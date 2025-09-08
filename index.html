@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Hobby Blog | bies93.github.io</title>
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Welcome to my IT hobby blog where I explore coding, cybersecurity, and technology with a dark twist.">
+    <meta name="keywords" content="IT, coding, cybersecurity, technology, hobby, programming">
+    <meta name="author" content="bies93">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    
+    <!-- Preload critical images -->
+    <link rel="preload" as="image" href="images/hero-bg.jpg">
+</head>
+<body>
+    <!-- Skip to content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Header/Navigation -->
+    <header id="header" role="banner">
+        <div class="container">
+            <div class="logo">
+                <h1><a href="#hero" aria-label="bies93.io homepage">bies93<span class="blood">.io</span></a></h1>
+            </div>
+            <nav role="navigation" aria-label="Main navigation">
+                <ul class="nav-menu">
+                    <li><a href="#hero">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <div class="hamburger" aria-label="Menu" role="button" tabindex="0">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Hero Section -->
+        <section id="hero" aria-labelledby="hero-heading">
+            <div class="container">
+                <div class="hero-content">
+                    <h2 id="hero-heading" class="glitch" data-text="Welcome to the Dark Side of IT">Welcome to the Dark Side of IT</h2>
+                    <p>Where code meets horror and technology tells tales</p>
+                    <div class="cta-buttons">
+                        <a href="#projects" class="btn btn-primary">Explore Projects</a>
+                        <a href="#blog" class="btn btn-secondary">Read Blog</a>
+                    </div>
+                </div>
+            </div>
+            <div class="blood-drip" aria-hidden="true"></div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" aria-labelledby="about-heading">
+            <div class="container">
+                <h2 id="about-heading" class="section-title">About <span class="blood">Me</span></h2>
+                <div class="about-content">
+                    <div class="profile-image">
+                        <img src="images/profile.jpg" alt="bies93" loading="lazy">
+                        <div class="haunted-frame" aria-hidden="true"></div>
+                    </div>
+                    <div class="bio">
+                        <p>Welcome to my digital crypt. I'm a tech enthusiast with a passion for all things IT, from coding to cybersecurity, wrapped in a dark, mysterious aesthetic.</p>
+                        <p>By day, I explore the depths of code and technology. By night, I document my journey in this haunted corner of the internet.</p>
+                        <div class="skills">
+                            <h3>My Haunted Skills</h3>
+                            <div class="skill-bar">
+                                <p>Web Development <span>85%</span></p>
+                                <div class="progress" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-fill web"></div>
+                                </div>
+                            </div>
+                            <div class="skill-bar">
+                                <p>Cybersecurity <span>75%</span></p>
+                                <div class="progress" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-fill security"></div>
+                                </div>
+                            <div class="skill-bar">
+                                <p>Data Analysis <span>70%</span></p>
+                                <div class="progress" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-fill data"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" aria-labelledby="projects-heading">
+            <div class="container">
+                <h2 id="projects-heading" class="section-title">My <span class="blood">Projects</span></h2>
+                <div class="projects-grid">
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="images/projects/project1.jpg" alt="Haunted Network Scanner project" loading="lazy">
+                        </div>
+                        <div class="project-content">
+                            <h3>Haunted Network Scanner</h3>
+                            <p>A cybersecurity tool that detects vulnerabilities with a spooky interface.</p>
+                            <div class="project-tags">
+                                <span class="tag">Python</span>
+                                <span class="tag">Security</span>
+                            </div>
+                            <a href="#" class="project-link">View Details</a>
+                        </div>
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="images/projects/project2.jpg" alt="Ghost in the Shell Script project" loading="lazy">
+                        </div>
+                        <div class="project-content">
+                            <h3>Ghost in the Shell Script</h3>
+                            <p>Automated bash scripts that perform system tasks with eerie efficiency.</p>
+                            <div class="project-tags">
+                                <span class="tag">Bash</span>
+                                <span class="tag">Automation</span>
+                            </div>
+                            <a href="#" class="project-link">View Details</a>
+                        </div>
+                    </div>
+                    <div class="project-card">
+                        <div class="project-image">
+                            <img src="images/projects/project3.jpg" alt="Zombie Process Monitor project" loading="lazy">
+                        </div>
+                        <div class="project-content">
+                            <h3>Zombie Process Monitor</h3>
+                            <p>A real-time system monitor with a horror-themed dashboard.</p>
+                            <div class="project-tags">
+                                <span class="tag">JavaScript</span>
+                                <span class="tag">System</span>
+                            </div>
+                            <a href="#" class="project-link">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Section -->
+        <section id="blog" aria-labelledby="blog-heading">
+            <div class="container">
+                <h2 id="blog-heading" class="section-title">Latest <span class="blood">Blog</span> Posts</h2>
+                <div class="blog-grid">
+                    <article class="blog-post">
+                        <div class="post-image">
+                            <img src="images/blog/post1.jpg" alt="The Phantom Menace: Understanding Zero-Day Exploits blog post" loading="lazy">
+                        </div>
+                        <div class="post-content">
+                            <div class="post-meta">
+                                <span class="date">October 31, 2023</span>
+                                <span class="category">Security</span>
+                            </div>
+                            <h3>The Phantom Menace: Understanding Zero-Day Exploits</h3>
+                            <p>Delve into the shadowy world of zero-day vulnerabilities and how they haunt the cybersecurity landscape.</p>
+                            <a href="#" class="read-more">Read More</a>
+                        </div>
+                    </article>
+                    <article class="blog-post">
+                        <div class="post-image">
+                            <img src="images/blog/post2.jpg" alt="Ghosts in the Code: Debugging the Unexplainable blog post" loading="lazy">
+                        </div>
+                        <div class="post-content">
+                            <div class="post-meta">
+                                <span class="date">October 15, 2023</span>
+                                <span class="category">Programming</span>
+                            </div>
+                            <h3>Ghosts in the Code: Debugging the Unexplainable</h3>
+                            <p>When your code behaves like it's possessed, these techniques will help you exorcise those digital demons.</p>
+                            <a href="#" class="read-more">Read More</a>
+                        </div>
+                    </article>
+                    <article class="blog-post">
+                        <div class="post-image">
+                            <img src="images/blog/post3.jpg" alt="Raising the Dead: Reviving Vintage Computer Hardware blog post" loading="lazy">
+                        </div>
+                        <div class="post-content">
+                            <div class="post-meta">
+                                <span class="date">September 30, 2023</span>
+                                <span class="category">Hardware</span>
+                            </div>
+                            <h3>Raising the Dead: Reviving Vintage Computer Hardware</h3>
+                            <p>Bringing old computers back from the grave and what we can learn from their resurrection.</p>
+                            <a href="#" class="read-more">Read More</a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" aria-labelledby="contact-heading">
+            <div class="container">
+                <h2 id="contact-heading" class="section-title">Get in <span class="blood">Touch</span></h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <p>Have a project that needs a dark touch or just want to chat about tech? Reach out!</p>
+                        <div class="contact-methods">
+                            <div class="contact-item">
+                                <h3><i class="icon-email" aria-hidden="true"></i> Email</h3>
+                                <p>contact@bies93.io</p>
+                            </div>
+                            <div class="contact-item">
+                                <h3><i class="icon-location" aria-hidden="true"></i> Location</h3>
+                                <p>Digital Realm</p>
+                            </div>
+                        </div>
+                    <form id="contact-form" class="contact-form" aria-label="Contact form">
+                        <div class="form-group">
+                            <label for="name" class="sr-only">Your Name</label>
+                            <input type="text" id="name" name="name" placeholder="Your Name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="sr-only">Your Email</label>
+                            <input type="email" id="email" name="email" placeholder="Your Email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="subject" class="sr-only">Subject</label>
+                            <input type="text" id="subject" name="subject" placeholder="Subject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message" class="sr-only">Your Message</label>
+                            <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer" role="contentinfo">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h2>bies93<span class="blood">.io</span></h2>
+                </div>
+                <div class="social-links">
+                    <a href="#" class="social-link" aria-label="GitHub"><i class="icon-github" aria-hidden="true"></i></a>
+                    <a href="#" class="social-link" aria-label="Twitter"><i class="icon-twitter" aria-hidden="true"></i></a>
+                    <a href="#" class="social-link" aria-label="LinkedIn"><i class="icon-linkedin" aria-hidden="true"></i></a>
+                </div>
+                <div class="footer-info">
+                    <p>&copy; 2023 bies93.io. All rights reserved.</p>
+                    <p>Built with blood, sweat, and a few tears.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/main.js"></script>
+    <script src="js/animations.js"></script>
+</body>
+</html>

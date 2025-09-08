@@ -1,22 +1,12 @@
-# CSS Styling Specification for Dark Horror/Thriller Theme
+/* CSS Styling for Dark Horror/Thriller Theme */
 
-## Overall Design Principles
-
-- Dark, moody color scheme with blood red accents
-- Subtle animations and transitions for eerie effects
-- Typography that enhances the horror atmosphere
-- Responsive design that works on all devices
-- Performance-optimized with minimal CSS
-
-## Color Palette
-
-```css
+/* Color Palette */
 :root {
   /* Primary Colors */
   --dark-bg: #0a0a0a;
   --darker-bg: #000000;
   --secondary-bg: #1a1a1a;
-  --light-text: #f8f8ff;
+  --light-text: #f8ff;
   --muted-text: #a9a9a9;
   
   /* Accent Colors */
@@ -29,13 +19,17 @@
   --blood-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
   --glow-shadow: 0 15px rgba(139, 0, 0, 0.7);
 }
-```
 
-## Typography
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-```css
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Creepster&family=Roboto:wght@300;400;700&display=swap');
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   font-family: 'Roboto', sans-serif;
@@ -43,19 +37,42 @@ body {
   color: var(--light-text);
   background-color: var(--dark-bg);
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
+/* Typography */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Creepster', cursive;
   font-weight: 400;
   letter-spacing: 1px;
 }
 
+a {
+  text-decoration: none;
+  color: var(--blood-red);
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+.container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+ padding: 0 15px;
+}
+
 .section-title {
   position: relative;
   text-align: center;
   margin-bottom: 2rem;
-  font-size: 2.5rem;
+ font-size: 2.5rem;
 }
 
 .section-title::after {
@@ -67,57 +84,67 @@ h1, h2, h3, h4, h5, h6 {
   margin: 10px auto;
   box-shadow: var(--blood-shadow);
 }
-```
 
-## Layout and Grid System
-
-```css
-.container {
-  width: 90%;
-  max-width: 120px;
-  margin: 0 auto;
-  padding: 0 15px;
+.btn {
+  display: inline-block;
+  padding: 12px 30px;
+  border: none;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+ letter-spacing: 1px;
+  font-family: 'Roboto', sans-serif;
 }
 
-/* Flexbox and Grid utilities */
-.flex {
-  display: flex;
+.btn-primary {
+  background: var(--blood-red);
+  color: var(--light-text);
+  box-shadow: var(--blood-shadow);
 }
 
-.grid {
-  display: grid;
+.btn-primary:hover {
+  background: #a500;
+  transform: translateY(-3px);
+  box-shadow: var(--glow-shadow);
 }
 
-/* Section spacing */
-section {
-  padding: 80px 0;
+.btn-secondary {
+  background: transparent;
+  color: var(--light-text);
+  border: 2px solid var(--blood-red);
 }
 
-section:nth-child(even) {
-  background-color: var(--secondary-bg);
+.btn-secondary:hover {
+  background: var(--blood-red);
+  transform: translateY(-3px);
 }
-```
 
-## Header and Navigation
-
-```css
+/* Header and Navigation */
 #header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  background-color: rgba(10, 10, 10, 0.95);
+  background-color: rgba(10, 10, 0.95);
   backdrop-filter: blur(10px);
-  z-index: 1000;
+ z-index: 1000;
   padding: 20px 0;
   border-bottom: 1px solid var(--blood-red);
   box-shadow: var(--blood-shadow);
+  transition: all 0.3s ease;
+}
+
+#header.scrolled {
+  padding: 15px 0;
 }
 
 .logo h1 a {
   color: var(--light-text);
   text-decoration: none;
- font-size: 1.8rem;
+  font-size: 1.8rem;
 }
 
 .blood {
@@ -160,20 +187,31 @@ section:nth-child(even) {
 .nav-menu a:hover::after {
   width: 100%;
 }
-```
 
-## Hero Section
+.hamburger {
+  display: none;
+  cursor: pointer;
+}
 
-```css
+.hamburger span {
+  display: block;
+  width: 25px;
+  height: 3px;
+  background: var(--light-text);
+  margin: 5px 0;
+  transition: 0.3s;
+}
+
+/* Hero Section */
 #hero {
   height: 100vh;
   display: flex;
- align-items: center;
+  align-items: center;
   justify-content: center;
   text-align: center;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(rgba(10, 10, 0.7), rgba(10, 10, 0.9)), 
+ background: linear-gradient(rgba(10, 10, 0.7), rgba(10, 10, 0.9)), 
               url('../images/hero-bg.jpg') center/cover no-repeat;
 }
 
@@ -208,26 +246,24 @@ section:nth-child(even) {
 .glitch::after {
   left: -2px;
   text-shadow: -2px 0 var(--zombie-green);
-  clip: rect(44px, 450px, 56px, 0);
+  clip: rect(4px, 450px, 56px, 0);
   animation: glitch-2 2s infinite linear alternate-reverse;
 }
 
 .blood-drip {
- position: absolute;
+  position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 20px;
   background: url('../images/blood-drip.svg') repeat-x;
-  animation: drip 10s linear infinite;
+ animation: drip 10s linear infinite;
 }
-```
 
-## About Section
-
-```css
+/* About Section */
 #about {
   background-color: var(--darker-bg);
+  padding: 80px 0;
 }
 
 .about-content {
@@ -240,7 +276,7 @@ section:nth-child(even) {
 .profile-image {
   position: relative;
   border-radius: 10px;
-  overflow: hidden;
+ overflow: hidden;
   box-shadow: var(--blood-shadow);
 }
 
@@ -255,7 +291,7 @@ section:nth-child(even) {
 }
 
 .haunted-frame {
- position: absolute;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
@@ -304,11 +340,13 @@ section:nth-child(even) {
   background: var(--haunted-purple);
   box-shadow: 0 0 10px rgba(75, 0, 130, 0.5);
 }
-```
 
-## Projects Section
+/* Projects Section */
+#projects {
+  padding: 80px 0;
+  background-color: var(--secondary-bg);
+}
 
-```css
 .projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -316,11 +354,11 @@ section:nth-child(even) {
 }
 
 .project-card {
-  background: var(--secondary-bg);
+  background: var(--darker-bg);
   border-radius: 10px;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
- box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
   position: relative;
 }
 
@@ -382,7 +420,7 @@ section:nth-child(even) {
 
 .project-link::after {
   content: "→";
-  margin-left: 5px;
+ margin-left: 5px;
   transition: transform 0.3s ease;
 }
 
@@ -393,11 +431,13 @@ section:nth-child(even) {
 .project-link:hover::after {
   transform: translateX(5px);
 }
-```
 
-## Blog Section
+/* Blog Section */
+#blog {
+  padding: 80px 0;
+  background-color: var(--darker-bg);
+}
 
-```css
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -407,7 +447,7 @@ section:nth-child(even) {
 .blog-post {
   background: var(--secondary-bg);
   border-radius: 10px;
-  overflow: hidden;
+ overflow: hidden;
   transition: all 0.3s ease;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
@@ -436,7 +476,7 @@ section:nth-child(even) {
   justify-content: space-between;
   margin-bottom: 15px;
   font-size: 0.9rem;
- color: var(--muted-text);
+  color: var(--muted-text);
 }
 
 .post-meta .category {
@@ -453,7 +493,7 @@ section:nth-child(even) {
   font-weight: 700;
   margin-top: 15px;
   position: relative;
- transition: all 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .read-more::after {
@@ -470,11 +510,13 @@ section:nth-child(even) {
 .read-more:hover::after {
   width: 100%;
 }
-```
 
-## Contact Section
+/* Contact Section */
+#contact {
+  padding: 80px 0;
+  background-color: var(--secondary-bg);
+}
 
-```css
 .contact-content {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -524,47 +566,7 @@ section:nth-child(even) {
   box-shadow: var(--blood-shadow);
 }
 
-.btn {
-  display: inline-block;
-  padding: 12px 30px;
-  border: none;
-  border-radius: 5px;
-  text-decoration: none;
-  font-weight: 700;
-  cursor: pointer;
- transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-family: 'Roboto', sans-serif;
-}
-
-.btn-primary {
-  background: var(--blood-red);
-  color: var(--light-text);
-  box-shadow: var(--blood-shadow);
-}
-
-.btn-primary:hover {
-  background: #a50000;
-  transform: translateY(-3px);
-  box-shadow: var(--glow-shadow);
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--light-text);
-  border: 2px solid var(--blood-red);
-}
-
-.btn-secondary:hover {
-  background: var(--blood-red);
-  transform: translateY(-3px);
-}
-```
-
-## Footer
-
-```css
+/* Footer */
 #footer {
   background: var(--darker-bg);
   padding: 40px 0 20px;
@@ -610,11 +612,8 @@ section:nth-child(even) {
   color: var(--muted-text);
   font-size: 0.9rem;
 }
-```
 
-## Animations and Keyframes
-
-```css
+/* Animations and Keyframes */
 @keyframes pulse {
   0% {
     text-shadow: 0 0 10px rgba(139, 0, 0, 0.5);
@@ -635,70 +634,70 @@ section:nth-child(even) {
     clip: rect(12px, 9999px, 59px, 0);
   }
   10% {
-    clip: rect(48px, 9999px, 29px, 0);
+    clip: rect(48px, 99px, 29px, 0);
   }
   15% {
     clip: rect(42px, 9999px, 73px, 0);
   }
   20% {
-    clip: rect(63px, 999px, 27px, 0);
+    clip: rect(63px, 9999px, 27px, 0);
   }
   25% {
-    clip: rect(34px, 999px, 55px, 0);
+    clip: rect(34px, 9999px, 55px, 0);
   }
   30% {
-    clip: rect(86px, 9999px, 73px, 0);
+    clip: rect(86px, 99px, 73px, 0);
   }
   35% {
-    clip: rect(20px, 999px, 20px, 0);
+    clip: rect(20px, 9999px, 20px, 0);
   }
   40% {
-    clip: rect(26px, 999px, 60px, 0);
+    clip: rect(26px, 9999px, 60px, 0);
   }
   45% {
-    clip: rect(25px, 999px, 66px, 0);
+    clip: rect(25px, 9999px, 66px, 0);
   }
   50% {
-    clip: rect(57px, 999px, 98px, 0);
+    clip: rect(57px, 9999px, 98px, 0);
   }
   55% {
     clip: rect(5px, 9999px, 46px, 0);
   }
   60% {
-    clip: rect(82px, 999px, 31px, 0);
+    clip: rect(82px, 9999px, 31px, 0);
   }
   65% {
     clip: rect(54px, 9999px, 27px, 0);
   }
   70% {
-    clip: rect(28px, 999px, 99px, 0);
+    clip: rect(28px, 9999px, 99px, 0);
   }
   75% {
-    clip: rect(45px, 9999px, 69px, 0);
+    clip: rect(45px, 999px, 69px, 0);
   }
   80% {
-    clip: rect(23px, 999px, 85px, 0);
+    clip: rect(23px, 9999px, 85px, 0);
   }
   85% {
     clip: rect(1px, 9999px, 83px, 0);
   }
   90% {
-    clip: rect(72px, 999px, 11px, 0);
+    clip: rect(72px, 9999px, 11px, 0);
   }
   95% {
-    clip: rect(60px, 999px, 89px, 0);
+    clip: rect(60px, 99px, 89px, 0);
   }
   100% {
-    clip: rect(52px, 999px, 74px, 0);
+    clip: rect(52px, 9999px, 74px, 0);
   }
 }
 
 @keyframes glitch-2 {
   0% {
-    clip: rect(65px, 999px, 32px, 0);
+    clip: rect(65px, 9999px, 32px, 0);
   }
   5% {
-    clip: rect(52px, 999px, 34px, 0);
+    clip: rect(52px, 9999px, 34px, 0);
   }
   10% {
     clip: rect(24px, 9999px, 59px, 0);
@@ -707,13 +706,13 @@ section:nth-child(even) {
     clip: rect(3px, 9999px, 80px, 0);
   }
   20% {
-    clip: rect(79px, 9999px, 85px, 0);
+    clip: rect(79px, 999px, 85px, 0);
   }
   25% {
-    clip: rect(97px, 999px, 42px, 0);
+    clip: rect(97px, 9999px, 42px, 0);
   }
   30% {
-    clip: rect(84px, 999px, 56px, 0);
+    clip: rect(84px, 9999px, 56px, 0);
   }
   35% {
     clip: rect(56px, 9999px, 24px, 0);
@@ -725,34 +724,34 @@ section:nth-child(even) {
     clip: rect(84px, 9999px, 85px, 0);
   }
   50% {
-    clip: rect(92px, 999px, 20px, 0);
+    clip: rect(92px, 9999px, 20px, 0);
   }
   55% {
-    clip: rect(95px, 9999px, 50px, 0);
+    clip: rect(95px, 999px, 50px, 0);
   }
   60% {
-    clip: rect(89px, 999px, 50px, 0);
+    clip: rect(89px, 9999px, 50px, 0);
   }
   65% {
     clip: rect(6px, 9999px, 90px, 0);
   }
   70% {
-    clip: rect(80px, 99px, 89px, 0);
+    clip: rect(80px, 9999px, 89px, 0);
   }
   75% {
-    clip: rect(86px, 999px, 84px, 0);
+    clip: rect(86px, 9999px, 84px, 0);
   }
   80% {
-    clip: rect(27px, 999px, 50px, 0);
+    clip: rect(27px, 9999px, 50px, 0);
   }
   85% {
     clip: rect(45px, 9999px, 38px, 0);
   }
   90% {
-    clip: rect(25px, 999px, 20px, 0);
+    clip: rect(25px, 9999px, 20px, 0);
   }
   95% {
-    clip: rect(75px, 999px, 11px, 0);
+    clip: rect(75px, 99px, 11px, 0);
   }
   100% {
     clip: rect(2px, 9999px, 50px, 0);
@@ -788,11 +787,8 @@ section:nth-child(even) {
 .fade-in {
   animation: fadeIn 1s ease-out;
 }
-```
 
-## Responsive Design
-
-```css
+/* Responsive Design */
 @media (max-width: 768px) {
   .hero-content h2 {
     font-size: 2.5rem;
@@ -831,6 +827,18 @@ section:nth-child(even) {
     display: block;
     cursor: pointer;
   }
+  
+  .hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+  
+  .hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+  
+  .hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -6px);
+  }
 }
 
 @media (max-width: 480px) {
@@ -845,54 +853,175 @@ section:nth-child(even) {
   .btn {
     padding: 10px 20px;
   }
+  
+  .post-meta {
+    flex-direction: column;
+    gap: 5px;
+  }
 }
-```
 
-## Special Effects and Transitions
-
-```css
-/* Creepy cursor trail effect */
+/* Special Effects */
 .cursor-trail {
-  position: fixed;
+ position: fixed;
   width: 20px;
   height: 20px;
   border-radius: 50%;
   background: var(--blood-red);
   pointer-events: none;
   transform: translate(-50%, -50%);
-  z-index: 9999;
+ z-index: 9999;
   opacity: 0.7;
   box-shadow: var(--blood-shadow);
 }
 
-/* Fog overlay effect */
-.fog {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url('../images/fog.png');
-  opacity: 0.1;
-  pointer-events: none;
-  z-index: -1;
-  animation: fog-animation 30s linear infinite;
+/* Form Message */
+.form-message {
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  text-align: center;
 }
 
-@keyframes fog-animation {
+.form-message.success {
+  background: rgba(50, 205, 50, 0.2);
+  border: 1px solid var(--zombie-green);
+  color: var(--zombie-green);
+}
+
+.form-message.error {
+  background: rgba(139, 0, 0, 0.2);
+  border: 1px solid var(--blood-red);
+  color: var(--blood-red);
+}
+
+/* Heartbeat effect for interactive elements */
+.heartbeat {
+  animation: heartbeat 1.5s infinite;
+}
+
+@keyframes heartbeat {
   0% {
-    background-position: 0 0;
+    transform: scale(1);
+  }
+  5% {
+    transform: scale(1.05);
+  }
+  10% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1);
   }
   100% {
-    background-position: 1000px 1000px;
+    transform: scale(1);
   }
 }
-```
 
-## Performance Optimizations
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .glitch::before,
+  .glitch::after {
+    display: none;
+  }
+  
+  .blood-drip {
+    animation: none;
+  }
+}
 
-1. **Minimize CSS**: All CSS should be minified for production
-2. **Combine Files**: Main styles and responsive styles in one file
-3. **Use Efficient Selectors**: Avoid overly specific selectors
-4. **Leverage Hardware Acceleration**: Use transform and opacity for animations
-5. **Optimize Images**: Use appropriate formats and compress images
+/* Focus Styles for Accessibility */
+a:focus,
+button:focus,
+input:focus,
+textarea:focus {
+  outline: 2px solid var(--blood-red);
+  outline-offset: 2px;
+}
+
+/* Skip to Content Link for Accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--blood-red);
+  color: var(--light-text);
+  padding: 8px;
+  z-index: 1001;
+  transition: top 0.3s;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Screen Reader Only Text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Print Styles */
+@media print {
+  #header,
+  #hero,
+  #footer,
+  .btn,
+  .social-links {
+    display: none;
+  }
+  
+  body {
+    background: white;
+    color: black;
+  }
+  
+  a {
+    color: black;
+    text-decoration: underline;
+  }
+}
+
+/* Performance Optimizations */
+/* Reduce animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero-content h2 {
+    animation: none;
+  }
+  
+  .project-card,
+  .blog-post {
+    transition: none;
+  }
+  
+  .profile-image img,
+  .project-image img {
+    transition: none;
+  }
+  
+  .btn {
+    transition: none;
+  }
+  
+  .nav-menu a::after {
+    transition: none;
+  }
+}
