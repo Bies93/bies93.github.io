@@ -34,7 +34,7 @@
     <header class="sticky top-0 z-40 border-b border-white/10 bg-ink-950/70 supports-backdrop:backdrop-blur">
       <div class="container flex h-16 items-center justify-between">
         <a href="#home" class="inline-flex items-center gap-2 font-mono text-sm tracking-tight">
-          <span class="inline-block size-6 rounded-md bg-gradient-to-br from-primary to-secondary"></span>
+          <img src="images/icons/home-icon.png" alt="Home Icon" class="inline-block size-6 object-contain" />
           <span class="font-semibold">bies93</span>
         </a>
         <nav class="hidden md:flex items-center gap-8 text-sm">
@@ -97,21 +97,21 @@
           </div>
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <article class="group overflow-hidden rounded-xl border border-white/10 bg-ink-900/40 shadow-soft hover:shadow-glow transition">
-              <img src="images/projects/project1.jpg" alt="Kubernetes Hardening" class="h-40 w-full object-cover opacity-90 group-hover:opacity-100" />
+              <img src="images/projects/project-cover-placeholder.jpg" alt="Kubernetes Hardening" class="h-40 w-full object-cover opacity-90 group-hover:opacity-100" />
               <div class="p-5">
                 <h3 class="text-lg font-semibold">Kubernetes Hardening</h3>
                 <p class="mt-2 text-sm text-ink-300">RBAC, Policies, Network Segmentation, Secrets‑Management.</p>
               </div>
             </article>
             <article class="group overflow-hidden rounded-xl border border-white/10 bg-ink-900/40 shadow-soft hover:shadow-glow transition">
-              <img src="images/projects/project2.jpg" alt="Zero‑Trust Architektur" class="h-40 w-full object-cover opacity-90 group-hover:opacity-100" />
+              <img src="images/projects/project-cover-placeholder.jpg" alt="Zero‑Trust Architektur" class="h-40 w-full object-cover opacity-90 group-hover:opacity-100" />
               <div class="p-5">
                 <h3 class="text-lg font-semibold">Zero‑Trust Architektur</h3>
                 <p class="mt-2 text-sm text-ink-300">Identity‑first, Segmentierung, kontinuierliche Verifikation.</p>
               </div>
             </article>
             <article class="group overflow-hidden rounded-xl border border-white/10 bg-ink-900/40 shadow-soft hover:shadow-glow transition">
-              <img src="images/projects/project3.jpg" alt="SIEM & Detection" class="h-40 w-full object-cover opacity-90 group-hover:opacity-100" />
+              <img src="images/projects/project-cover-placeholder.jpg" alt="SIEM & Detection" class="h-40 w-full object-cover opacity-90 group-hover:opacity-100" />
               <div class="p-5">
                 <h3 class="text-lg font-semibold">SIEM & Detection</h3>
                 <p class="mt-2 text-sm text-ink-300">Use Cases, Pipelines, Dashboards, KPIs und Runbooks.</p>
@@ -127,21 +127,21 @@
           <div class="mb-10"><h2 class="text-2xl md:text-3xl font-semibold">Aktuelle Artikel</h2></div>
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             <article class="group rounded-xl overflow-hidden border border-white/10 bg-ink-900/40 hover:shadow-glow transition">
-              <img src="images/blog/post1.jpg" alt="Threat Modeling" class="h-40 w-full object-cover" />
+              <img src="images/blog/blog-post-placeholder.jpg" alt="Threat Modeling" class="h-40 w-full object-cover" />
               <div class="p-5">
                 <h3 class="font-semibold">Threat Modeling Basics</h3>
                 <p class="mt-2 text-sm text-ink-300">Strukturierte Risiken, Priorisierung, schnelle Maßnahmen.</p>
               </div>
             </article>
             <article class="group rounded-xl overflow-hidden border border-white/10 bg-ink-900/40 hover:shadow-glow transition">
-              <img src="images/blog/post2.jpg" alt="Cloud Guardrails" class="h-40 w-full object-cover" />
+              <img src="images/blog/blog-post-placeholder.jpg" alt="Cloud Guardrails" class="h-40 w-full object-cover" />
               <div class="p-5">
                 <h3 class="font-semibold">Cloud Guardrails</h3>
                 <p class="mt-2 text-sm text-ink-300">Automatisierte Compliance mit IaC und Policies.</p>
               </div>
             </article>
             <article class="group rounded-xl overflow-hidden border border-white/10 bg-ink-900/40 hover:shadow-glow transition">
-              <img src="images/blog/post3.jpg" alt="DFIR Essentials" class="h-40 w-full object-cover" />
+              <img src="images/blog/blog-post-placeholder.jpg" alt="DFIR Essentials" class="h-40 w-full object-cover" />
               <div class="p-5">
                 <h3 class="font-semibold">DFIR Essentials</h3>
                 <p class="mt-2 text-sm text-ink-300">Vorbereitet sein: Logs, Prozesse, Kommunikation.</p>
@@ -167,13 +167,47 @@
           <div class="order-1 md:order-2">
             <img src="images/profile.jpg" alt="Profilbild bies93" class="mx-auto aspect-square max-w-sm rounded-xl object-cover shadow-soft" />
           </div>
+          <!-- Team Photo Placeholder -->
+          <div class="order-3 mt-12 text-center">
+            <h2 class="text-2xl md:text-3xl font-semibold mb-6">Unser Team</h2>
+            <img src="images/team-placeholder.jpg" alt="Teamfoto Platzhalter" class="mx-auto max-w-lg rounded-xl object-cover shadow-soft" />
+            <p class="mt-4 text-ink-300">Hier könnte Ihr Team vorgestellt werden.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Testimonials -->
+      <section id="testimonials" class="relative py-20 md:py-28 bg-cover bg-center" style="background-image: url('images/testimonials-bg.jpg');">
+        <div class="absolute inset-0 bg-ink-950/80"></div>
+        <div class="container relative z-10 text-center">
+          <h2 class="text-2xl md:text-3xl font-semibold mb-10">Das sagen unsere Kunden</h2>
+          <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <!-- Testimonial Card 1 -->
+            <div class="bg-ink-900/60 p-6 rounded-lg shadow-soft border border-white/10">
+              <p class="italic text-ink-300">"bies93 hat unsere Erwartungen übertroffen. Kompetent, zuverlässig und innovativ!"</p>
+              <p class="mt-4 font-semibold text-white">- Kunde A</p>
+            </div>
+            <!-- Testimonial Card 2 -->
+            <div class="bg-ink-900/60 p-6 rounded-lg shadow-soft border border-white/10">
+              <p class="italic text-ink-300">"Ein echter Game-Changer für unsere Cloud-Sicherheit."</p>
+              <p class="mt-4 font-semibold text-white">- Kunde B</p>
+            </div>
+            <!-- Testimonial Card 3 -->
+            <div class="bg-ink-900/60 p-6 rounded-lg shadow-soft border border-white/10">
+              <p class="italic text-ink-300">"Die Automatisierungslösungen haben unsere Effizienz massiv gesteigert."</p>
+              <p class="mt-4 font-semibold text-white">- Kunde C</p>
+            </div>
+          </div>
         </div>
       </section>
 
       <!-- Contact -->
       <section id="contact" class="py-20 md:py-28">
         <div class="container max-w-3xl">
-          <h2 class="text-2xl md:text-3xl font-semibold">Kontakt</h2>
+          <div class="flex items-center gap-4">
+            <img src="images/icons/contact-icon.png" alt="Kontakt Icon" class="size-8 object-contain" />
+            <h2 class="text-2xl md:text-3xl font-semibold">Kontakt</h2>
+          </div>
           <form id="contactForm" class="mt-8 grid gap-4" novalidate>
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
@@ -203,7 +237,20 @@
     </main>
 
     <footer class="border-t border-white/10 py-8 text-center text-sm text-ink-300">
-      <div class="container">© <span id="year"></span> bies93 — gebaut mit Tailwind</div>
+      <div class="container">
+        <div class="flex justify-center space-x-4 mb-4">
+          <a href="https://twitter.com/bies93" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+            <img src="images/icons/social-twitter.png" alt="Twitter" class="size-8 object-contain" />
+          </a>
+          <a href="https://linkedin.com/in/bies93" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <img src="images/icons/social-linkedin.png" alt="LinkedIn" class="size-8 object-contain" />
+          </a>
+          <a href="https://github.com/bies93" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <img src="images/icons/social-github.png" alt="GitHub" class="size-8 object-contain" />
+          </a>
+        </div>
+        <div>© <span id="year"></span> bies93 — gebaut mit Tailwind</div>
+      </div>
     </footer>
 
     <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
