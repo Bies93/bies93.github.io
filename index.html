@@ -1,175 +1,212 @@
 <!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>bies93 | Cybersecurity & Cloud Architecture</title>
+<html lang="de" class="scroll-smooth">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>bies93 — Cybersecurity & Cloud · 2025</title>
 
-  <meta name="description" content="Cybersecurity- und Cloud-Architektur Portfolio. Moderne Projekte, Blog und Kontakt.">
-  <meta name="author" content="bies93">
-  <link rel="canonical" href="https://bies93.github.io/">
+    <meta name="description" content="Moderner IT‑Blog und Portfolio: Cybersecurity, Cloud‑Architektur, Automatisierung. Projekte, Artikel, Kontakt." />
+    <meta name="author" content="bies93" />
+    <link rel="canonical" href="https://bies93.github.io/" />
 
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests; img-src 'self' data: https:; script-src 'self'; style-src 'self' https: 'unsafe-inline'; font-src 'self' https: data:; connect-src 'self'; manifest-src 'self'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; frame-ancestors 'none'; upgrade-insecure-requests; img-src 'self' data: https: blob:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' https://cdn.tailwindcss.com https://unpkg.com; connect-src 'self'; manifest-src 'self'; object-src 'none'" />
 
-  <meta name="theme-color" content="#0a0a0a">
-  <link rel="icon" href="images/favicon.ico" sizes="any">
-  <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0b0b0f" />
+    <link rel="icon" href="images/favicon.ico" sizes="any" />
+    <link rel="manifest" href="manifest.json" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Creepster&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class', theme: { container: { center: true, padding: '1rem' }, extend: { colors: { primary: '#6366f1', secondary: '#06b6d4', ink: { 50:'#f8fafc',100:'#eef2f7',200:'#e2e8f0',300:'#cbd5e1',400:'#94a3b8',500:'#64748b',600:'#475569',700:'#334155',800:'#1f2937',900:'#0b1220',950:'#0b0b0f'} }, boxShadow: { soft: '0 6px 24px rgba(2,6,23,.18)', glow: '0 0 0 4px rgb(99 102 241 / .15)' } } } };</script>
+    <style>
+      :root { color-scheme: dark light; }
+      .glass { backdrop-filter: blur(10px); background: color-mix(in oklab, #0b0b0f 75%, transparent); }
+      .gradient-ring { background: conic-gradient(from 220deg at 50% 50%, #06b6d4, #6366f1, #22c55e, #06b6d4); mask: radial-gradient(farthest-side, transparent 58%, black 60%); }
+    </style>
+    <noscript><style>html{scroll-behavior:auto}</style></noscript>
+  </head>
+  <body class="bg-ink-950 text-ink-100 font-sans selection:bg-primary/20 selection:text-white">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-50 bg-primary text-white px-4 py-2 rounded-md">Zum Inhalt springen</a>
 
-  <noscript><style>html{scroll-behavior:auto}</style></noscript>
-</head>
-<body>
-  <header id="header">
-    <div class="container flex" style="justify-content:space-between; align-items:center;">
-      <div class="logo">
-        <h1><a href="#hero">bies<span class="blood">93</span>.io</a></h1>
-      </div>
-      <nav aria-label="Hauptnavigation">
-        <button class="hamburger" aria-label="Menü öffnen" aria-controls="main-menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
-        <ul id="main-menu" class="nav-menu" role="menubar">
-          <li role="none"><a role="menuitem" href="#hero">Home</a></li>
-          <li role="none"><a role="menuitem" href="#about">About</a></li>
-          <li role="none"><a role="menuitem" href="#projects">Projects</a></li>
-          <li role="none"><a role="menuitem" href="#blog">Blog</a></li>
-          <li role="none"><a role="menuitem" href="#contact">Contact</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <main id="main-content">
-    <section id="hero" aria-label="Hero">
-      <div class="container hero-content">
-        <h2 class="glitch" data-text="Digital Sorcerer">Digital Sorcerer</h2>
-        <p style="max-width:720px;margin:0 auto 2rem;">Cybersecurity, Cloud & Automation – saubere Architekturen, starke Sicherheit und messbare Ergebnisse. Hier findest du ausgewählte Projekte, Artikel und Kontaktmöglichkeiten.</p>
-        <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
-          <a class="btn btn-primary" href="#projects">Projekte ansehen</a>
-          <a class="btn btn-secondary" href="#contact">Kontakt aufnehmen</a>
-        </div>
-        <div class="blood-drip" aria-hidden="true"></div>
-      </div>
-    </section>
-
-    <section id="about" class="section" aria-labelledby="about-title">
-      <div class="container" style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem; align-items:center;">
-        <div>
-          <h3 id="about-title" class="section-title">About</h3>
-          <p>Ich baue sichere, skalierbare Systeme – mit Fokus auf Zero‑Trust, Observability und DevSecOps. Von Threat Modeling bis Kubernetes Hardening: pragmatisch, performant, dokumentiert.</p>
-          <ul style="margin-top:1rem; list-style: none; padding:0;">
-            <li>• Cloud: AWS, Azure, IaC (Terraform)</li>
-            <li>• Security: Threat Modeling, SIEM, IAM</li>
-            <li>• Platform: Docker, Kubernetes, GitHub Actions</li>
-          </ul>
-        </div>
-        <div>
-          <img src="images/profile.jpg" alt="Profilbild bies93" style="border-radius:12px; box-shadow: 0 10px 30px rgba(0,0,0,.5);">
+    <header class="sticky top-0 z-40 border-b border-white/10 bg-ink-950/70 supports-backdrop:backdrop-blur">
+      <div class="container flex h-16 items-center justify-between">
+        <a href="#home" class="inline-flex items-center gap-2 font-mono text-sm tracking-tight">
+          <span class="inline-block size-6 rounded-md bg-gradient-to-br from-primary to-secondary"></span>
+          <span class="font-semibold">bies93</span>
+        </a>
+        <nav class="hidden md:flex items-center gap-8 text-sm">
+          <a class="hover:text-white/90" href="#projects">Projects</a>
+          <a class="hover:text-white/90" href="#blog">Blog</a>
+          <a class="hover:text-white/90" href="#about">About</a>
+          <a class="hover:text-white/90" href="#contact">Contact</a>
+        </nav>
+        <div class="flex items-center gap-2">
+          <button id="themeToggle" class="inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 hover:border-white/20 hover:shadow-glow transition" aria-label="Theme umschalten">
+            <svg id="sun" class="size-5 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m7-7h2M3 12H1m15.364 6.364l1.414 1.414M4.222 4.222 5.636 5.636M18.364 5.636l1.414-1.414M4.222 19.778 5.636 18.364M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0"/></svg>
+            <svg id="moon" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"/></svg>
+          </button>
+          <button id="menuBtn" class="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 hover:border-white/20" aria-controls="mobileNav" aria-expanded="false" aria-label="Menü öffnen">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
         </div>
       </div>
-    </section>
-
-    <section id="projects" class="section" aria-labelledby="projects-title">
-      <div class="container">
-        <h3 id="projects-title" class="section-title">Projects</h3>
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
-          <article class="card">
-            <img src="images/projects/project1.jpg" alt="Projekt 1 Vorschaubild">
-            <div class="card-content">
-              <h4>Kubernetes Hardening</h4>
-              <p>RBAC, PSP Nachfolger, Netzwerkrichtlinien, Secrets‑Management.</p>
-            </div>
-          </article>
-          <article class="card">
-            <img src="images/projects/project2.jpg" alt="Projekt 2 Vorschaubild">
-            <div class="card-content">
-              <h4>Zero‑Trust Architektur</h4>
-              <p>Identitätszentriert, Segmentierung, kontinuierliche Verifikation.</p>
-            </div>
-          </article>
-          <article class="card">
-            <img src="images/projects/project3.jpg" alt="Projekt 3 Vorschaubild">
-            <div class="card-content">
-              <h4>SIEM & Detection</h4>
-              <p>Use Cases, Pipelines, Dashboards, KPIs und Runbooks.</p>
-            </div>
-          </article>
+      <div id="mobileNav" class="md:hidden hidden border-t border-white/10">
+        <div class="container py-3 flex flex-col gap-3 text-sm">
+          <a class="py-2" href="#projects">Projects</a>
+          <a class="py-2" href="#blog">Blog</a>
+          <a class="py-2" href="#about">About</a>
+          <a class="py-2" href="#contact">Contact</a>
         </div>
       </div>
-    </section>
+    </header>
 
-    <section id="blog" class="section" aria-labelledby="blog-title">
-      <div class="container">
-        <h3 id="blog-title" class="section-title">Blog</h3>
-        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
-          <article class="card">
-            <img src="images/blog/post1.jpg" alt="Blogpost 1 Vorschaubild">
-            <div class="card-content">
-              <h4>Threat Modeling Basics</h4>
-              <p>Strukturierte Risiken, Priorisierung, schnelle Maßnahmen.</p>
-            </div>
-          </article>
-          <article class="card">
-            <img src="images/blog/post2.jpg" alt="Blogpost 2 Vorschaubild">
-            <div class="card-content">
-              <h4>Cloud Guardrails</h4>
-              <p>Automatisierte Compliance mit IaC und Policies.</p>
-            </div>
-          </article>
-          <article class="card">
-            <img src="images/blog/post3.jpg" alt="Blogpost 3 Vorschaubild">
-            <div class="card-content">
-              <h4>DFIR Essentials</h4>
-              <p>Vorbereitet sein: Logs, Prozesse, Kommunikation.</p>
-            </div>
-          </article>
+    <main id="main">
+      <!-- Hero -->
+      <section id="home" class="relative overflow-hidden">
+        <div class="absolute inset-0 -z-10">
+          <img src="images/hero-bg.jpg" alt="" class="h-full w-full object-cover opacity-10" />
+          <div class="absolute inset-0 bg-[radial-gradient(40%_50%_at_50%_0%,rgba(99,102,241,.25),transparent_60%)]"></div>
         </div>
-      </div>
-    </section>
+        <div class="container relative py-24 md:py-32">
+          <div class="mx-auto max-w-3xl text-center">
+            <div class="mx-auto mb-8 size-40 rounded-full gradient-ring opacity-30"></div>
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tight leading-tight">Security, Cloud, Automation — Klar. Modern. Messbar.</h1>
+            <p class="mt-6 text-ink-300 text-lg">Ich entwerfe und baue robuste Plattformen mit Zero‑Trust, Observability und DevSecOps — von Threat Modeling bis Kubernetes Hardening.</p>
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <a href="#projects" class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 font-medium text-white shadow-soft hover:shadow-glow">Projekte ansehen</a>
+              <a href="#contact" class="inline-flex items-center gap-2 rounded-md border border-white/10 px-5 py-3 font-medium hover:border-white/20">Kontakt aufnehmen</a>
+            </div>
+            <div class="mt-10 grid grid-cols-3 gap-6 text-left text-sm text-ink-300">
+              <div><div class="text-3xl font-semibold text-white">10+ Jahre</div><div>Erfahrung</div></div>
+              <div><div class="text-3xl font-semibold text-white">99.95%</div><div>SLAs in Prod</div></div>
+              <div><div class="text-3xl font-semibold text-white">150+ Audits</div><div>bestanden</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    <section id="contact" class="section" aria-labelledby="contact-title">
-      <div class="container">
-        <h3 id="contact-title" class="section-title">Contact</h3>
-        <form id="contact-form" class="contact-form" style="max-width:720px; margin:0 auto;">
-          <div class="grid" style="grid-template-columns: 1fr 1fr;">
+      <!-- Projects -->
+      <section id="projects" class="py-20 md:py-28">
+        <div class="container">
+          <div class="mb-10 flex items-end justify-between gap-4">
+            <h2 class="text-2xl md:text-3xl font-semibold">Ausgewählte Projekte</h2>
+            <a href="#contact" class="text-sm text-ink-300 hover:text-white">Verfügbarkeit anfragen →</a>
+          </div>
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article class="group overflow-hidden rounded-xl border border-white/10 bg-ink-900/40 shadow-soft hover:shadow-glow transition">
+              <img src="images/projects/project1.jpg" alt="Kubernetes Hardening" class="h-40 w-full object-cover opacity-90 group-hover:opacity-100" />
+              <div class="p-5">
+                <h3 class="text-lg font-semibold">Kubernetes Hardening</h3>
+                <p class="mt-2 text-sm text-ink-300">RBAC, Policies, Network Segmentation, Secrets‑Management.</p>
+              </div>
+            </article>
+            <article class="group overflow-hidden rounded-xl border border-white/10 bg-ink-900/40 shadow-soft hover:shadow-glow transition">
+              <img src="images/projects/project2.jpg" alt="Zero‑Trust Architektur" class="h-40 w-full object-cover opacity-90 group-hover:opacity-100" />
+              <div class="p-5">
+                <h3 class="text-lg font-semibold">Zero‑Trust Architektur</h3>
+                <p class="mt-2 text-sm text-ink-300">Identity‑first, Segmentierung, kontinuierliche Verifikation.</p>
+              </div>
+            </article>
+            <article class="group overflow-hidden rounded-xl border border-white/10 bg-ink-900/40 shadow-soft hover:shadow-glow transition">
+              <img src="images/projects/project3.jpg" alt="SIEM & Detection" class="h-40 w-full object-cover opacity-90 group-hover:opacity-100" />
+              <div class="p-5">
+                <h3 class="text-lg font-semibold">SIEM & Detection</h3>
+                <p class="mt-2 text-sm text-ink-300">Use Cases, Pipelines, Dashboards, KPIs und Runbooks.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Blog -->
+      <section id="blog" class="py-20 md:py-28 border-y border-white/10">
+        <div class="container">
+          <div class="mb-10"><h2 class="text-2xl md:text-3xl font-semibold">Aktuelle Artikel</h2></div>
+          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article class="group rounded-xl overflow-hidden border border-white/10 bg-ink-900/40 hover:shadow-glow transition">
+              <img src="images/blog/post1.jpg" alt="Threat Modeling" class="h-40 w-full object-cover" />
+              <div class="p-5">
+                <h3 class="font-semibold">Threat Modeling Basics</h3>
+                <p class="mt-2 text-sm text-ink-300">Strukturierte Risiken, Priorisierung, schnelle Maßnahmen.</p>
+              </div>
+            </article>
+            <article class="group rounded-xl overflow-hidden border border-white/10 bg-ink-900/40 hover:shadow-glow transition">
+              <img src="images/blog/post2.jpg" alt="Cloud Guardrails" class="h-40 w-full object-cover" />
+              <div class="p-5">
+                <h3 class="font-semibold">Cloud Guardrails</h3>
+                <p class="mt-2 text-sm text-ink-300">Automatisierte Compliance mit IaC und Policies.</p>
+              </div>
+            </article>
+            <article class="group rounded-xl overflow-hidden border border-white/10 bg-ink-900/40 hover:shadow-glow transition">
+              <img src="images/blog/post3.jpg" alt="DFIR Essentials" class="h-40 w-full object-cover" />
+              <div class="p-5">
+                <h3 class="font-semibold">DFIR Essentials</h3>
+                <p class="mt-2 text-sm text-ink-300">Vorbereitet sein: Logs, Prozesse, Kommunikation.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- About -->
+      <section id="about" class="py-20 md:py-28">
+        <div class="container grid items-center gap-12 md:grid-cols-2">
+          <div class="order-2 md:order-1 space-y-4">
+            <h2 class="text-2xl md:text-3xl font-semibold">Über mich</h2>
+            <p class="text-ink-300">Ich baue sichere, skalierbare Systeme – Zero‑Trust, Observability, DevSecOps. Pragmatismus vor Buzzwords, Dokumentation vor Überraschungen.</p>
+            <ul class="grid grid-cols-2 gap-3 text-sm text-ink-300">
+              <li class="flex items-center gap-2"><span class="size-1.5 rounded-full bg-secondary"></span> AWS, Azure, Terraform</li>
+              <li class="flex items-center gap-2"><span class="size-1.5 rounded-full bg-secondary"></span> Threat Modeling, SIEM, IAM</li>
+              <li class="flex items-center gap-2"><span class="size-1.5 rounded-full bg-secondary"></span> Docker, k8s, GitHub Actions</li>
+              <li class="flex items-center gap-2"><span class="size-1.5 rounded-full bg-secondary"></span> SRE, Observability, SLAs</li>
+            </ul>
+          </div>
+          <div class="order-1 md:order-2">
+            <img src="images/profile.jpg" alt="Profilbild bies93" class="mx-auto aspect-square max-w-sm rounded-xl object-cover shadow-soft" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section id="contact" class="py-20 md:py-28">
+        <div class="container max-w-3xl">
+          <h2 class="text-2xl md:text-3xl font-semibold">Kontakt</h2>
+          <form id="contactForm" class="mt-8 grid gap-4" novalidate>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label for="name" class="text-sm text-ink-300">Name</label>
+                <input id="name" name="name" type="text" class="mt-1 w-full rounded-md border border-white/10 bg-ink-900/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/40" required />
+              </div>
+              <div>
+                <label for="email" class="text-sm text-ink-300">E‑Mail</label>
+                <input id="email" name="email" type="email" class="mt-1 w-full rounded-md border border-white/10 bg-ink-900/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/40" required />
+              </div>
+            </div>
             <div>
-              <label for="name">Name</label>
-              <input id="name" name="name" type="text" required>
+              <label for="subject" class="text-sm text-ink-300">Betreff</label>
+              <input id="subject" name="subject" type="text" class="mt-1 w-full rounded-md border border-white/10 bg-ink-900/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/40" required />
             </div>
             <div>
-              <label for="email">E‑Mail</label>
-              <input id="email" name="email" type="email" required>
+              <label for="message" class="text-sm text-ink-300">Nachricht</label>
+              <textarea id="message" name="message" rows="5" class="mt-1 w-full rounded-md border border-white/10 bg-ink-900/60 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary/40" required></textarea>
             </div>
-          </div>
-          <div>
-            <label for="subject">Betreff</label>
-            <input id="subject" name="subject" type="text" required>
-          </div>
-          <div>
-            <label for="message">Nachricht</label>
-            <textarea id="message" name="message" rows="5" required></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary">Senden</button>
-        </form>
-      </div>
-    </section>
-  </main>
+            <div class="flex items-center justify-between">
+              <p id="formMsg" class="text-sm text-ink-300"></p>
+              <button type="submit" class="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 font-medium text-white hover:shadow-glow">Senden</button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
 
-  <footer style="padding:2rem 0; text-align:center; border-top:1px solid rgba(255,255,255,0.1);">
-    <div class="container">
-      <p>&copy; <span id="year"></span> bies93 — Built with care.</p>
-    </div>
-  </footer>
+    <footer class="border-t border-white/10 py-8 text-center text-sm text-ink-300">
+      <div class="container">© <span id="year"></span> bies93 — gebaut mit Tailwind</div>
+    </footer>
 
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
-  <script src="js/animations.js" defer></script>
-  <script src="js/main.js" defer></script>
-</body>
+    <script src="https://unpkg.com/alpinejs@3.x.x" defer></script>
+    <script src="js/app.js" defer></script>
+  </body>
 </html>
