@@ -1,273 +1,570 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth scroll-smooth-support">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Hobby Blog | bies93.github.io</title>
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Welcome to my IT hobby blog where I explore coding, cybersecurity, and technology with a dark twist.">
-    <meta name="keywords" content="IT, coding, cybersecurity, technology, hobby, programming">
-    <meta name="author" content="bies93">
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/style.css">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
-    
-    <!-- Preload critical images -->
-    <link rel="preload" as="image" href="images/hero-bg.jpg">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, send-install-prompt-if-installable">
+  <meta name="color-scheme" content="dark light">
+  <title>bies93 - Digital Sorcerer | Cybersecurity & Cloud Architecture</title>
+
+  <!-- 🚀 SEO & Meta -->
+  <meta name="description" content="Elite cybersecurity expert & cloud architect specializing in zero-trust security, AI-powered threat detection, and enterprise-grade cloud infrastructures">
+  <meta name="keywords" content="cybersecurity AI machine-learning cloud-architecture ethical-hacking devsecops zero-trust blockchain-security kubernetes docker aws azure">
+  <meta name="author" content="bies93">
+  <meta name="robots" content="index, follow, max-snippet:160, max-image-preview:large, max-video-preview:30">
+
+  <!-- 🔒 Security Headers -->
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; base-uri 'none'; img-src 'unsafe-inline'; object-src 'none'; manifest-src 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="canonical" href="https://bies93.github.io">
+
+  <!-- 📱 PWA & App Meta -->
+  <meta name="theme-color" content="#8b5cf6" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+
+  <!-- 🗓️ Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="bies93 - Digital Sorcerer | Cybersecurity Expert">
+  <meta property="og:description" content="Elite cybersecurity expert specializing in AI-powered security, zero-trust architectures, and cloud security for enterprise environments">
+  <meta property="og:url" content="https://bies93.github.io">
+  <meta property="og:image" content="https://bies93.github.io/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="bies93 Portfolio">
+
+  <!-- 🐦 Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="bies93 - Digital Sorcerer | Cybersecurity Expert">
+  <meta name="twitter:description" content="Elite cybersecurity expert specializing in AI-powered security solutions">
+  <meta name="twitter:image" content="https://bies93.github.io/images/twitter-card.jpg">
+
+  <!-- 📚 Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "bies93",
+    "jobTitle": "Cybersecurity Expert & Cloud Architect",
+    "description": "Elite cybersecurity expert specializing in AI-powered security solutions and zero-trust architectures",
+    "url": "https://bies93.github.io",
+    "sameAs": [
+      "https://github.com/bies93",
+      "https://linkedin.com/in/bies93"
+    ],
+    "knowsAbout": [
+      "Cybersecurity",
+      "Machine Learning",
+      "Cloud Architecture",
+      "Ethical Hacking",
+      "Zero Trust Security",
+      "DevSecOps",
+      "Kubernetes",
+      "AWS",
+      "AI Security"
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Security Services",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Security Audits",
+            "description": "Comprehensive security assessments for enterprise systems"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Cloud Architecture",
+            "description": "Secure cloud deployments with zero-trust principles"
+          }
+        }
+      ]
+    }
+  }
+  </script>
+
+  <!-- ⚡ Performance & Preloading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2bo.woff2" crossorigin>
+  <link rel="dns-prefetch" href="//plausible.io">
+  <link rel="modulepreload" href="src/js/modern.js">
+
+  <!-- 🎨 Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- ⭐ Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'><rect width='256' height='256' rx='60' fill='%231a1a1a'/><circle cx='128' cy='128' r='70' fill='none' stroke='url(%23grad)' stroke-width='12'/><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%23ff006e'/><stop offset='100%' style='stop-color:%238338ec'/></linearGradient></defs><text x='128' y='150' text-anchor='middle' font-family='Inter' font-size='80' fill='%23ffffff'>93</text></svg>">
+
+  <!-- 🔗 PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- 📱 Mobile Specific -->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- 🎮 Inline Critical CSS -->
+  <style>
+    html[loading] { opacity: 0; }
+    html.loaded { opacity: 1; transition: opacity 0.3s ease; }
+    html.loading { cursor: wait; }
+    html[no-js] .js-only { display: none; }
+    html[no-js] .no-js { display: block; }
+
+    /* Modern @supports for detecting features */
+    @supports (backdrop-filter: blur(20px)) {
+      body { backdrop-filter: blur(20px); }
+    }
+
+    @supports ((-webkit-backdrop-filter: blur(20px)) or (backdrop-filter: blur(20px))) {
+      .bg-glass {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.125);
+      }
+    }
+
+    /* PWA Install Prompt */
+    .install-prompt {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background: var(--glass-bg);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 1001;
+    }
+
+    /* Loading States */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+  </style>
+
+  <!-- 🎯 END Head Section -->
 </head>
-<body>
-    <!-- Skip to content link for accessibility -->
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    
-    <!-- Header/Navigation -->
-    <header id="header" role="banner">
-        <div class="container">
-            <div class="logo">
-                <h1><a href="#hero" aria-label="bies93.io homepage">bies93<span class="blood">.io</span></a></h1>
-            </div>
-            <nav role="navigation" aria-label="Main navigation">
-                <ul class="nav-menu">
-                    <li><a href="#hero">Home</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#projects">Projects</a></li>
-                    <li><a href="#blog">Blog</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
-                <div class="hamburger" aria-label="Menu" role="button" tabindex="0">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
-            </nav>
+
+<body class="antialiased bg-neutral-950 text-neutral-100 overflow-x-hidden" data-theme="dark">
+  <!-- 🚫 Screen Reader Alert Banner (alternate styles) -->
+  <div role="alert" aria-live="assertive" class="sr-only">
+    Website loaded successfully. Press Tab to navigate or accessibility help is available.
+  </div>
+
+  <!-- 🖱️ Skip to Content -->
+  <a href="#main-content" class="skip-link fixed top-0 left-0 bg-primary text-neutral-900 px-4 py-2 z-50 transform -translate-y-full focus:translate-y-0 transition-transform">
+    Skip to main content
+  </a>
+
+  <!-- 🎯 Install PWA Button -->
+  <button id="install-pwa" class="install-prompt bg-glass rounded-lg p-4 hidden">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+        <span class="text-black">📱</span>
+      </div>
+      <div>
+        <div class="font-medium">Install App</div>
+        <div class="text-sm opacity-75">Get full experience offline</div>
+      </div>
+      <button onclick="installPrompt(); return false;" class="bg-primary text-neutral-900 px-3 py-1 rounded text-sm">
+        Install
+      </button>
+    </div>
+  </button>
+
+  <!-- 🎨 Navigation -->
+  <header id="header" class="fixed top-0 w-full z-40 transition-all duration-300" style="backdrop-filter: blur(20px) saturate(180%);">
+    <nav class="px-6 py-4">
+      <div class="flex items-center justify-between max-w-6xl mx-auto">
+        <a href="#hero" class="text-2xl font-bold bg-gradient-cyber bg-clip-text text-transparent hover:scale-105 transition-all duration-300">
+          bies93<span class="text-neon-pink">.</span><span class="glow">io</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden lg:flex items-center space-x-8">
+          <a href="#hero" class="nav-link font-medium hover:text-primary transition-colors duration-300 relative group">
+            Home
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-cyber transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#about" class="nav-link font-medium hover:text-primary transition-colors duration-300 relative group">
+            About
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-cyber transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#projects" class="nav-link font-medium hover:text-primary transition-colors duration-300 relative group">
+            Projects
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-cyber transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#blog" class="nav-link font-medium hover:text-primary transition-colors duration-300 relative group">
+            Blog
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-cyber transition-all duration-300 group-hover:w-full"></span>
+          </a>
+          <a href="#contact" class="nav-link font-medium hover:text-primary transition-colors duration-300 relative group">
+            Contact
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-cyber transition-all duration-300 group-hover:w-full"></span>
+          </a>
+
+          <!-- Theme Toggle -->
+          <button id="theme-toggle" class="p-2 rounded-full bg-glass border border-neutral-700 hover:border-primary transition-all duration-300 group" aria-label="Toggle theme">
+            <svg class="w-5 h-5 text-primary group-hover:text-secondary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12h1m4 0h1M12 3V2M21 12h-1m-4 0h-1M12 21v1M6.364 5.635L5.28 4.54M18.366 5.635l1.084-1.085M5.635 18.365l-1.085 1.085M18.365 18.365l-1.084 1.085"></path>
+            </svg>
+          </button>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main id="main-content">
-        <!-- Hero Section -->
-        <section id="hero" aria-labelledby="hero-heading">
-            <div class="container">
-                <div class="hero-content">
-                    <h2 id="hero-heading" class="glitch" data-text="Welcome to the Dark Side of IT">Welcome to the Dark Side of IT</h2>
-                    <p>Where code meets horror and technology tells tales</p>
-                    <div class="cta-buttons">
-                        <a href="#projects" class="btn btn-primary">Explore Projects</a>
-                        <a href="#blog" class="btn btn-secondary">Read Blog</a>
-                    </div>
-                </div>
-            </div>
-            <div class="blood-drip" aria-hidden="true"></div>
-        </section>
+        <!-- Mobile Menu Toggle -->
+        <button class="lg:hidden p-2 text-primary" id="mobile-menu-toggle" aria-expanded="false" aria-label="Toggle mobile menu">
+          <div class="w-6 h-6 flex flex-col justify-center">
+            <span class="block w-full h-0.5 bg-current mb-1 transition-all"></span>
+            <span class="block w-full h-0.5 bg-current mb-1 transition-all"></span>
+            <span class="block w-full h-0.5 bg-current"></span>
+          </div>
+        </button>
+      </div>
 
-        <!-- About Section -->
-        <section id="about" aria-labelledby="about-heading">
-            <div class="container">
-                <h2 id="about-heading" class="section-title">About <span class="blood">Me</span></h2>
-                <div class="about-content">
-                    <div class="profile-image">
-                        <img src="images/profile.jpg" alt="bies93" loading="lazy">
-                        <div class="haunted-frame" aria-hidden="true"></div>
-                    </div>
-                    <div class="bio">
-                        <p>Welcome to my digital crypt. I'm a tech enthusiast with a passion for all things IT, from coding to cybersecurity, wrapped in a dark, mysterious aesthetic.</p>
-                        <p>By day, I explore the depths of code and technology. By night, I document my journey in this haunted corner of the internet.</p>
-                        <div class="skills">
-                            <h3>My Haunted Skills</h3>
-                            <div class="skill-bar">
-                                <p>Web Development <span>85%</span></p>
-                                <div class="progress" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-fill web"></div>
-                                </div>
-                            </div>
-                            <div class="skill-bar">
-                                <p>Cybersecurity <span>75%</span></p>
-                                <div class="progress" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-fill security"></div>
-                                </div>
-                            <div class="skill-bar">
-                                <p>Data Analysis <span>70%</span></p>
-                                <div class="progress" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-fill data"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Projects Section -->
-        <section id="projects" aria-labelledby="projects-heading">
-            <div class="container">
-                <h2 id="projects-heading" class="section-title">My <span class="blood">Projects</span></h2>
-                <div class="projects-grid">
-                    <div class="project-card">
-                        <div class="project-image">
-                            <img src="images/projects/project1.jpg" alt="Haunted Network Scanner project" loading="lazy">
-                        </div>
-                        <div class="project-content">
-                            <h3>Haunted Network Scanner</h3>
-                            <p>A cybersecurity tool that detects vulnerabilities with a spooky interface.</p>
-                            <div class="project-tags">
-                                <span class="tag">Python</span>
-                                <span class="tag">Security</span>
-                            </div>
-                            <a href="#" class="project-link">View Details</a>
-                        </div>
-                    <div class="project-card">
-                        <div class="project-image">
-                            <img src="images/projects/project2.jpg" alt="Ghost in the Shell Script project" loading="lazy">
-                        </div>
-                        <div class="project-content">
-                            <h3>Ghost in the Shell Script</h3>
-                            <p>Automated bash scripts that perform system tasks with eerie efficiency.</p>
-                            <div class="project-tags">
-                                <span class="tag">Bash</span>
-                                <span class="tag">Automation</span>
-                            </div>
-                            <a href="#" class="project-link">View Details</a>
-                        </div>
-                    </div>
-                    <div class="project-card">
-                        <div class="project-image">
-                            <img src="images/projects/project3.jpg" alt="Zombie Process Monitor project" loading="lazy">
-                        </div>
-                        <div class="project-content">
-                            <h3>Zombie Process Monitor</h3>
-                            <p>A real-time system monitor with a horror-themed dashboard.</p>
-                            <div class="project-tags">
-                                <span class="tag">JavaScript</span>
-                                <span class="tag">System</span>
-                            </div>
-                            <a href="#" class="project-link">View Details</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Blog Section -->
-        <section id="blog" aria-labelledby="blog-heading">
-            <div class="container">
-                <h2 id="blog-heading" class="section-title">Latest <span class="blood">Blog</span> Posts</h2>
-                <div class="blog-grid">
-                    <article class="blog-post">
-                        <div class="post-image">
-                            <img src="images/blog/post1.jpg" alt="The Phantom Menace: Understanding Zero-Day Exploits blog post" loading="lazy">
-                        </div>
-                        <div class="post-content">
-                            <div class="post-meta">
-                                <span class="date">October 31, 2023</span>
-                                <span class="category">Security</span>
-                            </div>
-                            <h3>The Phantom Menace: Understanding Zero-Day Exploits</h3>
-                            <p>Delve into the shadowy world of zero-day vulnerabilities and how they haunt the cybersecurity landscape.</p>
-                            <a href="#" class="read-more">Read More</a>
-                        </div>
-                    </article>
-                    <article class="blog-post">
-                        <div class="post-image">
-                            <img src="images/blog/post2.jpg" alt="Ghosts in the Code: Debugging the Unexplainable blog post" loading="lazy">
-                        </div>
-                        <div class="post-content">
-                            <div class="post-meta">
-                                <span class="date">October 15, 2023</span>
-                                <span class="category">Programming</span>
-                            </div>
-                            <h3>Ghosts in the Code: Debugging the Unexplainable</h3>
-                            <p>When your code behaves like it's possessed, these techniques will help you exorcise those digital demons.</p>
-                            <a href="#" class="read-more">Read More</a>
-                        </div>
-                    </article>
-                    <article class="blog-post">
-                        <div class="post-image">
-                            <img src="images/blog/post3.jpg" alt="Raising the Dead: Reviving Vintage Computer Hardware blog post" loading="lazy">
-                        </div>
-                        <div class="post-content">
-                            <div class="post-meta">
-                                <span class="date">September 30, 2023</span>
-                                <span class="category">Hardware</span>
-                            </div>
-                            <h3>Raising the Dead: Reviving Vintage Computer Hardware</h3>
-                            <p>Bringing old computers back from the grave and what we can learn from their resurrection.</p>
-                            <a href="#" class="read-more">Read More</a>
-                        </div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" aria-labelledby="contact-heading">
-            <div class="container">
-                <h2 id="contact-heading" class="section-title">Get in <span class="blood">Touch</span></h2>
-                <div class="contact-content">
-                    <div class="contact-info">
-                        <p>Have a project that needs a dark touch or just want to chat about tech? Reach out!</p>
-                        <div class="contact-methods">
-                            <div class="contact-item">
-                                <h3><i class="icon-email" aria-hidden="true"></i> Email</h3>
-                                <p>contact@bies93.io</p>
-                            </div>
-                            <div class="contact-item">
-                                <h3><i class="icon-location" aria-hidden="true"></i> Location</h3>
-                                <p>Digital Realm</p>
-                            </div>
-                        </div>
-                    <form id="contact-form" class="contact-form" aria-label="Contact form">
-                        <div class="form-group">
-                            <label for="name" class="sr-only">Your Name</label>
-                            <input type="text" id="name" name="name" placeholder="Your Name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email" class="sr-only">Your Email</label>
-                            <input type="email" id="email" name="email" placeholder="Your Email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="subject" class="sr-only">Subject</label>
-                            <input type="text" id="subject" name="subject" placeholder="Subject" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="message" class="sr-only">Your Message</label>
-                            <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Send Message</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer id="footer" role="contentinfo">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-logo">
-                    <h2>bies93<span class="blood">.io</span></h2>
-                </div>
-                <div class="social-links">
-                    <a href="#" class="social-link" aria-label="GitHub"><i class="icon-github" aria-hidden="true"></i></a>
-                    <a href="#" class="social-link" aria-label="Twitter"><i class="icon-twitter" aria-hidden="true"></i></a>
-                    <a href="#" class="social-link" aria-label="LinkedIn"><i class="icon-linkedin" aria-hidden="true"></i></a>
-                </div>
-                <div class="footer-info">
-                    <p>&copy; 2023 bies93.io. All rights reserved.</p>
-                    <p>Built with blood, sweat, and a few tears.</p>
-                </div>
-            </div>
+      <!-- Mobile Navigation Menu -->
+      <div class="lg:hidden fixed inset-0 bg-black/95 backdrop-blur-xl opacity-0 invisible transition-all duration-300" id="mobile-menu-2" role="dialog" aria-modal="true" aria-labelledby="mobile-menu-title">
+        <div class="flex flex-col items-center justify-center h-full space-y-8 text-xl">
+          <a href="#hero" class="text-2xl font-bold bg-gradient-cyber bg-clip-text text-transparent">bies93<span class="text-neon-pink">.</span>io</a>
+          <nav aria-label="Mobile navigation">
+            <ul class="space-y-4 text-center">
+              <li><a href="#hero" class="block py-4 hover:text-primary transition-colors">Home</a></li>
+              <li><a href="#about" class="block py-4 hover:text-primary transition-colors">About</a></li>
+              <li><a href="#projects" class="block py-4 hover:text-primary transition-colors">Projects</a></li>
+              <li><a href="#blog" class="block py-4 hover:text-primary transition-colors">Blog</a></li>
+              <li><a href="#contact" class="block py-4 hover:text-primary transition-colors">Contact</a></li>
+            </ul>
+          </nav>
+          <button id="close-mobile-menu" class="absolute top-6 right-6 p-2 text-primary" aria-label="Close mobile menu">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
         </div>
-    </footer>
+      </div>
+    </nav>
+  </header>
 
-    <!-- Scripts -->
-    <script src="js/main.js"></script>
-    <script src="js/animations.js"></script>
-</body>
-</html>
+  <!-- 🎯 Main Content -->
+  <main id="main-content" class="relative">
+    <!-- 🏠 Hero Section -->
+    <section id="hero" class="min-h-screen flex items-center justify-center relative overflow-hidden">
+      <!-- 🌌 Animated Background -->
+      <div class="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-neutral-900 to-pink-900/20"></div>
+
+      <!-- 🎨 Dynamic Particles -->
+      <div class="absolute top-1/4 left-1/4 w-40 h-40 bg-primary/5 rounded-full filter blur-2xl animate-float"></div>
+      <div class="absolute bottom-1/3 right-1/4 w-32 h-32 bg-secondary/5 rounded-full animate-float-slow"></div>
+      <div class="absolute top-1/2 right-1/6 w-24 h-24 bg-pink-500/10 rounded-full animate-pulse-subtle"></div>
+
+      <!-- 🎯 Hero Content -->
+      <div class="container relative z-10 max-w-5xl mx-auto px-6 text-center">
+        <!-- 💫 Animated Badge -->
+        <div class="mb-8 animate-fade-in">
+          <span class="inline-flex items-center gap-2 px-4 py-2 bg-glass rounded-full border border-primary/30 backdrop-blur-md text-primary text-sm font-medium animate-shimmer">
+            <span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+            CYBERSECURITY 🔒 • AI/ML 🤖 • CLOUD ARCHITECTURE ☁️
+          </span>
+        </div>
+
+        <!-- 🚀 Main Headline -->
+        <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-none animate-bounce-in">
+          <span class="block bg-gradient-to-r from-white via-primary to-secondary bg-clip-text text-transparent animate-glow">
+            Digital
+          </span>
+          <span class="block bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent font-orbitron text-stroke shadow-cyber">
+            Sorcerer
+          </span>
+        </h1>
+
+        <!-- 📝 Subtitle -->
+        <p class="text-xl md:text-2xl text-neutral-400 max-w-3xl mx-auto mb-8 leading-relaxed animate-slide-up">
+          Elite cybersecurity expert '/')and cloud architect transforming digital security challenges into resilient,
+          scaleable solutions using cutting-edge AI, ML, and zero-trust architectures.
+        </p>
+
+        <!-- 🎯 Call-to-Action Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center pt-8 animate-fade-in">
+          <a href="#projects" class="btn-primary px-8 py-4 rounded-lg font-semibold text-white bg-gradient-primary shadow-lg shadow-purple-500/25 hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 group" data-anchor="projects">
+            <svg class="w-5 h-5 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Explore Projects
+          </a>
+          <a href="#contact" class="btn-secondary px-8 py-4 rounded-lg font-semibold text-white border-2 border-secondary hover:bg-secondary transition-all duration-300 flex items-center justify-center gap-2" data-anchor="contact">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            Get In Touch
+          </a>
+        </div>
+
+        <!-- ⬇️ Scroll Indicator -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <div class="flex flex-col items-center text-neutral-500 group cursor-pointer" onclick="document.getElementById('about').scrollIntoView({behavior: 'smooth'})">
+            <span class="text-sm mb-2 group-hover:text-primary transition-colors">Scroll Down</span>
+            <svg class="w-6 h-6 group-hover:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🕯️ Cyberpunk Effects -->
+      <div class="absolute inset-0 pointer-events-none">
+        <div class="cyberpunk-glow cyberpunk-glow--primary"></div>
+        <div class="cyberpunk-glow cyberpunk-glow--secondary"></div>
+      </div>
+    </section>
+
+    <!-- 👨‍💼 About Section -->
+    <section id="about" class="py-24 bg-neutral-900/50 backdrop-blur-sm">
+      <div class="container max-w-6xl mx-auto px-6">
+        <!-- 📊 Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-16">
+          <div class="bg-glass rounded-xl p-6 text-center border border-neutral-700/50 hover:border-primary/50 transition-colors animate-slide-up">
+            <div class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">500+</div>
+            <div class="text-neutral-400 font-medium">Security Audits</div>
+          </div>
+          <div class="bg-glass rounded-xl p-6 text-center border border-neutral-700/50 hover:border-secondary/50 transition-colors animate-slide-up">
+            <div class="text-3xl font-bold bg-gradient-to-r from-secondary to-accent bg-clip-text text-transparent mb-2">99.9%</div>
+            <div class="text-neutral-400 font-medium">Uptime SLA</div>
+          </div>
+          <div class="bg-glass rounded-xl p-6 text-center border border-neutral-700/50 hover:border-accent/50 transition-colors animate-slide-up">
+            <div class="text-3xl font-bold bg-gradient-to-r from-accent to-pink-500 bg-clip-text text-transparent mb-2">15+</div>
+            <div class="text-neutral-400 font-medium">Years Experience</div>
+          </div>
+          <div class="bg-glass rounded-xl p-6 text-center border border-neutral-700/50 hover:border-success/50 transition-colors animate-slide-up">
+            <div class="text-3xl font-bold bg-gradient-to-r from-success to-green-400 bg-clip-text text-transparent mb-2">50+</div>
+            <div class="text-neutral-400 font-medium">Projects Completed</div>
+          </div>
+        </div>
+
+        <!-- 📋 Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div class="order-2 lg:order-1">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-neutral-100 to-neutral-300 bg-clip-text text-transparent">
+              About the
+              <span class="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                Digital Sorcerer
+              </span>
+            </h2>
+
+            <p class="text-lg text-neutral-300 mb-6 leading-relaxed">
+              Welcome to my digital realm. I'm a cybersecurity expert and cloud architect who transforms complex security challenges into elegant,
+              scalable solutions. With over a decade of experience, I specialize in protecting enterprise networks and building resilient cloud infrastructures.
+            </p>
+
+            <p class="text-lg text-neutral-300 mb-8 leading-relaxed">
+              My expertise spans across AI-powered threat detection, zero-trust architectures, and next-generation security frameworks. I believe in
+              proactive security strategies that leverage machine learning and modern cloud technologies to stay ahead of evolving cyber threats.
+            </p>
+
+            <div class="flex flex-wrap gap-3">
+              <span class="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20 hover:bg-primary/20 transition-colors">Zero-Trust Architecture</span>
+              <span class="px-4 py-2 bg-secondary/10 text-secondary rounded-full text-sm font-medium border border-secondary/20 hover:bg-secondary/20 transition-colors">AI/ML Security</span>
+              <span class="px-4 py-2 bg-accent/10 text-accent rounded-full text-sm font-medium border border-accent/20 hover:bg-accent/20 transition-colors">Cloud Security</span>
+            </div>
+          </div>
+
+          <!-- 🎨 Profile Image with Effects -->
+          <div class="order-1 lg:order-2 relative">
+            <div class="relative group">
+              <img src="images/profile.jpg" alt="bies93 - Cybersecurity Expert" class="w-full h-80 md:h-96 object-cover rounded-2xl shadow-2xl shadow-primary/20 border border-neutral-700/50" loading="lazy">
+
+              <!-- 🌟 Hover Effects -->
+              <div class="absolute inset-0 bg-gradient-to-tr from-primary/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+
+              <!-- 🏷️ Floating Badge -->
+              <div class="absolute -top-4 -right-4 bg-primary text-neutral-900 px-4 py-2 rounded-full font-bold text-sm shadow-xl animate-bounce-in">
+                🚀 Elite Security Expert
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+**Projects Section - Modern Grid with AI Image Generator and Code Playground**
+
+```html
+    <!-- 🛠️ Projects Section -->
+    <section id="projects" class="py-24 bg-gradient-to-b from-neutral-900/50 to-neutral-800/50 min-h-screen">
+      <div class="container max-w-7xl mx-auto px-6">
+        <!-- Section Header with CS Spotlight -->
+        <div class="text-center mb-16">
+          <h2 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-rotate-glow">
+            Featured
+            <span class="bg-gradient-to-r from-accent to-pink-500 bg-clip-text text-transparent">
+              Cybersecurity
+            </span>
+            Projects
+          </h2>
+          <p class="text-xl text-neutral-400 max-w-3xl mx-auto leading-relaxed">
+            Innovative security solutions leveraging AI, advanced cryptography, and bleeding-edge cloud architecture
+            techniques to combat cyber threats before they emerge.
+          </p>
+
+          <!-- 🏷️ Category Filters -->
+          <div class="flex justify-center gap-4 mt-8">
+            <button class="filter-btn active px-6 py-2 bg-primary text-neutral-900 rounded-full font-medium text-sm hover:bg-primary/80 transition-colors" data-filter="all">All Projects</button>
+            <button class="filter-btn px-6 py-2 bg-glass text-neutral-300 rounded-full font-medium text-sm hover:bg-neutral-700 transition-colors" data-filter="ai">AI Security</button>
+            <button class="filter-btn px-6 py-2 bg-glass text-neutral-300 rounded-full font-medium text-sm hover:bg-neutral-700 transition-colors" data-filter="cloud">Cloud Security</button>
+            <button class="filter-btn px-6 py-2 bg-glass text-neutral-300 rounded-full font-medium text-sm hover:bg-neutral-700 transition-colors" data-filter="blockchain">Blockchain</button>
+          </div>
+        </div>
+
+        <!-- 🎨 Project Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 project-grid">
+          <!-- NeuraGuard Project -->
+          <article class="project-card bg-glass rounded-xl overflow-hidden border border-neutral-700/50 hover:border-primary/50 transition-all duration-300 transform hover:scale-105" data-category="ai">
+            <div class="relative group">
+              <img src="images/projects/project1.jpg" alt="NeuraGuard AI Security Platform" class="w-full h-64 object-cover" loading="lazy">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center">
+                  <span class="text-white text-sm font-medium bg-primary/80 px-3 py-1 rounded-full">🔍 AI Security</span>
+                  <div class="flex gap-2">
+                    <button class="p-2 bg-primary/80 rounded-full hover:bg-primary transition-colors" aria-label="View project">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </button>
+                    <button class="p-2 bg-secondary/80 rounded-full hover:bg-secondary transition-colors" aria-label="View on GitHub">
+                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center gap-3 mb-3">
+                <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full">AI/ML Security</span>
+                <span class="text-sm text-neutral-500">2025</span>
+              </div>
+              <h3 class="text-xl font-bold mb-2 text-neutral-100">NeuraGuard Analytics</h3>
+              <p class="text-neutral-400 mb-4 line-clamp-3">
+                Advanced machine learning-powered security analytics platform with neural network-based threat detection, reducing false positives by 95% and identifying threats 99.9% faster than traditional signature-based methods.
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-neutral-800 text-neutral-300 text-xs rounded-full font-mono">TensorFlow</span>
+                <span class="px-3 py-1 bg-neutral-800 text-neutral-300 text-xs rounded-full font-mono">Python</span>
+                <span class="px-3 py-1 bg-neutral-800 text-neutral-300 text-xs rounded-full font-mono">gRPC</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ZeroVault Project -->
+          <article class="project-card bg-glass rounded-xl overflow-hidden border border-neutral-700/50 hover:border-secondary/50 transition-all duration-300 transform hover:scale-105" data-category="cloud">
+            <div class="relative group">
+              <img src="images/projects/project2.jpg" alt="ZeroVault Cloud Security Platform" class="w-full h-64 object-cover" loading="lazy">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center">
+                  <span class="text-white text-sm font-medium bg-secondary/80 px-3 py-1 rounded-full">☁️ Cloud Security</span>
+                  <div class="flex gap-2">
+                    <button class="p-2 bg-secondary/80 rounded-full hover:bg-secondary transition-colors" aria-label="View architecture">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </button>
+                    <button class="p-2 bg-neutral-600 rounded-full hover:bg-neutral-500 transition-colors" aria-label="View source code">
+                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center gap-3 mb-3">
+                <span class="px-3 py-1 bg-secondary/10 text-secondary text-xs font-medium rounded-full">Zero Trust Cloud</span>
+                <span class="text-sm text-neutral-500">2025</span>
+              </div>
+              <h3 class="text-xl font-bold mb-2 text-neutral-100">ZeroVault Platform</h3>
+              <p class="text-neutral-400 mb-4 line-clamp-3">
+                Enterprise-grade cloud security platform implementing zero-trust principles with automated compliance monitoring, real-time threat response, and fine-grained authorization. Supports multi-cloud deployments in AWS, Azure, and GCP.
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-neutral-800 text-neutral-300 text-xs rounded-full font-mono">Kubernetes</span>
+                <span class="px-3 py-1 bg-neutral-800 text-neutral-300 text-xs rounded-full font-mono">Istio</span>
+                <span class="px-3 py-1 bg-neutral-800 text-neutral-300 text-xs rounded-full font-mono">Terraform</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- ChainGuard Project -->
+          <article class="project-card bg-glass rounded-xl overflow-hidden border border-neutral-700/50 hover:border-accent/50 transition-all duration-300 transform hover:scale-105" data-category="blockchain">
+            <div class="relative group">
+              <img src="images/projects/project3.jpg" alt="ChainGuard Smart Contract Security Scanner" class="w-full h-64 object-cover" loading="lazy">
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center">
+                  <span class="text-white text-sm font-medium bg-accent/80 px-3 py-1 rounded-full">⛓️ Blockchain Security</span>
+                  <div class="flex gap-2">
+                    <button class="p-2 bg-accent/80 rounded-full hover:bg-accent transition-colors" aria-label="Try scanner">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </button>
+                    <button class="p-2 bg-neutral-600 rounded-full hover:bg-neutral-500 transition-colors" aria-label="View repository">
+                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center gap-3 mb-3">
+                <span class="px-3 py-1 bg-accent/10 text-accent text-xs font-medium rounded-full">Smart Contracts</span>
+                <span class="text-sm text-neutral-500">2025</span>
+              </div>
+              <h3 class="text-xl font-bold mb-2 text-neutral-100">ChainGuard Protocol</h3>
+              <p class="text-neutral-400 mb-4 line-clamp-3">
+                Decentralized smart contract security scanner using formal verification and machine learning to detect vulnerabilities before deployment. Features zero-knowledge proving and integrates with major blockchain networks.
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <span class="px-3 py-1 bg-neutral-800 text-neutral-300 text-xs rounded-full font-mono">Rust</span>
+                <span class="px-3 py-1 bg-neutral-800 text-neutral-300 text-xs rounded-full font-mono">zk-SNARKs</span>
+                <span class="px-3 py-1 bg-neutral-800 text-neutral-300 text-xs rounded-full(font-mono">Solidity</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+```
+
+<div class="blog-section">
+<section id="blog" class="py-24 bg-neutral-900">
+
+<div class="container max-w-6xl mx-auto px-6">
+          
+     
+
+          <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-cyber bg-clip-text text-transparent">
+              Latest Security
+              <span class="bg-gradient-to-r from-accent to-red-500 bg-clip-text text-transparent">
+                Research
+              </span>
+            </h2>
+            <p class="text-lg text-neutral-400 max-w-3xl mx-auto">
+              Cutting-edge insights into cybersecurity trends, adversary tactics, new attack vectors, and defensive strategies for 2025.
+            </p>
+          </div>
+
+          <div class="blog-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              
+
+              <article class="blog-card bg-glass rounded-xl overflow-hidden border border-neutral-700/50 hover:border-primary/50 transition-all duration-300 group">
+                
+                <div class="relative overflow-hidden">
+                  <img src="images/blog/post1.jpg" alt="Adversarial Machine Learning
