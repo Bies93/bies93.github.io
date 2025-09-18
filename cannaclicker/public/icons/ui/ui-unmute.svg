@@ -1,8 +1,0 @@
-<![CDATA[<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-  <!-- Speaker -->
-  <path d="M4 6L4 14L8 14L12 18L12 2L8 6L4 6Z" fill="#212121"/>
-  
-  <!-- Sound waves -->
-  <path d="M14 8C15 9 15 11 14 12" stroke="#212121" stroke-width="2" fill="none" stroke-linecap="round"/>
-  <path d="M16 6C18 8 18 12 16 14" stroke="#212121" stroke-width="2" fill="none" stroke-linecap="round"/>
-</svg>]]>
