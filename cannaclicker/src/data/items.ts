@@ -55,7 +55,7 @@ export const items: ItemDefinition[] = [
       en: 'Grow Tent',
     },
     description: {
-      de: 'Kontrollierte Umgebung für stabile Erträge.',
+      de: 'Kontrollierte Umgebung fÃ¼r stabile ErtrÃ¤ge.',
       en: 'Controlled environment for steady yields.',
     },
     baseCost: 1100,
@@ -87,11 +87,11 @@ export const items: ItemDefinition[] = [
   {
     id: 'cultivator',
     name: {
-      de: 'Gärtner',
+      de: 'GÃ¤rtner',
       en: 'Cultivator',
     },
     description: {
-      de: 'Ein Profi kümmert sich um jede Pflanze.',
+      de: 'Ein Profi kÃ¼mmert sich um jede Pflanze.',
       en: 'A professional takes care of each plant.',
     },
     baseCost: 130000,

@@ -86,7 +86,7 @@ export function getMaxAffordable(definition: ItemDefinition, state: GameState): 
 
 export function formatPayback(locale: LocaleKey, value: number | null): string {
   if (value === null || !Number.isFinite(value)) {
-    return '—';
+    return 'â€”';
   }
 
   return t(locale, 'shop.payback', { seconds: value });
