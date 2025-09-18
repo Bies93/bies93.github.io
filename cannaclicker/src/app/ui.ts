@@ -185,7 +185,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.importButton.addEventListener('click', () => {
-    const payload = window.prompt('Bitte Base64-Spielstand einfügen:');
+    const payload = window.prompt('Bitte Base64-Spielstand einfÃ¼gen:');
     if (!payload) {
       return;
     }
@@ -204,7 +204,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.resetButton.addEventListener('click', () => {
-    const confirmReset = window.confirm('Spielstand wirklich löschen?');
+    const confirmReset = window.confirm('Spielstand wirklich lÃ¶schen?');
     if (!confirmReset) {
       return;
     }
@@ -344,7 +344,7 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
   details.className = 'mt-3 grid grid-cols-2 gap-2 text-xs text-neutral-300';
 
   const cost = createDetail(details, 'Kosten');
-  const next = createDetail(details, 'Nächster Preis');
+  const next = createDetail(details, 'NÃ¤chster Preis');
   const owned = createDetail(details, 'Besitzt');
   const payback = createDetail(details, 'Payback');
 
