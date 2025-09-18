@@ -8,6 +8,11 @@
 
 body {
   @apply font-sans bg-neutral-950 text-neutral-100 selection:bg-leaf-400/40 selection:text-neutral-100;
+  background-image: radial-gradient(circle at top, rgba(74, 222, 128, 0.12), transparent 55%),
+    url('/img/bg-plants.svg'), url('/img/bg-noise.svg');
+  background-size: 160% 160%, 1200px, 512px;
+  background-repeat: no-repeat, repeat, repeat;
+  background-position: center top, center, center;
 }
 
 button {
@@ -23,11 +28,15 @@ button {
 }
 
 .click-button {
-  @apply relative flex h-48 items-center justify-center overflow-hidden rounded-3xl border border-leaf-500/40 bg-gradient-to-br from-leaf-500/40 to-leaf-600/50 text-2xl font-semibold text-neutral-100 transition;
+  @apply relative flex h-48 items-center justify-center overflow-hidden rounded-3xl border border-leaf-500/40 bg-gradient-to-br from-leaf-500/40 via-leaf-500/20 to-leaf-600/40 text-2xl font-semibold text-neutral-100 transition;
+}
+
+.click-button:hover {
+  @apply brightness-110;
 }
 
 .click-button:active {
-  @apply scale-[0.98] brightness-110;
+  @apply scale-95;
 }
 
 .fade-in {

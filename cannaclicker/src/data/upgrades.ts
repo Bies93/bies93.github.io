@@ -1,6 +1,6 @@
-import type { LocaleKey } from '../app/i18n';
+ï»¿import type { LocaleKey } from "../app/i18n";
 
-export type UpgradeKind = 'global' | 'click' | 'building';
+export type UpgradeKind = "global" | "click" | "building";
 
 export interface UpgradeRequirement {
   totalBuds?: number;
@@ -15,58 +15,62 @@ export interface UpgradeDefinition {
   description: Record<LocaleKey, string>;
   cost: number;
   multiplier: number;
+  icon: string;
   requirement?: UpgradeRequirement;
 }
 
 export const upgrades: UpgradeDefinition[] = [
   {
-    id: 'rich_soil',
-    kind: 'global',
+    id: "rich_soil",
+    kind: "global",
     name: {
-      de: 'Reiche Erde',
-      en: 'Rich Soil',
+      de: "Reiche Erde",
+      en: "Rich Soil",
     },
     description: {
-      de: 'Globale Produktion +25 %',
-      en: 'Global production +25%',
+      de: "Globale Produktion +25 %",
+      en: "Global production +25%",
     },
-    cost: 2500,
+    cost: 2_500,
     multiplier: 1.25,
+    icon: "/icons/upgrades/upgrade-global-bps.svg",
     requirement: {
-      totalBuds: 2000,
+      totalBuds: 2_000,
     },
   },
   {
-    id: 'precision_trim',
-    kind: 'click',
+    id: "precision_trim",
+    kind: "click",
     name: {
-      de: 'Präziser Trim',
-      en: 'Precision Trim',
+      de: "Praeziser Trim",
+      en: "Precision Trim",
     },
     description: {
-      de: 'Buds pro Klick verdoppelt.',
-      en: 'Doubles buds per click.',
+      de: "Buds pro Klick verdoppelt.",
+      en: "Doubles buds per click.",
     },
-    cost: 15000,
+    cost: 15_000,
     multiplier: 2,
+    icon: "/icons/upgrades/upgrade-click-x2.svg",
     requirement: {
-      totalBuds: 10000,
+      totalBuds: 10_000,
     },
   },
   {
-    id: 'grow_light_lenses',
-    kind: 'building',
-    appliesTo: 'grow_light',
+    id: "grow_light_lenses",
+    kind: "building",
+    appliesTo: "grow_light",
     name: {
-      de: 'Prismatische Linsen',
-      en: 'Prismatic Lenses',
+      de: "Prismatische Linsen",
+      en: "Prismatic Lenses",
     },
     description: {
-      de: 'LED-Lichter produzieren 2× Buds.',
-      en: 'Grow lights produce 2× buds.',
+      de: "LED-Lichter produzieren 2x Buds.",
+      en: "Grow lights produce 2x buds.",
     },
-    cost: 80000,
+    cost: 80_000,
     multiplier: 2,
+    icon: "/icons/upgrades/upgrade-light.svg",
     requirement: {
       itemsOwned: { grow_light: 10 },
     },

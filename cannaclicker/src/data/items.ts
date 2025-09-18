@@ -1,4 +1,4 @@
-export interface UnlockCondition {
+﻿export interface UnlockCondition {
   totalBuds?: number;
   itemsOwned?: Record<string, number>;
 }
@@ -22,13 +22,13 @@ export const items: ItemDefinition[] = [
       en: 'Seedling',
     },
     description: {
-      de: 'Dein erster Keimling steckt voller Potenzial.',
+      de: 'Dein erster Keimling steckt voller Potenziale.',
       en: 'Your first sprout brimming with promise.',
     },
     baseCost: 15,
     costFactor: 1.15,
     bps: 0.1,
-    icon: '??',
+    icon: '/icons/items/item-seedling.svg',
   },
   {
     id: 'planter',
@@ -43,7 +43,7 @@ export const items: ItemDefinition[] = [
     baseCost: 100,
     costFactor: 1.17,
     bps: 1,
-    icon: '??',
+    icon: '/icons/items/item-planter.svg',
     unlock: {
       totalBuds: 50,
     },
@@ -58,10 +58,10 @@ export const items: ItemDefinition[] = [
       de: 'Kontrollierte Umgebung für stabile Erträge.',
       en: 'Controlled environment for steady yields.',
     },
-    baseCost: 1100,
+    baseCost: 1_100,
     costFactor: 1.2,
     bps: 8,
-    icon: '?',
+    icon: '/icons/items/item-grow-tent.svg',
     unlock: {
       totalBuds: 500,
     },
@@ -76,10 +76,10 @@ export const items: ItemDefinition[] = [
       de: 'Vollspektrum-Licht boostet das Wachstum massiv.',
       en: 'Full spectrum light massively boosts growth.',
     },
-    baseCost: 12000,
+    baseCost: 12_000,
     costFactor: 1.25,
     bps: 47,
-    icon: '??',
+    icon: '/icons/items/item-grow-light.svg',
     unlock: {
       itemsOwned: { grow_tent: 5 },
     },
@@ -94,12 +94,12 @@ export const items: ItemDefinition[] = [
       de: 'Ein Profi kümmert sich um jede Pflanze.',
       en: 'A professional takes care of each plant.',
     },
-    baseCost: 130000,
+    baseCost: 130_000,
     costFactor: 1.3,
     bps: 260,
-    icon: '?????',
+    icon: '/icons/items/item-cultivator.svg',
     unlock: {
-      totalBuds: 75000,
+      totalBuds: 75_000,
     },
   },
 ];

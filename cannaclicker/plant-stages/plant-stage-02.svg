@@ -1,0 +1,13 @@
+<![CDATA[<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Stage 2: Young plant with first leaves -->
+  <rect x="240" y="400" width="32" height="32" fill="#8B4513"/>
+  <rect x="235" y="395" width="42" height="5" fill="#A0522D"/>
+  <rect x="238" y="390" width="36" height="5" fill="#5D4037"/>
+  
+  <!-- Stem -->
+  <line x1="256" y1="390" x2="256" y2="320" stroke="#4CAF50" stroke-width="6" stroke-linecap="round"/>
+  
+  <!-- First leaves -->
+  <path d="M256 340L230 320C230 320 240 330 256 330C272 330 282 320 282 320L256 340Z" fill="#4CAF50"/>
+  <path d="M256 350L220 340C220 340 230 350 256 350C282 350 292 340 292 340L256 350Z" fill="#4CAF50"/>
+</svg>]]>

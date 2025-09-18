@@ -1,0 +1,12 @@
+<![CDATA[<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Double arrows -->
+  <path d="M6 8L10 4M10 4L14 8M10 4L10 12" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M6 16L10 20M10 20L14 16M10 20L10 12" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Leaf symbol -->
+  <path d="M18 6C19 7 21 7 22 8C23 9 22 11 20 12C18 13 16 12 15 11C14 10 14 8 15 7C16 6 17 5 18 6Z" fill="#4CAF50"/>
+  
+  <!-- ×4 label area -->
+  <rect x="12" y="12" width="10" height="10" rx="2" fill="#FFFFFF" stroke="#212121" stroke-width="1"/>
+  <text x="17" y="20" font-family="Arial, sans-serif" font-size="8" text-anchor="middle" fill="#212121">×4</text>
+</svg>]]>

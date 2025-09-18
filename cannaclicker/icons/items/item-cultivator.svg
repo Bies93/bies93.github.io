@@ -1,0 +1,13 @@
+<![CDATA[<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gardener's glove -->
+  <path d="M15 20C15 15 19 12 24 12C29 12 33 15 33 20L33 28C33 3 29 36 24 36C19 36 15 33 15 28L15 20Z" fill="#F5F5F5" stroke="#CCCCCC" stroke-width="1"/>
+  
+  <!-- Glove details -->
+  <circle cx="20" cy="2" r="2" fill="#E0E0E0"/>
+  <circle cx="28" cy="22" r="2" fill="#E0E0E0"/>
+  <circle cx="24" cy="26" r="2" fill="#E0E0E0"/>
+  
+  <!-- Leaf -->
+  <path d="M30 30C35 25 40 30 38 35C36 40 31 40 28 38C25 36 24 32 26 29C28 26 25 25 30 30Z" fill="#4CAF50"/>
+  <path d="M32 32L36 28" stroke="#388E3C" stroke-width="1" stroke-linecap="round"/>
+</svg>]]>
