@@ -1,4 +1,4 @@
-﻿import Decimal from "break_infinity.js";
+import Decimal from "break_infinity.js";
 
 export interface FormatOptions {
   precision?: number;

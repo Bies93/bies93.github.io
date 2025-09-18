@@ -1,13 +1,13 @@
-import { defineConfig } from 'vite';
-import compression from 'vite-plugin-compression';
+import { defineConfig } from "vite";
+import compression from "vite-plugin-compression";
 
-export default defineConfig(({ mode }) => ({
-  base: mode === 'production' ? '/cannaclicker/' : '/',
+export default defineConfig({
+  base: "/",
   plugins: [
-    compression({ algorithm: 'brotliCompress', ext: '.br' }),
-    compression({ algorithm: 'gzip', ext: '.gz' }),
+    compression({ algorithm: "brotliCompress", ext: ".br" }),
+    compression({ algorithm: "gzip", ext: ".gz" }),
   ],
   build: {
-    sourcemap: mode !== 'production',
+    sourcemap: true,
   },
-}));
+});
