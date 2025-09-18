@@ -9,7 +9,7 @@
 body {
   @apply font-sans bg-neutral-950 text-neutral-100 selection:bg-leaf-400/40 selection:text-neutral-100;
   background-image: radial-gradient(circle at top, rgba(74, 222, 128, 0.12), transparent 55%),
-    url('/img/bg-plants.svg'), url('/img/bg-noise.svg');
+    url('../assets/img/bg-plants.svg'), url('../assets/img/bg-noise.svg');
   background-size: 160% 160%, 1200px, 512px;
   background-repeat: no-repeat, repeat, repeat;
   background-position: center top, center, center;

@@ -1,4 +1,6 @@
-﻿export interface UnlockCondition {
+import { asset } from "../app/assets";
+
+export interface UnlockCondition {
   totalBuds?: number;
   itemsOwned?: Record<string, number>;
 }
@@ -28,7 +30,7 @@ export const items: ItemDefinition[] = [
     baseCost: 15,
     costFactor: 1.15,
     bps: 0.1,
-    icon: '/icons/items/item-seedling.svg',
+    icon: asset('icons/items/item-seedling.svg'),
   },
   {
     id: 'planter',
@@ -43,7 +45,7 @@ export const items: ItemDefinition[] = [
     baseCost: 100,
     costFactor: 1.17,
     bps: 1,
-    icon: '/icons/items/item-planter.svg',
+    icon: asset('icons/items/item-planter.svg'),
     unlock: {
       totalBuds: 50,
     },
@@ -61,7 +63,7 @@ export const items: ItemDefinition[] = [
     baseCost: 1_100,
     costFactor: 1.2,
     bps: 8,
-    icon: '/icons/items/item-grow-tent.svg',
+    icon: asset('icons/items/item-grow-tent.svg'),
     unlock: {
       totalBuds: 500,
     },
@@ -79,7 +81,7 @@ export const items: ItemDefinition[] = [
     baseCost: 12_000,
     costFactor: 1.25,
     bps: 47,
-    icon: '/icons/items/item-grow-light.svg',
+    icon: asset('icons/items/item-grow-light.svg'),
     unlock: {
       itemsOwned: { grow_tent: 5 },
     },
@@ -97,7 +99,7 @@ export const items: ItemDefinition[] = [
     baseCost: 130_000,
     costFactor: 1.3,
     bps: 260,
-    icon: '/icons/items/item-cultivator.svg',
+    icon: asset('icons/items/item-cultivator.svg'),
     unlock: {
       totalBuds: 75_000,
     },

@@ -1,3 +1,5 @@
+import { asset } from "../app/assets";
+
 import type { LocaleKey } from '../app/i18n';
 
 export interface AchievementRequirement {
@@ -17,7 +19,7 @@ export interface AchievementDefinition {
 export const achievements: AchievementDefinition[] = [
   {
     id: 'seedling_10',
-    overlayIcon: '/achievements/badge-overlay-leaf.svg',
+    overlayIcon: asset('achievements/badge-overlay-leaf.svg'),
     name: {
       de: 'Keimstarter',
       en: 'Seed Starter',
@@ -33,13 +35,13 @@ export const achievements: AchievementDefinition[] = [
   },
   {
     id: 'planter_25',
-    overlayIcon: '/achievements/badge-overlay-pot.svg',
+    overlayIcon: asset('achievements/badge-overlay-pot.svg'),
     name: {
       de: 'Topfmeister',
       en: 'Pot Master',
     },
     description: {
-      de: 'Besitze 25 Töpfe.',
+      de: 'Besitze 25 TÃ¶pfe.',
       en: 'Own 25 planters.',
     },
     requirement: {
@@ -49,7 +51,7 @@ export const achievements: AchievementDefinition[] = [
   },
   {
     id: 'harvest_1m',
-    overlayIcon: '/achievements/badge-overlay-light.svg',
+    overlayIcon: asset('achievements/badge-overlay-light.svg'),
     name: {
       de: 'Ernteprofi',
       en: 'Harvest Hero',

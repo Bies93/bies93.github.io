@@ -1,4 +1,6 @@
-﻿import type { LocaleKey } from "../app/i18n";
+import { asset } from "../app/assets";
+
+import type { LocaleKey } from "../app/i18n";
 
 export type UpgradeKind = "global" | "click" | "building";
 
@@ -33,7 +35,7 @@ export const upgrades: UpgradeDefinition[] = [
     },
     cost: 2_500,
     multiplier: 1.25,
-    icon: "/icons/upgrades/upgrade-global-bps.svg",
+    icon: asset("icons/upgrades/upgrade-global-bps.svg"),
     requirement: {
       totalBuds: 2_000,
     },
@@ -51,7 +53,7 @@ export const upgrades: UpgradeDefinition[] = [
     },
     cost: 15_000,
     multiplier: 2,
-    icon: "/icons/upgrades/upgrade-click-x2.svg",
+    icon: asset("icons/upgrades/upgrade-click-x2.svg"),
     requirement: {
       totalBuds: 10_000,
     },
@@ -70,7 +72,7 @@ export const upgrades: UpgradeDefinition[] = [
     },
     cost: 80_000,
     multiplier: 2,
-    icon: "/icons/upgrades/upgrade-light.svg",
+    icon: asset("icons/upgrades/upgrade-light.svg"),
     requirement: {
       itemsOwned: { grow_light: 10 },
     },
