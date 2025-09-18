@@ -13,6 +13,7 @@ import { createAudioManager } from "./audio";
 import { t } from "./i18n";
 import { exportSave, importSave, clearSave, save } from "./save";
 import { spawnFloatingValue } from "./effects";
+import { asset } from "./assets";
 import { itemById } from "../data/items";
 
 interface ControlButtonRefs {
@@ -113,10 +114,10 @@ function buildUI(state: GameState): UIRefs {
   controlsRow.className = "flex flex-wrap gap-2";
   headerCard.appendChild(controlsRow);
 
-  const muteControl = createActionButton("/icons/ui/ui-mute.svg");
-  const exportControl = createActionButton("/icons/ui/ui-export.svg");
-  const importControl = createActionButton("/icons/ui/ui-import.svg");
-  const resetControl = createDangerButton("/icons/ui/ui-reset.svg");
+  const muteControl = createActionButton(asset("icons/ui/ui-mute.svg"));
+  const exportControl = createActionButton(asset("icons/ui/ui-export.svg"));
+  const importControl = createActionButton(asset("icons/ui/ui-import.svg"));
+  const resetControl = createDangerButton(asset("icons/ui/ui-reset.svg"));
 
   controlsRow.append(
     muteControl.button,
@@ -135,7 +136,7 @@ function buildUI(state: GameState): UIRefs {
   clickButton.type = "button";
 
   const clickIcon = document.createElement("img");
-  clickIcon.src = "/icons/ui/icon-leaf-click.svg";
+  clickIcon.src = asset("icons/ui/icon-leaf-click.svg");
   clickIcon.alt = "";
   clickIcon.className = "h-28 w-28 shrink-0 transition-transform duration-200";
 
@@ -279,8 +280,8 @@ function updateStrings(state: GameState): void {
   refs.clickLabel.textContent = t(state.locale, "actions.click");
 
   const muteAssets = state.muted
-    ? { label: t(state.locale, "actions.unmute"), icon: "/icons/ui/ui-unmute.svg" }
-    : { label: t(state.locale, "actions.mute"), icon: "/icons/ui/ui-mute.svg" };
+    ? { label: t(state.locale, "actions.unmute"), icon: asset("icons/ui/ui-unmute.svg") }
+    : { label: t(state.locale, "actions.mute"), icon: asset("icons/ui/ui-mute.svg") };
 
   refs.controls.mute.icon.src = muteAssets.icon;
   refs.controls.mute.label.textContent = muteAssets.label;
