@@ -1,0 +1,18 @@
+<![CDATA[<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- LED panel -->
+  <rect x="6" y="8" width="12" height="6" rx="1" fill="#1A1A1A"/>
+  
+  <!-- LED lights -->
+  <circle cx="8" cy="10" r="1" fill="#00BFFF"/>
+  <circle cx="10" cy="10" r="1" fill="#00BFFF"/>
+  <circle cx="12" cy="10" r="1" fill="#00BFFF"/>
+  <circle cx="14" cy="10" r="1" fill="#00BFFF"/>
+  <circle cx="16" cy="10" r="1" fill="#00BFFF"/>
+  
+  <!-- Light cones -->
+  <path d="M8 13L7 18L9 18L8 13Z" fill="#00BFFF" opacity="0.3"/>
+  <path d="M10 13L9 18L11 18L10 13Z" fill="#00BFFF" opacity="0.3"/>
+  <path d="M12 13L11 18L13 18L12 13Z" fill="#00BFFF" opacity="0.3"/>
+  <path d="M14 13L13 18L15 18L14 13Z" fill="#00BFFF" opacity="0.3"/>
+ <path d="M16 13L15 18L17 18L16 13Z" fill="#00BFFF" opacity="0.3"/>
+</svg>]]>

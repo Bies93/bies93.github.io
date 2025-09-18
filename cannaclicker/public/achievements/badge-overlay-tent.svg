@@ -1,0 +1,19 @@
+<![CDATA[<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Grow tent pictogram -->
+  <rect x="16" y="20" width="32" height="24" rx="2" fill="#2C2C2C"/>
+  
+  <!-- Tent opening -->
+  <path d="M20 24L4 24L40 32L24 32L20 24Z" fill="#3C3C3C"/>
+  
+  <!-- Zipper line -->
+  <line x1="32" y1="20" x2="32" y2="44" stroke="#4A4A4A" stroke-width="1" stroke-dasharray="2,2"/>
+  
+  <!-- Ventilation holes -->
+  <circle cx="22" cy="28" r="1" fill="#4A4A4A"/>
+  <circle cx="26" cy="28" r="1" fill="#4A4A4A"/>
+  <circle cx="38" cy="28" r="1" fill="#4A4A4A"/>
+  <circle cx="42" cy="28" r="1" fill="#4A4A4A"/>
+  
+  <!-- LED light inside -->
+  <rect x="28" y="34" width="8" height="2" fill="#FFD700"/>
+</svg>]]>

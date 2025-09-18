@@ -1,0 +1,13 @@
+<![CDATA[<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <!-- Planter pot -->
+  <path d="M8 36L8 40C8 41.1 8.9 42 10 42L38 42C39.1 42 40 41.1 40 40L40 36" fill="#8B4513"/>
+  <rect x="6" y="28" width="36" height="8" fill="#A0522D"/>
+  
+  <!-- Soil with texture -->
+  <rect x="8" y="26" width="32" height="2" fill="#5D4037"/>
+  <path d="M10 26L12 25M14 26L16 25M18 26L20 25M22 26L24 25M26 26L28 25M30 26L32 25M34 26L36 25" stroke="#4E342E" stroke-width="1" stroke-linecap="round"/>
+  
+  <!-- Plant -->
+  <line x1="24" y1="26" x2="24" y2="16" stroke="#4CAF50" stroke-width="2" stroke-linecap="round"/>
+  <path d="M24 16L18 12C18 12 20 14 24 14C28 14 30 12 30 12L24 16Z" fill="#4CAF50"/>
+</svg>]]>

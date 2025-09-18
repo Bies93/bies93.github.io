@@ -1,0 +1,15 @@
+<![CDATA[<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <!-- Pot -->
+  <path d="M12 36L12 40C12 41.1 12.9 42 14 42L34 42C35.1 42 36 41.1 36 40L36 36" fill="#8B4513"/>
+  <rect x="10" y="32" width="28" height="4" fill="#A0522D"/>
+  
+  <!-- Soil -->
+  <rect x="12" y="30" width="24" height="2" fill="#5D4037"/>
+  
+  <!-- Seedling stem -->
+  <line x1="24" y1="30" x2="24" y2="20" stroke="#4CAF50" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Seedling leaves -->
+  <path d="M24 20L20 16C20 16 22 18 24 18C26 18 28 16 28 16L24 20Z" fill="#4CAF50"/>
+  <path d="M24 22L18 18C18 18 20 20 24 20C28 20 30 18 30 18L24 22Z" fill="#4CAF50"/>
+</svg>]]>
