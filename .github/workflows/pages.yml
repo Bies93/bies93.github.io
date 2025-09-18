@@ -9,7 +9,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages
   cancel-in-progress: true
 
 jobs:
@@ -26,15 +26,19 @@ jobs:
         working-directory: cannaclicker
       - run: npm run build
         working-directory: cannaclicker
+      - name: Verify dist
+        run: |
+          test -f cannaclicker/dist/index.html
+          test -d cannaclicker/dist/icons
+          test -d cannaclicker/dist/assets
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./cannaclicker/dist
+          path: cannaclicker/dist
   deploy:
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deployment
+      - id: deploy
         uses: actions/deploy-pages@v4
