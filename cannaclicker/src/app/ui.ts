@@ -114,10 +114,10 @@ function buildUI(state: GameState): UIRefs {
   controlsRow.className = "flex flex-wrap gap-2";
   headerCard.appendChild(controlsRow);
 
-  const muteControl = createActionButton(asset("icons/ui/ui-mute.svg"));
-  const exportControl = createActionButton(asset("icons/ui/ui-export.svg"));
-  const importControl = createActionButton(asset("icons/ui/ui-import.svg"));
-  const resetControl = createDangerButton(asset("icons/ui/ui-reset.svg"));
+  const muteControl = createActionButton(asset("icons/ui/ui-mute.png"));
+  const exportControl = createActionButton(asset("icons/ui/ui-export.png"));
+  const importControl = createActionButton(asset("icons/ui/ui-import.png"));
+  const resetControl = createDangerButton(asset("icons/ui/ui-reset.png"));
 
   controlsRow.append(
     muteControl.button,
@@ -136,7 +136,7 @@ function buildUI(state: GameState): UIRefs {
   clickButton.type = "button";
 
   const clickIcon = document.createElement("img");
-  clickIcon.src = asset("icons/ui/icon-leaf-click.svg");
+  clickIcon.src = asset("icons/ui/icon-leaf-click.png");
   clickIcon.alt = "";
   clickIcon.className = "h-28 w-28 shrink-0 transition-transform duration-200";
 
@@ -280,8 +280,8 @@ function updateStrings(state: GameState): void {
   refs.clickLabel.textContent = t(state.locale, "actions.click");
 
   const muteAssets = state.muted
-    ? { label: t(state.locale, "actions.unmute"), icon: asset("icons/ui/ui-unmute.svg") }
-    : { label: t(state.locale, "actions.mute"), icon: asset("icons/ui/ui-mute.svg") };
+    ? { label: t(state.locale, "actions.unmute"), icon: asset("icons/ui/ui-unmute.png") }
+    : { label: t(state.locale, "actions.mute"), icon: asset("icons/ui/ui-mute.png") };
 
   refs.controls.mute.icon.src = muteAssets.icon;
   refs.controls.mute.label.textContent = muteAssets.label;
@@ -520,4 +520,5 @@ function announce(refs: UIRefs, total: Decimal): void {
 }
 
 export {};
+
 

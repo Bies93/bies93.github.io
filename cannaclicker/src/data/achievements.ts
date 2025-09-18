@@ -1,4 +1,4 @@
-import { asset } from "../app/assets";
+﻿import { asset } from "../app/assets";
 
 import type { LocaleKey } from '../app/i18n';
 
@@ -19,7 +19,7 @@ export interface AchievementDefinition {
 export const achievements: AchievementDefinition[] = [
   {
     id: 'seedling_10',
-    overlayIcon: asset('achievements/badge-overlay-leaf.svg'),
+    overlayIcon: asset('achievements/badge-overlay-leaf.png'),
     name: {
       de: 'Keimstarter',
       en: 'Seed Starter',
@@ -35,13 +35,13 @@ export const achievements: AchievementDefinition[] = [
   },
   {
     id: 'planter_25',
-    overlayIcon: asset('achievements/badge-overlay-pot.svg'),
+    overlayIcon: asset('achievements/badge-overlay-pot.png'),
     name: {
       de: 'Topfmeister',
       en: 'Pot Master',
     },
     description: {
-      de: 'Besitze 25 Töpfe.',
+      de: 'Besitze 25 TÃ¶pfe.',
       en: 'Own 25 planters.',
     },
     requirement: {
@@ -51,7 +51,7 @@ export const achievements: AchievementDefinition[] = [
   },
   {
     id: 'harvest_1m',
-    overlayIcon: asset('achievements/badge-overlay-light.svg'),
+    overlayIcon: asset('achievements/badge-overlay-light.png'),
     name: {
       de: 'Ernteprofi',
       en: 'Harvest Hero',
@@ -68,3 +68,4 @@ export const achievements: AchievementDefinition[] = [
 ];
 
 export const achievementById = new Map(achievements.map((entry) => [entry.id, entry] as const));
+

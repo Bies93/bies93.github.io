@@ -1,4 +1,4 @@
-import { asset } from "../app/assets";
+﻿import { asset } from "../app/assets";
 
 export interface UnlockCondition {
   totalBuds?: number;
@@ -30,7 +30,7 @@ export const items: ItemDefinition[] = [
     baseCost: 15,
     costFactor: 1.15,
     bps: 0.1,
-    icon: asset('icons/items/item-seedling.svg'),
+    icon: asset('icons/items/item-seedling.png'),
   },
   {
     id: 'planter',
@@ -45,7 +45,7 @@ export const items: ItemDefinition[] = [
     baseCost: 100,
     costFactor: 1.17,
     bps: 1,
-    icon: asset('icons/items/item-planter.svg'),
+    icon: asset('icons/items/item-planter.png'),
     unlock: {
       totalBuds: 50,
     },
@@ -57,13 +57,13 @@ export const items: ItemDefinition[] = [
       en: 'Grow Tent',
     },
     description: {
-      de: 'Kontrollierte Umgebung für stabile Erträge.',
+      de: 'Kontrollierte Umgebung fÃ¼r stabile ErtrÃ¤ge.',
       en: 'Controlled environment for steady yields.',
     },
     baseCost: 1_100,
     costFactor: 1.2,
     bps: 8,
-    icon: asset('icons/items/item-grow-tent.svg'),
+    icon: asset('icons/items/item-grow-tent.png'),
     unlock: {
       totalBuds: 500,
     },
@@ -81,7 +81,7 @@ export const items: ItemDefinition[] = [
     baseCost: 12_000,
     costFactor: 1.25,
     bps: 47,
-    icon: asset('icons/items/item-grow-light.svg'),
+    icon: asset('icons/items/item-grow-light.png'),
     unlock: {
       itemsOwned: { grow_tent: 5 },
     },
@@ -89,17 +89,17 @@ export const items: ItemDefinition[] = [
   {
     id: 'cultivator',
     name: {
-      de: 'Gärtner',
+      de: 'GÃ¤rtner',
       en: 'Cultivator',
     },
     description: {
-      de: 'Ein Profi kümmert sich um jede Pflanze.',
+      de: 'Ein Profi kÃ¼mmert sich um jede Pflanze.',
       en: 'A professional takes care of each plant.',
     },
     baseCost: 130_000,
     costFactor: 1.3,
     bps: 260,
-    icon: asset('icons/items/item-cultivator.svg'),
+    icon: asset('icons/items/item-cultivator.png'),
     unlock: {
       totalBuds: 75_000,
     },

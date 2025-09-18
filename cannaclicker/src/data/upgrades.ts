@@ -1,4 +1,4 @@
-import { asset } from "../app/assets";
+﻿import { asset } from "../app/assets";
 
 import type { LocaleKey } from "../app/i18n";
 
@@ -35,7 +35,7 @@ export const upgrades: UpgradeDefinition[] = [
     },
     cost: 2_500,
     multiplier: 1.25,
-    icon: asset("icons/upgrades/upgrade-global-bps.svg"),
+    icon: asset("icons/upgrades/upgrade-global-bps.png"),
     requirement: {
       totalBuds: 2_000,
     },
@@ -53,7 +53,7 @@ export const upgrades: UpgradeDefinition[] = [
     },
     cost: 15_000,
     multiplier: 2,
-    icon: asset("icons/upgrades/upgrade-click-x2.svg"),
+    icon: asset("icons/upgrades/upgrade-click-x2.png"),
     requirement: {
       totalBuds: 10_000,
     },
@@ -72,7 +72,7 @@ export const upgrades: UpgradeDefinition[] = [
     },
     cost: 80_000,
     multiplier: 2,
-    icon: asset("icons/upgrades/upgrade-light.svg"),
+    icon: asset("icons/upgrades/upgrade-light.png"),
     requirement: {
       itemsOwned: { grow_light: 10 },
     },
@@ -80,3 +80,4 @@ export const upgrades: UpgradeDefinition[] = [
 ];
 
 export const upgradeById = new Map(upgrades.map((upgrade) => [upgrade.id, upgrade] as const));
+
