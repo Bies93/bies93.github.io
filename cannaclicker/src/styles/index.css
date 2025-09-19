@@ -5,27 +5,30 @@
 :root {
   color-scheme: dark;
   --hero-image: none;
+  --bg-plants: none;
+  --bg-noise: none;
 }
 
 body {
-  @apply font-sans bg-neutral-950 text-neutral-100 selection:bg-leaf-400/40 selection:text-neutral-100;
+  @apply font-sans bg-neutral-950 text-neutral-100 selection:bg-emerald-400/40 selection:text-neutral-100;
   background-image:
-    radial-gradient(circle at top, rgba(74,222,128,.12), transparent 55%),
-    url('../assets/img/bg-plants.svg'),
-    url('../assets/img/bg-noise.svg');
+    radial-gradient(circle at top, rgba(74, 222, 128, 0.12), transparent 55%),
+    var(--bg-plants),
+    var(--bg-noise);
   background-size: 160% 160%, 1200px, 512px;
   background-repeat: no-repeat, repeat, repeat;
   background-position: center top, center, center;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   body {
     background-image:
       var(--hero-image),
-      radial-gradient(circle at top, rgba(74,222,128,.12), transparent 55%),
-      url('../assets/img/bg-plants.svg'),
-      url('../assets/img/bg-noise.svg');
+      radial-gradient(circle at top, rgba(74, 222, 128, 0.12), transparent 55%),
+      var(--bg-plants),
+      var(--bg-noise);
     background-size: cover, 160% 160%, 1200px, 512px;
+    background-repeat: no-repeat, no-repeat, repeat, repeat;
     background-position: top center, center top, center, center;
   }
 }
@@ -47,17 +50,16 @@ button {
   filter: drop-shadow(0 0 0.25rem rgba(0, 0, 0, 0.35));
 }
 
-.icon-img.filter-dark {
-  filter: invert(44%) sepia(15%) saturate(878%) hue-rotate(79deg) brightness(88%);
+.icon-dark {
+  filter: invert(35%) sepia(10%) saturate(900%) hue-rotate(95deg) brightness(85%);
 }
 
 .card {
-  @apply rounded-2xl border border-white/10 bg-neutral-900/50 backdrop-blur-sm p-4;
-  transition: transform 120ms;
+  @apply rounded-2xl border border-white/10 bg-neutral-900/50 backdrop-blur-sm p-4 transition;
 }
 
 .card:hover {
-  @apply border-leaf-400/40;
+  @apply border-emerald-400/40;
   transform: translateY(-1px);
 }
 
@@ -66,14 +68,14 @@ button {
 }
 
 .click-button::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -40%;
   background: radial-gradient(circle at 50% 30%, rgba(114, 206, 123, 0.18), transparent 55%);
 }
 
 .click-button:hover {
-  @apply border-leaf-400/60 ring-leaf-300/30;
+  @apply border-emerald-400/50;
   transform: translateY(-1px);
 }
 
@@ -81,7 +83,7 @@ button {
   transform: scale(0.98);
 }
 
-.click-button .click-icon {
+.click-icon {
   @apply h-28 w-28 transition-transform;
 }
 
@@ -89,8 +91,12 @@ button {
   transform: scale(0.94);
 }
 
-.click-button .click-label {
+.click-label {
   @apply absolute bottom-4 left-1/2 -translate-x-1/2 text-xs uppercase tracking-[0.35em] text-white/80;
+}
+
+.buy-btn {
+  @apply flex h-9 items-center justify-center rounded-md bg-emerald-500 text-sm font-semibold text-neutral-900 transition hover:bg-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-50;
 }
 
 .fade-in {
@@ -107,6 +113,3 @@ button {
     transform: translateY(0);
   }
 }
-
-
-

@@ -14,6 +14,7 @@ import { t } from "./i18n";
 import { exportSave, importSave, clearSave, save } from "./save";
 import { spawnFloatingValue } from "./effects";
 import { asset } from "./assets";
+import { withBase } from "./paths";
 import { itemById } from "../data/items";
 
 interface ControlButtonRefs {
@@ -62,6 +63,9 @@ let refs: UIRefs | null = null;
 let audio = createAudioManager(false);
 let lastAnnounced = new Decimal(0);
 
+const PLANT_STAGE_THRESHOLDS = [0, 100, 1000, 10000, 100000];
+const PLANT_STAGE_MAX = 5;
+
 export function renderUI(state: GameState): void {
   if (!refs) {
     refs = buildUI(state);
@@ -83,49 +87,28 @@ function buildUI(state: GameState): UIRefs {
   }
 
   root.innerHTML = "";
-  root.className = "mx-auto flex max-w-6xl flex-col gap-4 p-4";
+  root.className = "mx-auto flex w-full max-w-6xl flex-col gap-4 p-4";
 
-  const heroImageSet = `image-set(url("${asset("img/bg-hero-1920.png")}") type("image/png") 1x, url("${asset("img/bg-hero-2560.png")}") type("image/png") 2x)`;
+  const heroImageSet = `image-set(url("${withBase("img/bg-hero-1920.png")}") type("image/png") 1x, url("${withBase("img/bg-hero-2560.png")}") type("image/png") 2x)`;
   document.documentElement.style.setProperty("--hero-image", heroImageSet);
+  document.documentElement.style.setProperty("--bg-plants", `url("${withBase("img/bg-plants-1280.png")}")`);
+  document.documentElement.style.setProperty("--bg-noise", `url("${withBase("img/bg-noise-512.png")}")`);
 
-  const muteControl = createActionButton(asset("icons/ui/ui-mute.png"));
-  const exportControl = createActionButton(asset("icons/ui/ui-export.png"));
-  const importControl = createActionButton(asset("icons/ui/ui-import.png"));
-  const resetControl = createDangerButton(asset("icons/ui/ui-reset.png"));
+  const muteControl = createActionButton(withBase("icons/ui/ui-mute.png"));
+  const exportControl = createActionButton(withBase("icons/ui/ui-export.png"));
+  const importControl = createActionButton(withBase("icons/ui/ui-import.png"));
+  const resetControl = createDangerButton(withBase("icons/ui/ui-reset.png"));
 
-  const headerBar = document.createElement("header");
-  headerBar.className =
-    "flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/60 px-4 py-3 backdrop-blur-sm fade-in";
-
-  const brand = document.createElement("div");
-  brand.className = "flex items-center gap-3";
-
-  const mark = document.createElement("img");
-  mark.src = "./logo-leaf.svg";
-  mark.alt = "";
-  mark.className = "h-7 w-7";
-
-  const word = document.createElement("img");
-  word.src = "./logo-wordmark.svg";
-  word.alt = "CannaClicker";
-  word.className = "h-6";
-
-  brand.append(mark, word);
-
-  const controlsBar = document.createElement("div");
-  controlsBar.className = "flex flex-wrap gap-2";
-  controlsBar.append(
+  mountHeader(root, [
     muteControl.button,
     exportControl.button,
     importControl.button,
     resetControl.button,
-  );
+  ]);
 
-  headerBar.append(brand, controlsBar);
-  root.appendChild(headerBar);
-
-  const contentGrid = document.createElement("div");
-  contentGrid.className = "grid gap-4 lg:grid-cols-[1fr_1fr] xl:gap-6";
+  const layout = document.createElement("div");
+  layout.className = "grid gap-4 lg:grid-cols-[1fr_1fr] xl:gap-6";
+  root.appendChild(layout);
 
   const primaryColumn = document.createElement("div");
   primaryColumn.className = "space-y-4";
@@ -133,8 +116,7 @@ function buildUI(state: GameState): UIRefs {
   const secondaryColumn = document.createElement("div");
   secondaryColumn.className = "space-y-4";
 
-  contentGrid.append(primaryColumn, secondaryColumn);
-  root.appendChild(contentGrid);
+  layout.append(primaryColumn, secondaryColumn);
 
   const headerCard = document.createElement("section");
   headerCard.className = "card fade-in space-y-4";
@@ -154,7 +136,6 @@ function buildUI(state: GameState): UIRefs {
   const bpcStat = createStatBlock("stats.bpc", statsGrid, statsLabels);
   const totalStat = createStatBlock("stats.total", statsGrid, statsLabels);
 
-
   primaryColumn.appendChild(headerCard);
 
   const clickCard = document.createElement("section");
@@ -164,10 +145,11 @@ function buildUI(state: GameState): UIRefs {
   clickButton.className = "click-button w-full";
   clickButton.type = "button";
 
-  const clickIcon = document.createElement("img");
-  clickIcon.src = asset("icons/ui/icon-leaf-click.png");
+  const clickIcon = new Image();
+  clickIcon.src = withBase("plant-stages/plant-stage-01.png");
   clickIcon.alt = "";
   clickIcon.className = "click-icon";
+  clickIcon.dataset.stage = "1";
 
   const clickLabel = document.createElement("span");
   clickLabel.className = "click-label";
@@ -222,6 +204,33 @@ function buildUI(state: GameState): UIRefs {
   setupInteractions(uiRefs, state);
 
   return uiRefs;
+}
+
+function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
+  const header = document.createElement("header");
+  header.className = "mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3";
+
+  const brand = document.createElement("div");
+  brand.className = "flex items-center gap-3";
+
+  const leaf = new Image();
+  leaf.src = withBase("img/logo-leaf.svg");
+  leaf.alt = "";
+  leaf.className = "h-7 w-7";
+
+  const wordmark = new Image();
+  wordmark.src = withBase("img/logo-wordmark.svg");
+  wordmark.alt = "CannaClicker";
+  wordmark.className = "h-6";
+
+  brand.append(leaf, wordmark);
+
+  const actionWrap = document.createElement("div");
+  actionWrap.className = "flex flex-wrap gap-2";
+  controls.forEach((control) => actionWrap.append(control));
+
+  header.append(brand, actionWrap);
+  root.prepend(header);
 }
 
 function setupInteractions(refs: UIRefs, state: GameState): void {
@@ -340,6 +349,39 @@ function updateStrings(state: GameState): void {
   });
 }
 
+function resolvePlantStage(total: Decimal): number {
+  const totalValue = total.toNumber();
+  if (!Number.isFinite(totalValue)) {
+    return PLANT_STAGE_MAX;
+  }
+
+  let stage = 1;
+  for (let i = 0; i < PLANT_STAGE_THRESHOLDS.length; i += 1) {
+    if (totalValue >= PLANT_STAGE_THRESHOLDS[i]) {
+      stage = i + 1;
+    }
+  }
+
+  return Math.min(stage, PLANT_STAGE_MAX);
+}
+
+function updatePlantStage(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const nextStage = resolvePlantStage(state.total);
+  const currentStage = Number(refs.clickIcon.dataset.stage ?? "1");
+
+  if (currentStage === nextStage) {
+    return;
+  }
+
+  refs.clickIcon.dataset.stage = nextStage.toString();
+  const assetPath = `plant-stages/plant-stage-${nextStage.toString().padStart(2, "0")}.png`;
+  refs.clickIcon.src = withBase(assetPath);
+}
+
 function updateStats(state: GameState): void {
   if (!refs) {
     return;
@@ -349,6 +391,7 @@ function updateStats(state: GameState): void {
   refs.bps.textContent = formatDecimal(state.bps);
   refs.bpc.textContent = formatDecimal(state.bpc);
   refs.total.textContent = formatDecimal(state.total);
+  updatePlantStage(state);
 }
 
 function updateShop(state: GameState): void {
@@ -436,14 +479,12 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
 
   const buyButton = document.createElement("button");
   buyButton.type = "button";
-  buyButton.className =
-    "flex-1 rounded-lg bg-leaf-500/90 px-3 py-2 text-sm font-semibold text-neutral-900 transition hover:bg-leaf-400 focus-visible:ring-2 focus-visible:ring-leaf-300";
+  buyButton.className = "buy-btn flex-1";
   buyButton.textContent = t(state.locale, "actions.buy");
 
   const maxButton = document.createElement("button");
   maxButton.type = "button";
-  maxButton.className =
-    "rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-neutral-200 transition hover:border-leaf-400 focus-visible:ring-2 focus-visible:ring-leaf-300";
+  maxButton.className = "rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-neutral-200 transition hover:border-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300";
   maxButton.textContent = t(state.locale, "actions.max");
 
   actions.append(buyButton, maxButton);
@@ -511,21 +552,25 @@ function createDetail(wrapper: HTMLElement, labelText: string): { label: HTMLEle
   return { label, value };
 }
 
+function wrapIcon(icon: HTMLImageElement): HTMLSpanElement {
+  const wrapper = document.createElement("span");
+  wrapper.className = "icon-badge";
+  icon.classList.add("icon-img", "icon-dark");
+  wrapper.append(icon);
+  return wrapper;
+}
+
 function createActionButton(iconPath: string): ControlButtonRefs {
   const button = document.createElement("button");
   button.type = "button";
   button.className =
     "inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-neutral-200 transition hover:border-leaf-400 focus-visible:ring-2 focus-visible:ring-leaf-300";
 
-  const iconWrap = document.createElement("span");
-  iconWrap.className = "icon-badge";
-
-  const icon = document.createElement("img");
+  const icon = new Image();
   icon.src = iconPath;
   icon.alt = "";
-  icon.className = "icon-img";
 
-  iconWrap.append(icon);
+  const iconWrap = wrapIcon(icon);
 
   const label = document.createElement("span");
   label.className = "whitespace-nowrap";
@@ -534,7 +579,6 @@ function createActionButton(iconPath: string): ControlButtonRefs {
 
   return { button, icon, label };
 }
-
 function createDangerButton(iconPath: string): ControlButtonRefs {
   const control = createActionButton(iconPath);
   control.button.classList.add("hover:border-rose-400", "text-rose-300");
@@ -551,6 +595,16 @@ function announce(refs: UIRefs, total: Decimal): void {
 }
 
 export {};
+
+
+
+
+
+
+
+
+
+
 
 
 
