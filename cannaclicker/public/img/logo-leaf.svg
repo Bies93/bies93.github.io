@@ -1,7 +1,7 @@
-<![CDATA[<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <path d="M256 40C150 40 64 126 64 232C64 338 150 424 256 424C362 424 448 338 448 232C448 126 362 40 256 40Z" stroke="#2D7D32" stroke-width="8" fill="none"/>
   <path d="M256 100L256 400" stroke="#2D7D32" stroke-width="8" stroke-linecap="round"/>
   <path d="M180 150L256 200L332 150" stroke="#2D7D32" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M180 220L256 270L332 220" stroke="#2D7D32" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M180 290L256 340L332 290" stroke="#2D7D32" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>]]>
+</svg>
