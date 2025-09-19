@@ -1,18 +1,33 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   color-scheme: dark;
+  --hero-image: none;
 }
 
 body {
   @apply font-sans bg-neutral-950 text-neutral-100 selection:bg-leaf-400/40 selection:text-neutral-100;
-  background-image: radial-gradient(circle at top, rgba(74, 222, 128, 0.12), transparent 55%),
-    url('../assets/img/bg-plants.svg'), url('../assets/img/bg-noise.svg');
+  background-image:
+    radial-gradient(circle at top, rgba(74,222,128,.12), transparent 55%),
+    url('../assets/img/bg-plants.svg'),
+    url('../assets/img/bg-noise.svg');
   background-size: 160% 160%, 1200px, 512px;
   background-repeat: no-repeat, repeat, repeat;
   background-position: center top, center, center;
+}
+
+@media (min-width: 1024px) {
+  body {
+    background-image:
+      var(--hero-image),
+      radial-gradient(circle at top, rgba(74,222,128,.12), transparent 55%),
+      url('../assets/img/bg-plants.svg'),
+      url('../assets/img/bg-noise.svg');
+    background-size: cover, 160% 160%, 1200px, 512px;
+    background-position: top center, center top, center, center;
+  }
 }
 
 button {
@@ -23,20 +38,59 @@ button {
   @apply sr-only;
 }
 
+.icon-badge {
+  @apply inline-flex items-center justify-center rounded-md border border-white/10 bg-neutral-900/70 p-1 shadow-inner;
+}
+
+.icon-img {
+  @apply h-4 w-4;
+  filter: drop-shadow(0 0 0.25rem rgba(0, 0, 0, 0.35));
+}
+
+.icon-img.filter-dark {
+  filter: invert(44%) sepia(15%) saturate(878%) hue-rotate(79deg) brightness(88%);
+}
+
 .card {
-  @apply rounded-2xl border border-white/5 bg-neutral-900/70 p-4 shadow-card backdrop-blur;
+  @apply rounded-2xl border border-white/10 bg-neutral-900/50 backdrop-blur-sm p-4;
+  transition: transform 120ms;
+}
+
+.card:hover {
+  @apply border-leaf-400/40;
+  transform: translateY(-1px);
 }
 
 .click-button {
-  @apply relative flex h-48 items-center justify-center overflow-hidden rounded-3xl border border-leaf-500/40 bg-gradient-to-br from-leaf-500/40 via-leaf-500/20 to-leaf-600/40 text-2xl font-semibold text-neutral-100 transition;
+  @apply relative grid place-items-center h-52 rounded-2xl border border-white/10 bg-neutral-900/60 overflow-hidden ring-1 ring-white/5 transition;
+}
+
+.click-button::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at 50% 30%, rgba(114, 206, 123, 0.18), transparent 55%);
 }
 
 .click-button:hover {
-  @apply brightness-110;
+  @apply border-leaf-400/60 ring-leaf-300/30;
+  transform: translateY(-1px);
 }
 
 .click-button:active {
-  @apply scale-95;
+  transform: scale(0.98);
+}
+
+.click-button .click-icon {
+  @apply h-28 w-28 transition-transform;
+}
+
+.click-button:active .click-icon {
+  transform: scale(0.94);
+}
+
+.click-button .click-label {
+  @apply absolute bottom-4 left-1/2 -translate-x-1/2 text-xs uppercase tracking-[0.35em] text-white/80;
 }
 
 .fade-in {
@@ -53,3 +107,6 @@ button {
     transform: translateY(0);
   }
 }
+
+
+

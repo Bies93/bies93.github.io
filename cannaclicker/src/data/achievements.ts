@@ -41,7 +41,7 @@ export const achievements: AchievementDefinition[] = [
       en: 'Pot Master',
     },
     description: {
-      de: 'Besitze 25 TÃ¶pfe.',
+      de: 'Besitze 25 Töpfe.',
       en: 'Own 25 planters.',
     },
     requirement: {
@@ -68,4 +68,5 @@ export const achievements: AchievementDefinition[] = [
 ];
 
 export const achievementById = new Map(achievements.map((entry) => [entry.id, entry] as const));
+
 

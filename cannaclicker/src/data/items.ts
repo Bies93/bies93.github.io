@@ -57,7 +57,7 @@ export const items: ItemDefinition[] = [
       en: 'Grow Tent',
     },
     description: {
-      de: 'Kontrollierte Umgebung fÃ¼r stabile ErtrÃ¤ge.',
+      de: 'Kontrollierte Umgebung für stabile Erträge.',
       en: 'Controlled environment for steady yields.',
     },
     baseCost: 1_100,
@@ -89,11 +89,11 @@ export const items: ItemDefinition[] = [
   {
     id: 'cultivator',
     name: {
-      de: 'GÃ¤rtner',
+      de: 'Gärtner',
       en: 'Cultivator',
     },
     description: {
-      de: 'Ein Profi kÃ¼mmert sich um jede Pflanze.',
+      de: 'Ein Profi kümmert sich um jede Pflanze.',
       en: 'A professional takes care of each plant.',
     },
     baseCost: 130_000,
@@ -107,3 +107,4 @@ export const items: ItemDefinition[] = [
 ];
 
 export const itemById = new Map(items.map((item) => [item.id, item] as const));
+

@@ -83,6 +83,49 @@ function buildUI(state: GameState): UIRefs {
   }
 
   root.innerHTML = "";
+  root.className = "mx-auto flex max-w-6xl flex-col gap-4 p-4";
+
+  const heroImageSet = `image-set(url("${asset("img/bg-hero-1920.png")}") type("image/png") 1x, url("${asset("img/bg-hero-2560.png")}") type("image/png") 2x)`;
+  document.documentElement.style.setProperty("--hero-image", heroImageSet);
+
+  const muteControl = createActionButton(asset("icons/ui/ui-mute.png"));
+  const exportControl = createActionButton(asset("icons/ui/ui-export.png"));
+  const importControl = createActionButton(asset("icons/ui/ui-import.png"));
+  const resetControl = createDangerButton(asset("icons/ui/ui-reset.png"));
+
+  const headerBar = document.createElement("header");
+  headerBar.className =
+    "flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/60 px-4 py-3 backdrop-blur-sm fade-in";
+
+  const brand = document.createElement("div");
+  brand.className = "flex items-center gap-3";
+
+  const mark = document.createElement("img");
+  mark.src = "./logo-leaf.svg";
+  mark.alt = "";
+  mark.className = "h-7 w-7";
+
+  const word = document.createElement("img");
+  word.src = "./logo-wordmark.svg";
+  word.alt = "CannaClicker";
+  word.className = "h-6";
+
+  brand.append(mark, word);
+
+  const controlsBar = document.createElement("div");
+  controlsBar.className = "flex flex-wrap gap-2";
+  controlsBar.append(
+    muteControl.button,
+    exportControl.button,
+    importControl.button,
+    resetControl.button,
+  );
+
+  headerBar.append(brand, controlsBar);
+  root.appendChild(headerBar);
+
+  const contentGrid = document.createElement("div");
+  contentGrid.className = "grid gap-4 lg:grid-cols-[1fr_1fr] xl:gap-6";
 
   const primaryColumn = document.createElement("div");
   primaryColumn.className = "space-y-4";
@@ -90,7 +133,8 @@ function buildUI(state: GameState): UIRefs {
   const secondaryColumn = document.createElement("div");
   secondaryColumn.className = "space-y-4";
 
-  root.append(primaryColumn, secondaryColumn);
+  contentGrid.append(primaryColumn, secondaryColumn);
+  root.appendChild(contentGrid);
 
   const headerCard = document.createElement("section");
   headerCard.className = "card fade-in space-y-4";
@@ -110,21 +154,6 @@ function buildUI(state: GameState): UIRefs {
   const bpcStat = createStatBlock("stats.bpc", statsGrid, statsLabels);
   const totalStat = createStatBlock("stats.total", statsGrid, statsLabels);
 
-  const controlsRow = document.createElement("div");
-  controlsRow.className = "flex flex-wrap gap-2";
-  headerCard.appendChild(controlsRow);
-
-  const muteControl = createActionButton(asset("icons/ui/ui-mute.png"));
-  const exportControl = createActionButton(asset("icons/ui/ui-export.png"));
-  const importControl = createActionButton(asset("icons/ui/ui-import.png"));
-  const resetControl = createDangerButton(asset("icons/ui/ui-reset.png"));
-
-  controlsRow.append(
-    muteControl.button,
-    exportControl.button,
-    importControl.button,
-    resetControl.button
-  );
 
   primaryColumn.appendChild(headerCard);
 
@@ -138,11 +167,10 @@ function buildUI(state: GameState): UIRefs {
   const clickIcon = document.createElement("img");
   clickIcon.src = asset("icons/ui/icon-leaf-click.png");
   clickIcon.alt = "";
-  clickIcon.className = "h-28 w-28 shrink-0 transition-transform duration-200";
+  clickIcon.className = "click-icon";
 
   const clickLabel = document.createElement("span");
-  clickLabel.className =
-    "absolute bottom-4 left-1/2 -translate-x-1/2 text-sm uppercase tracking-[0.35em] text-white/80";
+  clickLabel.className = "click-label";
 
   clickButton.append(clickIcon, clickLabel);
 
@@ -200,8 +228,6 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   refs.clickButton.addEventListener("click", () => {
     const gained = handleManualClick(state);
     audio.playClick();
-    refs.clickIcon.classList.add("scale-95");
-    setTimeout(() => refs.clickIcon.classList.remove("scale-95"), 120);
     spawnFloatingValue(refs.clickButton, `+${formatDecimal(gained)}`);
     announce(refs, state.buds);
     renderUI(state);
@@ -491,15 +517,20 @@ function createActionButton(iconPath: string): ControlButtonRefs {
   button.className =
     "inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-neutral-200 transition hover:border-leaf-400 focus-visible:ring-2 focus-visible:ring-leaf-300";
 
+  const iconWrap = document.createElement("span");
+  iconWrap.className = "icon-badge";
+
   const icon = document.createElement("img");
   icon.src = iconPath;
   icon.alt = "";
-  icon.className = "h-4 w-4";
+  icon.className = "icon-img";
+
+  iconWrap.append(icon);
 
   const label = document.createElement("span");
   label.className = "whitespace-nowrap";
 
-  button.append(icon, label);
+  button.append(iconWrap, label);
 
   return { button, icon, label };
 }
@@ -520,5 +551,10 @@ function announce(refs: UIRefs, total: Decimal): void {
 }
 
 export {};
+
+
+
+
+
 
 
