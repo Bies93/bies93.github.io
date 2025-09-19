@@ -1,4 +1,4 @@
-import Decimal from "break_infinity.js";
+﻿import Decimal from "break_infinity.js";
 import {
   handleManualClick,
   buyItem,
@@ -170,7 +170,8 @@ const PLANT_STAGE_THRESHOLDS = [
   50_000_000,
 ];
 const PLANT_STAGE_MAX = PLANT_STAGE_THRESHOLDS.length - 1;
-const preloadedPlantStages = new Set<number>();
+const PLANT_STAGE_ASSET_SUFFIXES = ["01", "02", "03", "04", "05"];
+const preloadedPlantStages = new Set<string>();
 
 function appendRetinaSuffix(path: string): string {
   const queryIndex = path.indexOf("?");
@@ -259,7 +260,7 @@ function buildUI(state: GameState): UIRefs {
 
   const statsGrid = document.createElement("dl");
   statsGrid.className =
-    "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 text-sm sm:text-base text-neutral-300";
+    "stats-grid grid gap-4 xl:gap-5 text-sm sm:text-base text-neutral-300";
   headerCard.appendChild(statsGrid);
 
   const statsLabels = new Map<string, HTMLElement>();
@@ -465,7 +466,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.import.button.addEventListener("click", () => {
-    const payload = window.prompt("Bitte Base64-Spielstand einfügen:");
+    const payload = window.prompt("Bitte Base64-Spielstand einfÃ¼gen:");
     if (!payload) {
       return;
     }
@@ -484,7 +485,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.reset.button.addEventListener("click", () => {
-    const confirmReset = window.confirm("Spielstand wirklich löschen?");
+    const confirmReset = window.confirm("Spielstand wirklich lÃ¶schen?");
     if (!confirmReset) {
       return;
     }
@@ -703,18 +704,30 @@ function resolvePlantStage(total: Decimal): number {
 
 function plantStageAsset(stage: number): string {
   const clamped = Math.max(0, Math.min(stage, PLANT_STAGE_MAX));
-  return `plant-stages/plant-stage-${clamped.toString().padStart(2, "0")}.png`;
+  if (PLANT_STAGE_ASSET_SUFFIXES.length === 0) {
+    return `plant-stages/plant-stage-${clamped.toString().padStart(2, "0")}.png`;
+  }
+
+  const normalized = PLANT_STAGE_MAX > 0 ? clamped / PLANT_STAGE_MAX : 0;
+  const scaledIndex = Math.floor(normalized * PLANT_STAGE_ASSET_SUFFIXES.length);
+  const mappedIndex = Math.min(
+    PLANT_STAGE_ASSET_SUFFIXES.length - 1,
+    Number.isFinite(scaledIndex) ? scaledIndex : 0,
+  );
+  const suffix = PLANT_STAGE_ASSET_SUFFIXES[mappedIndex] ?? PLANT_STAGE_ASSET_SUFFIXES[0];
+  return `plant-stages/plant-stage-${suffix}.png`;
 }
 
 function preloadPlantStage(stage: number): void {
   const clamped = Math.max(0, Math.min(stage, PLANT_STAGE_MAX));
-  if (preloadedPlantStages.has(clamped)) {
+  const assetPath = plantStageAsset(clamped);
+  if (preloadedPlantStages.has(assetPath)) {
     return;
   }
 
   const image = new Image();
-  image.src = withBase(plantStageAsset(clamped));
-  preloadedPlantStages.add(clamped);
+  image.src = withBase(assetPath);
+  preloadedPlantStages.add(assetPath);
 }
 
 function triggerPlantStageAnimation(icon: HTMLDivElement): void {
@@ -757,7 +770,7 @@ function updateStats(state: GameState): void {
   refs.bpc.textContent = formatDecimal(state.bpc);
   refs.total.textContent = formatDecimal(state.total);
   refs.seeds.textContent = formatDecimal(state.prestige.seeds);
-  refs.prestigeMult.textContent = `${state.prestige.mult.toFixed(2)}×`;
+  refs.prestigeMult.textContent = `${state.prestige.mult.toFixed(2)}\u00D7`;
   updatePlantStage(state);
 }
 
@@ -1133,8 +1146,8 @@ function updatePrestigeModal(state: GameState): void {
   refs.prestigeModal.seedsCurrent.textContent = formatDecimal(preview.currentSeeds);
   refs.prestigeModal.seedsNext.textContent = formatDecimal(preview.potentialSeeds);
   refs.prestigeModal.seedsGain.textContent = formatDecimal(preview.gainedSeeds);
-  refs.prestigeModal.multiplierCurrent.textContent = `${preview.currentMultiplier.toFixed(2)}×`;
-  refs.prestigeModal.multiplierNext.textContent = `${preview.nextMultiplier.toFixed(2)}×`;
+  refs.prestigeModal.multiplierCurrent.textContent = `${preview.currentMultiplier.toFixed(2)}Ã—`;
+  refs.prestigeModal.multiplierNext.textContent = `${preview.nextMultiplier.toFixed(2)}Ã—`;
   refs.prestigeModal.confirmButton.disabled = preview.gainedSeeds <= 0;
 }
 
@@ -1348,13 +1361,15 @@ function createStatBlock(
   registry: Map<string, HTMLElement>,
 ): HTMLElement {
   const group = document.createElement("div");
-  group.className = "rounded-lg bg-neutral-900/40 p-3 ring-1 ring-white/5 sm:p-4";
+  group.className =
+    "rounded-2xl bg-neutral-900/40 p-4 ring-1 ring-white/5 shadow-[0_18px_38px_rgba(10,12,21,0.35)] flex flex-col justify-between gap-2 sm:p-5";
   const label = document.createElement("dt");
-  label.className = "text-[0.7rem] uppercase tracking-[0.22em] text-neutral-400";
+  label.className = "text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-400";
   registry.set(key, label);
 
   const value = document.createElement("dd");
-  value.className = "mt-2 text-2xl md:text-3xl font-bold text-neutral-100 tabular-nums drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)]";
+  value.className =
+    "text-2xl font-bold text-neutral-100 tabular-nums leading-tight drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)] sm:text-[2.4rem]";
 
   group.append(label, value);
   wrapper.appendChild(group);
@@ -1705,6 +1720,15 @@ function announce(refs: UIRefs, total: Decimal): void {
 }
 
 export {};
+
+
+
+
+
+
+
+
+
 
 
 

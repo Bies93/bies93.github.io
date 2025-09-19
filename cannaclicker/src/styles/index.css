@@ -120,6 +120,21 @@ button {
   bottom: clamp(1.75rem, 5vw, 2.75rem);
   letter-spacing: 0.45em;
 }
+.stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  align-items: stretch;
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.stats-grid > div {
+  grid-template-rows: auto 1fr;
+  min-height: 6.5rem;
+}
 
 .buy-btn {
   @apply flex h-9 items-center justify-center rounded-md bg-emerald-500 text-sm font-semibold text-neutral-900 transition hover:bg-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-50;
@@ -435,6 +450,8 @@ button {
 .toast.visible {
   @apply translate-y-0 opacity-100;
 }
+
+
 
 
 
