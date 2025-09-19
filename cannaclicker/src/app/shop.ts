@@ -4,6 +4,11 @@ import { formatDecimal, paybackSeconds } from './math';
 import type { GameState } from './state';
 import { t, type LocaleKey } from './i18n';
 
+export const SHOP_TIER_SIZE = 25;
+const SHOP_TIER_BONUS = 1.15;
+const SHOP_TIER_SOFTCAP_STAGE = 8;
+const SHOP_TIER_SOFTCAP_BONUS = 1.1;
+
 export interface ShopEntry {
   definition: ItemDefinition;
   owned: number;
@@ -11,10 +16,22 @@ export interface ShopEntry {
   nextCost: Decimal;
   formattedCost: string;
   formattedNextCost: string;
-  bpsGain: Decimal;
+  deltaBps: Decimal;
+  roi: number | null;
   payback: number | null;
   unlocked: boolean;
   affordable: boolean;
+  tier: TierInfo;
+  order: number;
+}
+
+export interface TierInfo {
+  stage: number;
+  progressCount: number;
+  remainingCount: number;
+  completion: number;
+  size: number;
+  nextThreshold: number;
 }
 
 export function getItemCost(
@@ -54,12 +71,21 @@ export function canUnlockItem(state: GameState, definition: ItemDefinition): boo
 }
 
 export function getShopEntries(state: GameState): ShopEntry[] {
-  return items.map((definition) => {
+  return items.map((definition, index) => {
     const owned = state.items[definition.id] ?? 0;
     const cost = getItemCost(definition, owned, state.temp.costMultiplier);
     const nextCost = getNextCost(definition, owned, state.temp.costMultiplier);
-    const bpsGain = new Decimal(definition.bps);
-    const payback = paybackSeconds(cost, bpsGain);
+    const tier = getTierInfo(owned);
+    const baseMultiplier = state.temp.buildingBaseMultipliers[definition.id] ?? new Decimal(1);
+    const currentTierMultiplier = getTierMultiplier(owned);
+    const nextTierMultiplier = getTierMultiplier(owned + 1);
+    const baseProduction = new Decimal(definition.bps);
+    const currentProduction = baseProduction.mul(owned).mul(baseMultiplier).mul(currentTierMultiplier);
+    const nextProduction = baseProduction.mul(owned + 1).mul(baseMultiplier).mul(nextTierMultiplier);
+    const deltaBase = nextProduction.sub(currentProduction);
+    const deltaBps = deltaBase.mul(state.temp.bpsMult);
+    const payback = paybackSeconds(cost, deltaBps);
+    const roi = deltaBps.lessThanOrEqualTo(0) ? null : Number(cost.div(deltaBps).toFixed(2));
 
     return {
       definition,
@@ -68,12 +94,50 @@ export function getShopEntries(state: GameState): ShopEntry[] {
       nextCost,
       formattedCost: formatDecimal(cost),
       formattedNextCost: formatDecimal(nextCost),
-      bpsGain,
+      deltaBps,
+      roi,
       payback,
       unlocked: canUnlockItem(state, definition),
       affordable: state.buds.greaterThanOrEqualTo(cost),
+      tier,
+      order: index,
     } satisfies ShopEntry;
   });
+}
+
+export function getTierInfo(owned: number): TierInfo {
+  const safeOwned = Number.isFinite(owned) && owned > 0 ? Math.floor(owned) : 0;
+  const tiersCompleted = Math.floor(safeOwned / SHOP_TIER_SIZE);
+  const stage = tiersCompleted + 1;
+  const progressCount = safeOwned % SHOP_TIER_SIZE;
+  const completion = SHOP_TIER_SIZE > 0 ? progressCount / SHOP_TIER_SIZE : 0;
+  const remainingCount = SHOP_TIER_SIZE - progressCount;
+  const nextThreshold = (tiersCompleted + 1) * SHOP_TIER_SIZE;
+
+  return {
+    stage,
+    progressCount,
+    remainingCount,
+    completion: Math.max(0, Math.min(1, completion)),
+    size: SHOP_TIER_SIZE,
+    nextThreshold,
+  } satisfies TierInfo;
+}
+
+export function getTierMultiplier(owned: number): Decimal {
+  const safeOwned = Number.isFinite(owned) && owned > 0 ? Math.floor(owned) : 0;
+  const tiersCompleted = Math.floor(safeOwned / SHOP_TIER_SIZE);
+  if (tiersCompleted <= 0) {
+    return new Decimal(1);
+  }
+
+  let multiplier = new Decimal(1);
+  for (let tierIndex = 1; tierIndex <= tiersCompleted; tierIndex += 1) {
+    const stepBonus = tierIndex >= SHOP_TIER_SOFTCAP_STAGE ? SHOP_TIER_SOFTCAP_BONUS : SHOP_TIER_BONUS;
+    multiplier = multiplier.mul(stepBonus);
+  }
+
+  return multiplier;
 }
 
 export function getMaxAffordable(definition: ItemDefinition, state: GameState): number {
@@ -98,5 +162,14 @@ export function formatPayback(locale: LocaleKey, value: number | null): string {
   }
 
   return t(locale, 'shop.paybackValue', { seconds: value });
+}
+
+export function formatRoi(locale: LocaleKey, value: number | null): string {
+  if (value === null || !Number.isFinite(value)) {
+    return t(locale, 'shop.roiInfinite');
+  }
+
+  const rounded = Math.max(1, Math.round(value));
+  return t(locale, 'shop.roiValue', { seconds: rounded });
 }
 

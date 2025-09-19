@@ -5,10 +5,16 @@ import {
   recalcDerivedValues,
   evaluateAchievements,
 } from "./game";
-import { getShopEntries, getMaxAffordable, formatPayback } from "./shop";
+import { getShopEntries, getMaxAffordable, formatPayback, formatRoi, type ShopEntry } from "./shop";
 import { formatDecimal } from "./math";
-import type { AbilityId, GameState } from "./state";
-import { createDefaultState } from "./state";
+import type { AbilityId, GameState, ShopSortMode } from "./state";
+import {
+  createDefaultState,
+  AUTO_BUY_ROI_MIN,
+  AUTO_BUY_ROI_MAX,
+  AUTO_BUY_RESERVE_MIN,
+  AUTO_BUY_RESERVE_MAX,
+} from "./state";
 import { createAudioManager } from "./audio";
 import { t } from "./i18n";
 import { exportSave, importSave, clearSave, save } from "./save";
@@ -39,6 +45,27 @@ interface ControlButtonRefs {
   label: HTMLSpanElement;
 }
 
+interface AutoBuyRefs {
+  container: HTMLElement;
+  title: HTMLElement;
+  enableButton: HTMLButtonElement;
+  roiLabel: HTMLElement;
+  roiToggle: HTMLButtonElement;
+  roiValue: HTMLElement;
+  roiSlider: HTMLInputElement;
+  reserveLabel: HTMLElement;
+  reserveToggle: HTMLButtonElement;
+  reserveValue: HTMLElement;
+  reserveSlider: HTMLInputElement;
+}
+
+interface ShopControlsRefs {
+  container: HTMLElement;
+  sortLabel: HTMLElement;
+  sortButtons: Map<ShopSortMode, HTMLButtonElement>;
+  autoBuy: AutoBuyRefs;
+}
+
 interface UIRefs {
   root: HTMLElement;
   title: HTMLHeadingElement;
@@ -61,6 +88,7 @@ interface UIRefs {
   };
   announcer: HTMLElement;
   shopTitle: HTMLElement;
+  shopControls: ShopControlsRefs;
   shopList: HTMLElement;
   shopEntries: Map<string, ShopCardRefs>;
   abilityTitle: HTMLElement;
@@ -79,6 +107,11 @@ interface ShopCardRefs {
   icon: HTMLImageElement;
   name: HTMLElement;
   description: HTMLElement;
+  roiBadge: HTMLElement;
+  roiValue: HTMLElement;
+  stageLabel: HTMLElement;
+  stageProgressBar: HTMLElement;
+  stageProgressText: HTMLElement;
   costLabel: HTMLElement;
   cost: HTMLElement;
   nextLabel: HTMLElement;
@@ -123,8 +156,21 @@ let lastAnnounced = new Decimal(0);
 let activeResearchFilter: ResearchFilter = "available";
 let prestigeOpen = false;
 
-const PLANT_STAGE_THRESHOLDS = [0, 100, 1000, 10000, 100000];
-const PLANT_STAGE_MAX = 5;
+const PLANT_STAGE_THRESHOLDS = [
+  0,
+  50,
+  250,
+  1_000,
+  5_000,
+  25_000,
+  100_000,
+  500_000,
+  2_500_000,
+  10_000_000,
+  50_000_000,
+];
+const PLANT_STAGE_MAX = PLANT_STAGE_THRESHOLDS.length - 1;
+const preloadedPlantStages = new Set<number>();
 
 function appendRetinaSuffix(path: string): string {
   const queryIndex = path.indexOf("?");
@@ -155,6 +201,7 @@ export function renderUI(state: GameState): void {
   updateStats(state);
   updateAbilities(state);
   updateResearch(state);
+  updateShopControls(state);
   updateShop(state);
   updatePrestigeModal(state);
   updateOfflineToast(state);
@@ -238,9 +285,11 @@ function buildUI(state: GameState): UIRefs {
   clickIcon.setAttribute("aria-hidden", "true");
   clickIcon.style.setProperty(
     "background-image",
-    `url("${withBase("plant-stages/plant-stage-01.png")}")`,
+    `url("${withBase(plantStageAsset(0))}")`,
   );
-  clickIcon.dataset.stage = "1";
+  clickIcon.dataset.stage = "0";
+  preloadPlantStage(0);
+  preloadPlantStage(1);
 
   const clickLabel = document.createElement("span");
   clickLabel.className = "click-label";
@@ -286,6 +335,9 @@ function buildUI(state: GameState): UIRefs {
   shopTitle.className = "text-xl font-semibold text-leaf-200";
   shopSection.appendChild(shopTitle);
 
+  const shopControls = createShopControls(state);
+  shopSection.appendChild(shopControls.container);
+
   const shopList = document.createElement("div");
   shopList.className = "grid gap-3";
   shopSection.appendChild(shopList);
@@ -321,6 +373,7 @@ function buildUI(state: GameState): UIRefs {
     },
     announcer,
     shopTitle,
+    shopControls,
     shopList,
     shopEntries: new Map(),
     abilityTitle,
@@ -491,6 +544,63 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
       renderUI(state);
     });
   });
+
+  refs.shopControls.sortButtons.forEach((button, mode) => {
+    button.addEventListener("click", () => {
+      if (state.preferences.shopSortMode === mode) {
+        return;
+      }
+      state.preferences.shopSortMode = mode;
+      save(state);
+      renderUI(state);
+    });
+  });
+
+  const auto = refs.shopControls.autoBuy;
+  auto.enableButton.addEventListener("click", () => {
+    state.automation.autoBuy.enabled = !state.automation.autoBuy.enabled;
+    save(state);
+    renderUI(state);
+  });
+
+  auto.roiToggle.addEventListener("click", () => {
+    state.automation.autoBuy.roi.enabled = !state.automation.autoBuy.roi.enabled;
+    save(state);
+    renderUI(state);
+  });
+
+  auto.reserveToggle.addEventListener("click", () => {
+    state.automation.autoBuy.reserve.enabled = !state.automation.autoBuy.reserve.enabled;
+    save(state);
+    renderUI(state);
+  });
+
+  auto.roiSlider.addEventListener("input", (event) => {
+    const target = event.target as HTMLInputElement;
+    const value = Number.parseInt(target.value, 10);
+    const clamped = Math.max(AUTO_BUY_ROI_MIN, Math.min(AUTO_BUY_ROI_MAX, Number.isFinite(value) ? value : AUTO_BUY_ROI_MIN));
+    state.automation.autoBuy.roi.thresholdSeconds = clamped;
+    updateShopControls(state);
+  });
+
+  auto.roiSlider.addEventListener("change", () => {
+    save(state);
+  });
+
+  auto.reserveSlider.addEventListener("input", (event) => {
+    const target = event.target as HTMLInputElement;
+    const value = Number.parseInt(target.value, 10);
+    const clamped = Math.max(
+      AUTO_BUY_RESERVE_MIN,
+      Math.min(AUTO_BUY_RESERVE_MAX, Number.isFinite(value) ? value : AUTO_BUY_RESERVE_MIN),
+    );
+    state.automation.autoBuy.reserve.percent = clamped;
+    updateShopControls(state);
+  });
+
+  auto.reserveSlider.addEventListener("change", () => {
+    save(state);
+  });
 }
 
 function attachGlobalShortcuts(): void {
@@ -573,24 +683,6 @@ function updateStrings(state: GameState): void {
   refs.prestigeModal.multiplierNextLabel.textContent = t(state.locale, "prestige.modal.nextMultiplier");
   refs.prestigeModal.confirmButton.textContent = t(state.locale, "prestige.modal.confirm");
   refs.prestigeModal.cancelButton.textContent = t(state.locale, "actions.cancel");
-
-  refs.shopEntries.forEach((entry, itemId) => {
-    const definition = itemById.get(itemId);
-    if (!definition) {
-      return;
-    }
-
-    entry.name.textContent = definition.name[state.locale];
-    entry.description.textContent = definition.description[state.locale];
-    entry.icon.alt = definition.name[state.locale];
-    entry.icon.srcset = buildItemSrcset(definition.icon);
-    entry.costLabel.textContent = t(state.locale, "shop.cost");
-    entry.nextLabel.textContent = t(state.locale, "shop.nextPrice");
-    entry.ownedLabel.textContent = t(state.locale, "shop.owned");
-    entry.paybackLabel.textContent = t(state.locale, "shop.paybackLabel");
-    entry.buyButton.textContent = t(state.locale, "actions.buy");
-    entry.maxButton.textContent = t(state.locale, "actions.max");
-  });
 }
 
 function resolvePlantStage(total: Decimal): number {
@@ -599,14 +691,37 @@ function resolvePlantStage(total: Decimal): number {
     return PLANT_STAGE_MAX;
   }
 
-  let stage = 1;
+  let stage = 0;
   for (let i = 0; i < PLANT_STAGE_THRESHOLDS.length; i += 1) {
     if (totalValue >= PLANT_STAGE_THRESHOLDS[i]) {
-      stage = i + 1;
+      stage = i;
     }
   }
 
   return Math.min(stage, PLANT_STAGE_MAX);
+}
+
+function plantStageAsset(stage: number): string {
+  const clamped = Math.max(0, Math.min(stage, PLANT_STAGE_MAX));
+  return `plant-stages/plant-stage-${clamped.toString().padStart(2, "0")}.png`;
+}
+
+function preloadPlantStage(stage: number): void {
+  const clamped = Math.max(0, Math.min(stage, PLANT_STAGE_MAX));
+  if (preloadedPlantStages.has(clamped)) {
+    return;
+  }
+
+  const image = new Image();
+  image.src = withBase(plantStageAsset(clamped));
+  preloadedPlantStages.add(clamped);
+}
+
+function triggerPlantStageAnimation(icon: HTMLDivElement): void {
+  icon.classList.add("is-upgrading");
+  window.setTimeout(() => {
+    icon.classList.remove("is-upgrading");
+  }, 600);
 }
 
 function updatePlantStage(state: GameState): void {
@@ -614,19 +729,22 @@ function updatePlantStage(state: GameState): void {
     return;
   }
 
-  const nextStage = resolvePlantStage(state.total);
-  const currentStage = Number(refs.clickIcon.dataset.stage ?? "1");
+  const nextStage = resolvePlantStage(state.prestige.lifetimeBuds);
+  const currentStage = Number(refs.clickIcon.dataset.stage ?? "0");
 
   if (currentStage === nextStage) {
     return;
   }
 
   refs.clickIcon.dataset.stage = nextStage.toString();
-  const assetPath = `plant-stages/plant-stage-${nextStage.toString().padStart(2, "0")}.png`;
+  preloadPlantStage(nextStage);
+  preloadPlantStage(nextStage + 1);
+  const assetPath = plantStageAsset(nextStage);
   refs.clickIcon.style.setProperty(
     "background-image",
     `url("${withBase(assetPath)}")`,
   );
+  triggerPlantStageAnimation(refs.clickIcon);
 }
 
 function updateStats(state: GameState): void {
@@ -649,8 +767,9 @@ function updateShop(state: GameState): void {
   }
 
   const entries = getShopEntries(state);
+  const sorted = sortShopEntries(entries, state.preferences.shopSortMode);
 
-  entries.forEach((entry) => {
+  sorted.forEach((entry) => {
     let card = refs!.shopEntries.get(entry.definition.id);
     if (!card) {
       card = createShopCard(entry.definition.id, state);
@@ -660,12 +779,39 @@ function updateShop(state: GameState): void {
     const iconPath = entry.definition.icon;
     card.icon.src = iconPath;
     card.icon.srcset = buildItemSrcset(iconPath);
+    card.icon.alt = entry.definition.name[state.locale];
+
+    card.name.textContent = entry.definition.name[state.locale];
+    card.description.textContent = entry.definition.description[state.locale];
+    card.costLabel.textContent = t(state.locale, "shop.cost");
+    card.nextLabel.textContent = t(state.locale, "shop.nextPrice");
+    card.ownedLabel.textContent = t(state.locale, "shop.owned");
+    card.paybackLabel.textContent = t(state.locale, "shop.paybackLabel");
+    card.buyButton.textContent = t(state.locale, "actions.buy");
+    card.maxButton.textContent = t(state.locale, "actions.max");
+
+    const roiText = formatRoi(state.locale, entry.roi);
+    card.roiValue.textContent = roiText;
+    card.roiBadge.dataset.variant = resolveRoiVariant(entry.roi);
+    card.roiBadge.setAttribute("aria-label", roiText);
+    card.roiBadge.setAttribute("title", roiText);
+
+    card.stageLabel.textContent = t(state.locale, "shop.stageLabel", { level: entry.tier.stage });
+    card.stageProgressText.textContent = t(state.locale, "shop.stageProgress", {
+      current: entry.tier.progressCount,
+      total: entry.tier.size,
+    });
+    const progressPercent = Math.max(0, Math.min(1, entry.tier.completion));
+    card.stageProgressBar.style.width = `${(progressPercent * 100).toFixed(2)}%`;
+
     if (entry.unlocked) {
       card.container.classList.remove("opacity-40");
+      card.container.classList.remove("is-locked");
       card.buyButton.disabled = !entry.affordable;
       card.maxButton.disabled = getMaxAffordable(entry.definition, state) === 0;
     } else {
       card.container.classList.add("opacity-40");
+      card.container.classList.add("is-locked");
       card.buyButton.disabled = true;
       card.maxButton.disabled = true;
     }
@@ -674,7 +820,70 @@ function updateShop(state: GameState): void {
     card.next.textContent = entry.formattedNextCost;
     card.owned.textContent = entry.owned.toString();
     card.payback.textContent = formatPayback(state.locale, entry.payback);
+
+    refs!.shopList.appendChild(card.container);
   });
+}
+
+function sortShopEntries(entries: ShopEntry[], mode: ShopSortMode): ShopEntry[] {
+  const sorted = [...entries];
+  sorted.sort((a, b) => {
+    if (a.unlocked !== b.unlocked) {
+      return a.unlocked ? -1 : 1;
+    }
+
+    if (mode === 'price') {
+      if (a.cost.lessThan(b.cost)) {
+        return -1;
+      }
+      if (a.cost.greaterThan(b.cost)) {
+        return 1;
+      }
+    } else if (mode === 'bps') {
+      if (a.deltaBps.greaterThan(b.deltaBps)) {
+        return -1;
+      }
+      if (a.deltaBps.lessThan(b.deltaBps)) {
+        return 1;
+      }
+    } else {
+      const roiA = a.roi ?? Number.POSITIVE_INFINITY;
+      const roiB = b.roi ?? Number.POSITIVE_INFINITY;
+      const finiteA = Number.isFinite(roiA);
+      const finiteB = Number.isFinite(roiB);
+      if (finiteA && finiteB && roiA !== roiB) {
+        return roiA - roiB;
+      }
+      if (finiteA !== finiteB) {
+        return finiteA ? -1 : 1;
+      }
+    }
+
+    if (a.cost.lessThan(b.cost)) {
+      return -1;
+    }
+    if (a.cost.greaterThan(b.cost)) {
+      return 1;
+    }
+    return a.order - b.order;
+  });
+  return sorted;
+}
+
+function resolveRoiVariant(roi: number | null): 'fast' | 'medium' | 'slow' | 'none' {
+  if (roi === null || !Number.isFinite(roi)) {
+    return 'none';
+  }
+
+  if (roi < 120) {
+    return 'fast';
+  }
+
+  if (roi <= 600) {
+    return 'medium';
+  }
+
+  return 'slow';
 }
 
 function updateAbilities(state: GameState): void {
@@ -728,6 +937,75 @@ function updateResearch(state: GameState): void {
   });
 
   renderResearchList(state);
+}
+
+function updateShopControls(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const controls = refs.shopControls;
+  controls.sortLabel.textContent = t(state.locale, "shop.sort.label");
+
+  controls.sortButtons.forEach((button, mode) => {
+    const label = t(state.locale, `shop.sort.${mode}`);
+    button.textContent = label;
+    button.setAttribute("aria-label", label);
+    const isActive = state.preferences.shopSortMode === mode;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+
+  const auto = state.automation.autoBuy;
+  controls.autoBuy.title.textContent = t(state.locale, "shop.autobuy.title");
+
+  controls.autoBuy.enableButton.textContent = auto.enabled
+    ? t(state.locale, "toggle.on")
+    : t(state.locale, "toggle.off");
+  controls.autoBuy.enableButton.classList.toggle("is-active", auto.enabled);
+  controls.autoBuy.enableButton.setAttribute("aria-pressed", auto.enabled ? "true" : "false");
+  controls.autoBuy.enableButton.setAttribute("aria-label", t(state.locale, "shop.autobuy.enable"));
+  controls.autoBuy.enableButton.setAttribute("title", t(state.locale, "shop.autobuy.enable"));
+
+  controls.autoBuy.roiLabel.textContent = t(state.locale, "shop.autobuy.roiLabel");
+  controls.autoBuy.roiToggle.textContent = auto.roi.enabled
+    ? t(state.locale, "toggle.on")
+    : t(state.locale, "toggle.off");
+  controls.autoBuy.roiToggle.classList.toggle("is-active", auto.roi.enabled);
+  controls.autoBuy.roiToggle.disabled = !auto.enabled;
+  controls.autoBuy.roiToggle.setAttribute("aria-pressed", auto.roi.enabled ? "true" : "false");
+  controls.autoBuy.roiToggle.setAttribute("aria-label", t(state.locale, "shop.autobuy.roiLabel"));
+  controls.autoBuy.roiToggle.setAttribute("title", t(state.locale, "shop.autobuy.roiLabel"));
+
+  const roiValue = Math.max(AUTO_BUY_ROI_MIN, Math.min(AUTO_BUY_ROI_MAX, Math.round(auto.roi.thresholdSeconds)));
+  controls.autoBuy.roiValue.textContent = t(state.locale, "shop.autobuy.roiValue", { seconds: roiValue });
+  controls.autoBuy.roiSlider.value = roiValue.toString();
+  controls.autoBuy.roiSlider.disabled = !auto.enabled || !auto.roi.enabled;
+  controls.autoBuy.roiSlider.setAttribute("aria-valuenow", roiValue.toString());
+  controls.autoBuy.roiSlider.setAttribute("aria-valuemin", AUTO_BUY_ROI_MIN.toString());
+  controls.autoBuy.roiSlider.setAttribute("aria-valuemax", AUTO_BUY_ROI_MAX.toString());
+  controls.autoBuy.roiSlider.setAttribute("aria-label", t(state.locale, "shop.autobuy.roiLabel"));
+
+  controls.autoBuy.reserveLabel.textContent = t(state.locale, "shop.autobuy.reserveLabel");
+  controls.autoBuy.reserveToggle.textContent = auto.reserve.enabled
+    ? t(state.locale, "toggle.on")
+    : t(state.locale, "toggle.off");
+  controls.autoBuy.reserveToggle.classList.toggle("is-active", auto.reserve.enabled);
+  controls.autoBuy.reserveToggle.disabled = !auto.enabled;
+  controls.autoBuy.reserveToggle.setAttribute("aria-pressed", auto.reserve.enabled ? "true" : "false");
+  controls.autoBuy.reserveToggle.setAttribute("aria-label", t(state.locale, "shop.autobuy.reserveLabel"));
+  controls.autoBuy.reserveToggle.setAttribute("title", t(state.locale, "shop.autobuy.reserveLabel"));
+
+  const reserveValue = Math.max(AUTO_BUY_RESERVE_MIN, Math.min(AUTO_BUY_RESERVE_MAX, Math.round(auto.reserve.percent)));
+  controls.autoBuy.reserveValue.textContent = t(state.locale, "shop.autobuy.reserveValue", { percent: reserveValue });
+  controls.autoBuy.reserveSlider.value = reserveValue.toString();
+  controls.autoBuy.reserveSlider.disabled = !auto.enabled || !auto.reserve.enabled;
+  controls.autoBuy.reserveSlider.setAttribute("aria-valuenow", reserveValue.toString());
+  controls.autoBuy.reserveSlider.setAttribute("aria-valuemin", AUTO_BUY_RESERVE_MIN.toString());
+  controls.autoBuy.reserveSlider.setAttribute("aria-valuemax", AUTO_BUY_RESERVE_MAX.toString());
+  controls.autoBuy.reserveSlider.setAttribute("aria-label", t(state.locale, "shop.autobuy.reserveLabel"));
+
+  controls.autoBuy.container.classList.toggle("is-disabled", !auto.enabled);
 }
 
 function renderResearchList(state: GameState): void {
@@ -937,8 +1215,11 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
   const info = document.createElement("div");
   info.className = "flex flex-col gap-3";
 
+  const headerRow = document.createElement("div");
+  headerRow.className = "flex items-start justify-between gap-3";
+
   const titleWrap = document.createElement("div");
-  titleWrap.className = "space-y-1";
+  titleWrap.className = "space-y-1 flex-1";
 
   const name = document.createElement("h3");
   name.className = "text-lg font-semibold text-neutral-100";
@@ -950,7 +1231,35 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
   description.textContent = definition.description[state.locale];
   titleWrap.appendChild(description);
 
-  info.appendChild(titleWrap);
+  const roiBadge = document.createElement("span");
+  roiBadge.className = "roi-badge";
+
+  const roiValue = document.createElement("span");
+  roiValue.className = "roi-badge__value";
+  roiBadge.appendChild(roiValue);
+
+  headerRow.append(titleWrap, roiBadge);
+  info.appendChild(headerRow);
+
+  const tierHeader = document.createElement("div");
+  tierHeader.className = "tier-header";
+
+  const stageLabel = document.createElement("span");
+  stageLabel.className = "tier-label";
+  tierHeader.appendChild(stageLabel);
+
+  const stageProgressText = document.createElement("span");
+  stageProgressText.className = "tier-progress-text";
+  tierHeader.appendChild(stageProgressText);
+
+  const progressTrack = document.createElement("div");
+  progressTrack.className = "tier-progress-track";
+
+  const progressBar = document.createElement("div");
+  progressBar.className = "tier-progress-bar";
+  progressTrack.appendChild(progressBar);
+
+  info.append(tierHeader, progressTrack);
 
   const details = document.createElement("dl");
   details.className = "grid grid-cols-2 gap-x-4 gap-y-1 text-sm opacity-90";
@@ -1016,6 +1325,11 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
     icon,
     name,
     description,
+    roiBadge,
+    roiValue,
+    stageLabel,
+    stageProgressBar: progressBar,
+    stageProgressText,
     costLabel: cost.label,
     cost: cost.value,
     nextLabel: next.label,
@@ -1161,6 +1475,143 @@ function createResearchSection(): {
   section.appendChild(list);
 
   return { section, title, filters, list };
+}
+
+function createShopControls(state: GameState): ShopControlsRefs {
+  const container = document.createElement("div");
+  container.className =
+    "shop-controls flex flex-col gap-4 rounded-xl border border-white/5 bg-neutral-900/40 p-4 sm:flex-row sm:items-end sm:justify-between";
+
+  const sortGroup = document.createElement("div");
+  sortGroup.className = "flex flex-col gap-2";
+
+  const sortLabel = document.createElement("span");
+  sortLabel.className = "text-[0.65rem] uppercase tracking-[0.35em] text-neutral-400";
+  sortGroup.appendChild(sortLabel);
+
+  const sortButtonsWrap = document.createElement("div");
+  sortButtonsWrap.className = "segmented-control";
+  const sortButtons = new Map<ShopSortMode, HTMLButtonElement>();
+  (['price', 'bps', 'roi'] as ShopSortMode[]).forEach((mode) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.mode = mode;
+    button.className = "segmented-control__option";
+    sortButtonsWrap.appendChild(button);
+    sortButtons.set(mode, button);
+  });
+  sortGroup.appendChild(sortButtonsWrap);
+
+  const autoBuy = createAutoBuyPanel(state);
+
+  container.append(sortGroup, autoBuy.container);
+
+  return { container, sortLabel, sortButtons, autoBuy } satisfies ShopControlsRefs;
+}
+
+function createAutoBuyPanel(state: GameState): AutoBuyRefs {
+  const container = document.createElement("div");
+  container.className = "auto-buy-card space-y-3";
+
+  const header = document.createElement("div");
+  header.className = "flex items-center justify-between gap-3";
+
+  const title = document.createElement("h3");
+  title.className = "text-xs font-semibold uppercase tracking-[0.4em] text-neutral-300";
+  header.appendChild(title);
+
+  const enableButton = document.createElement("button");
+  enableButton.type = "button";
+  enableButton.className = "toggle-button";
+  header.appendChild(enableButton);
+
+  container.appendChild(header);
+
+  const roiBlock = document.createElement("div");
+  roiBlock.className = "auto-buy-option";
+
+  const roiHeader = document.createElement("div");
+  roiHeader.className = "flex items-center justify-between gap-2";
+
+  const roiLabel = document.createElement("span");
+  roiLabel.className = "auto-buy-label";
+  roiHeader.appendChild(roiLabel);
+
+  const roiControls = document.createElement("div");
+  roiControls.className = "flex items-center gap-2";
+
+  const roiValue = document.createElement("span");
+  roiValue.className = "auto-buy-value";
+  roiControls.appendChild(roiValue);
+
+  const roiToggle = document.createElement("button");
+  roiToggle.type = "button";
+  roiToggle.className = "toggle-button";
+  roiControls.appendChild(roiToggle);
+
+  roiHeader.appendChild(roiControls);
+  roiBlock.appendChild(roiHeader);
+
+  const roiSlider = document.createElement("input");
+  roiSlider.type = "range";
+  roiSlider.className = "range-input";
+  roiSlider.min = AUTO_BUY_ROI_MIN.toString();
+  roiSlider.max = AUTO_BUY_ROI_MAX.toString();
+  roiSlider.step = "10";
+  roiSlider.value = state.automation.autoBuy.roi.thresholdSeconds.toString();
+  roiBlock.appendChild(roiSlider);
+
+  container.appendChild(roiBlock);
+
+  const reserveBlock = document.createElement("div");
+  reserveBlock.className = "auto-buy-option";
+
+  const reserveHeader = document.createElement("div");
+  reserveHeader.className = "flex items-center justify-between gap-2";
+
+  const reserveLabel = document.createElement("span");
+  reserveLabel.className = "auto-buy-label";
+  reserveHeader.appendChild(reserveLabel);
+
+  const reserveControls = document.createElement("div");
+  reserveControls.className = "flex items-center gap-2";
+
+  const reserveValue = document.createElement("span");
+  reserveValue.className = "auto-buy-value";
+  reserveControls.appendChild(reserveValue);
+
+  const reserveToggle = document.createElement("button");
+  reserveToggle.type = "button";
+  reserveToggle.className = "toggle-button";
+  reserveControls.appendChild(reserveToggle);
+
+  reserveHeader.appendChild(reserveControls);
+  reserveBlock.appendChild(reserveHeader);
+
+  const reserveSlider = document.createElement("input");
+  reserveSlider.type = "range";
+  reserveSlider.className = "range-input";
+  reserveSlider.min = AUTO_BUY_RESERVE_MIN.toString();
+  reserveSlider.max = AUTO_BUY_RESERVE_MAX.toString();
+  reserveSlider.step = "1";
+  reserveSlider.value = state.automation.autoBuy.reserve.percent.toString();
+  reserveBlock.appendChild(reserveSlider);
+
+  container.appendChild(reserveBlock);
+
+  return {
+    container,
+    title,
+    enableButton,
+    roiLabel,
+    roiToggle,
+    roiValue,
+    roiSlider,
+    reserveLabel,
+    reserveToggle,
+    reserveValue,
+    reserveSlider,
+  } satisfies AutoBuyRefs;
 }
 
 function createPrestigeModal(): PrestigeModalRefs {

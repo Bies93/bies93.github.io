@@ -1,7 +1,7 @@
 import Decimal from 'break_infinity.js';
 import { DEFAULT_LOCALE, type LocaleKey } from './i18n';
 
-export const SAVE_VERSION = 2 as const;
+export const SAVE_VERSION = 3 as const;
 
 export type DecimalLike = Decimal | number | string | null | undefined;
 
@@ -30,9 +30,56 @@ export interface TempState {
   overdriveDurationMult: number;
   offlineBuds: Decimal | null;
   offlineDuration: number;
+  buildingBaseMultipliers: Record<string, Decimal>;
+  buildingTierMultipliers: Record<string, Decimal>;
 }
 
-export interface SaveV2 {
+export type ShopSortMode = 'price' | 'bps' | 'roi';
+
+export interface PreferencesState {
+  shopSortMode: ShopSortMode;
+}
+
+export interface AutoBuyRoiConfig {
+  enabled: boolean;
+  thresholdSeconds: number;
+}
+
+export interface AutoBuyReserveConfig {
+  enabled: boolean;
+  percent: number;
+}
+
+export interface AutoBuyState {
+  enabled: boolean;
+  roi: AutoBuyRoiConfig;
+  reserve: AutoBuyReserveConfig;
+}
+
+export interface AutomationState {
+  autoBuy: AutoBuyState;
+}
+
+export const AUTO_BUY_ROI_MIN = 60;
+export const AUTO_BUY_ROI_MAX = 600;
+export const AUTO_BUY_RESERVE_MIN = 0;
+export const AUTO_BUY_RESERVE_MAX = 30;
+
+export function createDefaultPreferences(): PreferencesState {
+  return { shopSortMode: 'price' } satisfies PreferencesState;
+}
+
+export function createDefaultAutomation(): AutomationState {
+  return {
+    autoBuy: {
+      enabled: false,
+      roi: { enabled: false, thresholdSeconds: 180 },
+      reserve: { enabled: false, percent: 0 },
+    },
+  } satisfies AutomationState;
+}
+
+export interface SaveV3 {
   v: typeof SAVE_VERSION;
   buds: Decimal;
   total: Decimal;
@@ -46,9 +93,11 @@ export interface SaveV2 {
   abilities: AbilityState;
   time: number;
   lastSeenAt: number;
+  preferences: PreferencesState;
+  automation: AutomationState;
 }
 
-export interface GameState extends SaveV2 {
+export interface GameState extends SaveV3 {
   locale: LocaleKey;
   muted: boolean;
   lastTick: number;
@@ -62,6 +111,9 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
     overdrive: { active: false, endsAt: 0, readyAt: now },
     burst_click: { active: false, endsAt: 0, readyAt: now },
   } satisfies AbilityState;
+
+  const defaultPreferences = createDefaultPreferences();
+  const defaultAutomation = createDefaultAutomation();
 
   return {
     v: SAVE_VERSION,
@@ -82,6 +134,8 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
     abilities: defaultAbilities,
     time: now,
     lastSeenAt: now,
+    preferences: defaultPreferences,
+    automation: defaultAutomation,
     locale: DEFAULT_LOCALE,
     muted: false,
     lastTick,
@@ -93,6 +147,8 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       overdriveDurationMult: 1,
       offlineBuds: null,
       offlineDuration: 0,
+      buildingBaseMultipliers: {},
+      buildingTierMultipliers: {},
     },
     ...partial,
   } satisfies GameState;

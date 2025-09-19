@@ -2,7 +2,7 @@ import Decimal from 'break_infinity.js';
 import { itemById } from '../data/items';
 import { achievements } from '../data/achievements';
 import { upgrades } from '../data/upgrades';
-import { getItemCost } from './shop';
+import { getItemCost, getTierMultiplier } from './shop';
 import type { GameState } from './state';
 import { sum, toDecimal } from './math';
 import { collectResearchBonuses } from './research';
@@ -21,6 +21,8 @@ export function recalcDerivedValues(state: GameState): void {
   state.temp.costMultiplier = researchBonuses.costMultiplier;
   state.temp.autoClickRate = researchBonuses.autoClickRate;
   state.temp.overdriveDurationMult = researchBonuses.overdriveDurationMult;
+  state.temp.buildingBaseMultipliers = {};
+  state.temp.buildingTierMultipliers = {};
 
   const abilityBpsMult = new Decimal(abilityMultiplier(state, 'overdrive'));
   const abilityBpcMult = new Decimal(abilityMultiplier(state, 'burst_click'));
@@ -29,12 +31,17 @@ export function recalcDerivedValues(state: GameState): void {
 
   const buildingProduction = Array.from(itemById.entries()).map(([id, definition]) => {
     const owned = state.items[id] ?? 0;
+    const baseMultiplier = buildingMultipliers.get(id) ?? new Decimal(1);
+    const tierMultiplier = getTierMultiplier(owned);
+    state.temp.buildingBaseMultipliers[id] = baseMultiplier;
+    state.temp.buildingTierMultipliers[id] = tierMultiplier;
+
     if (!owned) {
       return new Decimal(0);
     }
 
-    const multiplier = buildingMultipliers.get(id) ?? new Decimal(1);
-    return new Decimal(definition.bps).mul(owned).mul(multiplier);
+    const totalMultiplier = baseMultiplier.mul(tierMultiplier);
+    return new Decimal(definition.bps).mul(owned).mul(totalMultiplier);
   });
 
   const achievementMultiplier = collectAchievementMultiplier(state);

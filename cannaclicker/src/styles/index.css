@@ -198,6 +198,125 @@ button {
   @apply border-emerald-400/40 text-neutral-100;
 }
 
+.segmented-control {
+  @apply inline-flex items-center gap-1 rounded-full border border-white/10 bg-neutral-900/50 p-1 shadow-inner;
+}
+
+.segmented-control__option {
+  @apply rounded-full px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-400 transition;
+}
+
+.segmented-control__option:hover {
+  @apply text-neutral-100;
+}
+
+.segmented-control__option.is-active {
+  @apply bg-emerald-500/20 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.35)];
+}
+
+.auto-buy-card {
+  @apply flex-1 rounded-xl border border-white/10 bg-neutral-900/40 p-4 shadow-inner backdrop-blur-sm transition;
+}
+
+.auto-buy-card.is-disabled {
+  @apply opacity-70;
+}
+
+.auto-buy-option {
+  @apply space-y-2;
+}
+
+.auto-buy-label {
+  @apply text-[0.65rem] uppercase tracking-[0.35em] text-neutral-400;
+}
+
+.auto-buy-value {
+  @apply text-sm font-semibold text-neutral-200;
+}
+
+.toggle-button {
+  @apply inline-flex items-center justify-center rounded-full border border-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-300 transition;
+}
+
+.toggle-button:hover:not(:disabled) {
+  @apply border-emerald-400/50 text-neutral-100;
+}
+
+.toggle-button.is-active {
+  @apply border-emerald-400/60 bg-emerald-500/15 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.3)];
+}
+
+.toggle-button:disabled {
+  @apply cursor-not-allowed opacity-50;
+}
+
+.range-input {
+  @apply w-full accent-emerald-400;
+}
+
+.tier-header {
+  @apply flex items-center justify-between text-[0.7rem] uppercase tracking-[0.25em] text-neutral-400;
+}
+
+.tier-label {
+  @apply font-semibold text-neutral-300;
+}
+
+.tier-progress-text {
+  @apply font-medium text-neutral-300;
+}
+
+.tier-progress-track {
+  @apply h-1.5 w-full overflow-hidden rounded-full bg-neutral-800/80;
+}
+
+.tier-progress-bar {
+  @apply h-full w-0 rounded-full bg-gradient-to-r from-emerald-400/70 to-lime-300/70 transition-[width];
+}
+
+.roi-badge {
+  @apply inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-300 transition;
+}
+
+.roi-badge__value {
+  @apply text-sm font-semibold tracking-normal;
+}
+
+.roi-badge[data-variant='fast'] {
+  @apply border-emerald-400/60 bg-emerald-500/15 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.3)];
+}
+
+.roi-badge[data-variant='medium'] {
+  @apply border-amber-400/60 bg-amber-500/15 text-amber-200;
+}
+
+.roi-badge[data-variant='slow'] {
+  @apply border-rose-400/60 bg-rose-500/15 text-rose-200;
+}
+
+.roi-badge[data-variant='none'] {
+  @apply border-white/15 bg-neutral-800/60 text-neutral-400;
+}
+
+.click-icon.is-upgrading {
+  animation: plantGlow 600ms ease-out;
+}
+
+@keyframes plantGlow {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 22px 40px rgba(52, 211, 153, 0.45));
+  }
+  45% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 28px 48px rgba(74, 222, 128, 0.65));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 22px 40px rgba(52, 211, 153, 0.45));
+  }
+}
+
 .filter-pill.is-active {
   @apply border-emerald-400/60 bg-emerald-500/20 text-emerald-200;
 }
