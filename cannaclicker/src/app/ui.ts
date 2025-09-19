@@ -216,43 +216,41 @@ function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
 
   const brand = document.createElement("div");
   brand.className =
-    "flex items-center gap-5 rounded-2xl bg-neutral-900/60 px-4 py-3 shadow-[0_18px_32px_rgba(16,185,129,0.25)] ring-1 ring-emerald-400/25 backdrop-blur";
+    "flex items-center gap-6 rounded-2xl bg-neutral-900/60 px-5 py-4 shadow-[0_18px_32px_rgba(16,185,129,0.25)] ring-1 ring-emerald-400/25 backdrop-blur";
 
   const leafWrap = document.createElement("span");
   leafWrap.className =
-    "relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-400/30 via-emerald-500/20 to-emerald-700/30 shadow-[0_0_32px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400/30";
+    "relative grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-emerald-400/30 via-emerald-500/20 to-emerald-700/30 shadow-[0_0_32px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400/30";
 
   const leaf = new Image();
   leaf.src = withBase("img/logo-leaf.svg");
   leaf.alt = "";
   leaf.decoding = "async";
-  leaf.className = "h-9 w-9 drop-shadow-[0_10px_22px_rgba(16,185,129,0.55)]";
+  leaf.className = "h-11 w-11 drop-shadow-[0_10px_22px_rgba(16,185,129,0.55)]";
 
   leafWrap.appendChild(leaf);
 
   const brandText = document.createElement("div");
-  brandText.className = "flex flex-col";
+  brandText.className = "flex flex-col justify-center";
 
   const wordmark = new Image();
   wordmark.src = withBase("img/logo-wordmark.svg");
   wordmark.alt = "CannaClicker";
   wordmark.decoding = "async";
   wordmark.className =
-    "h-10 w-auto drop-shadow-[0_14px_28px_rgba(34,197,94,0.45)] saturate-150";
+    "h-12 w-auto drop-shadow-[0_18px_32px_rgba(34,197,94,0.45)] saturate-150";
 
-  const brandSubtitle = document.createElement("span");
-  brandSubtitle.textContent = "Galaktischer Grow-Simulator";
-  brandSubtitle.className =
-    "mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.5em] text-emerald-200/80";
-
-  brandText.append(wordmark, brandSubtitle);
+  brandText.append(wordmark);
 
   brand.append(leafWrap, brandText);
 
   const actionWrap = document.createElement("div");
   actionWrap.className =
-    "flex flex-wrap items-center gap-3 rounded-2xl bg-neutral-900/50 px-3 py-2.5 shadow-[0_20px_38px_rgba(15,23,42,0.45)] ring-1 ring-white/10 backdrop-blur";
-  controls.forEach((control) => actionWrap.append(control));
+    "flex flex-nowrap items-center gap-2 overflow-x-auto rounded-2xl bg-neutral-900/50 px-3 py-2 shadow-[0_20px_38px_rgba(15,23,42,0.45)] ring-1 ring-white/10 backdrop-blur sm:px-4";
+  controls.forEach((control) => {
+    control.classList.add("shrink-0");
+    actionWrap.append(control);
+  });
 
   header.append(brand, actionWrap);
   root.prepend(header);
@@ -283,7 +281,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.import.button.addEventListener("click", () => {
-    const payload = window.prompt("Bitte Base64-Spielstand einfügen:");
+    const payload = window.prompt("Bitte Base64-Spielstand einfÃ¼gen:");
     if (!payload) {
       return;
     }
@@ -302,7 +300,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.reset.button.addEventListener("click", () => {
-    const confirmReset = window.confirm("Spielstand wirklich löschen?");
+    const confirmReset = window.confirm("Spielstand wirklich lÃ¶schen?");
     if (!confirmReset) {
       return;
     }
@@ -592,7 +590,7 @@ function createActionButton(iconPath: string): ControlButtonRefs {
   const button = document.createElement("button");
   button.type = "button";
   button.className =
-    "inline-flex items-center gap-3 rounded-xl border border-white/15 bg-neutral-900/60 px-4 py-2.5 text-sm font-semibold text-neutral-100 shadow-[0_6px_20px_rgba(15,23,42,0.45)] transition hover:border-leaf-400/70 hover:text-leaf-100 focus-visible:ring-2 focus-visible:ring-leaf-300/70";
+    "inline-flex items-center gap-2 rounded-lg border border-white/15 bg-neutral-900/60 px-3 py-1.5 text-xs font-semibold text-neutral-100 shadow-[0_6px_16px_rgba(15,23,42,0.4)] transition hover:border-leaf-400/70 hover:text-leaf-100 focus-visible:ring-2 focus-visible:ring-leaf-300/70";
 
   const icon = new Image();
   icon.src = iconPath;
@@ -604,7 +602,7 @@ function createActionButton(iconPath: string): ControlButtonRefs {
   icon.classList.add("control-icon-img");
 
   const label = document.createElement("span");
-  label.className = "whitespace-nowrap uppercase tracking-[0.25em]";
+  label.className = "whitespace-nowrap text-[0.65rem] uppercase tracking-[0.35em]";
 
   button.append(iconWrap, label);
 
