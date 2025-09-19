@@ -7,7 +7,7 @@ import {
 } from "./game";
 import { getShopEntries, getMaxAffordable, formatPayback } from "./shop";
 import { formatDecimal } from "./math";
-import type { GameState } from "./state";
+import type { AbilityId, GameState } from "./state";
 import { createDefaultState } from "./state";
 import { createAudioManager } from "./audio";
 import { t } from "./i18n";
@@ -16,6 +16,22 @@ import { spawnFloatingValue } from "./effects";
 import { asset } from "./assets";
 import { withBase } from "./paths";
 import { itemById } from "../data/items";
+import {
+  activateAbility,
+  formatAbilityTooltip,
+  getAbilityDefinition,
+  getAbilityProgress,
+  isAbilityReady,
+  listAbilities,
+} from "./abilities";
+import {
+  getResearchList,
+  purchaseResearch,
+  type ResearchFilter,
+  getResearchNode,
+  type ResearchViewModel,
+} from "./research";
+import { getPrestigePreview, performPrestige } from "./prestige";
 
 interface ControlButtonRefs {
   button: HTMLButtonElement;
@@ -31,6 +47,8 @@ interface UIRefs {
   bps: HTMLElement;
   bpc: HTMLElement;
   total: HTMLElement;
+  seeds: HTMLElement;
+  prestigeMult: HTMLElement;
   clickButton: HTMLButtonElement;
   clickLabel: HTMLSpanElement;
   clickIcon: HTMLDivElement;
@@ -39,11 +57,21 @@ interface UIRefs {
     export: ControlButtonRefs;
     import: ControlButtonRefs;
     reset: ControlButtonRefs;
+    prestige: ControlButtonRefs;
   };
   announcer: HTMLElement;
   shopTitle: HTMLElement;
   shopList: HTMLElement;
   shopEntries: Map<string, ShopCardRefs>;
+  abilityTitle: HTMLElement;
+  abilityList: Map<string, AbilityButtonRefs>;
+  research: {
+    title: HTMLElement;
+    filters: Map<string, HTMLButtonElement>;
+    list: HTMLElement;
+  };
+  prestigeModal: PrestigeModalRefs;
+  toastContainer: HTMLElement;
 }
 
 interface ShopCardRefs {
@@ -63,9 +91,37 @@ interface ShopCardRefs {
   maxButton: HTMLButtonElement;
 }
 
+interface AbilityButtonRefs {
+  container: HTMLButtonElement;
+  label: HTMLElement;
+  progressBar: HTMLElement;
+  status: HTMLElement;
+}
+
+interface PrestigeModalRefs {
+  overlay: HTMLElement;
+  dialog: HTMLDivElement;
+  title: HTMLElement;
+  warning: HTMLElement;
+  seedsCurrent: HTMLElement;
+  seedsNext: HTMLElement;
+  seedsGain: HTMLElement;
+  multiplierCurrent: HTMLElement;
+  multiplierNext: HTMLElement;
+  seedsCurrentLabel: HTMLElement;
+  seedsNextLabel: HTMLElement;
+  seedsGainLabel: HTMLElement;
+  multiplierCurrentLabel: HTMLElement;
+  multiplierNextLabel: HTMLElement;
+  confirmButton: HTMLButtonElement;
+  cancelButton: HTMLButtonElement;
+}
+
 let refs: UIRefs | null = null;
 let audio = createAudioManager(false);
 let lastAnnounced = new Decimal(0);
+let activeResearchFilter: ResearchFilter = "available";
+let prestigeOpen = false;
 
 const PLANT_STAGE_THRESHOLDS = [0, 100, 1000, 10000, 100000];
 const PLANT_STAGE_MAX = 5;
@@ -97,7 +153,11 @@ export function renderUI(state: GameState): void {
 
   updateStrings(state);
   updateStats(state);
+  updateAbilities(state);
+  updateResearch(state);
   updateShop(state);
+  updatePrestigeModal(state);
+  updateOfflineToast(state);
 }
 
 function buildUI(state: GameState): UIRefs {
@@ -118,11 +178,15 @@ function buildUI(state: GameState): UIRefs {
   const exportControl = createActionButton(withBase("icons/ui/ui-export.png"));
   const importControl = createActionButton(withBase("icons/ui/ui-import.png"));
   const resetControl = createDangerButton(withBase("icons/ui/ui-reset.png"));
+  const prestigeControl = createActionButton(withBase("icons/ui/ui-save.png"));
+  prestigeControl.button.classList.add("text-amber-200");
+  prestigeControl.button.classList.add("hover:border-amber-400/60", "hover:bg-amber-900/40");
 
   mountHeader(root, [
     muteControl.button,
     exportControl.button,
     importControl.button,
+    prestigeControl.button,
     resetControl.button,
   ]);
 
@@ -147,7 +211,8 @@ function buildUI(state: GameState): UIRefs {
   headerCard.appendChild(title);
 
   const statsGrid = document.createElement("dl");
-  statsGrid.className = "grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-sm sm:text-base text-neutral-300";
+  statsGrid.className =
+    "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 text-sm sm:text-base text-neutral-300";
   headerCard.appendChild(statsGrid);
 
   const statsLabels = new Map<string, HTMLElement>();
@@ -156,6 +221,8 @@ function buildUI(state: GameState): UIRefs {
   const bpsStat = createStatBlock("stats.bps", statsGrid, statsLabels);
   const bpcStat = createStatBlock("stats.bpc", statsGrid, statsLabels);
   const totalStat = createStatBlock("stats.total", statsGrid, statsLabels);
+  const seedsStat = createStatBlock("stats.seeds", statsGrid, statsLabels);
+  const prestigeStat = createStatBlock("stats.prestigeMult", statsGrid, statsLabels);
 
   primaryColumn.appendChild(headerCard);
 
@@ -189,6 +256,29 @@ function buildUI(state: GameState): UIRefs {
 
   primaryColumn.appendChild(clickCard);
 
+  const abilitySection = document.createElement("section");
+  abilitySection.className = "card fade-in space-y-4";
+
+  const abilityTitle = document.createElement("h2");
+  abilityTitle.className = "text-xl font-semibold text-leaf-200";
+  abilitySection.appendChild(abilityTitle);
+
+  const abilityGrid = document.createElement("div");
+  abilityGrid.className = "ability-grid";
+  abilitySection.appendChild(abilityGrid);
+
+  const abilityRefs = new Map<string, AbilityButtonRefs>();
+  for (const ability of listAbilities()) {
+    const abilityButton = createAbilityButton(ability.id, state);
+    abilityRefs.set(ability.id, abilityButton);
+    abilityGrid.appendChild(abilityButton.container);
+  }
+
+  primaryColumn.appendChild(abilitySection);
+
+  const research = createResearchSection();
+  secondaryColumn.appendChild(research.section);
+
   const shopSection = document.createElement("section");
   shopSection.className = "card fade-in space-y-4";
 
@@ -202,6 +292,13 @@ function buildUI(state: GameState): UIRefs {
 
   secondaryColumn.appendChild(shopSection);
 
+  const toastContainer = document.createElement("div");
+  toastContainer.className = "toast-stack";
+  root.appendChild(toastContainer);
+
+  const prestigeModal = createPrestigeModal();
+  root.appendChild(prestigeModal.overlay);
+
   const uiRefs: UIRefs = {
     root,
     title,
@@ -210,6 +307,8 @@ function buildUI(state: GameState): UIRefs {
     bps: bpsStat,
     bpc: bpcStat,
     total: totalStat,
+    seeds: seedsStat,
+    prestigeMult: prestigeStat,
     clickButton,
     clickLabel,
     clickIcon,
@@ -218,11 +317,21 @@ function buildUI(state: GameState): UIRefs {
       export: exportControl,
       import: importControl,
       reset: resetControl,
+      prestige: prestigeControl,
     },
     announcer,
     shopTitle,
     shopList,
     shopEntries: new Map(),
+    abilityTitle,
+    abilityList: abilityRefs,
+    research: {
+      title: research.title,
+      filters: research.filters,
+      list: research.list,
+    },
+    prestigeModal,
+    toastContainer,
   };
 
   setupInteractions(uiRefs, state);
@@ -334,6 +443,54 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
     evaluateAchievements(state);
     renderUI(state);
   });
+
+  refs.controls.prestige.button.addEventListener("click", () => {
+    openPrestigeModal(state);
+  });
+
+  refs.prestigeModal.cancelButton.addEventListener("click", () => {
+    closePrestigeModal();
+  });
+
+  refs.prestigeModal.confirmButton.addEventListener("click", () => {
+    const preview = getPrestigePreview(state);
+    if (preview.gainedSeeds <= 0) {
+      return;
+    }
+
+    performPrestige(state);
+    recalcDerivedValues(state);
+    evaluateAchievements(state);
+    closePrestigeModal();
+    renderUI(state);
+  });
+
+  refs.prestigeModal.overlay.addEventListener("click", (event) => {
+    if (event.target === refs?.prestigeModal.overlay) {
+      closePrestigeModal();
+    }
+  });
+
+  refs.abilityList.forEach((abilityRefs, abilityId) => {
+    abilityRefs.container.addEventListener("click", () => {
+      const activated = activateAbility(state, abilityId as AbilityId);
+      if (activated) {
+        audio.playPurchase();
+        recalcDerivedValues(state);
+        renderUI(state);
+      }
+    });
+  });
+
+  refs.research.filters.forEach((button, key) => {
+    button.addEventListener("click", () => {
+      if (activeResearchFilter === (key as ResearchFilter)) {
+        return;
+      }
+      activeResearchFilter = key as ResearchFilter;
+      renderUI(state);
+    });
+  });
 }
 
 function attachGlobalShortcuts(): void {
@@ -345,6 +502,11 @@ function attachGlobalShortcuts(): void {
     if (event.code === "Space" || event.code === "Enter") {
       event.preventDefault();
       refs?.clickButton.click();
+    }
+
+    if (event.code === "Escape" && prestigeOpen) {
+      event.preventDefault();
+      closePrestigeModal();
     }
   });
 }
@@ -380,9 +542,37 @@ function updateStrings(state: GameState): void {
   refs.controls.reset.button.setAttribute("aria-label", t(state.locale, "actions.reset"));
   refs.controls.reset.button.setAttribute("title", t(state.locale, "actions.reset"));
 
+  refs.controls.prestige.label.textContent = t(state.locale, "actions.prestige");
+  refs.controls.prestige.button.setAttribute("aria-label", t(state.locale, "actions.prestige"));
+  refs.controls.prestige.button.setAttribute("title", t(state.locale, "actions.prestige"));
+
   refs.statsLabels.forEach((label, key) => {
     label.textContent = t(state.locale, key);
   });
+
+  refs.abilityTitle.textContent = t(state.locale, "abilities.title");
+  refs.abilityList.forEach((abilityRefs, abilityId) => {
+    const definition = getAbilityDefinition(abilityId as AbilityId);
+    abilityRefs.label.textContent = definition.label[state.locale];
+    abilityRefs.container.title = formatAbilityTooltip(state, abilityId as AbilityId, state.locale);
+    abilityRefs.container.setAttribute("aria-label", definition.label[state.locale]);
+  });
+
+  refs.research.title.textContent = t(state.locale, "research.title");
+  refs.research.filters.forEach((button, key) => {
+    button.textContent = t(state.locale, `research.filter.${key}`);
+    button.setAttribute("aria-label", button.textContent ?? "");
+  });
+
+  refs.prestigeModal.title.textContent = t(state.locale, "prestige.modal.title");
+  refs.prestigeModal.warning.textContent = t(state.locale, "prestige.modal.warning");
+  refs.prestigeModal.seedsCurrentLabel.textContent = t(state.locale, "prestige.modal.currentSeeds");
+  refs.prestigeModal.seedsNextLabel.textContent = t(state.locale, "prestige.modal.newSeeds");
+  refs.prestigeModal.seedsGainLabel.textContent = t(state.locale, "prestige.modal.gainSeeds");
+  refs.prestigeModal.multiplierCurrentLabel.textContent = t(state.locale, "prestige.modal.currentMultiplier");
+  refs.prestigeModal.multiplierNextLabel.textContent = t(state.locale, "prestige.modal.nextMultiplier");
+  refs.prestigeModal.confirmButton.textContent = t(state.locale, "prestige.modal.confirm");
+  refs.prestigeModal.cancelButton.textContent = t(state.locale, "actions.cancel");
 
   refs.shopEntries.forEach((entry, itemId) => {
     const definition = itemById.get(itemId);
@@ -448,6 +638,8 @@ function updateStats(state: GameState): void {
   refs.bps.textContent = formatDecimal(state.bps);
   refs.bpc.textContent = formatDecimal(state.bpc);
   refs.total.textContent = formatDecimal(state.total);
+  refs.seeds.textContent = formatDecimal(state.prestige.seeds);
+  refs.prestigeMult.textContent = `${state.prestige.mult.toFixed(2)}×`;
   updatePlantStage(state);
 }
 
@@ -483,6 +675,249 @@ function updateShop(state: GameState): void {
     card.owned.textContent = entry.owned.toString();
     card.payback.textContent = formatPayback(state.locale, entry.payback);
   });
+}
+
+function updateAbilities(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const now = Date.now();
+  refs.abilityList.forEach((abilityRefs, abilityId) => {
+    const id = abilityId as AbilityId;
+    const definition = getAbilityDefinition(id);
+    const progress = getAbilityProgress(state, id, now);
+    abilityRefs.label.textContent = definition.label[state.locale];
+    abilityRefs.container.title = formatAbilityTooltip(state, id, state.locale);
+
+    const durationMultiplier = id === "overdrive" ? state.temp.overdriveDurationMult : 1;
+    const totalDuration = definition.duration * durationMultiplier;
+
+    let percent = 100;
+    let statusKey = "abilities.status.ready";
+    let seconds = 0;
+
+    if (progress.active) {
+      percent = totalDuration > 0 ? ((totalDuration - progress.remaining) / totalDuration) * 100 : 100;
+      statusKey = "abilities.status.active";
+      seconds = Math.ceil(progress.remaining);
+    } else if (progress.readyIn > 0) {
+      percent = progress.cooldown > 0 ? ((progress.cooldown - progress.readyIn) / progress.cooldown) * 100 : 0;
+      statusKey = "abilities.status.cooldown";
+      seconds = Math.ceil(progress.readyIn);
+    }
+
+    abilityRefs.progressBar.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+    abilityRefs.container.disabled = progress.active || progress.readyIn > 0;
+    abilityRefs.container.classList.toggle("is-active", progress.active);
+    abilityRefs.container.classList.toggle("is-ready", !progress.active && progress.readyIn <= 0);
+    abilityRefs.container.classList.toggle("is-cooldown", !progress.active && progress.readyIn > 0);
+    abilityRefs.status.textContent = seconds > 0 ? t(state.locale, statusKey, { seconds }) : t(state.locale, statusKey);
+  });
+}
+
+function updateResearch(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  refs.research.filters.forEach((button, key) => {
+    const isActive = key === activeResearchFilter;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+
+  renderResearchList(state);
+}
+
+function renderResearchList(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const entries = getResearchList(state, activeResearchFilter);
+  refs.research.list.innerHTML = "";
+
+  if (!entries.length) {
+    const empty = document.createElement("p");
+    empty.className = "text-sm text-neutral-400";
+    empty.textContent = t(state.locale, "research.empty");
+    refs.research.list.appendChild(empty);
+    return;
+  }
+
+  for (const entry of entries) {
+    const card = buildResearchCard(entry, state);
+    refs.research.list.appendChild(card);
+  }
+}
+
+function buildResearchCard(entry: ResearchViewModel, state: GameState): HTMLElement {
+  const card = document.createElement("article");
+  card.className = "research-card";
+  if (entry.owned) {
+    card.classList.add("is-owned");
+  }
+  if (entry.blocked) {
+    card.classList.add("is-locked");
+  }
+
+  const header = document.createElement("div");
+  header.className = "research-header";
+
+  if (entry.node.icon) {
+    const icon = new Image();
+    icon.src = entry.node.icon;
+    icon.alt = "";
+    icon.decoding = "async";
+    icon.className = "research-icon";
+    header.appendChild(icon);
+  }
+
+  const heading = document.createElement("div");
+  heading.className = "research-heading";
+
+  const title = document.createElement("h3");
+  title.className = "research-name";
+  title.textContent = entry.node.name[state.locale];
+  heading.appendChild(title);
+
+  const desc = document.createElement("p");
+  desc.className = "research-desc";
+  desc.textContent = entry.node.desc[state.locale];
+  heading.appendChild(desc);
+
+  header.appendChild(heading);
+  card.appendChild(header);
+
+  if (entry.node.requires && entry.node.requires.length > 0) {
+    const requirement = document.createElement("p");
+    requirement.className = "research-requires";
+    const names = entry.node.requires
+      .map((id) => getResearchNode(id)?.name[state.locale] ?? id)
+      .join(", ");
+    requirement.textContent = t(state.locale, "research.requires", { list: names });
+    card.appendChild(requirement);
+  }
+
+  const cost = document.createElement("p");
+  cost.className = "research-cost";
+  const costValue = entry.node.costType === "buds"
+    ? formatDecimal(entry.node.cost)
+    : entry.node.cost.toString();
+  const costLabelKey = entry.node.costType === "buds" ? "research.cost.buds" : "research.cost.seeds";
+  cost.textContent = `${t(state.locale, costLabelKey)}: ${costValue}`;
+  card.appendChild(cost);
+
+  const actions = document.createElement("div");
+  actions.className = "research-actions";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "research-btn";
+
+  if (entry.owned) {
+    button.textContent = t(state.locale, "research.button.owned");
+    button.disabled = true;
+  } else if (entry.blocked) {
+    button.textContent = t(state.locale, "research.button.locked");
+    button.disabled = true;
+  } else {
+    button.textContent = t(state.locale, "research.button.buy");
+    button.disabled = !entry.affordable;
+  }
+
+  button.addEventListener("click", () => {
+    if (entry.owned || entry.blocked) {
+      return;
+    }
+
+    const purchased = purchaseResearch(state, entry.node.id);
+    if (purchased) {
+      audio.playPurchase();
+      recalcDerivedValues(state);
+      renderUI(state);
+    }
+  });
+
+  actions.appendChild(button);
+  card.appendChild(actions);
+
+  return card;
+}
+
+function updatePrestigeModal(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const preview = getPrestigePreview(state);
+  refs.prestigeModal.seedsCurrent.textContent = formatDecimal(preview.currentSeeds);
+  refs.prestigeModal.seedsNext.textContent = formatDecimal(preview.potentialSeeds);
+  refs.prestigeModal.seedsGain.textContent = formatDecimal(preview.gainedSeeds);
+  refs.prestigeModal.multiplierCurrent.textContent = `${preview.currentMultiplier.toFixed(2)}×`;
+  refs.prestigeModal.multiplierNext.textContent = `${preview.nextMultiplier.toFixed(2)}×`;
+  refs.prestigeModal.confirmButton.disabled = preview.gainedSeeds <= 0;
+}
+
+function openPrestigeModal(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  prestigeOpen = true;
+  refs.prestigeModal.overlay.classList.remove("hidden");
+  refs.prestigeModal.overlay.setAttribute("aria-hidden", "false");
+  requestAnimationFrame(() => refs.prestigeModal.overlay.classList.add("visible"));
+  updatePrestigeModal(state);
+}
+
+function closePrestigeModal(): void {
+  if (!refs) {
+    return;
+  }
+
+  prestigeOpen = false;
+  refs.prestigeModal.overlay.classList.remove("visible");
+  refs.prestigeModal.overlay.setAttribute("aria-hidden", "true");
+  setTimeout(() => {
+    refs?.prestigeModal.overlay.classList.add("hidden");
+  }, 200);
+}
+
+function updateOfflineToast(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  if (state.temp.offlineBuds && state.temp.offlineDuration > 0) {
+    const hours = state.temp.offlineDuration / 3_600_000;
+    const message = t(state.locale, "toast.offline", {
+      buds: formatDecimal(state.temp.offlineBuds),
+      hours: hours.toFixed(2),
+    });
+    showToast(message);
+    state.temp.offlineBuds = null;
+    state.temp.offlineDuration = 0;
+  }
+}
+
+function showToast(message: string): void {
+  if (!refs) {
+    return;
+  }
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = message;
+  refs.toastContainer.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add("visible"));
+
+  setTimeout(() => {
+    toast.classList.remove("visible");
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
 }
 
 function createShopCard(itemId: string, state: GameState): ShopCardRefs {
@@ -661,6 +1096,152 @@ function createDangerButton(iconPath: string): ControlButtonRefs {
     .replace("focus-visible:ring-emerald-300/70", "focus-visible:ring-rose-300/70");
   control.button.classList.add("text-rose-300");
   return control;
+}
+
+function createAbilityButton(id: string, state: GameState): AbilityButtonRefs {
+  const definition = getAbilityDefinition(id);
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "ability-btn";
+
+  const label = document.createElement("span");
+  label.className = "ability-label";
+  label.textContent = definition.label[state.locale];
+
+  const status = document.createElement("span");
+  status.className = "ability-status";
+
+  const progress = document.createElement("div");
+  progress.className = "ability-progress";
+
+  const progressBar = document.createElement("div");
+  progressBar.className = "ability-progress-bar";
+  progress.appendChild(progressBar);
+
+  button.append(label, status, progress);
+
+  return { container: button, label, status, progressBar };
+}
+
+function createResearchSection(): {
+  section: HTMLElement;
+  title: HTMLElement;
+  filters: Map<string, HTMLButtonElement>;
+  list: HTMLElement;
+} {
+  const section = document.createElement("section");
+  section.className = "card fade-in space-y-4";
+
+  const header = document.createElement("div");
+  header.className = "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between";
+
+  const title = document.createElement("h2");
+  title.className = "text-xl font-semibold text-leaf-200";
+  header.appendChild(title);
+
+  const filterWrap = document.createElement("div");
+  filterWrap.className = "research-filters";
+  const filters = new Map<string, HTMLButtonElement>();
+
+  const filterKeys: ResearchFilter[] = ["all", "available", "owned"];
+  filterKeys.forEach((key) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.filter = key;
+    button.className = "filter-pill";
+    filterWrap.appendChild(button);
+    filters.set(key, button);
+  });
+
+  header.appendChild(filterWrap);
+  section.appendChild(header);
+
+  const list = document.createElement("div");
+  list.className = "grid gap-3";
+  section.appendChild(list);
+
+  return { section, title, filters, list };
+}
+
+function createPrestigeModal(): PrestigeModalRefs {
+  const overlay = document.createElement("div");
+  overlay.className = "modal-overlay hidden";
+  overlay.setAttribute("aria-hidden", "true");
+
+  const dialog = document.createElement("div");
+  dialog.className = "modal-card";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+
+  const title = document.createElement("h2");
+  title.className = "modal-title";
+  dialog.appendChild(title);
+
+  const warning = document.createElement("p");
+  warning.className = "modal-warning";
+  dialog.appendChild(warning);
+
+  const stats = document.createElement("dl");
+  stats.className = "modal-stats";
+
+  const currentSeeds = createModalStat(stats);
+  const nextSeeds = createModalStat(stats);
+  const gainSeeds = createModalStat(stats);
+  const currentMult = createModalStat(stats);
+  const nextMult = createModalStat(stats);
+
+  dialog.appendChild(stats);
+
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+
+  const cancelButton = document.createElement("button");
+  cancelButton.type = "button";
+  cancelButton.className = "modal-button secondary";
+  actions.appendChild(cancelButton);
+
+  const confirmButton = document.createElement("button");
+  confirmButton.type = "button";
+  confirmButton.className = "modal-button primary";
+  actions.appendChild(confirmButton);
+
+  dialog.appendChild(actions);
+  overlay.appendChild(dialog);
+
+  return {
+    overlay,
+    dialog,
+    title,
+    warning,
+    seedsCurrent: currentSeeds.value,
+    seedsNext: nextSeeds.value,
+    seedsGain: gainSeeds.value,
+    multiplierCurrent: currentMult.value,
+    multiplierNext: nextMult.value,
+    seedsCurrentLabel: currentSeeds.label,
+    seedsNextLabel: nextSeeds.label,
+    seedsGainLabel: gainSeeds.label,
+    multiplierCurrentLabel: currentMult.label,
+    multiplierNextLabel: nextMult.label,
+    confirmButton,
+    cancelButton,
+  };
+}
+
+function createModalStat(wrapper: HTMLElement): { label: HTMLElement; value: HTMLElement } {
+  const row = document.createElement("div");
+  row.className = "modal-stat";
+
+  const label = document.createElement("dt");
+  label.className = "modal-stat-label";
+
+  const value = document.createElement("dd");
+  value.className = "modal-stat-value";
+
+  row.append(label, value);
+  wrapper.appendChild(row);
+
+  return { label, value };
 }
 
 function announce(refs: UIRefs, total: Decimal): void {

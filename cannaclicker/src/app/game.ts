@@ -5,15 +5,27 @@ import { upgrades } from '../data/upgrades';
 import { getItemCost } from './shop';
 import type { GameState } from './state';
 import { sum, toDecimal } from './math';
+import { collectResearchBonuses } from './research';
+import { abilityMultiplier } from './abilities';
 
 export function handleManualClick(state: GameState): Decimal {
   state.buds = state.buds.add(state.bpc);
   state.total = state.total.add(state.bpc);
+  state.prestige.lifetimeBuds = state.prestige.lifetimeBuds.add(state.bpc);
   return state.bpc;
 }
 
 export function recalcDerivedValues(state: GameState): void {
   const { globalMultiplier, buildingMultipliers, clickMultiplier } = collectUpgradeMultipliers(state);
+  const researchBonuses = collectResearchBonuses(state);
+  state.temp.costMultiplier = researchBonuses.costMultiplier;
+  state.temp.autoClickRate = researchBonuses.autoClickRate;
+  state.temp.overdriveDurationMult = researchBonuses.overdriveDurationMult;
+
+  const abilityBpsMult = new Decimal(abilityMultiplier(state, 'overdrive'));
+  const abilityBpcMult = new Decimal(abilityMultiplier(state, 'burst_click'));
+
+  const prestigeMultiplier = state.prestige.mult;
 
   const buildingProduction = Array.from(itemById.entries()).map(([id, definition]) => {
     const owned = state.items[id] ?? 0;
@@ -26,10 +38,15 @@ export function recalcDerivedValues(state: GameState): void {
   });
 
   const achievementMultiplier = collectAchievementMultiplier(state);
-  const totalMultiplier = globalMultiplier.mul(achievementMultiplier);
+  const baseMultiplier = globalMultiplier.mul(achievementMultiplier).mul(prestigeMultiplier);
 
-  state.bps = sum(...buildingProduction).mul(totalMultiplier);
-  state.bpc = new Decimal(1).mul(clickMultiplier).mul(totalMultiplier);
+  const totalBpsMultiplier = baseMultiplier.mul(researchBonuses.bpsMult).mul(abilityBpsMult);
+  const totalBpcMultiplier = baseMultiplier.mul(clickMultiplier).mul(researchBonuses.bpcMult).mul(abilityBpcMult);
+
+  state.bps = sum(...buildingProduction).mul(totalBpsMultiplier);
+  state.bpc = new Decimal(1).mul(totalBpcMultiplier);
+  state.temp.bpsMult = totalBpsMultiplier;
+  state.temp.bpcMult = totalBpcMultiplier;
 }
 
 export function buyItem(state: GameState, itemId: string, quantity = 1): boolean {
@@ -39,13 +56,11 @@ export function buyItem(state: GameState, itemId: string, quantity = 1): boolean
   }
 
   const owned = state.items[itemId] ?? 0;
-  const factor = new Decimal(definition.costFactor);
-  let nextCost = getItemCost(definition, owned);
   let totalCost = new Decimal(0);
 
   for (let i = 0; i < quantity; i += 1) {
-    totalCost = totalCost.add(nextCost);
-    nextCost = nextCost.mul(factor);
+    const price = getItemCost(definition, owned + i, state.temp.costMultiplier);
+    totalCost = totalCost.add(price);
   }
 
   if (state.buds.lessThan(totalCost)) {

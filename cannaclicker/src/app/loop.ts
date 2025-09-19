@@ -1,4 +1,7 @@
+import Decimal from 'break_infinity.js';
 import type { GameState } from './state';
+import { updateAbilityTimers } from './abilities';
+import { recalcDerivedValues } from './game';
 
 interface LoopOptions {
   autosaveSeconds?: number;
@@ -33,8 +36,29 @@ export function startLoop(
     last = timestamp;
     state.lastTick = timestamp;
 
-    state.buds = state.buds.add(state.bps.mul(delta));
-    state.total = state.total.add(state.bps.mul(delta));
+    const now = Date.now();
+
+    const production = state.bps.mul(delta);
+    if (production.greaterThan(0)) {
+      state.buds = state.buds.add(production);
+      state.total = state.total.add(production);
+      state.prestige.lifetimeBuds = state.prestige.lifetimeBuds.add(production);
+    }
+
+    if (state.temp.autoClickRate > 0) {
+      const autoClicks = new Decimal(state.temp.autoClickRate * delta);
+      const autoGain = state.bpc.mul(autoClicks);
+      if (autoGain.greaterThan(0)) {
+        state.buds = state.buds.add(autoGain);
+        state.total = state.total.add(autoGain);
+        state.prestige.lifetimeBuds = state.prestige.lifetimeBuds.add(autoGain);
+      }
+    }
+
+    const abilityChanged = updateAbilityTimers(state, now);
+    if (abilityChanged) {
+      recalcDerivedValues(state);
+    }
 
     accumulator += delta;
     autosaveTimer += delta;
