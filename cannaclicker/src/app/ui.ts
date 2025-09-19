@@ -260,7 +260,7 @@ function buildUI(state: GameState): UIRefs {
 
   const statsGrid = document.createElement("dl");
   statsGrid.className =
-    "stats-grid grid gap-4 xl:gap-5 text-sm sm:text-base text-neutral-300";
+    "stats-grid grid gap-4 text-sm sm:text-base text-neutral-300";
   headerCard.appendChild(statsGrid);
 
   const statsLabels = new Map<string, HTMLElement>();
@@ -829,6 +829,9 @@ function updateShop(state: GameState): void {
       card.maxButton.disabled = true;
     }
 
+    card.container.dataset.locked = entry.unlocked ? "false" : "true";
+    card.container.dataset.affordable = entry.affordable && entry.unlocked ? "true" : "false";
+    card.container.classList.toggle("is-affordable", entry.affordable && entry.unlocked);
     card.cost.textContent = entry.formattedCost;
     card.next.textContent = entry.formattedNextCost;
     card.owned.textContent = entry.owned.toString();
@@ -1224,6 +1227,7 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
   const container = document.createElement("article");
   container.className =
     "relative grid gap-4 rounded-xl border border-white/10 bg-neutral-900/70 p-4 shadow-card backdrop-blur-sm transition hover:border-emerald-400/40 sm:grid-cols-[1fr_auto] sm:items-center sm:p-5";
+  container.classList.add("shop-card");
 
   const info = document.createElement("div");
   info.className = "flex flex-col gap-3";
@@ -1361,15 +1365,14 @@ function createStatBlock(
   registry: Map<string, HTMLElement>,
 ): HTMLElement {
   const group = document.createElement("div");
-  group.className =
-    "rounded-2xl bg-neutral-900/40 p-4 ring-1 ring-white/5 shadow-[0_18px_38px_rgba(10,12,21,0.35)] flex flex-col justify-between gap-2 sm:p-5";
+  group.className = "stat-card";
+  group.dataset.variant = key;
   const label = document.createElement("dt");
-  label.className = "text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-400";
+  label.className = "stat-card__label";
   registry.set(key, label);
 
   const value = document.createElement("dd");
-  value.className =
-    "text-2xl font-bold text-neutral-100 tabular-nums leading-tight drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)] sm:text-[2.4rem]";
+  value.className = "stat-card__value";
 
   group.append(label, value);
   wrapper.appendChild(group);
@@ -1720,6 +1723,15 @@ function announce(refs: UIRefs, total: Decimal): void {
 }
 
 export {};
+
+
+
+
+
+
+
+
+
 
 
 
