@@ -33,7 +33,7 @@ interface UIRefs {
   total: HTMLElement;
   clickButton: HTMLButtonElement;
   clickLabel: HTMLSpanElement;
-  clickIcon: HTMLImageElement;
+  clickIcon: HTMLDivElement;
   controls: {
     mute: ControlButtonRefs;
     export: ControlButtonRefs;
@@ -145,10 +145,13 @@ function buildUI(state: GameState): UIRefs {
   clickButton.className = "click-button w-full";
   clickButton.type = "button";
 
-  const clickIcon = new Image();
-  clickIcon.src = withBase("plant-stages/plant-stage-01.png");
-  clickIcon.alt = "";
+  const clickIcon = document.createElement("div");
   clickIcon.className = "click-icon";
+  clickIcon.setAttribute("aria-hidden", "true");
+  clickIcon.style.setProperty(
+    "background-image",
+    `url("${withBase("plant-stages/plant-stage-01.png")}")`,
+  );
   clickIcon.dataset.stage = "1";
 
   const clickLabel = document.createElement("span");
@@ -379,7 +382,10 @@ function updatePlantStage(state: GameState): void {
 
   refs.clickIcon.dataset.stage = nextStage.toString();
   const assetPath = `plant-stages/plant-stage-${nextStage.toString().padStart(2, "0")}.png`;
-  refs.clickIcon.src = withBase(assetPath);
+  refs.clickIcon.style.setProperty(
+    "background-image",
+    `url("${withBase(assetPath)}")`,
+  );
 }
 
 function updateStats(state: GameState): void {
