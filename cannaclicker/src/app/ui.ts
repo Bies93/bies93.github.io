@@ -221,25 +221,26 @@ function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
 
   const leafWrap = document.createElement("span");
   leafWrap.className =
-    "relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-400/30 via-emerald-500/20 to-emerald-700/35 shadow-[0_0_34px_rgba(16,185,129,0.45)] ring-1 ring-emerald-400/30";
+    "relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-lime-300/35 via-emerald-300/25 to-emerald-500/30 shadow-[0_0_38px_rgba(202,255,120,0.55)] ring-1 ring-lime-200/35";
 
   const leaf = new Image();
   leaf.src = withBase("img/logo-leaf.svg");
   leaf.alt = "";
   leaf.decoding = "async";
-  leaf.className = "h-12 w-12 drop-shadow-[0_18px_34px_rgba(16,185,129,0.6)] saturate-125";
+  leaf.className =
+    "h-12 w-12 drop-shadow-[0_18px_34px_rgba(202,255,150,0.6)] saturate-150 brightness-110";
 
   leafWrap.appendChild(leaf);
 
   const brandText = document.createElement("div");
-  brandText.className = "flex flex-col justify-center gap-1";
+  brandText.className = "flex flex-col justify-center gap-1 pl-2";
 
   const wordmark = new Image();
   wordmark.src = withBase("img/logo-wordmark.svg");
   wordmark.alt = "CannaClicker wordmark";
   wordmark.decoding = "async";
   wordmark.className =
-    "h-16 w-auto drop-shadow-[0_22px_40px_rgba(34,197,94,0.55)] saturate-150 contrast-125";
+    "relative left-4 top-2 h-24 w-auto drop-shadow-[0_26px_46px_rgba(56,220,120,0.6)] saturate-150 contrast-125 md:left-6 md:top-2";
 
   brandText.append(wordmark);
 
