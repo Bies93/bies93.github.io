@@ -85,6 +85,10 @@ button {
 
 .click-icon {
   @apply h-28 w-28 transition-transform;
+  background-color: transparent;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .click-button:active .click-icon {
