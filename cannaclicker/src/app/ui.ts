@@ -1,4 +1,4 @@
-ï»¿import Decimal from "break_infinity.js";
+import Decimal from "break_infinity.js";
 import {
   handleManualClick,
   buyItem,
@@ -211,25 +211,47 @@ function buildUI(state: GameState): UIRefs {
 
 function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
   const header = document.createElement("header");
-  header.className = "mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3";
+  header.className =
+    "mx-auto flex w-full max-w-6xl flex-col gap-4 rounded-3xl border border-white/10 bg-neutral-950/70 px-4 py-4 shadow-[0_18px_40px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6";
 
   const brand = document.createElement("div");
-  brand.className = "flex items-center gap-3";
+  brand.className =
+    "flex items-center gap-5 rounded-2xl bg-neutral-900/60 px-4 py-3 shadow-[0_18px_32px_rgba(16,185,129,0.25)] ring-1 ring-emerald-400/25 backdrop-blur";
+
+  const leafWrap = document.createElement("span");
+  leafWrap.className =
+    "relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-400/30 via-emerald-500/20 to-emerald-700/30 shadow-[0_0_32px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400/30";
 
   const leaf = new Image();
   leaf.src = withBase("img/logo-leaf.svg");
   leaf.alt = "";
-  leaf.className = "h-7 w-7";
+  leaf.decoding = "async";
+  leaf.className = "h-9 w-9 drop-shadow-[0_10px_22px_rgba(16,185,129,0.55)]";
+
+  leafWrap.appendChild(leaf);
+
+  const brandText = document.createElement("div");
+  brandText.className = "flex flex-col";
 
   const wordmark = new Image();
   wordmark.src = withBase("img/logo-wordmark.svg");
   wordmark.alt = "CannaClicker";
-  wordmark.className = "h-6";
+  wordmark.decoding = "async";
+  wordmark.className =
+    "h-10 w-auto drop-shadow-[0_14px_28px_rgba(34,197,94,0.45)] saturate-150";
 
-  brand.append(leaf, wordmark);
+  const brandSubtitle = document.createElement("span");
+  brandSubtitle.textContent = "Galaktischer Grow-Simulator";
+  brandSubtitle.className =
+    "mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.5em] text-emerald-200/80";
+
+  brandText.append(wordmark, brandSubtitle);
+
+  brand.append(leafWrap, brandText);
 
   const actionWrap = document.createElement("div");
-  actionWrap.className = "flex flex-wrap gap-2";
+  actionWrap.className =
+    "flex flex-wrap items-center gap-3 rounded-2xl bg-neutral-900/50 px-3 py-2.5 shadow-[0_20px_38px_rgba(15,23,42,0.45)] ring-1 ring-white/10 backdrop-blur";
   controls.forEach((control) => actionWrap.append(control));
 
   header.append(brand, actionWrap);
@@ -261,7 +283,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.import.button.addEventListener("click", () => {
-    const payload = window.prompt("Bitte Base64-Spielstand einfÃ¼gen:");
+    const payload = window.prompt("Bitte Base64-Spielstand einfügen:");
     if (!payload) {
       return;
     }
@@ -280,7 +302,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.reset.button.addEventListener("click", () => {
-    const confirmReset = window.confirm("Spielstand wirklich lÃ¶schen?");
+    const confirmReset = window.confirm("Spielstand wirklich löschen?");
     if (!confirmReset) {
       return;
     }
@@ -570,16 +592,19 @@ function createActionButton(iconPath: string): ControlButtonRefs {
   const button = document.createElement("button");
   button.type = "button";
   button.className =
-    "inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-neutral-200 transition hover:border-leaf-400 focus-visible:ring-2 focus-visible:ring-leaf-300";
+    "inline-flex items-center gap-3 rounded-xl border border-white/15 bg-neutral-900/60 px-4 py-2.5 text-sm font-semibold text-neutral-100 shadow-[0_6px_20px_rgba(15,23,42,0.45)] transition hover:border-leaf-400/70 hover:text-leaf-100 focus-visible:ring-2 focus-visible:ring-leaf-300/70";
 
   const icon = new Image();
   icon.src = iconPath;
   icon.alt = "";
+  icon.decoding = "async";
 
   const iconWrap = wrapIcon(icon);
+  iconWrap.classList.add("control-icon-badge");
+  icon.classList.add("control-icon-img");
 
   const label = document.createElement("span");
-  label.className = "whitespace-nowrap";
+  label.className = "whitespace-nowrap uppercase tracking-[0.25em]";
 
   button.append(iconWrap, label);
 
@@ -587,7 +612,11 @@ function createActionButton(iconPath: string): ControlButtonRefs {
 }
 function createDangerButton(iconPath: string): ControlButtonRefs {
   const control = createActionButton(iconPath);
-  control.button.classList.add("hover:border-rose-400", "text-rose-300");
+  control.button.className = control.button.className
+    .replace("hover:border-leaf-400/70", "hover:border-rose-400/70")
+    .replace("hover:text-leaf-100", "hover:text-rose-200")
+    .replace("focus-visible:ring-leaf-300/70", "focus-visible:ring-rose-300/60");
+  control.button.classList.add("text-rose-300");
   return control;
 }
 
@@ -601,6 +630,9 @@ function announce(refs: UIRefs, total: Decimal): void {
 }
 
 export {};
+
+
+
 
 
 
