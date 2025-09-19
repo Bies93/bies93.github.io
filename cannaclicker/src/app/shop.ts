@@ -89,5 +89,6 @@ export function formatPayback(locale: LocaleKey, value: number | null): string {
     return '—';
   }
 
-  return t(locale, 'shop.payback', { seconds: value });
+  return t(locale, 'shop.paybackValue', { seconds: value });
 }
+

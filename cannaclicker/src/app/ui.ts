@@ -1,4 +1,4 @@
-﻿import Decimal from "break_infinity.js";
+import Decimal from "break_infinity.js";
 import {
   handleManualClick,
   buyItem,
@@ -51,9 +51,13 @@ interface ShopCardRefs {
   icon: HTMLImageElement;
   name: HTMLElement;
   description: HTMLElement;
+  costLabel: HTMLElement;
   cost: HTMLElement;
+  nextLabel: HTMLElement;
   next: HTMLElement;
+  ownedLabel: HTMLElement;
   owned: HTMLElement;
+  paybackLabel: HTMLElement;
   payback: HTMLElement;
   buyButton: HTMLButtonElement;
   maxButton: HTMLButtonElement;
@@ -66,6 +70,22 @@ let lastAnnounced = new Decimal(0);
 const PLANT_STAGE_THRESHOLDS = [0, 100, 1000, 10000, 100000];
 const PLANT_STAGE_MAX = 5;
 
+function appendRetinaSuffix(path: string): string {
+  const queryIndex = path.indexOf("?");
+  const hasQuery = queryIndex !== -1;
+  const basePath = hasQuery ? path.slice(0, queryIndex) : path;
+  const query = hasQuery ? path.slice(queryIndex) : "";
+  const dotIndex = basePath.lastIndexOf(".");
+  if (dotIndex === -1) {
+    return `${basePath}@2x${query}`;
+  }
+  const retinaPath = `${basePath.slice(0, dotIndex)}@2x${basePath.slice(dotIndex)}`;
+  return `${retinaPath}${query}`;
+}
+
+function buildItemSrcset(path: string): string {
+  return `${path} 1x, ${appendRetinaSuffix(path)} 2x`;
+}
 export function renderUI(state: GameState): void {
   if (!refs) {
     refs = buildUI(state);
@@ -283,7 +303,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.import.button.addEventListener("click", () => {
-    const payload = window.prompt("Bitte Base64-Spielstand einfÃ¼gen:");
+    const payload = window.prompt("Bitte Base64-Spielstand einfügen:");
     if (!payload) {
       return;
     }
@@ -302,7 +322,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.reset.button.addEventListener("click", () => {
-    const confirmReset = window.confirm("Spielstand wirklich lÃ¶schen?");
+    const confirmReset = window.confirm("Spielstand wirklich löschen?");
     if (!confirmReset) {
       return;
     }
@@ -373,6 +393,11 @@ function updateStrings(state: GameState): void {
     entry.name.textContent = definition.name[state.locale];
     entry.description.textContent = definition.description[state.locale];
     entry.icon.alt = definition.name[state.locale];
+    entry.icon.srcset = buildItemSrcset(definition.icon);
+    entry.costLabel.textContent = t(state.locale, "shop.cost");
+    entry.nextLabel.textContent = t(state.locale, "shop.nextPrice");
+    entry.ownedLabel.textContent = t(state.locale, "shop.owned");
+    entry.paybackLabel.textContent = t(state.locale, "shop.paybackLabel");
     entry.buyButton.textContent = t(state.locale, "actions.buy");
     entry.maxButton.textContent = t(state.locale, "actions.max");
   });
@@ -440,8 +465,9 @@ function updateShop(state: GameState): void {
       refs!.shopEntries.set(entry.definition.id, card);
     }
 
-    card.icon.src = entry.definition.icon;
-
+    const iconPath = entry.definition.icon;
+    card.icon.src = iconPath;
+    card.icon.srcset = buildItemSrcset(iconPath);
     if (entry.unlocked) {
       card.container.classList.remove("opacity-40");
       card.buyButton.disabled = !entry.affordable;
@@ -470,58 +496,67 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
   }
 
   const container = document.createElement("article");
-  container.className = "card relative overflow-hidden border-white/10 bg-neutral-900/40";
+  container.className =
+    "relative grid gap-4 rounded-xl border border-white/10 bg-neutral-900/70 p-4 shadow-card backdrop-blur-sm transition hover:border-emerald-400/40 sm:grid-cols-[1fr_auto] sm:items-center sm:p-5";
 
-  const header = document.createElement("div");
-  header.className = "flex items-start justify-between gap-3";
+  const info = document.createElement("div");
+  info.className = "flex flex-col gap-3";
 
   const titleWrap = document.createElement("div");
+  titleWrap.className = "space-y-1";
+
   const name = document.createElement("h3");
   name.className = "text-lg font-semibold text-neutral-100";
   name.textContent = definition.name[state.locale];
   titleWrap.appendChild(name);
 
   const description = document.createElement("p");
-  description.className = "text-sm text-neutral-400";
+  description.className = "text-sm leading-snug text-neutral-400";
   description.textContent = definition.description[state.locale];
   titleWrap.appendChild(description);
 
-  header.appendChild(titleWrap);
-
-  const icon = document.createElement("img");
-  icon.src = definition.icon;
-  icon.alt = definition.name[state.locale];
-  icon.className = "h-12 w-12 shrink-0 rounded-xl border border-white/5 bg-neutral-950/60 p-2";
-  header.appendChild(icon);
-
-  container.appendChild(header);
+  info.appendChild(titleWrap);
 
   const details = document.createElement("dl");
-  details.className = "mt-3 grid grid-cols-2 gap-2 text-xs text-neutral-300";
+  details.className = "grid grid-cols-2 gap-x-4 gap-y-1 text-sm opacity-90";
 
-  const cost = createDetail(details, "Kosten");
-  const next = createDetail(details, "Naechster Preis");
-  const owned = createDetail(details, "Besitzt");
-  const payback = createDetail(details, "Payback");
+  const cost = createDetail(details, t(state.locale, "shop.cost"));
+  const next = createDetail(details, t(state.locale, "shop.nextPrice"));
+  const owned = createDetail(details, t(state.locale, "shop.owned"));
+  const payback = createDetail(details, t(state.locale, "shop.paybackLabel"));
 
-  container.appendChild(details);
+  info.appendChild(details);
 
   const actions = document.createElement("div");
-  actions.className = "mt-4 flex items-center gap-2";
+  actions.className = "mt-3 flex flex-wrap gap-2 sm:flex-nowrap";
 
   const buyButton = document.createElement("button");
   buyButton.type = "button";
-  buyButton.className = "buy-btn flex-1";
+  buyButton.className = "buy-btn h-10 flex-1";
   buyButton.textContent = t(state.locale, "actions.buy");
 
   const maxButton = document.createElement("button");
   maxButton.type = "button";
-  maxButton.className = "rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold text-neutral-200 transition hover:border-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300";
+  maxButton.className =
+    "h-10 shrink-0 rounded-lg border border-white/10 px-4 text-sm font-semibold text-neutral-200 transition hover:border-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300";
   maxButton.textContent = t(state.locale, "actions.max");
 
   actions.append(buyButton, maxButton);
-  container.appendChild(actions);
+  info.appendChild(actions);
 
+  const media = document.createElement("div");
+  media.className = "w-24 aspect-square shrink-0 justify-self-center sm:justify-self-end sm:w-28 md:w-32";
+
+  const icon = document.createElement("img");
+  icon.src = definition.icon;
+  icon.srcset = buildItemSrcset(definition.icon);
+  icon.alt = definition.name[state.locale];
+  icon.decoding = "async";
+  icon.className = "h-full w-full object-contain";
+
+  media.appendChild(icon);
+
+  container.append(info, media);
   refs.shopList.appendChild(container);
 
   buyButton.addEventListener("click", () => {
@@ -546,15 +581,18 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
     icon,
     name,
     description,
+    costLabel: cost.label,
     cost: cost.value,
+    nextLabel: next.label,
     next: next.value,
+    ownedLabel: owned.label,
     owned: owned.value,
+    paybackLabel: payback.label,
     payback: payback.value,
     buyButton,
     maxButton,
   } satisfies ShopCardRefs;
 }
-
 function createStatBlock(
   key: string,
   wrapper: HTMLElement,
@@ -580,7 +618,7 @@ function createDetail(wrapper: HTMLElement, labelText: string): { label: HTMLEle
   label.textContent = labelText;
   label.className = "text-neutral-400";
   const value = document.createElement("dd");
-  value.className = "text-neutral-100";
+  value.className = "justify-self-end font-medium text-neutral-100";
   wrapper.append(label, value);
   return { label, value };
 }
@@ -635,6 +673,12 @@ function announce(refs: UIRefs, total: Decimal): void {
 }
 
 export {};
+
+
+
+
+
+
 
 
 
