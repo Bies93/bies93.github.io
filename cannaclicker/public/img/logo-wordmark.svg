@@ -1,5 +1,4 @@
-<![CDATA[<svg width="1200" height="512" viewBox="0 0 1200 512" xmlns="http://www.w3.org/2000/svg">
-  <!-- Cannabis Leaf -->
+<svg width="1200" height="512" viewBox="0 0 1200 512" xmlns="http://www.w3.org/2000/svg">
   <g transform="translate(100, 56)">
     <path d="M128 0C60 0 0 60 0 128C0 196 60 256 128 256C196 256 256 196 256 128C256 60 196 0 128 0Z" stroke="#2D7D32" stroke-width="4" fill="none"/>
     <path d="M128 30L128 26" stroke="#2D7D32" stroke-width="4" stroke-linecap="round"/>
@@ -7,8 +6,6 @@
     <path d="M90 110L128 135L166 110" stroke="#2D7D32" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M90 145L128 170L166 145" stroke="#2D7D32" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
-  
-  <!-- Wordmark Text -->
   <text x="300" y="180" font-family="Arial, sans-serif" font-size="100" font-weight="bold" fill="#2D7D32">CannaClicker</text>
   <text x="300" y="280" font-family="Arial, sans-serif" font-size="40" fill="#2D7D32">Grow Your Fortune</text>
-</svg>]]>
+</svg>
