@@ -140,6 +140,183 @@ button {
   }
 }
 
+.ability-grid {
+  @apply grid gap-3 md:grid-cols-2;
+}
+
+.ability-btn {
+  @apply relative flex flex-col gap-2 rounded-xl border border-white/10 bg-neutral-900/70 px-4 py-4 text-left shadow-card transition;
+}
+
+.ability-btn:hover:not(:disabled) {
+  @apply border-emerald-400/50;
+  transform: translateY(-1px);
+}
+
+.ability-btn:disabled {
+  @apply cursor-not-allowed opacity-70;
+}
+
+.ability-btn.is-active {
+  @apply border-emerald-400/60 bg-emerald-900/20;
+}
+
+.ability-btn.is-ready {
+  @apply border-emerald-400/40;
+}
+
+.ability-btn.is-cooldown {
+  @apply border-white/10 bg-neutral-900/60;
+}
+
+.ability-label {
+  @apply text-base font-semibold text-neutral-100;
+}
+
+.ability-status {
+  @apply text-sm text-neutral-400;
+}
+
+.ability-progress {
+  @apply h-2 w-full rounded-full bg-neutral-800/80;
+  overflow: hidden;
+}
+
+.ability-progress-bar {
+  @apply h-full w-0 rounded-full bg-gradient-to-r from-emerald-400/80 to-lime-300/80 transition-[width];
+}
+
+.research-filters {
+  @apply flex gap-2;
+}
+
+.filter-pill {
+  @apply rounded-full border border-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-neutral-300 transition;
+}
+
+.filter-pill:hover {
+  @apply border-emerald-400/40 text-neutral-100;
+}
+
+.filter-pill.is-active {
+  @apply border-emerald-400/60 bg-emerald-500/20 text-emerald-200;
+}
+
+.research-card {
+  @apply flex flex-col gap-3 rounded-xl border border-white/10 bg-neutral-900/70 p-4 shadow-card transition;
+}
+
+.research-card.is-owned {
+  @apply border-emerald-400/50 bg-emerald-900/10;
+}
+
+.research-card.is-locked {
+  @apply opacity-60;
+}
+
+.research-header {
+  @apply flex items-start gap-3;
+}
+
+.research-icon {
+  @apply h-10 w-10 rounded-full border border-white/10 bg-neutral-800/80 p-1;
+}
+
+.research-heading {
+  @apply flex-1;
+}
+
+.research-name {
+  @apply text-lg font-semibold text-neutral-100;
+}
+
+.research-desc {
+  @apply text-sm text-neutral-400;
+}
+
+.research-requires {
+  @apply text-xs uppercase tracking-wider text-amber-300;
+}
+
+.research-cost {
+  @apply text-sm font-medium text-neutral-200;
+}
+
+.research-actions {
+  @apply flex justify-end;
+}
+
+.research-btn {
+  @apply rounded-md bg-emerald-500 px-4 py-2 text-sm font-semibold text-neutral-900 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+.modal-overlay {
+  @apply fixed inset-0 z-50 grid place-items-center bg-black/70 backdrop-blur-sm transition-opacity duration-200;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-card {
+  @apply w-full max-w-md space-y-4 rounded-2xl border border-white/10 bg-neutral-900/90 p-6 shadow-[0_30px_60px_rgba(0,0,0,0.45)];
+}
+
+.modal-title {
+  @apply text-xl font-semibold text-neutral-100;
+}
+
+.modal-warning {
+  @apply text-sm text-neutral-300;
+}
+
+.modal-stats {
+  @apply grid gap-3;
+}
+
+.modal-stat {
+  @apply flex items-baseline justify-between rounded-lg border border-white/5 bg-neutral-900/60 px-3 py-2;
+}
+
+.modal-stat-label {
+  @apply text-xs uppercase tracking-widest text-neutral-400;
+}
+
+.modal-stat-value {
+  @apply text-base font-semibold text-neutral-100;
+}
+
+.modal-actions {
+  @apply flex justify-end gap-2;
+}
+
+.modal-button {
+  @apply rounded-md px-4 py-2 text-sm font-semibold transition;
+}
+
+.modal-button.primary {
+  @apply bg-emerald-500 text-neutral-900 hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60;
+}
+
+.modal-button.secondary {
+  @apply border border-white/10 bg-neutral-800/80 text-neutral-200 hover:border-emerald-300/40 hover:text-neutral-100;
+}
+
+.toast-stack {
+  @apply pointer-events-none fixed bottom-6 right-6 flex w-full max-w-xs flex-col gap-2;
+}
+
+.toast {
+  @apply translate-y-2 rounded-lg border border-white/10 bg-neutral-900/90 px-4 py-3 text-sm text-neutral-100 shadow-card opacity-0 transition-all duration-200;
+}
+
+.toast.visible {
+  @apply translate-y-0 opacity-100;
+}
+
 
 
 
