@@ -1,4 +1,4 @@
-import Decimal from "break_infinity.js";
+﻿import Decimal from "break_infinity.js";
 import {
   handleManualClick,
   buyItem,
@@ -122,11 +122,12 @@ function buildUI(state: GameState): UIRefs {
   headerCard.className = "card fade-in space-y-4";
 
   const title = document.createElement("h1");
-  title.className = "text-3xl font-bold tracking-tight text-leaf-200";
+  title.className = "text-4xl md:text-5xl font-extrabold tracking-tight text-leaf-200 drop-shadow-[0_14px_28px_rgba(16,185,129,0.35)]";
+  title.textContent = "CannaBies";
   headerCard.appendChild(title);
 
   const statsGrid = document.createElement("dl");
-  statsGrid.className = "grid grid-cols-2 gap-4 text-sm text-neutral-300";
+  statsGrid.className = "grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-sm sm:text-base text-neutral-300";
   headerCard.appendChild(statsGrid);
 
   const statsLabels = new Map<string, HTMLElement>();
@@ -212,33 +213,33 @@ function buildUI(state: GameState): UIRefs {
 function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
   const header = document.createElement("header");
   header.className =
-    "mx-auto flex w-full max-w-6xl flex-col gap-4 rounded-3xl border border-white/10 bg-neutral-950/70 px-4 py-4 shadow-[0_18px_40px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6";
+    "mx-auto flex w-full max-w-6xl flex-col items-start gap-4 rounded-3xl border border-white/10 bg-neutral-900/80 px-4 py-4 shadow-[0_24px_60px_rgba(10,12,21,0.55)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6";
 
   const brand = document.createElement("div");
   brand.className =
-    "flex items-center gap-6 rounded-2xl bg-neutral-900/60 px-5 py-4 shadow-[0_18px_32px_rgba(16,185,129,0.25)] ring-1 ring-emerald-400/25 backdrop-blur";
+    "flex items-center gap-4 md:gap-6 rounded-2xl bg-gradient-to-br from-neutral-900/90 via-neutral-900/75 to-neutral-800/75 px-4 md:px-6 py-4 shadow-[0_24px_48px_rgba(16,185,129,0.28)] ring-1 ring-emerald-400/25 backdrop-blur";
 
   const leafWrap = document.createElement("span");
   leafWrap.className =
-    "relative grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-emerald-400/30 via-emerald-500/20 to-emerald-700/30 shadow-[0_0_32px_rgba(16,185,129,0.35)] ring-1 ring-emerald-400/30";
+    "relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-400/30 via-emerald-500/20 to-emerald-700/35 shadow-[0_0_34px_rgba(16,185,129,0.45)] ring-1 ring-emerald-400/30";
 
   const leaf = new Image();
   leaf.src = withBase("img/logo-leaf.svg");
   leaf.alt = "";
   leaf.decoding = "async";
-  leaf.className = "h-11 w-11 drop-shadow-[0_10px_22px_rgba(16,185,129,0.55)]";
+  leaf.className = "h-12 w-12 drop-shadow-[0_18px_34px_rgba(16,185,129,0.6)] saturate-125";
 
   leafWrap.appendChild(leaf);
 
   const brandText = document.createElement("div");
-  brandText.className = "flex flex-col justify-center";
+  brandText.className = "flex flex-col justify-center gap-1";
 
   const wordmark = new Image();
   wordmark.src = withBase("img/logo-wordmark.svg");
-  wordmark.alt = "CannaClicker";
+  wordmark.alt = "CannaClicker wordmark";
   wordmark.decoding = "async";
   wordmark.className =
-    "h-12 w-auto drop-shadow-[0_18px_32px_rgba(34,197,94,0.45)] saturate-150";
+    "h-16 w-auto drop-shadow-[0_22px_40px_rgba(34,197,94,0.55)] saturate-150 contrast-125";
 
   brandText.append(wordmark);
 
@@ -246,7 +247,7 @@ function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
 
   const actionWrap = document.createElement("div");
   actionWrap.className =
-    "flex flex-nowrap items-center gap-2 overflow-x-auto rounded-2xl bg-neutral-900/50 px-3 py-2 shadow-[0_20px_38px_rgba(15,23,42,0.45)] ring-1 ring-white/10 backdrop-blur sm:px-4";
+    "flex flex-nowrap items-center gap-3 overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/70 px-3 py-2 shadow-[0_22px_44px_rgba(10,12,21,0.5)] ring-1 ring-white/10 backdrop-blur sm:px-4";
   controls.forEach((control) => {
     control.classList.add("shrink-0");
     actionWrap.append(control);
@@ -281,7 +282,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.import.button.addEventListener("click", () => {
-    const payload = window.prompt("Bitte Base64-Spielstand einfügen:");
+    const payload = window.prompt("Bitte Base64-Spielstand einfÃ¼gen:");
     if (!payload) {
       return;
     }
@@ -300,7 +301,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.reset.button.addEventListener("click", () => {
-    const confirmReset = window.confirm("Spielstand wirklich löschen?");
+    const confirmReset = window.confirm("Spielstand wirklich lÃ¶schen?");
     if (!confirmReset) {
       return;
     }
@@ -332,7 +333,7 @@ function updateStrings(state: GameState): void {
     return;
   }
 
-  refs.title.textContent = t(state.locale, "app.title");
+  refs.title.textContent = "CannaBies";
   refs.shopTitle.textContent = t(state.locale, "shop.title");
   refs.clickButton.setAttribute("aria-label", t(state.locale, "actions.click"));
   refs.clickLabel.textContent = t(state.locale, "actions.click");
@@ -344,15 +345,19 @@ function updateStrings(state: GameState): void {
   refs.controls.mute.icon.src = muteAssets.icon;
   refs.controls.mute.label.textContent = muteAssets.label;
   refs.controls.mute.button.setAttribute("aria-label", muteAssets.label);
+  refs.controls.mute.button.setAttribute("title", muteAssets.label);
 
   refs.controls.export.label.textContent = t(state.locale, "actions.export");
   refs.controls.export.button.setAttribute("aria-label", t(state.locale, "actions.export"));
+  refs.controls.export.button.setAttribute("title", t(state.locale, "actions.export"));
 
   refs.controls.import.label.textContent = t(state.locale, "actions.import");
   refs.controls.import.button.setAttribute("aria-label", t(state.locale, "actions.import"));
+  refs.controls.import.button.setAttribute("title", t(state.locale, "actions.import"));
 
   refs.controls.reset.label.textContent = t(state.locale, "actions.reset");
   refs.controls.reset.button.setAttribute("aria-label", t(state.locale, "actions.reset"));
+  refs.controls.reset.button.setAttribute("title", t(state.locale, "actions.reset"));
 
   refs.statsLabels.forEach((label, key) => {
     label.textContent = t(state.locale, key);
@@ -555,12 +560,13 @@ function createStatBlock(
   registry: Map<string, HTMLElement>,
 ): HTMLElement {
   const group = document.createElement("div");
+  group.className = "rounded-lg bg-neutral-900/40 p-3 ring-1 ring-white/5 sm:p-4";
   const label = document.createElement("dt");
-  label.className = "text-xs uppercase tracking-[0.28em] text-neutral-500";
+  label.className = "text-[0.7rem] uppercase tracking-[0.22em] text-neutral-400";
   registry.set(key, label);
 
   const value = document.createElement("dd");
-  value.className = "mt-1 text-lg font-semibold text-neutral-100";
+  value.className = "mt-2 text-2xl md:text-3xl font-bold text-neutral-100 tabular-nums drop-shadow-[0_6px_18px_rgba(0,0,0,0.45)]";
 
   group.append(label, value);
   wrapper.appendChild(group);
@@ -590,7 +596,7 @@ function createActionButton(iconPath: string): ControlButtonRefs {
   const button = document.createElement("button");
   button.type = "button";
   button.className =
-    "inline-flex items-center gap-2 rounded-lg border border-white/15 bg-neutral-900/60 px-3 py-1.5 text-xs font-semibold text-neutral-100 shadow-[0_6px_16px_rgba(15,23,42,0.4)] transition hover:border-leaf-400/70 hover:text-leaf-100 focus-visible:ring-2 focus-visible:ring-leaf-300/70";
+    "inline-flex items-center gap-2 rounded-lg border border-white/10 bg-neutral-900/60 px-2.5 py-1.5 text-sm font-medium text-neutral-200 shadow-[0_10px_24px_rgba(9,11,19,0.45)] transition hover:border-emerald-400/40 hover:bg-neutral-800/70 focus-visible:ring-2 focus-visible:ring-emerald-300/70 focus-visible:ring-offset-0";
 
   const icon = new Image();
   icon.src = iconPath;
@@ -602,7 +608,7 @@ function createActionButton(iconPath: string): ControlButtonRefs {
   icon.classList.add("control-icon-img");
 
   const label = document.createElement("span");
-  label.className = "whitespace-nowrap text-[0.65rem] uppercase tracking-[0.35em]";
+  label.className = "hidden whitespace-nowrap text-sm font-medium text-neutral-200 sm:inline";
 
   button.append(iconWrap, label);
 
@@ -611,9 +617,9 @@ function createActionButton(iconPath: string): ControlButtonRefs {
 function createDangerButton(iconPath: string): ControlButtonRefs {
   const control = createActionButton(iconPath);
   control.button.className = control.button.className
-    .replace("hover:border-leaf-400/70", "hover:border-rose-400/70")
-    .replace("hover:text-leaf-100", "hover:text-rose-200")
-    .replace("focus-visible:ring-leaf-300/70", "focus-visible:ring-rose-300/60");
+    .replace("hover:border-emerald-400/40", "hover:border-rose-400/60")
+    .replace("hover:bg-neutral-800/70", "hover:bg-rose-900/30")
+    .replace("focus-visible:ring-emerald-300/70", "focus-visible:ring-rose-300/70");
   control.button.classList.add("text-rose-300");
   return control;
 }
@@ -628,6 +634,19 @@ function announce(refs: UIRefs, total: Decimal): void {
 }
 
 export {};
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
