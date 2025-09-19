@@ -1,13 +1,21 @@
 import Decimal from 'break_infinity.js';
 import {
   createDefaultState,
+  createDefaultPreferences,
+  createDefaultAutomation,
   ensureDecimal,
   type GameState,
   SAVE_VERSION,
   type AbilityId,
   type AbilityState,
   type AbilityRuntimeState,
-  type SaveV2,
+  type SaveV3,
+  type PreferencesState,
+  type AutomationState,
+  AUTO_BUY_ROI_MIN,
+  AUTO_BUY_ROI_MAX,
+  AUTO_BUY_RESERVE_MIN,
+  AUTO_BUY_RESERVE_MAX,
 } from './state';
 import { computePrestigeMultiplier } from './prestige';
 import { DEFAULT_LOCALE, resolveLocale, type LocaleKey } from './i18n';
@@ -41,7 +49,21 @@ export interface PersistedStateV1Legacy {
   muted?: boolean;
 }
 
-export type PersistedStateV2 = Omit<SaveV2, 'buds' | 'total' | 'bps' | 'bpc' | 'prestige' | 'abilities' | 'temp'> & {
+export type PersistedStateV2 = Omit<SaveV3, 'buds' | 'total' | 'bps' | 'bpc' | 'prestige' | 'abilities' | 'temp' | 'preferences' | 'automation'> & {
+  v: 2;
+  buds: string;
+  total: string;
+  bps: string;
+  bpc: string;
+  researchOwned: string[];
+  prestige: PersistedPrestigeState;
+  abilities: Record<AbilityId, PersistedAbilityState>;
+  lastSeenAt: number;
+  locale?: LocaleKey;
+  muted?: boolean;
+};
+
+export type PersistedStateV3 = Omit<SaveV3, 'buds' | 'total' | 'bps' | 'bpc' | 'prestige' | 'abilities' | 'temp'> & {
   v: typeof SAVE_VERSION;
   buds: string;
   total: string;
@@ -53,6 +75,8 @@ export type PersistedStateV2 = Omit<SaveV2, 'buds' | 'total' | 'bps' | 'bpc' | '
   lastSeenAt: number;
   locale?: LocaleKey;
   muted?: boolean;
+  preferences?: Partial<PreferencesState>;
+  automation?: Partial<AutomationState>;
 };
 
 function clampOfflineDuration(elapsedMs: number): number {
@@ -81,9 +105,11 @@ function calculateOfflineProgress(bps: Decimal, elapsedMs: number): OfflineRewar
   };
 }
 
-function normalisePersistedState(data: PersistedStateV2): PersistedStateV2 {
+function normalisePersistedState(data: PersistedStateV2 | PersistedStateV3): PersistedStateV3 {
   const now = Date.now();
   const prestige = data.prestige ?? {};
+  const preferences = normalisePreferences(data.preferences);
+  const automation = normaliseAutomation(data.automation);
 
   return {
     v: SAVE_VERSION,
@@ -106,6 +132,8 @@ function normalisePersistedState(data: PersistedStateV2): PersistedStateV2 {
     lastSeenAt: data.lastSeenAt ?? data.time ?? now,
     locale: data.locale,
     muted: data.muted,
+    preferences,
+    automation,
   };
 }
 
@@ -130,7 +158,54 @@ function normalisePersistedAbilities(
   return normalised;
 }
 
-function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV2 {
+function normalisePreferences(preferences?: Partial<PreferencesState>): PreferencesState {
+  const defaults = createDefaultPreferences();
+  const mode = preferences?.shopSortMode;
+  if (mode === 'price' || mode === 'bps' || mode === 'roi') {
+    return { shopSortMode: mode } satisfies PreferencesState;
+  }
+  return defaults;
+}
+
+function normaliseAutomation(automation?: Partial<AutomationState>): AutomationState {
+  const defaults = createDefaultAutomation();
+  const autoBuy = automation?.autoBuy;
+  const roi = autoBuy?.roi;
+  const reserve = autoBuy?.reserve;
+
+  return {
+    autoBuy: {
+      enabled: typeof autoBuy?.enabled === 'boolean' ? autoBuy.enabled : defaults.autoBuy.enabled,
+      roi: {
+        enabled: typeof roi?.enabled === 'boolean' ? roi.enabled : defaults.autoBuy.roi.enabled,
+        thresholdSeconds: clampNumber(
+          roi?.thresholdSeconds,
+          AUTO_BUY_ROI_MIN,
+          AUTO_BUY_ROI_MAX,
+          defaults.autoBuy.roi.thresholdSeconds,
+        ),
+      },
+      reserve: {
+        enabled: typeof reserve?.enabled === 'boolean' ? reserve.enabled : defaults.autoBuy.reserve.enabled,
+        percent: clampNumber(
+          reserve?.percent,
+          AUTO_BUY_RESERVE_MIN,
+          AUTO_BUY_RESERVE_MAX,
+          defaults.autoBuy.reserve.percent,
+        ),
+      },
+    },
+  } satisfies AutomationState;
+}
+
+function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return fallback;
+  }
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV3 {
   const now = Date.now();
   return normalisePersistedState({
     v: SAVE_VERSION,
@@ -153,6 +228,8 @@ function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV2 {
     lastSeenAt: data.time ?? now,
     locale: data.locale,
     muted: data.muted,
+    preferences: createDefaultPreferences(),
+    automation: createDefaultAutomation(),
   });
 }
 
@@ -232,24 +309,30 @@ export function migrate(): void {
   }
 }
 
-export function load(): PersistedStateV2 | null {
+export function load(): PersistedStateV3 | null {
   try {
     const raw = window.localStorage.getItem(SAVE_KEY);
     if (!raw) {
       return null;
     }
 
-    const parsed = JSON.parse(raw) as PersistedStateV2 | PersistedStateV1Legacy | null;
+    const parsed = JSON.parse(raw) as PersistedStateV3 | PersistedStateV2 | PersistedStateV1Legacy | null;
     if (!parsed || typeof parsed !== 'object' || parsed === null) {
       return null;
     }
 
     if (parsed.v === SAVE_VERSION) {
-      return normalisePersistedState(parsed as PersistedStateV2);
+      return normalisePersistedState(parsed as PersistedStateV3);
     }
 
     if (parsed.v === 1) {
       const upgraded = upgradeFromLegacy(parsed as PersistedStateV1Legacy);
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
+      return upgraded;
+    }
+
+    if (parsed.v === 2) {
+      const upgraded = normalisePersistedState(parsed as PersistedStateV2);
       window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
       return upgraded;
     }
@@ -261,7 +344,7 @@ export function load(): PersistedStateV2 | null {
   }
 }
 
-export function initState(saved: PersistedStateV2 | null): GameState {
+export function initState(saved: PersistedStateV3 | null): GameState {
   if (!saved) {
     return createDefaultState({
       locale: detectLocale(),
@@ -294,6 +377,8 @@ export function initState(saved: PersistedStateV2 | null): GameState {
     abilities: restoreAbilities(saved.abilities, now),
     time: saved.time ?? now,
     lastSeenAt: lastSeen,
+    preferences: normalisePreferences(saved.preferences),
+    automation: normaliseAutomation(saved.automation),
     locale: saved.locale ?? detectLocale(),
     muted: saved.muted ?? loadAudioPreference(),
   });
@@ -323,7 +408,7 @@ export function initState(saved: PersistedStateV2 | null): GameState {
 export function save(state: GameState): void {
   const timestamp = Date.now();
   state.lastSeenAt = timestamp;
-  const payload: PersistedStateV2 = {
+  const payload: PersistedStateV3 = {
     v: SAVE_VERSION,
     buds: state.buds.toString(),
     total: state.total.toString(),
@@ -344,6 +429,8 @@ export function save(state: GameState): void {
     lastSeenAt: timestamp,
     locale: state.locale,
     muted: state.muted,
+    preferences: state.preferences,
+    automation: state.automation,
   };
 
   window.localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
@@ -351,7 +438,7 @@ export function save(state: GameState): void {
 
 export function exportSave(state: GameState): string {
   const timestamp = Date.now();
-  const payload: PersistedStateV2 = {
+  const payload: PersistedStateV3 = {
     v: SAVE_VERSION,
     buds: state.buds.toString(),
     total: state.total.toString(),
@@ -372,6 +459,8 @@ export function exportSave(state: GameState): string {
     lastSeenAt: state.lastSeenAt,
     locale: state.locale,
     muted: state.muted,
+    preferences: state.preferences,
+    automation: state.automation,
   };
 
   const json = JSON.stringify(payload);
@@ -380,13 +469,23 @@ export function exportSave(state: GameState): string {
 
 export function importSave(encoded: string): GameState {
   const decoded = decodeURIComponent(escape(atob(encoded.trim())));
-  const parsed = JSON.parse(decoded) as PersistedStateV2 | PersistedStateV1Legacy;
+  const parsed = JSON.parse(decoded) as PersistedStateV3 | PersistedStateV2 | PersistedStateV1Legacy;
 
   if (!parsed || !parsed.v) {
     throw new Error('Unbekanntes Save-Format');
   }
 
-  const normalised = parsed.v === 1 ? upgradeFromLegacy(parsed) : normalisePersistedState(parsed as PersistedStateV2);
+  let normalised: PersistedStateV3;
+  if (parsed.v === 1) {
+    normalised = upgradeFromLegacy(parsed as PersistedStateV1Legacy);
+  } else if (parsed.v === 2) {
+    normalised = normalisePersistedState(parsed as PersistedStateV2);
+  } else if (parsed.v === SAVE_VERSION) {
+    normalised = normalisePersistedState(parsed as PersistedStateV3);
+  } else {
+    throw new Error('Unbekannte Save-Version');
+  }
+
   window.localStorage.setItem(SAVE_KEY, JSON.stringify(normalised));
   return initState(normalised);
 }
