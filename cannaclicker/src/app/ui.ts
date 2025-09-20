@@ -234,7 +234,8 @@ function buildUI(state: GameState): UIRefs {
   }
 
   root.innerHTML = "";
-  root.className = "mx-auto flex w-full max-w-6xl flex-col gap-4 p-4";
+  root.className =
+    "mx-auto flex w-full max-w-[92rem] flex-col gap-6 px-4 pb-8 pt-4 sm:px-6 lg:px-10";
 
   const heroImageSet = `image-set(url("${withBase("img/bg-hero-1920.png")}") type("image/png") 1x, url("${withBase("img/bg-hero-2560.png")}") type("image/png") 2x)`;
   document.documentElement.style.setProperty("--hero-image", heroImageSet);
@@ -258,7 +259,8 @@ function buildUI(state: GameState): UIRefs {
   ]);
 
   const layout = document.createElement("div");
-  layout.className = "grid gap-4 lg:grid-cols-[1fr_1fr] xl:gap-6";
+  layout.className =
+    "grid gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] xl:gap-6 2xl:gap-8";
   root.appendChild(layout);
 
   const primaryColumn = document.createElement("div");
@@ -270,28 +272,28 @@ function buildUI(state: GameState): UIRefs {
   layout.append(primaryColumn, secondaryColumn);
 
   const headerCard = document.createElement("section");
-  headerCard.className = "card fade-in space-y-4";
+  headerCard.className = "card fade-in space-y-3";
 
   const title = document.createElement("h1");
   title.className = "text-4xl md:text-5xl font-extrabold tracking-tight text-leaf-200 drop-shadow-[0_14px_28px_rgba(16,185,129,0.35)]";
   title.textContent = "CannaBies";
   headerCard.appendChild(title);
 
-  const statsGrid = document.createElement("div");
-  statsGrid.className = "stats-grid text-neutral-300";
-  headerCard.appendChild(statsGrid);
+  const statsList = document.createElement("dl");
+  statsList.className = "stats-list";
+  headerCard.appendChild(statsList);
 
   const statsLabels = new Map<string, HTMLElement>();
   const statsMeta = new Map<string, HTMLElement>();
 
-  const budsStat = createStatBlock("stats.buds", statsGrid, statsLabels, statsMeta);
-  const bpsStat = createStatBlock("stats.bps", statsGrid, statsLabels, statsMeta);
-  const bpcStat = createStatBlock("stats.bpc", statsGrid, statsLabels, statsMeta);
-  const totalStat = createStatBlock("stats.total", statsGrid, statsLabels, statsMeta);
-  const seedsStat = createStatBlock("stats.seeds", statsGrid, statsLabels, statsMeta);
+  const budsStat = createStatBlock("stats.buds", statsList, statsLabels, statsMeta);
+  const bpsStat = createStatBlock("stats.bps", statsList, statsLabels, statsMeta);
+  const bpcStat = createStatBlock("stats.bpc", statsList, statsLabels, statsMeta);
+  const totalStat = createStatBlock("stats.total", statsList, statsLabels, statsMeta);
+  const seedsStat = createStatBlock("stats.seeds", statsList, statsLabels, statsMeta);
   const prestigeStat = createStatBlock(
     "stats.prestigeMult",
-    statsGrid,
+    statsList,
     statsLabels,
     statsMeta,
   );
@@ -421,7 +423,7 @@ function buildUI(state: GameState): UIRefs {
 function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
   const header = document.createElement("header");
   header.className =
-    "mx-auto flex w-full max-w-6xl flex-col items-start gap-4 rounded-3xl border border-white/10 bg-neutral-900/80 px-4 py-4 shadow-[0_24px_60px_rgba(10,12,21,0.55)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6";
+    "flex w-full flex-col items-start gap-4 rounded-3xl border border-white/10 bg-neutral-900/80 px-4 py-4 shadow-[0_24px_60px_rgba(10,12,21,0.55)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 lg:px-8";
 
   const brand = document.createElement("div");
   brand.className =
@@ -1394,37 +1396,28 @@ function createStatBlock(
   labelRegistry: Map<string, HTMLElement>,
   metaRegistry: Map<string, HTMLElement>,
 ): HTMLElement {
-  const group = document.createElement("article");
-  group.className = "stat-card";
-  group.dataset.variant = key;
+  const item = document.createElement("div");
+  item.className = "stat-line";
+  item.dataset.variant = key;
 
-  const header = document.createElement("div");
-  header.className = "stat-card__header";
-
-  const indicator = document.createElement("span");
-  indicator.className = "stat-card__indicator";
-  indicator.setAttribute("aria-hidden", "true");
-
-  const label = document.createElement("span");
-  label.className = "stat-card__label";
+  const label = document.createElement("dt");
+  label.className = "stat-line__label";
   labelRegistry.set(key, label);
 
-  header.append(indicator, label);
-
-  const valueWrapper = document.createElement("div");
-  valueWrapper.className = "stat-card__value";
+  const valueWrapper = document.createElement("dd");
+  valueWrapper.className = "stat-line__value";
 
   const value = document.createElement("span");
-  value.className = "stat-card__number";
+  value.className = "stat-line__number";
 
   const meta = document.createElement("span");
-  meta.className = "stat-card__meta";
+  meta.className = "stat-line__meta";
   metaRegistry.set(key, meta);
 
   valueWrapper.append(value, meta);
 
-  group.append(header, valueWrapper);
-  wrapper.appendChild(group);
+  item.append(label, valueWrapper);
+  wrapper.appendChild(item);
 
   return value;
 }
