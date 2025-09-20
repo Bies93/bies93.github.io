@@ -27,7 +27,7 @@ export function recalcDerivedValues(state: GameState): void {
   const buildingProduction = Array.from(itemById.entries()).map(([id, definition]) => {
     const owned = state.items[id] ?? 0;
     const baseMultiplier = buildingMultipliers.get(id) ?? new Decimal(1);
-    const tierMultiplier = getTierMultiplier(owned);
+    const tierMultiplier = getTierMultiplier(definition, owned);
     state.temp.buildingBaseMultipliers[id] = baseMultiplier;
     state.temp.buildingTierMultipliers[id] = tierMultiplier;
 
@@ -43,8 +43,8 @@ export function recalcDerivedValues(state: GameState): void {
   const baseMultiplier = globalMultiplier.mul(achievementMultiplier).mul(prestigeMultiplier);
   const researchBpsMult = state.temp.researchBpsMult ?? new Decimal(1);
   const researchBpcMult = state.temp.researchBpcMult ?? new Decimal(1);
-  const abilityBpsMult = state.abilities.overdrive?.active ? new Decimal(state.abilities.overdrive.multiplier) : new Decimal(1);
-  const abilityBpcMult = state.abilities.burst?.active ? new Decimal(state.abilities.burst.multiplier) : new Decimal(1);
+  const abilityBpsMult = new Decimal(abilityMultiplier(state, 'overdrive'));
+  const abilityBpcMult = new Decimal(abilityMultiplier(state, 'burst'));
 
   const totalBpsMultiplier = baseMultiplier.mul(researchBpsMult).mul(abilityBpsMult);
   const totalBpcMultiplier = baseMultiplier.mul(clickMultiplier).mul(researchBpcMult).mul(abilityBpcMult);

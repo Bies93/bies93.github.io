@@ -144,6 +144,15 @@ export function getAbilityLabel(state: GameState, id: AbilityId, locale: LocaleK
   return t(locale, ability.nameKey);
 }
 
+export function abilityMultiplier(state: GameState, id: AbilityId): number {
+  const runtime = getRuntime(state, id);
+  if (!runtime) {
+    return 1;
+  }
+
+  return runtime.active ? runtime.multiplier : 1;
+}
+
 export function reapplyAbilityEffects(state: GameState): void {
   for (const ability of ABILITIES) {
     const runtime = getRuntime(state, ability.id);
