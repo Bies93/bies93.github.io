@@ -1,4 +1,4 @@
-﻿@tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -589,4 +589,15 @@ button {
 
 
 
+
+
+
+
+.toast-title {
+  @apply block font-semibold;
+}
+
+.toast-message {
+  @apply block text-neutral-200;
+}
 

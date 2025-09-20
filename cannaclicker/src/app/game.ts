@@ -5,7 +5,7 @@ import { upgrades } from '../data/upgrades';
 import { getItemCost, getTierMultiplier } from './shop';
 import type { GameState } from './state';
 import { sum, toDecimal } from './math';
-import { collectResearchBonuses } from './research';
+import { applyResearchEffects } from './research';
 import { abilityMultiplier } from './abilities';
 
 export function handleManualClick(state: GameState): Decimal {
@@ -16,16 +16,11 @@ export function handleManualClick(state: GameState): Decimal {
 }
 
 export function recalcDerivedValues(state: GameState): void {
+  applyResearchEffects(state);
+
   const { globalMultiplier, buildingMultipliers, clickMultiplier } = collectUpgradeMultipliers(state);
-  const researchBonuses = collectResearchBonuses(state);
-  state.temp.costMultiplier = researchBonuses.costMultiplier;
-  state.temp.autoClickRate = researchBonuses.autoClickRate;
-  state.temp.overdriveDurationMult = researchBonuses.overdriveDurationMult;
   state.temp.buildingBaseMultipliers = {};
   state.temp.buildingTierMultipliers = {};
-
-  const abilityBpsMult = new Decimal(abilityMultiplier(state, 'overdrive'));
-  const abilityBpcMult = new Decimal(abilityMultiplier(state, 'burst_click'));
 
   const prestigeMultiplier = state.prestige.mult;
 
@@ -46,14 +41,18 @@ export function recalcDerivedValues(state: GameState): void {
 
   const achievementMultiplier = collectAchievementMultiplier(state);
   const baseMultiplier = globalMultiplier.mul(achievementMultiplier).mul(prestigeMultiplier);
+  const researchBpsMult = state.temp.researchBpsMult ?? new Decimal(1);
+  const researchBpcMult = state.temp.researchBpcMult ?? new Decimal(1);
+  const abilityBpsMult = state.abilities.overdrive?.active ? new Decimal(state.abilities.overdrive.multiplier) : new Decimal(1);
+  const abilityBpcMult = state.abilities.burst?.active ? new Decimal(state.abilities.burst.multiplier) : new Decimal(1);
 
-  const totalBpsMultiplier = baseMultiplier.mul(researchBonuses.bpsMult).mul(abilityBpsMult);
-  const totalBpcMultiplier = baseMultiplier.mul(clickMultiplier).mul(researchBonuses.bpcMult).mul(abilityBpcMult);
+  const totalBpsMultiplier = baseMultiplier.mul(researchBpsMult).mul(abilityBpsMult);
+  const totalBpcMultiplier = baseMultiplier.mul(clickMultiplier).mul(researchBpcMult).mul(abilityBpcMult);
 
   state.bps = sum(...buildingProduction).mul(totalBpsMultiplier);
   state.bpc = new Decimal(1).mul(totalBpcMultiplier);
-  state.temp.bpsMult = totalBpsMultiplier;
-  state.temp.bpcMult = totalBpcMultiplier;
+  state.temp.totalBpsMult = totalBpsMultiplier;
+  state.temp.totalBpcMult = totalBpcMultiplier;
 }
 
 export function buyItem(state: GameState, itemId: string, quantity = 1): boolean {
@@ -144,3 +143,5 @@ function collectAchievementMultiplier(state: GameState): Decimal {
     return acc.mul(achievement.rewardMultiplier);
   }, new Decimal(1));
 }
+
+

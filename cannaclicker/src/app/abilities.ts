@@ -1,15 +1,6 @@
-import { formatDecimal } from './math';
-import type { GameState, AbilityId } from './state';
-
-export interface AbilityDefinition {
-  id: AbilityId;
-  label: Record<'de' | 'en', string>;
-  description: Record<'de' | 'en', string>;
-  duration: number;
-  cooldown: number;
-  multiplier: number;
-  affects: 'bps' | 'bpc';
-}
+import { ABILITIES, type Ability, type AbilityId } from "../data/abilities";
+import type { GameState } from "./state";
+import { t, type LocaleKey } from "./i18n";
 
 export interface AbilityProgress {
   active: boolean;
@@ -18,90 +9,82 @@ export interface AbilityProgress {
   readyIn: number;
 }
 
-const definitions: Record<AbilityId, AbilityDefinition> = {
-  overdrive: {
-    id: 'overdrive',
-    label: {
-      de: 'Overdrive',
-      en: 'Overdrive',
-    },
-    description: {
-      de: 'Verfünffacht für kurze Zeit deine Buds pro Sekunde.',
-      en: 'Quintuples your buds per second for a short time.',
-    },
-    duration: 10,
-    cooldown: 60,
-    multiplier: 5,
-    affects: 'bps',
-  },
-  burst_click: {
-    id: 'burst_click',
-    label: {
-      de: 'Burst Click',
-      en: 'Burst Click',
-    },
-    description: {
-      de: 'Multipliziert deine Buds pro Klick für wenige Sekunden.',
-      en: 'Multiplies your buds per click for a few seconds.',
-    },
-    duration: 5,
-    cooldown: 45,
-    multiplier: 20,
-    affects: 'bpc',
-  },
-};
+const abilityById = new Map<AbilityId, Ability>(ABILITIES.map((ability) => [ability.id, ability]));
 
-export function getAbilityDefinition(id: AbilityId): AbilityDefinition {
-  return definitions[id];
+export function listAbilities(): Ability[] {
+  return ABILITIES;
 }
 
-export function listAbilities(): AbilityDefinition[] {
-  return Object.values(definitions);
+export function getAbilityDefinition(id: AbilityId): Ability | undefined {
+  return abilityById.get(id);
+}
+
+function computeAbilityStrength(state: GameState, ability: Ability): number {
+  if (ability.id === "overdrive") {
+    return ability.baseMultiplier * (1 + state.temp.abilityPowerBonus);
+  }
+
+  return ability.baseMultiplier;
+}
+
+function getRuntime(state: GameState, id: AbilityId) {
+  return state.abilities[id];
 }
 
 export function isAbilityReady(state: GameState, id: AbilityId, now = Date.now()): boolean {
-  const ability = state.abilities[id];
-  if (!ability) {
+  const runtime = getRuntime(state, id);
+  if (!runtime) {
     return false;
   }
 
-  if (ability.active) {
-    return ability.endsAt <= now;
+  if (runtime.active) {
+    return runtime.endsAt <= now;
   }
 
-  return ability.readyAt <= now;
+  return runtime.readyAt <= now;
 }
 
 export function activateAbility(state: GameState, id: AbilityId, now = Date.now()): boolean {
-  const definition = definitions[id];
-  const runtime = state.abilities[id];
-  if (!definition || !runtime) {
+  const ability = abilityById.get(id);
+  const runtime = getRuntime(state, id);
+  if (!ability || !runtime) {
     return false;
   }
 
-  if (!isAbilityReady(state, id, now)) {
+  if (runtime.active || !isAbilityReady(state, id, now)) {
     return false;
   }
 
-  const durationMultiplier = id === 'overdrive' ? state.temp.overdriveDurationMult : 1;
-  const duration = definition.duration * durationMultiplier;
   runtime.active = true;
-  runtime.endsAt = now + duration * 1000;
-  runtime.readyAt = runtime.endsAt + definition.cooldown * 1000;
+  runtime.multiplier = computeAbilityStrength(state, ability);
+  runtime.endsAt = now + ability.durationSec * 1000;
+  runtime.readyAt = runtime.endsAt + ability.cooldownSec * 1000;
   return true;
+}
+
+export function endAbility(state: GameState, id: AbilityId): void {
+  const runtime = getRuntime(state, id);
+  if (!runtime || !runtime.active) {
+    return;
+  }
+
+  runtime.active = false;
+  runtime.endsAt = Date.now();
+  runtime.multiplier = 1;
 }
 
 export function updateAbilityTimers(state: GameState, now = Date.now()): boolean {
   let changed = false;
-  for (const definition of listAbilities()) {
-    const runtime = state.abilities[definition.id];
+  for (const ability of ABILITIES) {
+    const runtime = getRuntime(state, ability.id);
     if (!runtime) {
       continue;
     }
 
-    if (runtime.active && runtime.endsAt <= now) {
+    if (runtime.active && now >= runtime.endsAt) {
       runtime.active = false;
       runtime.endsAt = now;
+      runtime.multiplier = 1;
       changed = true;
     }
 
@@ -114,48 +97,64 @@ export function updateAbilityTimers(state: GameState, now = Date.now()): boolean
 }
 
 export function getAbilityProgress(state: GameState, id: AbilityId, now = Date.now()): AbilityProgress {
-  const runtime = state.abilities[id];
-  const definition = definitions[id];
-  if (!runtime || !definition) {
+  const runtime = getRuntime(state, id);
+  const ability = abilityById.get(id);
+  if (!runtime || !ability) {
     return { active: false, remaining: 0, cooldown: 0, readyIn: 0 } satisfies AbilityProgress;
   }
 
   const remaining = runtime.active ? Math.max(0, runtime.endsAt - now) / 1000 : 0;
   const readyIn = runtime.readyAt > now ? (runtime.readyAt - now) / 1000 : 0;
-  const cooldown = definition.cooldown;
 
   return {
     active: runtime.active,
     remaining,
-    cooldown,
+    cooldown: ability.cooldownSec,
     readyIn,
   } satisfies AbilityProgress;
 }
 
-export function abilityMultiplier(state: GameState, id: AbilityId): number {
-  const definition = definitions[id];
-  const runtime = state.abilities[id];
-  if (!definition || !runtime) {
-    return 1;
+export function formatAbilityTooltip(state: GameState, id: AbilityId, locale: LocaleKey): string {
+  const ability = abilityById.get(id);
+  if (!ability) {
+    return "";
   }
 
-  if (!runtime.active) {
-    return 1;
+  const strength = computeAbilityStrength(state, ability);
+  const base = t(locale, ability.descriptionKey, {
+    multiplier: strength.toFixed(2),
+    duration: ability.durationSec,
+    cooldown: ability.cooldownSec,
+  });
+
+  if (ability.id === "overdrive" && state.temp.abilityPowerBonus > 0) {
+    const bonusPercent = Math.round(state.temp.abilityPowerBonus * 100);
+    return `${base} (+${bonusPercent}%)`;
   }
 
-  return definition.multiplier;
+  return base;
 }
 
-export function formatAbilityTooltip(state: GameState, id: AbilityId, locale: 'de' | 'en'): string {
-  const definition = definitions[id];
-  if (!definition) {
-    return '';
+export function getAbilityLabel(state: GameState, id: AbilityId, locale: LocaleKey): string {
+  const ability = abilityById.get(id);
+  if (!ability) {
+    return "";
   }
 
-  const base = definition.description[locale];
-  if (definition.affects === 'bps') {
-    return `${base} (${formatDecimal(definition.multiplier)}× BPS)`;
-  }
+  return t(locale, ability.nameKey);
+}
 
-  return `${base} (${formatDecimal(definition.multiplier)}× BPC)`;
+export function reapplyAbilityEffects(state: GameState): void {
+  for (const ability of ABILITIES) {
+    const runtime = getRuntime(state, ability.id);
+    if (!runtime) {
+      continue;
+    }
+
+    if (runtime.active) {
+      runtime.multiplier = computeAbilityStrength(state, ability);
+    } else {
+      runtime.multiplier = 1;
+    }
+  }
 }

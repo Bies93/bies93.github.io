@@ -83,7 +83,7 @@ export function getShopEntries(state: GameState): ShopEntry[] {
     const currentProduction = baseProduction.mul(owned).mul(baseMultiplier).mul(currentTierMultiplier);
     const nextProduction = baseProduction.mul(owned + 1).mul(baseMultiplier).mul(nextTierMultiplier);
     const deltaBase = nextProduction.sub(currentProduction);
-    const deltaBps = deltaBase.mul(state.temp.bpsMult);
+    const deltaBps = deltaBase.mul(state.temp.totalBpsMult);
     const payback = paybackSeconds(cost, deltaBps);
     const roi = deltaBps.lessThanOrEqualTo(0) ? null : Number(cost.div(deltaBps).toFixed(2));
 

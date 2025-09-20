@@ -9,16 +9,20 @@ import {
   type AbilityId,
   type AbilityState,
   type AbilityRuntimeState,
-  type SaveV3,
   type PreferencesState,
   type AutomationState,
+  type MetaState,
   AUTO_BUY_ROI_MIN,
   AUTO_BUY_ROI_MAX,
   AUTO_BUY_RESERVE_MIN,
   AUTO_BUY_RESERVE_MAX,
 } from './state';
 import { computePrestigeMultiplier } from './prestige';
+import { OFFLINE_CAP_MS } from './balance';
+import { applyResearchEffects } from './research';
+import { reapplyAbilityEffects } from './abilities';
 import { DEFAULT_LOCALE, resolveLocale, type LocaleKey } from './i18n';
+import { createDefaultSettings, type SettingsState } from './settings';
 
 const SAVE_KEY = 'cannaclicker:save:v1';
 
@@ -33,6 +37,12 @@ interface PersistedPrestigeState {
   mult?: string;
   lifetimeBuds?: string;
   lastResetAt?: number;
+  version?: number;
+}
+
+interface PersistedMetaState {
+  lastSeenAt?: number;
+  lastBpsAtSave?: number;
 }
 
 export interface PersistedStateV1Legacy {
@@ -49,7 +59,7 @@ export interface PersistedStateV1Legacy {
   muted?: boolean;
 }
 
-export type PersistedStateV2 = Omit<SaveV3, 'buds' | 'total' | 'bps' | 'bpc' | 'prestige' | 'abilities' | 'temp' | 'preferences' | 'automation'> & {
+export interface PersistedStateV2 {
   v: 2;
   buds: string;
   total: string;
@@ -57,59 +67,87 @@ export type PersistedStateV2 = Omit<SaveV3, 'buds' | 'total' | 'bps' | 'bpc' | '
   bpc: string;
   researchOwned: string[];
   prestige: PersistedPrestigeState;
-  abilities: Record<AbilityId, PersistedAbilityState>;
+  abilities: Record<string, PersistedAbilityState>;
   lastSeenAt: number;
+  items?: Record<string, number>;
+  upgrades?: Record<string, boolean>;
+  achievements?: Record<string, boolean>;
   locale?: LocaleKey;
   muted?: boolean;
-};
+}
 
-export type PersistedStateV3 = Omit<SaveV3, 'buds' | 'total' | 'bps' | 'bpc' | 'prestige' | 'abilities' | 'temp'> & {
+export interface PersistedStateV3 {
+  v: 3;
+  buds: string;
+  total: string;
+  bps: string;
+  bpc: string;
+  items?: Record<string, number>;
+  upgrades?: Record<string, boolean>;
+  achievements?: Record<string, boolean>;
+  researchOwned?: string[];
+  prestige: PersistedPrestigeState;
+  abilities?: Record<string, PersistedAbilityState>;
+  time?: number;
+  lastSeenAt?: number;
+  locale?: LocaleKey;
+  muted?: boolean;
+  preferences?: Partial<PreferencesState>;
+  automation?: Partial<AutomationState>;
+}
+
+export interface PersistedStateV4 {
+  v: 4;
+  buds: string;
+  total: string;
+  bps: string;
+  bpc: string;
+  items?: Record<string, number>;
+  upgrades?: Record<string, boolean>;
+  achievements?: Record<string, boolean>;
+  researchOwned: string[];
+  prestige: PersistedPrestigeState;
+  abilities: Record<AbilityId, PersistedAbilityState>;
+  time?: number;
+  lastSeenAt?: number;
+  locale?: LocaleKey;
+  muted?: boolean;
+  preferences?: Partial<PreferencesState>;
+  automation?: Partial<AutomationState>;
+  settings?: Partial<SettingsState>;
+  meta?: PersistedMetaState;
+}
+
+export interface PersistedStateV5 {
   v: typeof SAVE_VERSION;
   buds: string;
   total: string;
   bps: string;
   bpc: string;
+  items: Record<string, number>;
+  upgrades: Record<string, boolean>;
+  achievements: Record<string, boolean>;
   researchOwned: string[];
   prestige: PersistedPrestigeState;
   abilities: Record<AbilityId, PersistedAbilityState>;
+  time: number;
   lastSeenAt: number;
   locale?: LocaleKey;
   muted?: boolean;
   preferences?: Partial<PreferencesState>;
   automation?: Partial<AutomationState>;
-};
-
-function clampOfflineDuration(elapsedMs: number): number {
-  if (!Number.isFinite(elapsedMs) || elapsedMs <= 0) {
-    return 0;
-  }
-
-  const max = 8 * 60 * 60 * 1000;
-  return Math.min(max, Math.max(0, Math.floor(elapsedMs)));
+  settings: SettingsState;
+  meta: PersistedMetaState;
 }
-
-interface OfflineReward {
-  earned: Decimal;
-  duration: number;
-}
-
-function calculateOfflineProgress(bps: Decimal, elapsedMs: number): OfflineReward {
-  const clamped = clampOfflineDuration(elapsedMs);
-  if (clamped <= 0) {
-    return { earned: new Decimal(0), duration: 0 };
-  }
-
-  return {
-    earned: ensureDecimal(bps).mul(clamped).div(1000),
-    duration: clamped,
-  };
-}
-
-function normalisePersistedState(data: PersistedStateV2 | PersistedStateV3): PersistedStateV3 {
+function normalisePersistedState(
+  data: PersistedStateV2 | PersistedStateV3 | PersistedStateV4 | PersistedStateV5,
+): PersistedStateV5 {
   const now = Date.now();
   const prestige = data.prestige ?? {};
-  const preferences = normalisePreferences(data.preferences);
-  const automation = normaliseAutomation(data.automation);
+  const preferences = normalisePreferences((data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5).preferences);
+  const automation = normaliseAutomation((data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5).automation);
+  const settings = normaliseSettings((data as PersistedStateV4 | PersistedStateV5).settings);
+  const meta = normaliseMeta((data as PersistedStateV4 | PersistedStateV5).meta, (data as any).lastSeenAt, now);
 
   return {
     v: SAVE_VERSION,
@@ -120,34 +158,39 @@ function normalisePersistedState(data: PersistedStateV2 | PersistedStateV3): Per
     items: data.items ?? {},
     upgrades: data.upgrades ?? {},
     achievements: data.achievements ?? {},
-    researchOwned: Array.isArray(data.researchOwned) ? [...new Set(data.researchOwned)] : [],
+    researchOwned: Array.isArray((data as any).researchOwned)
+      ? [...new Set((data as any).researchOwned)]
+      : [],
     prestige: {
       seeds: prestige.seeds ?? 0,
       mult: prestige.mult ?? '1',
       lifetimeBuds: prestige.lifetimeBuds ?? data.total ?? '0',
-      lastResetAt: prestige.lastResetAt ?? data.lastSeenAt ?? data.time ?? now,
+      lastResetAt: prestige.lastResetAt ?? (data as any).lastSeenAt ?? (data as any).time ?? now,
+      version: Number.isFinite(prestige.version) ? Number(prestige.version) : 1,
     },
-    abilities: normalisePersistedAbilities(data.abilities),
-    time: data.time ?? now,
-    lastSeenAt: data.lastSeenAt ?? data.time ?? now,
+    abilities: normalisePersistedAbilities((data as any).abilities),
+    time: (data as any).time ?? now,
+    lastSeenAt: meta.lastSeenAt,
     locale: data.locale,
     muted: data.muted,
     preferences,
     automation,
-  };
+    settings,
+    meta,
+  } satisfies PersistedStateV5;
 }
-
 function normalisePersistedAbilities(
-  abilities?: Record<AbilityId, PersistedAbilityState>,
+  abilities?: Record<string, PersistedAbilityState>,
 ): Record<AbilityId, PersistedAbilityState> {
   const now = Date.now();
   const normalised: Record<AbilityId, PersistedAbilityState> = {
     overdrive: {},
-    burst_click: {},
+    burst: {},
   };
 
   for (const id of ABILITY_IDS) {
-    const entry = abilities?.[id] ?? {};
+    const legacyKey = id === "burst" ? "burst_click" : id;
+    const entry = abilities?.[id] ?? abilities?.[legacyKey] ?? {};
     normalised[id] = {
       active: entry.active ?? false,
       endsAt: entry.endsAt ?? now,
@@ -156,6 +199,28 @@ function normalisePersistedAbilities(
   }
 
   return normalised;
+}
+
+function normaliseSettings(settings?: Partial<SettingsState>): SettingsState {
+  const defaults = createDefaultSettings();
+  if (!settings) {
+    return defaults;
+  }
+
+  return {
+    showOfflineEarnings: typeof settings.showOfflineEarnings === 'boolean' ? settings.showOfflineEarnings : defaults.showOfflineEarnings,
+  } satisfies SettingsState;
+}
+
+function normaliseMeta(meta: PersistedMetaState | undefined, fallbackLastSeen: number | undefined, now: number): MetaState {
+  const lastSeen = Number.isFinite(meta?.lastSeenAt) ? Number(meta!.lastSeenAt) : fallbackLastSeen ?? now;
+  const safeLastSeen = lastSeen > 0 ? Math.floor(lastSeen) : now;
+  const lastBps = Number.isFinite(meta?.lastBpsAtSave) ? Number(meta!.lastBpsAtSave) : 0;
+
+  return {
+    lastSeenAt: safeLastSeen,
+    lastBpsAtSave: lastBps >= 0 ? lastBps : 0,
+  } satisfies MetaState;
 }
 
 function normalisePreferences(preferences?: Partial<PreferencesState>): PreferencesState {
@@ -205,7 +270,7 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
   return Math.min(max, Math.max(min, Math.round(value)));
 }
 
-function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV3 {
+function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV5 {
   const now = Date.now();
   return normalisePersistedState({
     v: SAVE_VERSION,
@@ -234,16 +299,17 @@ function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV3 {
 }
 
 function restoreAbilities(
-  abilities: Record<AbilityId, PersistedAbilityState> | undefined,
+  abilities: Record<string, PersistedAbilityState> | undefined,
   now: number,
 ): AbilityState {
   const restored: AbilityState = {
-    overdrive: { active: false, endsAt: now, readyAt: now },
-    burst_click: { active: false, endsAt: now, readyAt: now },
+    overdrive: { active: false, endsAt: now, readyAt: now, multiplier: 1 },
+    burst: { active: false, endsAt: now, readyAt: now, multiplier: 1 },
   };
 
   for (const id of ABILITY_IDS) {
-    const entry = abilities?.[id];
+    const legacyKey = id === "burst" ? "burst_click" : id;
+    const entry = abilities?.[id] ?? abilities?.[legacyKey];
     if (!entry) {
       continue;
     }
@@ -256,6 +322,7 @@ function restoreAbilities(
       active,
       endsAt: active ? endsAt : now,
       readyAt,
+      multiplier: 1,
     } satisfies AbilityRuntimeState;
   }
 
@@ -291,7 +358,7 @@ function serialiseAbilities(state: AbilityState): Record<AbilityId, PersistedAbi
   }, {} as Record<AbilityId, PersistedAbilityState>);
 }
 
-const ABILITY_IDS: AbilityId[] = ['overdrive', 'burst_click'];
+const ABILITY_IDS: AbilityId[] = ['overdrive', 'burst'];
 
 export function migrate(): void {
   const raw = window.localStorage.getItem(SAVE_KEY);
@@ -309,30 +376,48 @@ export function migrate(): void {
   }
 }
 
-export function load(): PersistedStateV3 | null {
+export function load(): PersistedStateV5 | null {
   try {
     const raw = window.localStorage.getItem(SAVE_KEY);
     if (!raw) {
       return null;
     }
 
-    const parsed = JSON.parse(raw) as PersistedStateV3 | PersistedStateV2 | PersistedStateV1Legacy | null;
+    const parsed = JSON.parse(raw) as
+      | PersistedStateV5
+      | PersistedStateV4
+      | PersistedStateV3
+      | PersistedStateV2
+      | PersistedStateV1Legacy
+      | null;
     if (!parsed || typeof parsed !== 'object' || parsed === null) {
       return null;
     }
 
     if (parsed.v === SAVE_VERSION) {
-      return normalisePersistedState(parsed as PersistedStateV3);
+      return normalisePersistedState(parsed as PersistedStateV5);
     }
 
-    if (parsed.v === 1) {
-      const upgraded = upgradeFromLegacy(parsed as PersistedStateV1Legacy);
+    if (parsed.v === 4) {
+      const upgraded = normalisePersistedState(parsed as PersistedStateV4);
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
+      return upgraded;
+    }
+
+    if (parsed.v === 3) {
+      const upgraded = normalisePersistedState(parsed as PersistedStateV3);
       window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
       return upgraded;
     }
 
     if (parsed.v === 2) {
       const upgraded = normalisePersistedState(parsed as PersistedStateV2);
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
+      return upgraded;
+    }
+
+    if (parsed.v === 1) {
+      const upgraded = upgradeFromLegacy(parsed as PersistedStateV1Legacy);
       window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
       return upgraded;
     }
@@ -344,7 +429,7 @@ export function load(): PersistedStateV3 | null {
   }
 }
 
-export function initState(saved: PersistedStateV3 | null): GameState {
+export function initState(saved: PersistedStateV5 | null): GameState {
   if (!saved) {
     return createDefaultState({
       locale: detectLocale(),
@@ -353,10 +438,18 @@ export function initState(saved: PersistedStateV3 | null): GameState {
   }
 
   const now = Date.now();
-  const lastSeen = saved.lastSeenAt ?? saved.time ?? now;
   const prestigeSeeds = Math.max(0, Math.floor(saved.prestige?.seeds ?? 0));
   const prestigeMult = computePrestigeMultiplier(prestigeSeeds);
   const prestigeLifetime = ensureDecimal(saved.prestige?.lifetimeBuds ?? saved.total ?? '0');
+
+  const metaLastSeen = Number.isFinite(saved.meta?.lastSeenAt)
+    ? Math.floor(saved.meta!.lastSeenAt)
+    : saved.lastSeenAt ?? saved.time ?? now;
+  const safeLastSeen = metaLastSeen > 0 ? metaLastSeen : now;
+  const metaBps = Number.isFinite(saved.meta?.lastBpsAtSave) && saved.meta!.lastBpsAtSave >= 0
+    ? saved.meta!.lastBpsAtSave
+    : 0;
+  const initialMeta: MetaState = { lastSeenAt: safeLastSeen, lastBpsAtSave: metaBps };
 
   const state = createDefaultState({
     v: SAVE_VERSION,
@@ -373,29 +466,48 @@ export function initState(saved: PersistedStateV3 | null): GameState {
       mult: prestigeMult,
       lifetimeBuds: prestigeLifetime,
       lastResetAt: saved.prestige?.lastResetAt ?? saved.time ?? now,
+      version: saved.prestige?.version ?? 1,
     },
     abilities: restoreAbilities(saved.abilities, now),
     time: saved.time ?? now,
-    lastSeenAt: lastSeen,
+    lastSeenAt: safeLastSeen,
     preferences: normalisePreferences(saved.preferences),
     automation: normaliseAutomation(saved.automation),
+    settings: saved.settings,
+    meta: initialMeta,
     locale: saved.locale ?? detectLocale(),
     muted: saved.muted ?? loadAudioPreference(),
   });
 
-  const offline = calculateOfflineProgress(state.bps, now - lastSeen);
-  if (offline.earned.greaterThan(0)) {
-    state.buds = state.buds.add(offline.earned);
-    state.total = state.total.add(offline.earned);
-    const lifetime = state.prestige.lifetimeBuds.add(offline.earned);
+  applyResearchEffects(state);
+  reapplyAbilityEffects(state);
+
+  const rawDelta = now - state.meta.lastSeenAt;
+  const cappedDelta = Math.max(0, Math.min(rawDelta, OFFLINE_CAP_MS));
+  const fallbackBps = state.bps.toNumber();
+  const baseBps = Number.isFinite(state.meta.lastBpsAtSave)
+    ? state.meta.lastBpsAtSave
+    : Number.isFinite(fallbackBps) && fallbackBps > 0
+      ? fallbackBps
+      : 0;
+  const safeBps = baseBps >= 0 ? baseBps : 0;
+  state.meta.lastBpsAtSave = safeBps;
+  const earnedNumber = Math.floor(safeBps * (cappedDelta / 1000));
+
+  if (earnedNumber > 0) {
+    const offlineGain = new Decimal(earnedNumber);
+    state.buds = state.buds.add(offlineGain);
+    state.total = state.total.add(offlineGain);
+    const lifetime = state.prestige.lifetimeBuds.add(offlineGain);
     state.prestige.lifetimeBuds = lifetime.greaterThan(state.total) ? lifetime : state.total;
-    state.temp.offlineBuds = offline.earned;
-    state.temp.offlineDuration = offline.duration;
+    state.temp.offlineBuds = offlineGain;
+    state.temp.offlineDuration = cappedDelta;
   } else {
     state.temp.offlineBuds = null;
     state.temp.offlineDuration = 0;
   }
 
+  state.meta.lastSeenAt = now;
   state.lastSeenAt = now;
   state.time = now;
   state.prestige.mult = computePrestigeMultiplier(state.prestige.seeds);
@@ -408,7 +520,13 @@ export function initState(saved: PersistedStateV3 | null): GameState {
 export function save(state: GameState): void {
   const timestamp = Date.now();
   state.lastSeenAt = timestamp;
-  const payload: PersistedStateV3 = {
+  state.time = timestamp;
+  const bpsNumber = state.bps.toNumber();
+  const safeBps = Number.isFinite(bpsNumber) && bpsNumber >= 0 ? bpsNumber : 0;
+  state.meta.lastSeenAt = timestamp;
+  state.meta.lastBpsAtSave = safeBps;
+
+  const payload: PersistedStateV5 = {
     v: SAVE_VERSION,
     buds: state.buds.toString(),
     total: state.total.toString(),
@@ -423,6 +541,7 @@ export function save(state: GameState): void {
       mult: state.prestige.mult.toString(),
       lifetimeBuds: state.prestige.lifetimeBuds.toString(),
       lastResetAt: state.prestige.lastResetAt,
+      version: state.prestige.version,
     },
     abilities: serialiseAbilities(state.abilities),
     time: timestamp,
@@ -431,14 +550,26 @@ export function save(state: GameState): void {
     muted: state.muted,
     preferences: state.preferences,
     automation: state.automation,
-  };
+    settings: state.settings,
+    meta: {
+      lastSeenAt: state.meta.lastSeenAt,
+      lastBpsAtSave: state.meta.lastBpsAtSave,
+    },
+  } satisfies PersistedStateV5;
 
   window.localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
 }
 
 export function exportSave(state: GameState): string {
   const timestamp = Date.now();
-  const payload: PersistedStateV3 = {
+  state.lastSeenAt = timestamp;
+  state.time = timestamp;
+  const bpsNumber = state.bps.toNumber();
+  const safeBps = Number.isFinite(bpsNumber) && bpsNumber >= 0 ? bpsNumber : 0;
+  state.meta.lastSeenAt = timestamp;
+  state.meta.lastBpsAtSave = safeBps;
+
+  const payload: PersistedStateV5 = {
     v: SAVE_VERSION,
     buds: state.buds.toString(),
     total: state.total.toString(),
@@ -453,15 +584,21 @@ export function exportSave(state: GameState): string {
       mult: state.prestige.mult.toString(),
       lifetimeBuds: state.prestige.lifetimeBuds.toString(),
       lastResetAt: state.prestige.lastResetAt,
+      version: state.prestige.version,
     },
     abilities: serialiseAbilities(state.abilities),
     time: timestamp,
-    lastSeenAt: state.lastSeenAt,
+    lastSeenAt: timestamp,
     locale: state.locale,
     muted: state.muted,
     preferences: state.preferences,
     automation: state.automation,
-  };
+    settings: state.settings,
+    meta: {
+      lastSeenAt: state.meta.lastSeenAt,
+      lastBpsAtSave: state.meta.lastBpsAtSave,
+    },
+  } satisfies PersistedStateV5;
 
   const json = JSON.stringify(payload);
   return btoa(unescape(encodeURIComponent(json)));
@@ -469,19 +606,28 @@ export function exportSave(state: GameState): string {
 
 export function importSave(encoded: string): GameState {
   const decoded = decodeURIComponent(escape(atob(encoded.trim())));
-  const parsed = JSON.parse(decoded) as PersistedStateV3 | PersistedStateV2 | PersistedStateV1Legacy;
+  const parsed = JSON.parse(decoded) as
+    | PersistedStateV5
+    | PersistedStateV4
+    | PersistedStateV3
+    | PersistedStateV2
+    | PersistedStateV1Legacy;
 
   if (!parsed || !parsed.v) {
     throw new Error('Unbekanntes Save-Format');
   }
 
-  let normalised: PersistedStateV3;
+  let normalised: PersistedStateV5;
   if (parsed.v === 1) {
     normalised = upgradeFromLegacy(parsed as PersistedStateV1Legacy);
   } else if (parsed.v === 2) {
     normalised = normalisePersistedState(parsed as PersistedStateV2);
-  } else if (parsed.v === SAVE_VERSION) {
+  } else if (parsed.v === 3) {
     normalised = normalisePersistedState(parsed as PersistedStateV3);
+  } else if (parsed.v === 4) {
+    normalised = normalisePersistedState(parsed as PersistedStateV4);
+  } else if (parsed.v === SAVE_VERSION) {
+    normalised = normalisePersistedState(parsed as PersistedStateV5);
   } else {
     throw new Error('Unbekannte Save-Version');
   }
@@ -513,3 +659,18 @@ export function persistAudioPreference(muted: boolean): void {
     // ignore storage errors
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,137 +1,110 @@
-import { asset } from '../app/assets';
+import { asset } from "../app/assets";
 
-export type ResearchCostType = 'buds' | 'seeds';
-export type ResearchEffectType =
-  | 'BPC_MULT'
-  | 'BPS_MULT'
-  | 'COST_REDUCE_ALL'
-  | 'CLICK_AUTOMATION'
-  | 'ABILITY_OVERDRIVE_PLUS';
+export type ResearchCostType = "buds" | "seeds";
+
+export type EffectId =
+  | "BPC_MULT"
+  | "BPS_MULT"
+  | "COST_REDUCE_ALL"
+  | "CLICK_AUTOMATION"
+  | "ABILITY_OVERDRIVE_PLUS";
 
 export interface ResearchEffect {
-  type: ResearchEffectType;
-  value?: number;
+  id: EffectId;
+  v: number;
 }
 
 export interface ResearchNode {
   id: string;
-  name: Record<'de' | 'en', string>;
-  desc: Record<'de' | 'en', string>;
+  name: Record<"de" | "en", string>;
+  desc: Record<"de" | "en", string>;
   costType: ResearchCostType;
   cost: number;
   requires?: string[];
-  icon?: string;
   effects: ResearchEffect[];
+  icon?: string;
 }
 
-export const researchNodes: ResearchNode[] = [
+export const RESEARCH: ResearchNode[] = [
   {
-    id: 'potency_metrics',
+    id: "r_start_click",
     name: {
-      de: 'Potenz-Analysen',
-      en: 'Potency Analytics',
+      de: "Saubere Schnitte",
+      en: "Clean Cuts",
     },
     desc: {
-      de: 'Verfeinere deine Click-Technik für mehr Buds pro Klick.',
-      en: 'Refine click techniques for more buds per click.',
+      de: "Verbessert die Klick-Effizienz leicht.",
+      en: "Slightly improves click efficiency.",
     },
-    costType: 'buds',
+    costType: "buds",
+    cost: 1_000,
+    effects: [{ id: "BPC_MULT", v: 1.2 }],
+    icon: asset("icons/ui/ui-help.png"),
+  },
+  {
+    id: "r_growth",
+    name: {
+      de: "Optimierte Bewaesserung",
+      en: "Optimised Irrigation",
+    },
+    desc: {
+      de: "Erhoeht die Produktion ein wenig.",
+      en: "Gently raises overall production.",
+    },
+    costType: "seeds",
+    cost: 2,
+    requires: ["r_start_click"],
+    effects: [{ id: "BPS_MULT", v: 1.15 }],
+    icon: asset("icons/ui/ui-save.png"),
+  },
+  {
+    id: "r_costcut",
+    name: {
+      de: "Grosshandel",
+      en: "Bulk Deals",
+    },
+    desc: {
+      de: "Reduziert die Kosten aller Kaeufe leicht.",
+      en: "Slightly lowers all purchase costs.",
+    },
+    costType: "buds",
     cost: 25_000,
-    icon: asset('icons/ui/ui-help.png'),
-    effects: [
-      { type: 'BPC_MULT', value: 1.5 },
-    ],
+    requires: ["r_start_click"],
+    effects: [{ id: "COST_REDUCE_ALL", v: 0.97 }],
+    icon: asset("icons/ui/ui-export.png"),
   },
   {
-    id: 'auto_harvest_protocol',
+    id: "r_autoclick",
     name: {
-      de: 'Auto-Harvest-Protokoll',
-      en: 'Auto Harvest Protocol',
+      de: "Zeitschaltuhr",
+      en: "Timer Switch",
     },
     desc: {
-      de: 'Automatisierte Helfer klicken jede Sekunde für dich.',
-      en: 'Automated helpers trigger one harvest per second.',
+      de: "Automatische Klicks pro Sekunde.",
+      en: "Adds automatic clicks each second.",
     },
-    costType: 'buds',
-    cost: 120_000,
-    requires: ['potency_metrics'],
-    icon: asset('icons/ui/ui-settings.png'),
-    effects: [
-      { type: 'CLICK_AUTOMATION', value: 1 },
-    ],
-  },
-  {
-    id: 'yield_modulation',
-    name: {
-      de: 'Ertragsmodulation',
-      en: 'Yield Modulation',
-    },
-    desc: {
-      de: 'Optimierte Nährstoffe steigern alle Produktionen.',
-      en: 'Optimised nutrients boost all productions.',
-    },
-    costType: 'seeds',
+    costType: "seeds",
     cost: 5,
-    requires: ['auto_harvest_protocol'],
-    icon: asset('icons/ui/ui-save.png'),
-    effects: [
-      { type: 'BPS_MULT', value: 1.25 },
-    ],
+    requires: ["r_growth"],
+    effects: [{ id: "CLICK_AUTOMATION", v: 2 }],
+    icon: asset("icons/ui/ui-import.png"),
   },
   {
-    id: 'supply_chain',
+    id: "r_overdrive_plus",
     name: {
-      de: 'Supply-Chain-Optimierung',
-      en: 'Supply Chain Optimisation',
+      de: "Leistungsregler",
+      en: "Power Regulator",
     },
     desc: {
-      de: 'Reduziert die Kosten aller Gebäude dank schlanker Prozesse.',
-      en: 'Slim processes reduce all building costs.',
+      de: "Overdrive wird um 20 % staerker.",
+      en: "Overdrive becomes 20% stronger.",
     },
-    costType: 'seeds',
-    cost: 10,
-    requires: ['yield_modulation'],
-    icon: asset('icons/ui/ui-export.png'),
-    effects: [
-      { type: 'COST_REDUCE_ALL', value: 0.9 },
-    ],
-  },
-  {
-    id: 'overdrive_blueprints',
-    name: {
-      de: 'Overdrive-Blaupausen',
-      en: 'Overdrive Blueprints',
-    },
-    desc: {
-      de: 'Verbessert die Overdrive-Fähigkeit mit längerer Laufzeit.',
-      en: 'Improves the Overdrive ability with longer uptime.',
-    },
-    costType: 'seeds',
-    cost: 18,
-    requires: ['supply_chain'],
-    icon: asset('icons/ui/ui-import.png'),
-    effects: [
-      { type: 'ABILITY_OVERDRIVE_PLUS', value: 1.5 },
-    ],
-  },
-  {
-    id: 'quantum_clicks',
-    name: {
-      de: 'Quantenklicks',
-      en: 'Quantum Clicks',
-    },
-    desc: {
-      de: 'Verdoppelt dauerhaft deine Klickproduktion.',
-      en: 'Doubles your click production permanently.',
-    },
-    costType: 'seeds',
-    cost: 30,
-    requires: ['overdrive_blueprints'],
-    icon: asset('icons/ui/ui-reset.png'),
-    effects: [
-      { type: 'BPC_MULT', value: 2 },
-    ],
+    costType: "seeds",
+    cost: 3,
+    requires: ["r_growth"],
+    effects: [{ id: "ABILITY_OVERDRIVE_PLUS", v: 0.2 }],
+    icon: asset("icons/ui/ui-reset.png"),
   },
 ];
 
-export const researchById = new Map(researchNodes.map((node) => [node.id, node] as const));
+export const researchById = new Map(RESEARCH.map((node) => [node.id, node] as const));
