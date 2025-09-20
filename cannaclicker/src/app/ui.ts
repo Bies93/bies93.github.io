@@ -47,7 +47,7 @@ const STAT_META: Record<LocaleKey, Record<string, string>> = {
     "stats.bps": "Produktion pro Sekunde",
     "stats.bpc": "Ertrag pro Klick",
     "stats.total": "Lebenszeit-Ernte",
-        "stats.seeds": "Prestige-Waehrung",,
+    "stats.seeds": "Prestige-Waehrung",
     "stats.prestigeMult": "Aktiver Bonus",
   },
   en: {
@@ -55,7 +55,7 @@ const STAT_META: Record<LocaleKey, Record<string, string>> = {
     "stats.bps": "Production each second",
     "stats.bpc": "Yield per click",
     "stats.total": "Lifetime harvest",
-        "stats.seeds": "Prestige-Waehrung",,
+    "stats.seeds": "Prestige currency",
     "stats.prestigeMult": "Active boost",
   },
 };
