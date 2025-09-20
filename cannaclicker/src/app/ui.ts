@@ -60,6 +60,13 @@ const STAT_META: Record<LocaleKey, Record<string, string>> = {
   },
 };
 
+function formatTierBonus(locale: LocaleKey, value: number): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 interface ControlButtonRefs {
   button: HTMLButtonElement;
   icon: HTMLImageElement;
@@ -899,11 +906,21 @@ function updateShop(state: GameState): void {
     card.roiBadge.setAttribute("aria-label", roiText);
     card.roiBadge.setAttribute("title", roiText);
 
-    card.stageLabel.textContent = t(state.locale, "shop.stageLabel", { level: entry.tier.stage });
-    card.stageProgressText.textContent = t(state.locale, "shop.stageProgress", {
-      current: entry.tier.progressCount,
-      total: entry.tier.size,
+    const stageLabel = t(state.locale, "shop.stageLabel", { level: entry.tier.stage });
+    card.stageLabel.textContent = stageLabel;
+    const tierTooltip = t(state.locale, "shop.stageTooltip", {
+      bonus: formatTierBonus(state.locale, entry.tier.bonus),
+      count: entry.tier.size,
     });
+    card.stageLabel.setAttribute("title", tierTooltip);
+    card.stageLabel.setAttribute("aria-label", `${stageLabel} (${tierTooltip})`);
+    const stageProgressLabel = t(state.locale, "shop.stageProgress", {
+      remaining: entry.tier.remainingCount,
+      next: entry.tier.stage + 1,
+    });
+    card.stageProgressText.textContent = stageProgressLabel;
+    card.stageProgressText.setAttribute("title", stageProgressLabel);
+    card.stageProgressText.setAttribute("aria-label", stageProgressLabel);
     const progressPercent = Math.max(0, Math.min(1, entry.tier.completion));
     card.stageProgressBar.style.width = `${(progressPercent * 100).toFixed(2)}%`;
 

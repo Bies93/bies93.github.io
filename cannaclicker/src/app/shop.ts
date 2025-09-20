@@ -4,10 +4,8 @@ import { formatDecimal, paybackSeconds } from './math';
 import type { GameState } from './state';
 import { t, type LocaleKey } from './i18n';
 
-export const SHOP_TIER_SIZE = 25;
-const SHOP_TIER_BONUS = 1.15;
-const SHOP_TIER_SOFTCAP_STAGE = 8;
-const SHOP_TIER_SOFTCAP_BONUS = 1.1;
+const DEFAULT_TIER_SIZE = 25;
+const DEFAULT_TIER_BONUS = 1.15;
 
 export interface ShopEntry {
   definition: ItemDefinition;
@@ -32,6 +30,64 @@ export interface TierInfo {
   completion: number;
   size: number;
   nextThreshold: number;
+  bonus: number;
+  softcapTier?: number;
+  softcapMult?: number;
+}
+
+interface TierConfig {
+  size: number;
+  bonus: number;
+  softcapTier?: number;
+  softcapMult?: number;
+}
+
+function resolveTierConfig(definition: ItemDefinition): TierConfig {
+  const size = definition.tierSize ?? DEFAULT_TIER_SIZE;
+  const bonus = definition.tierBonusMult ?? DEFAULT_TIER_BONUS;
+  return {
+    size: size > 0 ? size : DEFAULT_TIER_SIZE,
+    bonus: bonus > 0 ? bonus : DEFAULT_TIER_BONUS,
+    softcapTier: definition.softcapTier,
+    softcapMult: definition.softcapMult,
+  } satisfies TierConfig;
+}
+
+export function tierMultiplier(
+  count: number,
+  tierSize: number,
+  bonus: number,
+  softcapTier?: number,
+  softcapMult?: number,
+): number {
+  const safeCount = Number.isFinite(count) && count > 0 ? Math.floor(count) : 0;
+  const safeSize = tierSize > 0 ? tierSize : DEFAULT_TIER_SIZE;
+  const tiers = safeSize > 0 ? Math.floor(safeCount / safeSize) : 0;
+  if (!softcapTier || !softcapMult || tiers <= softcapTier) {
+    return Math.pow(bonus, tiers);
+  }
+  const pre = Math.pow(bonus, softcapTier);
+  const post = Math.pow(softcapMult, tiers - softcapTier);
+  return pre * post;
+}
+
+export function getTierMultiplier(definition: ItemDefinition, owned: number): Decimal {
+  const config = resolveTierConfig(definition);
+  const multiplier = tierMultiplier(owned, config.size, config.bonus, config.softcapTier, config.softcapMult);
+  return new Decimal(multiplier);
+}
+
+export function deltaBpsNextBuy(
+  definition: ItemDefinition,
+  owned: number,
+  baseMultiplier: Decimal,
+): Decimal {
+  const perUnitBase = new Decimal(definition.bps).mul(baseMultiplier);
+  const currentMultiplier = getTierMultiplier(definition, owned);
+  const nextMultiplier = getTierMultiplier(definition, owned + 1);
+  const totalNow = perUnitBase.mul(currentMultiplier).mul(owned);
+  const totalNext = perUnitBase.mul(nextMultiplier).mul(owned + 1);
+  return totalNext.sub(totalNow);
 }
 
 export function getItemCost(
@@ -75,14 +131,9 @@ export function getShopEntries(state: GameState): ShopEntry[] {
     const owned = state.items[definition.id] ?? 0;
     const cost = getItemCost(definition, owned, state.temp.costMultiplier);
     const nextCost = getNextCost(definition, owned, state.temp.costMultiplier);
-    const tier = getTierInfo(owned);
+    const tier = getTierInfo(definition, owned);
     const baseMultiplier = state.temp.buildingBaseMultipliers[definition.id] ?? new Decimal(1);
-    const currentTierMultiplier = getTierMultiplier(owned);
-    const nextTierMultiplier = getTierMultiplier(owned + 1);
-    const baseProduction = new Decimal(definition.bps);
-    const currentProduction = baseProduction.mul(owned).mul(baseMultiplier).mul(currentTierMultiplier);
-    const nextProduction = baseProduction.mul(owned + 1).mul(baseMultiplier).mul(nextTierMultiplier);
-    const deltaBase = nextProduction.sub(currentProduction);
+    const deltaBase = deltaBpsNextBuy(definition, owned, baseMultiplier);
     const deltaBps = deltaBase.mul(state.temp.totalBpsMult);
     const payback = paybackSeconds(cost, deltaBps);
     const roi = deltaBps.lessThanOrEqualTo(0) ? null : Number(cost.div(deltaBps).toFixed(2));
@@ -105,39 +156,27 @@ export function getShopEntries(state: GameState): ShopEntry[] {
   });
 }
 
-export function getTierInfo(owned: number): TierInfo {
+export function getTierInfo(definition: ItemDefinition, owned: number): TierInfo {
+  const config = resolveTierConfig(definition);
+  const size = config.size > 0 ? config.size : DEFAULT_TIER_SIZE;
   const safeOwned = Number.isFinite(owned) && owned > 0 ? Math.floor(owned) : 0;
-  const tiersCompleted = Math.floor(safeOwned / SHOP_TIER_SIZE);
-  const stage = tiersCompleted + 1;
-  const progressCount = safeOwned % SHOP_TIER_SIZE;
-  const completion = SHOP_TIER_SIZE > 0 ? progressCount / SHOP_TIER_SIZE : 0;
-  const remainingCount = SHOP_TIER_SIZE - progressCount;
-  const nextThreshold = (tiersCompleted + 1) * SHOP_TIER_SIZE;
+  const tiersCompleted = size > 0 ? Math.floor(safeOwned / size) : 0;
+  const progressCount = size > 0 ? safeOwned % size : 0;
+  const remainingCount = size > 0 ? size - progressCount : 0;
+  const completion = size > 0 ? progressCount / size : 0;
+  const nextThreshold = size > 0 ? (tiersCompleted + 1) * size : safeOwned;
 
   return {
-    stage,
+    stage: tiersCompleted,
     progressCount,
     remainingCount,
     completion: Math.max(0, Math.min(1, completion)),
-    size: SHOP_TIER_SIZE,
+    size,
     nextThreshold,
+    bonus: config.bonus,
+    softcapTier: config.softcapTier,
+    softcapMult: config.softcapMult,
   } satisfies TierInfo;
-}
-
-export function getTierMultiplier(owned: number): Decimal {
-  const safeOwned = Number.isFinite(owned) && owned > 0 ? Math.floor(owned) : 0;
-  const tiersCompleted = Math.floor(safeOwned / SHOP_TIER_SIZE);
-  if (tiersCompleted <= 0) {
-    return new Decimal(1);
-  }
-
-  let multiplier = new Decimal(1);
-  for (let tierIndex = 1; tierIndex <= tiersCompleted; tierIndex += 1) {
-    const stepBonus = tierIndex >= SHOP_TIER_SOFTCAP_STAGE ? SHOP_TIER_SOFTCAP_BONUS : SHOP_TIER_BONUS;
-    multiplier = multiplier.mul(stepBonus);
-  }
-
-  return multiplier;
 }
 
 export function getMaxAffordable(definition: ItemDefinition, state: GameState): number {

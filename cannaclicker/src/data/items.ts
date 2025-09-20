@@ -13,6 +13,10 @@ export interface ItemDefinition {
   costFactor: number;
   bps: number;
   icon: string;
+  tierSize?: number;
+  tierBonusMult?: number;
+  softcapTier?: number;
+  softcapMult?: number;
   unlock?: UnlockCondition;
 }
 
@@ -31,6 +35,8 @@ export const items: ItemDefinition[] = [
     costFactor: 1.15,
     bps: 0.1,
     icon: asset('icons/items/item-seedling.png'),
+    softcapTier: 8,
+    softcapMult: 1.1,
   },
   {
     id: 'planter',
@@ -49,6 +55,8 @@ export const items: ItemDefinition[] = [
     unlock: {
       totalBuds: 50,
     },
+    softcapTier: 8,
+    softcapMult: 1.1,
   },
   {
     id: 'grow_tent',
@@ -67,6 +75,8 @@ export const items: ItemDefinition[] = [
     unlock: {
       totalBuds: 500,
     },
+    softcapTier: 8,
+    softcapMult: 1.1,
   },
   {
     id: 'grow_light',
@@ -85,6 +95,8 @@ export const items: ItemDefinition[] = [
     unlock: {
       itemsOwned: { grow_tent: 5 },
     },
+    softcapTier: 8,
+    softcapMult: 1.1,
   },
   {
     id: 'cultivator',
@@ -103,6 +115,8 @@ export const items: ItemDefinition[] = [
     unlock: {
       totalBuds: 75_000,
     },
+    softcapTier: 8,
+    softcapMult: 1.1,
   },
 ];
 
