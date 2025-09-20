@@ -292,8 +292,8 @@ function buildUI(state: GameState): UIRefs {
   title.textContent = "CannaBies";
   headerCard.appendChild(title);
 
-  const statsList = document.createElement("dl");
-  statsList.className = "stats-list";
+  const statsList = document.createElement("div");
+  statsList.className = "stats-bar";
   headerCard.appendChild(statsList);
 
   const statsLabels = new Map<string, HTMLElement>();
@@ -1575,36 +1575,61 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
     maxButton,
   } satisfies ShopCardRefs;
 }
-function createStatBlock(
+function getStatIcon(key: string): string {
+  const iconMap: Record<string, string> = {
+    "stats.buds": "icons/ui/icon-leaf-click.png",
+    "stats.bps": "icons/upgrades/upgrade-global-bps.png",
+    "stats.bpc": "icons/ui/icon-leaf-click.png",
+    "stats.total": "icons/ui/icon-leaf-click.png",
+    "stats.seeds": "icons/ui/ui-save.png",
+    "stats.prestigeMult": "icons/ui/ui-save.png",
+  };
+  return iconMap[key] || "icons/ui/icon-leaf-click.png";
+}
+
+function createCompactStatBlock(
   key: string,
-  wrapper: HTMLElement,
-  labelRegistry: Map<string, HTMLElement>,
-  metaRegistry: Map<string, HTMLElement>,
+  container: HTMLElement,
+  labels: Map<string, HTMLElement>,
+  meta: Map<string, HTMLElement>,
 ): HTMLElement {
-  const item = document.createElement("div");
-  item.className = "stat-line";
-  item.dataset.variant = key;
+  const wrapper = document.createElement("div");
+  wrapper.className = "stat-item";
+  wrapper.dataset.variant = key;
 
-  const label = document.createElement("dt");
-  label.className = "stat-line__label";
-  labelRegistry.set(key, label);
+  const icon = document.createElement("img");
+  icon.className = "stat-item__icon";
+  icon.src = withBase(getStatIcon(key));
+  icon.alt = "";
 
-  const valueWrapper = document.createElement("dd");
-  valueWrapper.className = "stat-line__value";
+  const contentDiv = document.createElement("div");
+  contentDiv.className = "stat-item__content";
 
-  const value = document.createElement("span");
-  value.className = "stat-line__number";
+  const label = document.createElement("div");
+  label.className = "stat-item__label";
+  label.textContent = t("en", key); // Default to English for now
 
-  const meta = document.createElement("span");
-  meta.className = "stat-line__meta";
-  metaRegistry.set(key, meta);
+  const value = document.createElement("div");
+  value.className = "stat-item__value";
+  value.textContent = "0";
 
-  valueWrapper.append(value, meta);
+  contentDiv.append(label, value);
+  wrapper.append(icon, contentDiv);
+  container.appendChild(wrapper);
 
-  item.append(label, valueWrapper);
-  wrapper.appendChild(item);
+  labels.set(key, label);
+  meta.set(key, value); // Using value as the primary display element
 
   return value;
+}
+
+function createStatBlock(
+  key: string,
+  container: HTMLElement,
+  labels: Map<string, HTMLElement>,
+  meta: Map<string, HTMLElement>,
+): HTMLElement {
+  return createCompactStatBlock(key, container, labels, meta);
 }
 
 function createDetail(wrapper: HTMLElement, labelText: string): { label: HTMLElement; value: HTMLElement } {

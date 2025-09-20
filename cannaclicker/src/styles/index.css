@@ -126,6 +126,58 @@ button {
   gap: clamp(0.6rem, 1.6vw, 1rem);
 }
 
+.stats-bar {
+  @apply flex flex-wrap items-center gap-4 md:gap-6 lg:gap-8;
+}
+
+.stat-item {
+  @apply flex items-center gap-3 rounded-lg border border-white/10 bg-neutral-900/60 px-4 py-2 transition hover:bg-neutral-900/80;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.stat-item__icon {
+  @apply h-5 w-5 flex-shrink-0;
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.5));
+}
+
+.stat-item__content {
+  @apply flex flex-col gap-1 min-w-0 flex-1;
+}
+
+.stat-item__label {
+  @apply text-xs uppercase tracking-wider font-semibold text-neutral-400;
+  letter-spacing: 0.05em;
+}
+
+.stat-item__value {
+  @apply text-sm font-bold text-white tabular-nums;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.stat-item[data-variant="stats.buds"] .stat-item__icon {
+  filter: drop-shadow(0 0 4px hsl(150 76% 52% / 0.6));
+}
+
+.stat-item[data-variant="stats.bps"] .stat-item__icon {
+  filter: drop-shadow(0 0 4px hsl(193 82% 64% / 0.6));
+}
+
+.stat-item[data-variant="stats.bpc"] .stat-item__icon {
+  filter: drop-shadow(0 0 4px hsl(265 76% 66% / 0.6));
+}
+
+.stat-item[data-variant="stats.total"] .stat-item__icon {
+  filter: drop-shadow(0 0 4px hsl(42 94% 64% / 0.6));
+}
+
+.stat-item[data-variant="stats.seeds"] .stat-item__icon {
+  filter: drop-shadow(0 0 4px hsl(31 100% 65% / 0.6));
+}
+
+.stat-item[data-variant="stats.prestigeMult"] .stat-item__icon {
+  filter: drop-shadow(0 0 4px hsl(318 68% 66% / 0.6));
+}
 .stat-line {
   position: relative;
   display: grid;
