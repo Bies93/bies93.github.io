@@ -40,6 +40,18 @@ import {
 import type { ResearchEffect } from "../data/research";
 import { getPrestigePreview, performPrestige } from "./prestige";
 import { PRESTIGE_MIN_REQUIREMENT } from "./balance";
+import {
+  createTopInfoBar,
+  updateTopInfoBarStrings,
+  updateTopInfoBarValues,
+  type TopInfoBarRefs,
+} from "./components/TopInfoBar";
+import {
+  createBudHUD,
+  updateBudHUDStrings,
+  updateBudHUDValues,
+  type BudHUDRefs,
+} from "./components/BudHUD";
 
 const STAT_META: Record<LocaleKey, Record<string, string>> = {
   de: {
@@ -97,14 +109,9 @@ interface ShopControlsRefs {
 interface UIRefs {
   root: HTMLElement;
   title: HTMLHeadingElement;
-  statsLabels: Map<string, HTMLElement>;
-  statsMeta: Map<string, HTMLElement>;
-  buds: HTMLElement;
-  bps: HTMLElement;
-  bpc: HTMLElement;
-  total: HTMLElement;
-  seeds: HTMLElement;
-  prestigeMult: HTMLElement;
+  controlGroup: HTMLElement;
+  topInfoBar: TopInfoBarRefs;
+  budHud: BudHUDRefs;
   clickButton: HTMLButtonElement;
   clickLabel: HTMLSpanElement;
   clickIcon: HTMLDivElement;
@@ -261,15 +268,19 @@ function buildUI(state: GameState): UIRefs {
   const resetControl = createDangerButton(withBase("icons/ui/ui-reset.png"));
   const prestigeControl = createActionButton(withBase("icons/ui/ui-save.png"));
   prestigeControl.button.classList.add("text-amber-200");
+  prestigeControl.button.style.setProperty("--control-glow", "var(--brand-violet)");
   prestigeControl.button.classList.add("hover:border-amber-400/60", "hover:bg-amber-900/40");
 
-  mountHeader(root, [
-    muteControl.button,
-    exportControl.button,
-    importControl.button,
-    prestigeControl.button,
-    resetControl.button,
+  const headerRefs = mountHeader(root, [
+    muteControl,
+    exportControl,
+    importControl,
+    prestigeControl,
+    resetControl,
   ]);
+
+  const topInfoBar = createTopInfoBar();
+  root.appendChild(topInfoBar.root);
 
   const layout = document.createElement("div");
   layout.className =
@@ -284,49 +295,11 @@ function buildUI(state: GameState): UIRefs {
 
   layout.append(primaryColumn, secondaryColumn);
 
-  const headerCard = document.createElement("section");
-  headerCard.className = "card fade-in space-y-3";
-
-  const title = document.createElement("h1");
-  title.className = "text-4xl md:text-5xl font-extrabold tracking-tight text-leaf-200 drop-shadow-[0_14px_28px_rgba(16,185,129,0.35)]";
-  title.textContent = "CannaBies";
-  headerCard.appendChild(title);
-
-  const statsList = document.createElement("div");
-  statsList.className = "stats-bar";
-  headerCard.appendChild(statsList);
-
-  const statsLabels = new Map<string, HTMLElement>();
-  const statsMeta = new Map<string, HTMLElement>();
-
-  const budsStat = createStatBlock("stats.buds", statsList, statsLabels, statsMeta);
-  const bpsStat = createStatBlock("stats.bps", statsList, statsLabels, statsMeta);
-  const bpcStat = createStatBlock("stats.bpc", statsList, statsLabels, statsMeta);
-  const totalStat = createStatBlock("stats.total", statsList, statsLabels, statsMeta);
-  const seedsStat = createStatBlock("stats.seeds", statsList, statsLabels, statsMeta);
-  const prestigeStat = createStatBlock(
-    "stats.prestigeMult",
-    statsList,
-    statsLabels,
-    statsMeta,
-  );
-
-  const seedBadge = document.createElement('button');
-  seedBadge.type = 'button';
-  seedBadge.className = 'inline-flex items-center gap-2 self-start rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-sm font-semibold text-emerald-100 transition hover:border-emerald-300/60 hover:bg-emerald-500/20 focus-visible:ring-2 focus-visible:ring-emerald-300/60 focus-visible:ring-offset-0';
-  const seedIcon = new Image();
-  seedIcon.src = withBase('icons/ui/ui-save.png');
-  seedIcon.alt = '';
-  seedIcon.decoding = 'async';
-  seedIcon.className = 'h-4 w-4';
-  const seedBadgeValue = document.createElement('span');
-  seedBadgeValue.className = 'tabular-nums';
-  seedBadge.append(seedIcon, seedBadgeValue);
-  headerCard.appendChild(seedBadge);
-  primaryColumn.appendChild(headerCard);
-
   const clickCard = document.createElement("section");
   clickCard.className = "card fade-in space-y-4";
+
+  const clickStack = document.createElement("div");
+  clickStack.className = "click-stack w-full";
 
   const clickButton = document.createElement("button");
   clickButton.className = "click-button w-full";
@@ -348,7 +321,12 @@ function buildUI(state: GameState): UIRefs {
 
   clickButton.append(clickIcon, clickLabel);
 
-  clickCard.appendChild(clickButton);
+  clickStack.appendChild(clickButton);
+
+  const budHud = createBudHUD();
+  clickStack.appendChild(budHud.root);
+
+  clickCard.appendChild(clickStack);
 
   const announcer = document.createElement("p");
   announcer.setAttribute("data-sr-only", "true");
@@ -405,17 +383,10 @@ function buildUI(state: GameState): UIRefs {
 
   const uiRefs: UIRefs = {
     root,
-    title,
-    statsLabels,
-    statsMeta,
-    buds: budsStat,
-    bps: bpsStat,
-    bpc: bpcStat,
-    total: totalStat,
-    seeds: seedsStat,
-    prestigeMult: prestigeStat,
-    seedBadge,
-    seedBadgeValue,
+    title: headerRefs.wordmark,
+    controlGroup: headerRefs.controlsGroup,
+    topInfoBar,
+    budHud,
     clickButton,
     clickLabel,
     clickIcon,
@@ -447,59 +418,63 @@ function buildUI(state: GameState): UIRefs {
   return uiRefs;
 }
 
-function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
+function mountHeader(
+  root: HTMLElement,
+  controls: ControlButtonRefs[],
+): { wordmark: HTMLHeadingElement; controlsGroup: HTMLDivElement } {
   const header = document.createElement("header");
-  header.className =
-    "flex w-full flex-col items-start gap-4 rounded-3xl border border-white/10 bg-neutral-900/80 px-4 py-4 shadow-[0_24px_60px_rgba(10,12,21,0.55)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 lg:px-8";
+  header.className = "app-header";
 
   const brand = document.createElement("div");
-  brand.className =
-    "flex items-center gap-4 md:gap-6 rounded-2xl bg-gradient-to-br from-neutral-900/90 via-neutral-900/75 to-neutral-800/75 px-4 md:px-6 py-4 shadow-[0_24px_48px_rgba(16,185,129,0.28)] ring-1 ring-emerald-400/25 backdrop-blur";
+  brand.className = "app-header__brand";
 
-  const leafWrap = document.createElement("span");
-  leafWrap.className =
-    "relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-lime-300/35 via-emerald-300/25 to-emerald-500/30 shadow-[0_0_38px_rgba(202,255,120,0.55)] ring-1 ring-lime-200/35";
+  const logo = document.createElement("span");
+  logo.className = "app-header__logo";
 
   const leaf = new Image();
   leaf.src = withBase("img/logo-leaf.svg");
   leaf.alt = "";
   leaf.decoding = "async";
-  leaf.className =
-    "h-12 w-12 drop-shadow-[0_18px_34px_rgba(202,255,150,0.6)] saturate-150 brightness-110";
+  logo.appendChild(leaf);
 
-  leafWrap.appendChild(leaf);
+  const wordmark = document.createElement("h1");
+  wordmark.className = "app-header__title";
+  wordmark.textContent = "CannaClicker";
 
-  const brandText = document.createElement("div");
-  brandText.className = "flex flex-col justify-center gap-1 pl-2";
+  brand.append(logo, wordmark);
 
-  const wordmark = new Image();
-  wordmark.src = withBase("img/logo-wordmark.svg");
-  wordmark.alt = "CannaClicker wordmark";
-  wordmark.decoding = "async";
-  wordmark.className =
-    "relative left-4 top-2 h-24 w-auto drop-shadow-[0_26px_46px_rgba(56,220,120,0.6)] saturate-150 contrast-125 md:left-6 md:top-2";
-
-  brandText.append(wordmark);
-
-  brand.append(leafWrap, brandText);
+  const spacer = document.createElement("div");
+  spacer.className = "hidden md:block";
 
   const actionWrap = document.createElement("div");
-  actionWrap.className =
-    "flex flex-nowrap items-center gap-3 overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/70 px-3 py-2 shadow-[0_22px_44px_rgba(10,12,21,0.5)] ring-1 ring-white/10 backdrop-blur sm:px-4";
+  actionWrap.className = "app-header__controls";
+  actionWrap.setAttribute("role", "group");
+  actionWrap.setAttribute("aria-label", "Game controls");
+
   controls.forEach((control) => {
-    control.classList.add("shrink-0");
-    actionWrap.append(control);
+    control.button.classList.add("shrink-0");
+    if (!control.button.style.getPropertyValue("--control-glow")) {
+      control.button.style.setProperty("--control-glow", "var(--brand-cyan)");
+    }
+    actionWrap.append(control.button);
   });
 
-  header.append(brand, actionWrap);
+  header.append(brand, spacer, actionWrap);
   root.prepend(header);
+
+  return { wordmark, controlsGroup: actionWrap };
 }
 
 function setupInteractions(refs: UIRefs, state: GameState): void {
   refs.clickButton.addEventListener("click", () => {
     const gained = handleManualClick(state);
     audio.playClick();
-    spawnFloatingValue(refs.clickButton, `+${formatDecimal(gained)}`);
+    const multiplier = state.temp.totalBpcMult ?? new Decimal(1);
+    const bonusPercent = multiplier.minus(1).mul(100);
+    const bonusText = bonusPercent.greaterThan(0)
+      ? ` (+${bonusPercent.toFixed(bonusPercent.lessThan(5) ? 1 : 0)}%)`
+      : "";
+    spawnFloatingValue(refs.clickButton, `+${formatDecimal(gained)}${bonusText}`);
     announce(refs, state.buds);
     renderUI(state);
   });
@@ -589,6 +564,9 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
     abilityRefs.label.textContent = labelText;
     abilityRefs.container.title = formatAbilityTooltip(state, abilityId as AbilityId, state.locale);
     abilityRefs.container.setAttribute('aria-label', labelText);
+    abilityRefs.container.addEventListener('click', () => {
+      triggerAbility(state, abilityId as AbilityId);
+    });
   });
 
   refs.research.filters.forEach((button, key) => {
@@ -659,6 +637,16 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 }
 
+function triggerAbility(state: GameState, abilityId: AbilityId): void {
+  if (!activateAbility(state, abilityId)) {
+    return;
+  }
+
+  recalcDerivedValues(state);
+  evaluateAchievements(state);
+  renderUI(state);
+}
+
 function attachGlobalShortcuts(state: GameState): void {
   window.addEventListener("keydown", (event) => {
     if (event.repeat) {
@@ -703,7 +691,10 @@ function updateStrings(state: GameState): void {
     return;
   }
 
-  refs.title.textContent = "CannaBies";
+  const appTitle = t(state.locale, "app.title");
+  refs.title.textContent = appTitle;
+  const controlLabelSuffix = state.locale === "de" ? "Steuerung" : "controls";
+  refs.controlGroup.setAttribute("aria-label", `${appTitle} ${controlLabelSuffix}`);
   refs.shopTitle.textContent = t(state.locale, "shop.title");
   refs.clickButton.setAttribute("aria-label", t(state.locale, "actions.click"));
   refs.clickLabel.textContent = t(state.locale, "actions.click");
@@ -733,13 +724,9 @@ function updateStrings(state: GameState): void {
   refs.controls.prestige.button.setAttribute("aria-label", t(state.locale, "actions.prestige"));
   refs.controls.prestige.button.setAttribute("title", t(state.locale, "actions.prestige"));
 
-  refs.statsLabels.forEach((label, key) => {
-    label.textContent = t(state.locale, key);
-  });
-
-  refs.statsMeta.forEach((meta, key) => {
-    meta.textContent = STAT_META[state.locale]?.[key] ?? "";
-  });
+  const meta = STAT_META[state.locale] ?? {};
+  updateTopInfoBarStrings(refs.topInfoBar, state.locale, meta);
+  updateBudHUDStrings(refs.budHud, state.locale, meta);
 
   refs.abilityTitle.textContent = t(state.locale, "abilities.title");
   refs.abilityList.forEach((abilityRefs, abilityId) => {
@@ -843,18 +830,8 @@ function updateStats(state: GameState): void {
   }
 
   const preview = getPrestigePreview(state);
-  refs.buds.textContent = formatDecimal(state.buds);
-  refs.bps.textContent = formatDecimal(state.bps);
-  refs.bpc.textContent = formatDecimal(state.bpc);
-  refs.total.textContent = formatDecimal(state.total);
-  refs.seeds.textContent = formatDecimal(state.prestige.seeds);
-  refs.prestigeMult.textContent = `${state.prestige.mult.toFixed(2)}\u00D7`;
-
-  const bonusPercent = Math.max(0, state.prestige.mult.minus(1).mul(100).toNumber());
-  refs.seedBadgeValue.textContent = formatDecimal(state.prestige.seeds);
-  const badgeTooltip = t(state.locale, 'prestige.badge.tooltip', { value: bonusPercent.toFixed(1) });
-  refs.seedBadge.setAttribute('title', badgeTooltip);
-  refs.seedBadge.setAttribute('aria-label', badgeTooltip);
+  updateTopInfoBarValues(refs.topInfoBar, state);
+  updateBudHUDValues(refs.budHud, state);
 
   const canPrestige = preview.requirementMet && preview.gain > 0;
   const controlLabel = canPrestige
@@ -1575,63 +1552,6 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
     maxButton,
   } satisfies ShopCardRefs;
 }
-function getStatIcon(key: string): string {
-  const iconMap: Record<string, string> = {
-    "stats.buds": "icons/ui/icon-leaf-click.png",
-    "stats.bps": "icons/upgrades/upgrade-global-bps.png",
-    "stats.bpc": "icons/ui/icon-leaf-click.png",
-    "stats.total": "icons/ui/icon-leaf-click.png",
-    "stats.seeds": "icons/ui/ui-save.png",
-    "stats.prestigeMult": "icons/ui/ui-save.png",
-  };
-  return iconMap[key] || "icons/ui/icon-leaf-click.png";
-}
-
-function createCompactStatBlock(
-  key: string,
-  container: HTMLElement,
-  labels: Map<string, HTMLElement>,
-  meta: Map<string, HTMLElement>,
-): HTMLElement {
-  const wrapper = document.createElement("div");
-  wrapper.className = "stat-item";
-  wrapper.dataset.variant = key;
-
-  const icon = document.createElement("img");
-  icon.className = "stat-item__icon";
-  icon.src = withBase(getStatIcon(key));
-  icon.alt = "";
-
-  const contentDiv = document.createElement("div");
-  contentDiv.className = "stat-item__content";
-
-  const label = document.createElement("div");
-  label.className = "stat-item__label";
-  label.textContent = t("en", key); // Default to English for now
-
-  const value = document.createElement("div");
-  value.className = "stat-item__value";
-  value.textContent = "0";
-
-  contentDiv.append(label, value);
-  wrapper.append(icon, contentDiv);
-  container.appendChild(wrapper);
-
-  labels.set(key, label);
-  meta.set(key, value); // Using value as the primary display element
-
-  return value;
-}
-
-function createStatBlock(
-  key: string,
-  container: HTMLElement,
-  labels: Map<string, HTMLElement>,
-  meta: Map<string, HTMLElement>,
-): HTMLElement {
-  return createCompactStatBlock(key, container, labels, meta);
-}
-
 function createDetail(wrapper: HTMLElement, labelText: string): { label: HTMLElement; value: HTMLElement } {
   const label = document.createElement("dt");
   label.textContent = labelText;
@@ -1644,8 +1564,8 @@ function createDetail(wrapper: HTMLElement, labelText: string): { label: HTMLEle
 
 function wrapIcon(icon: HTMLImageElement): HTMLSpanElement {
   const wrapper = document.createElement("span");
-  wrapper.className = "icon-badge";
-  icon.classList.add("icon-img", "icon-dark");
+  wrapper.className = "control-icon-badge";
+  icon.classList.add("control-icon-img");
   wrapper.append(icon);
   return wrapper;
 }
@@ -1654,7 +1574,7 @@ function createActionButton(iconPath: string): ControlButtonRefs {
   const button = document.createElement("button");
   button.type = "button";
   button.className =
-    "inline-flex items-center gap-2 rounded-lg border border-white/10 bg-neutral-900/60 px-2.5 py-1.5 text-sm font-medium text-neutral-200 shadow-[0_10px_24px_rgba(9,11,19,0.45)] transition hover:border-emerald-400/40 hover:bg-neutral-800/70 focus-visible:ring-2 focus-visible:ring-emerald-300/70 focus-visible:ring-offset-0";
+    "control-button inline-flex items-center gap-2 text-neutral-100 transition focus-visible:ring-2 focus-visible:ring-emerald-300/60 focus-visible:ring-offset-0 hover:border-emerald-300/60";
 
   const icon = new Image();
   icon.src = iconPath;
@@ -1662,11 +1582,9 @@ function createActionButton(iconPath: string): ControlButtonRefs {
   icon.decoding = "async";
 
   const iconWrap = wrapIcon(icon);
-  iconWrap.classList.add("control-icon-badge");
-  icon.classList.add("control-icon-img");
 
   const label = document.createElement("span");
-  label.className = "hidden whitespace-nowrap text-sm font-medium text-neutral-200 sm:inline";
+  label.className = "control-button__label hidden whitespace-nowrap text-neutral-100 sm:inline";
 
   button.append(iconWrap, label);
 
@@ -1674,16 +1592,13 @@ function createActionButton(iconPath: string): ControlButtonRefs {
 }
 function createDangerButton(iconPath: string): ControlButtonRefs {
   const control = createActionButton(iconPath);
-  control.button.className = control.button.className
-    .replace("hover:border-emerald-400/40", "hover:border-rose-400/60")
-    .replace("hover:bg-neutral-800/70", "hover:bg-rose-900/30")
-    .replace("focus-visible:ring-emerald-300/70", "focus-visible:ring-rose-300/70");
-  control.button.classList.add("text-rose-300");
+  control.button.classList.remove("hover:border-emerald-300/60", "focus-visible:ring-emerald-300/60");
+  control.button.classList.add("hover:border-rose-400/60", "focus-visible:ring-rose-300/60", "text-rose-200");
+  control.button.style.setProperty("--control-glow", "var(--brand-violet)");
   return control;
 }
 
 function createAbilityButton(id: string, state: GameState): AbilityButtonRefs {
-  const definition = getAbilityDefinition(id);
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'ability-btn';
