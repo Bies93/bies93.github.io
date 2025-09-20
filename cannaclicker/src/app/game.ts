@@ -27,7 +27,7 @@ export function recalcDerivedValues(state: GameState): void {
   const buildingProduction = Array.from(itemById.entries()).map(([id, definition]) => {
     const owned = state.items[id] ?? 0;
     const baseMultiplier = buildingMultipliers.get(id) ?? new Decimal(1);
-    const tierMultiplier = getTierMultiplier(owned);
+    const tierMultiplier = getTierMultiplier(definition, owned);
     state.temp.buildingBaseMultipliers[id] = baseMultiplier;
     state.temp.buildingTierMultipliers[id] = tierMultiplier;
 
