@@ -16,7 +16,7 @@ import {
   AUTO_BUY_RESERVE_MAX,
 } from "./state";
 import { createAudioManager } from "./audio";
-import { t } from "./i18n";
+import { t, type LocaleKey } from "./i18n";
 import { exportSave, importSave, clearSave, save } from "./save";
 import { spawnFloatingValue } from "./effects";
 import { asset } from "./assets";
@@ -27,7 +27,6 @@ import {
   formatAbilityTooltip,
   getAbilityDefinition,
   getAbilityProgress,
-  isAbilityReady,
   listAbilities,
 } from "./abilities";
 import {
@@ -38,6 +37,25 @@ import {
   type ResearchViewModel,
 } from "./research";
 import { getPrestigePreview, performPrestige } from "./prestige";
+
+const STAT_META: Record<LocaleKey, Record<string, string>> = {
+  de: {
+    "stats.buds": "Aktueller Vorrat",
+    "stats.bps": "Produktion pro Sekunde",
+    "stats.bpc": "Ertrag pro Klick",
+    "stats.total": "Lebenszeit-Ernte",
+    "stats.seeds": "Prestige-Währung",
+    "stats.prestigeMult": "Aktiver Bonus",
+  },
+  en: {
+    "stats.buds": "Current stock",
+    "stats.bps": "Production each second",
+    "stats.bpc": "Yield per click",
+    "stats.total": "Lifetime harvest",
+    "stats.seeds": "Prestige currency",
+    "stats.prestigeMult": "Active boost",
+  },
+};
 
 interface ControlButtonRefs {
   button: HTMLButtonElement;
@@ -70,6 +88,7 @@ interface UIRefs {
   root: HTMLElement;
   title: HTMLHeadingElement;
   statsLabels: Map<string, HTMLElement>;
+  statsMeta: Map<string, HTMLElement>;
   buds: HTMLElement;
   bps: HTMLElement;
   bpc: HTMLElement;
@@ -258,19 +277,24 @@ function buildUI(state: GameState): UIRefs {
   title.textContent = "CannaBies";
   headerCard.appendChild(title);
 
-  const statsGrid = document.createElement("dl");
-  statsGrid.className =
-    "stats-grid grid gap-4 text-sm sm:text-base text-neutral-300";
+  const statsGrid = document.createElement("div");
+  statsGrid.className = "stats-grid text-neutral-300";
   headerCard.appendChild(statsGrid);
 
   const statsLabels = new Map<string, HTMLElement>();
+  const statsMeta = new Map<string, HTMLElement>();
 
-  const budsStat = createStatBlock("stats.buds", statsGrid, statsLabels);
-  const bpsStat = createStatBlock("stats.bps", statsGrid, statsLabels);
-  const bpcStat = createStatBlock("stats.bpc", statsGrid, statsLabels);
-  const totalStat = createStatBlock("stats.total", statsGrid, statsLabels);
-  const seedsStat = createStatBlock("stats.seeds", statsGrid, statsLabels);
-  const prestigeStat = createStatBlock("stats.prestigeMult", statsGrid, statsLabels);
+  const budsStat = createStatBlock("stats.buds", statsGrid, statsLabels, statsMeta);
+  const bpsStat = createStatBlock("stats.bps", statsGrid, statsLabels, statsMeta);
+  const bpcStat = createStatBlock("stats.bpc", statsGrid, statsLabels, statsMeta);
+  const totalStat = createStatBlock("stats.total", statsGrid, statsLabels, statsMeta);
+  const seedsStat = createStatBlock("stats.seeds", statsGrid, statsLabels, statsMeta);
+  const prestigeStat = createStatBlock(
+    "stats.prestigeMult",
+    statsGrid,
+    statsLabels,
+    statsMeta,
+  );
 
   primaryColumn.appendChild(headerCard);
 
@@ -356,6 +380,7 @@ function buildUI(state: GameState): UIRefs {
     root,
     title,
     statsLabels,
+    statsMeta,
     buds: budsStat,
     bps: bpsStat,
     bpc: bpcStat,
@@ -659,6 +684,10 @@ function updateStrings(state: GameState): void {
 
   refs.statsLabels.forEach((label, key) => {
     label.textContent = t(state.locale, key);
+  });
+
+  refs.statsMeta.forEach((meta, key) => {
+    meta.textContent = STAT_META[state.locale]?.[key] ?? "";
   });
 
   refs.abilityTitle.textContent = t(state.locale, "abilities.title");
@@ -1362,19 +1391,39 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
 function createStatBlock(
   key: string,
   wrapper: HTMLElement,
-  registry: Map<string, HTMLElement>,
+  labelRegistry: Map<string, HTMLElement>,
+  metaRegistry: Map<string, HTMLElement>,
 ): HTMLElement {
-  const group = document.createElement("div");
+  const group = document.createElement("article");
   group.className = "stat-card";
   group.dataset.variant = key;
-  const label = document.createElement("dt");
+
+  const header = document.createElement("div");
+  header.className = "stat-card__header";
+
+  const indicator = document.createElement("span");
+  indicator.className = "stat-card__indicator";
+  indicator.setAttribute("aria-hidden", "true");
+
+  const label = document.createElement("span");
   label.className = "stat-card__label";
-  registry.set(key, label);
+  labelRegistry.set(key, label);
 
-  const value = document.createElement("dd");
-  value.className = "stat-card__value";
+  header.append(indicator, label);
 
-  group.append(label, value);
+  const valueWrapper = document.createElement("div");
+  valueWrapper.className = "stat-card__value";
+
+  const value = document.createElement("span");
+  value.className = "stat-card__number";
+
+  const meta = document.createElement("span");
+  meta.className = "stat-card__meta";
+  metaRegistry.set(key, meta);
+
+  valueWrapper.append(value, meta);
+
+  group.append(header, valueWrapper);
   wrapper.appendChild(group);
 
   return value;
