@@ -126,10 +126,6 @@ button {
   gap: clamp(0.6rem, 1.6vw, 1rem);
 }
 
-.stats-bar {
-  @apply flex flex-wrap items-center gap-4 md:gap-6 lg:gap-8;
-}
-
 .stat-item {
   @apply flex items-center gap-3 rounded-lg border border-white/10 bg-neutral-900/60 px-4 py-2 transition hover:bg-neutral-900/80;
   min-width: 0;
@@ -153,6 +149,136 @@ button {
 .stat-item__value {
   @apply text-sm font-bold text-white tabular-nums;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.info-ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: clamp(0.85rem, 2vw, 1.4rem);
+  padding: clamp(0.9rem, 2.2vw, 1.3rem) clamp(1.1rem, 2.6vw, 1.8rem);
+  border-radius: 1.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.78), rgba(8, 14, 27, 0.85));
+  box-shadow: 0 22px 48px -26px rgba(6, 10, 18, 0.9);
+  backdrop-filter: blur(18px);
+}
+
+.info-ribbon__list {
+  display: flex;
+  flex: 1 1 16rem;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: clamp(0.6rem, 1.6vw, 1rem);
+}
+
+.info-ribbon__list .stat-item {
+  @apply bg-neutral-900/50 border-white/10 px-4 py-3;
+  flex: 1 1 14rem;
+  border-radius: 1.25rem;
+  background-image: linear-gradient(140deg, rgba(30, 64, 175, 0.08), rgba(6, 95, 70, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02), 0 16px 32px -26px rgba(6, 10, 18, 0.9);
+}
+
+.info-ribbon__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+
+.prestige-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(74, 222, 128, 0.35);
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.3), rgba(21, 128, 61, 0.25));
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: hsl(152 76% 85%);
+  box-shadow: 0 18px 38px -24px rgba(16, 185, 129, 0.6);
+  transition: border-color 200ms ease, background 200ms ease, transform 200ms ease;
+}
+
+.prestige-badge:hover {
+  border-color: rgba(74, 222, 128, 0.55);
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.42), rgba(21, 128, 61, 0.38));
+  transform: translateY(-1px);
+}
+
+.prestige-badge:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.45);
+}
+
+.prestige-badge__icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.45));
+}
+
+.prestige-badge__value {
+  @apply tabular-nums;
+  font-variant-numeric: tabular-nums;
+}
+
+.click-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.click-card__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(1.1rem, 2.6vw, 1.6rem) clamp(1.2rem, 3vw, 2rem) clamp(0.6rem, 1.8vw, 0.9rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(6, 11, 21, 0.75));
+}
+
+.click-card__title {
+  @apply text-3xl md:text-4xl font-extrabold tracking-tight text-leaf-200;
+  text-shadow: 0 16px 34px rgba(16, 185, 129, 0.35);
+}
+
+.click-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 3.5vw, 2.25rem);
+  padding: clamp(1.25rem, 3.2vw, 2.2rem) clamp(1.1rem, 3vw, 2rem) clamp(2.5rem, 5vw, 3rem);
+}
+
+.click-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+  margin-top: clamp(-2.25rem, -5vw, -1.5rem);
+}
+
+.click-stats .stat-item {
+  position: relative;
+  @apply border-white/10 bg-neutral-900/70 px-4 py-3;
+  border-radius: 1.35rem;
+  background-image: linear-gradient(145deg, rgba(5, 150, 105, 0.15), rgba(30, 64, 175, 0.12));
+  box-shadow: 0 24px 48px -26px rgba(9, 17, 29, 0.85);
+}
+
+.click-stats .stat-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at top right, rgba(34, 197, 94, 0.3), transparent 60%);
+  opacity: 0.6;
+  mix-blend-mode: screen;
+  pointer-events: none;
 }
 
 .stat-item[data-variant="stats.buds"] .stat-item__icon {

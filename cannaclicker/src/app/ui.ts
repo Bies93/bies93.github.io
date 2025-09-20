@@ -274,7 +274,6 @@ function buildUI(state: GameState): UIRefs {
   const layout = document.createElement("div");
   layout.className =
     "grid gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] xl:gap-6 2xl:gap-8";
-  root.appendChild(layout);
 
   const primaryColumn = document.createElement("div");
   primaryColumn.className = "space-y-4";
@@ -284,49 +283,58 @@ function buildUI(state: GameState): UIRefs {
 
   layout.append(primaryColumn, secondaryColumn);
 
-  const headerCard = document.createElement("section");
-  headerCard.className = "card fade-in space-y-3";
-
-  const title = document.createElement("h1");
-  title.className = "text-4xl md:text-5xl font-extrabold tracking-tight text-leaf-200 drop-shadow-[0_14px_28px_rgba(16,185,129,0.35)]";
-  title.textContent = "CannaBies";
-  headerCard.appendChild(title);
-
-  const statsList = document.createElement("div");
-  statsList.className = "stats-bar";
-  headerCard.appendChild(statsList);
-
   const statsLabels = new Map<string, HTMLElement>();
   const statsMeta = new Map<string, HTMLElement>();
 
-  const budsStat = createStatBlock("stats.buds", statsList, statsLabels, statsMeta);
-  const bpsStat = createStatBlock("stats.bps", statsList, statsLabels, statsMeta);
-  const bpcStat = createStatBlock("stats.bpc", statsList, statsLabels, statsMeta);
-  const totalStat = createStatBlock("stats.total", statsList, statsLabels, statsMeta);
-  const seedsStat = createStatBlock("stats.seeds", statsList, statsLabels, statsMeta);
+  const infoRibbon = document.createElement("section");
+  infoRibbon.className = "info-ribbon fade-in";
+
+  const infoList = document.createElement("div");
+  infoList.className = "info-ribbon__list";
+  infoRibbon.appendChild(infoList);
+
+  const totalStat = createStatBlock("stats.total", infoList, statsLabels, statsMeta);
+  const seedsStat = createStatBlock("stats.seeds", infoList, statsLabels, statsMeta);
   const prestigeStat = createStatBlock(
     "stats.prestigeMult",
-    statsList,
+    infoList,
     statsLabels,
     statsMeta,
   );
 
-  const seedBadge = document.createElement('button');
-  seedBadge.type = 'button';
-  seedBadge.className = 'inline-flex items-center gap-2 self-start rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-sm font-semibold text-emerald-100 transition hover:border-emerald-300/60 hover:bg-emerald-500/20 focus-visible:ring-2 focus-visible:ring-emerald-300/60 focus-visible:ring-offset-0';
+  const infoActions = document.createElement("div");
+  infoActions.className = "info-ribbon__actions";
+  infoRibbon.appendChild(infoActions);
+
+  const seedBadge = document.createElement("button");
+  seedBadge.type = "button";
+  seedBadge.className = "prestige-badge";
   const seedIcon = new Image();
-  seedIcon.src = withBase('icons/ui/ui-save.png');
-  seedIcon.alt = '';
-  seedIcon.decoding = 'async';
-  seedIcon.className = 'h-4 w-4';
-  const seedBadgeValue = document.createElement('span');
-  seedBadgeValue.className = 'tabular-nums';
+  seedIcon.src = withBase("icons/ui/ui-save.png");
+  seedIcon.alt = "";
+  seedIcon.decoding = "async";
+  seedIcon.className = "prestige-badge__icon";
+  const seedBadgeValue = document.createElement("span");
+  seedBadgeValue.className = "prestige-badge__value";
   seedBadge.append(seedIcon, seedBadgeValue);
-  headerCard.appendChild(seedBadge);
-  primaryColumn.appendChild(headerCard);
+  infoActions.appendChild(seedBadge);
+  root.append(infoRibbon, layout);
+
+  const title = document.createElement("h1");
+  title.className = "click-card__title";
+  title.textContent = "CannaBies";
 
   const clickCard = document.createElement("section");
-  clickCard.className = "card fade-in space-y-4";
+  clickCard.className = "card fade-in click-card";
+
+  const clickHeader = document.createElement("div");
+  clickHeader.className = "click-card__header";
+  clickHeader.appendChild(title);
+  clickCard.appendChild(clickHeader);
+
+  const clickBody = document.createElement("div");
+  clickBody.className = "click-card__body";
+  clickCard.appendChild(clickBody);
 
   const clickButton = document.createElement("button");
   clickButton.className = "click-button w-full";
@@ -347,8 +355,15 @@ function buildUI(state: GameState): UIRefs {
   clickLabel.className = "click-label";
 
   clickButton.append(clickIcon, clickLabel);
+  clickBody.appendChild(clickButton);
 
-  clickCard.appendChild(clickButton);
+  const clickStats = document.createElement("div");
+  clickStats.className = "click-stats";
+  clickBody.appendChild(clickStats);
+
+  const budsStat = createStatBlock("stats.buds", clickStats, statsLabels, statsMeta);
+  const bpsStat = createStatBlock("stats.bps", clickStats, statsLabels, statsMeta);
+  const bpcStat = createStatBlock("stats.bpc", clickStats, statsLabels, statsMeta);
 
   const announcer = document.createElement("p");
   announcer.setAttribute("data-sr-only", "true");
@@ -450,34 +465,34 @@ function buildUI(state: GameState): UIRefs {
 function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
   const header = document.createElement("header");
   header.className =
-    "flex w-full flex-col items-start gap-4 rounded-3xl border border-white/10 bg-neutral-900/80 px-4 py-4 shadow-[0_24px_60px_rgba(10,12,21,0.55)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 lg:px-8";
+    "flex w-full flex-col items-start gap-3 rounded-3xl border border-white/10 bg-neutral-900/80 px-4 py-3 shadow-[0_20px_48px_rgba(10,12,21,0.5)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 lg:px-6";
 
   const brand = document.createElement("div");
   brand.className =
-    "flex items-center gap-4 md:gap-6 rounded-2xl bg-gradient-to-br from-neutral-900/90 via-neutral-900/75 to-neutral-800/75 px-4 md:px-6 py-4 shadow-[0_24px_48px_rgba(16,185,129,0.28)] ring-1 ring-emerald-400/25 backdrop-blur";
+    "flex items-center gap-3 md:gap-5 rounded-2xl bg-gradient-to-br from-neutral-900/90 via-neutral-900/75 to-neutral-800/75 px-4 md:px-5 py-3 shadow-[0_18px_38px_rgba(16,185,129,0.28)] ring-1 ring-emerald-400/25 backdrop-blur";
 
   const leafWrap = document.createElement("span");
   leafWrap.className =
-    "relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-lime-300/35 via-emerald-300/25 to-emerald-500/30 shadow-[0_0_38px_rgba(202,255,120,0.55)] ring-1 ring-lime-200/35";
+    "relative grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-lime-300/35 via-emerald-300/25 to-emerald-500/30 shadow-[0_0_28px_rgba(202,255,120,0.5)] ring-1 ring-lime-200/35";
 
   const leaf = new Image();
   leaf.src = withBase("img/logo-leaf.svg");
   leaf.alt = "";
   leaf.decoding = "async";
   leaf.className =
-    "h-12 w-12 drop-shadow-[0_18px_34px_rgba(202,255,150,0.6)] saturate-150 brightness-110";
+    "h-10 w-10 drop-shadow-[0_14px_28px_rgba(202,255,150,0.6)] saturate-150 brightness-110";
 
   leafWrap.appendChild(leaf);
 
   const brandText = document.createElement("div");
-  brandText.className = "flex flex-col justify-center gap-1 pl-2";
+  brandText.className = "flex flex-col justify-center gap-1 pl-1";
 
   const wordmark = new Image();
   wordmark.src = withBase("img/logo-wordmark.svg");
   wordmark.alt = "CannaClicker wordmark";
   wordmark.decoding = "async";
   wordmark.className =
-    "relative left-4 top-2 h-24 w-auto drop-shadow-[0_26px_46px_rgba(56,220,120,0.6)] saturate-150 contrast-125 md:left-6 md:top-2";
+    "relative left-2 top-1 h-16 w-auto drop-shadow-[0_22px_42px_rgba(56,220,120,0.55)] saturate-150 contrast-125 md:left-4 md:top-0 md:h-20";
 
   brandText.append(wordmark);
 
@@ -485,7 +500,7 @@ function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
 
   const actionWrap = document.createElement("div");
   actionWrap.className =
-    "flex flex-nowrap items-center gap-3 overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/70 px-3 py-2 shadow-[0_22px_44px_rgba(10,12,21,0.5)] ring-1 ring-white/10 backdrop-blur sm:px-4";
+    "flex flex-nowrap items-center gap-2.5 overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/70 px-3 py-1.5 shadow-[0_18px_36px_rgba(10,12,21,0.45)] ring-1 ring-white/10 backdrop-blur sm:px-3.5";
   controls.forEach((control) => {
     control.classList.add("shrink-0");
     actionWrap.append(control);
