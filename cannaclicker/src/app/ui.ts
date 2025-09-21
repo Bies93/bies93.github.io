@@ -1026,46 +1026,13 @@ function updateShop(state: GameState): void {
   });
 }
 
-function sortShopEntries(entries: ShopEntry[], mode: ShopSortMode): ShopEntry[] {
+function sortShopEntries(entries: ShopEntry[], _mode: ShopSortMode): ShopEntry[] {
   const sorted = [...entries];
   sorted.sort((a, b) => {
     if (a.unlocked !== b.unlocked) {
       return a.unlocked ? -1 : 1;
     }
 
-    if (mode === 'price') {
-      if (a.cost.lessThan(b.cost)) {
-        return -1;
-      }
-      if (a.cost.greaterThan(b.cost)) {
-        return 1;
-      }
-    } else if (mode === 'bps') {
-      if (a.deltaBps.greaterThan(b.deltaBps)) {
-        return -1;
-      }
-      if (a.deltaBps.lessThan(b.deltaBps)) {
-        return 1;
-      }
-    } else {
-      const roiA = a.roi ?? Number.POSITIVE_INFINITY;
-      const roiB = b.roi ?? Number.POSITIVE_INFINITY;
-      const finiteA = Number.isFinite(roiA);
-      const finiteB = Number.isFinite(roiB);
-      if (finiteA && finiteB && roiA !== roiB) {
-        return roiA - roiB;
-      }
-      if (finiteA !== finiteB) {
-        return finiteA ? -1 : 1;
-      }
-    }
-
-    if (a.cost.lessThan(b.cost)) {
-      return -1;
-    }
-    if (a.cost.greaterThan(b.cost)) {
-      return 1;
-    }
     return a.order - b.order;
   });
   return sorted;
