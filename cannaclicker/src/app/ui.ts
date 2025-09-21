@@ -465,48 +465,43 @@ function buildUI(state: GameState): UIRefs {
 function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
   const header = document.createElement("header");
   header.className =
-    "flex w-full flex-col items-start gap-3 rounded-3xl border border-white/10 bg-neutral-900/80 px-4 py-3 shadow-[0_20px_48px_rgba(10,12,21,0.5)] backdrop-blur-xl sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-5 lg:px-6";
+    "grid w-full gap-2 rounded-3xl border border-white/10 bg-neutral-900/80 px-3 py-2 shadow-[0_20px_48px_rgba(10,12,21,0.45)] backdrop-blur-xl sm:grid-cols-[auto_auto_1fr] sm:items-center sm:gap-3 sm:px-4 lg:px-5";
 
-  const brand = document.createElement("div");
-  brand.className =
-    "flex items-center gap-3 md:gap-5 rounded-2xl bg-gradient-to-br from-neutral-900/90 via-neutral-900/75 to-neutral-800/75 px-4 md:px-5 py-3 shadow-[0_18px_38px_rgba(16,185,129,0.28)] ring-1 ring-emerald-400/25 backdrop-blur";
-
-  const leafWrap = document.createElement("span");
-  leafWrap.className =
-    "relative grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-lime-300/35 via-emerald-300/25 to-emerald-500/30 shadow-[0_0_28px_rgba(202,255,120,0.5)] ring-1 ring-lime-200/35";
+  const logoWrap = document.createElement("div");
+  logoWrap.className =
+    "grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-lime-300/35 via-emerald-300/25 to-emerald-500/30 shadow-[0_0_20px_rgba(202,255,120,0.45)] ring-1 ring-lime-200/35 sm:h-14 sm:w-14";
 
   const leaf = new Image();
   leaf.src = withBase("img/logo-leaf.svg");
   leaf.alt = "";
   leaf.decoding = "async";
   leaf.className =
-    "h-10 w-10 drop-shadow-[0_14px_28px_rgba(202,255,150,0.6)] saturate-150 brightness-110";
+    "h-8 w-8 drop-shadow-[0_12px_24px_rgba(202,255,150,0.55)] saturate-150 brightness-110 sm:h-10 sm:w-10";
 
-  leafWrap.appendChild(leaf);
+  logoWrap.appendChild(leaf);
 
-  const brandText = document.createElement("div");
-  brandText.className = "flex flex-col justify-center gap-1 pl-1";
+  const wordmarkWrap = document.createElement("div");
+  wordmarkWrap.className =
+    "flex items-center rounded-2xl bg-gradient-to-br from-neutral-900/90 via-neutral-900/75 to-neutral-800/70 px-3 py-1.5 shadow-[0_14px_28px_rgba(16,185,129,0.22)] ring-1 ring-emerald-400/20 backdrop-blur";
 
   const wordmark = new Image();
   wordmark.src = withBase("img/logo-wordmark.svg");
   wordmark.alt = "CannaClicker wordmark";
   wordmark.decoding = "async";
   wordmark.className =
-    "relative left-2 top-1 h-16 w-auto drop-shadow-[0_22px_42px_rgba(56,220,120,0.55)] saturate-150 contrast-125 md:left-4 md:top-0 md:h-20";
+    "h-12 w-auto drop-shadow-[0_18px_32px_rgba(56,220,120,0.5)] saturate-150 contrast-125 sm:h-14";
 
-  brandText.append(wordmark);
-
-  brand.append(leafWrap, brandText);
+  wordmarkWrap.append(wordmark);
 
   const actionWrap = document.createElement("div");
   actionWrap.className =
-    "flex flex-nowrap items-center gap-2.5 overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/70 px-3 py-1.5 shadow-[0_18px_36px_rgba(10,12,21,0.45)] ring-1 ring-white/10 backdrop-blur sm:px-3.5";
+    "flex flex-nowrap items-center justify-self-stretch gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/70 px-3 py-1 shadow-[0_16px_30px_rgba(10,12,21,0.4)] ring-1 ring-white/10 backdrop-blur sm:justify-self-end";
   controls.forEach((control) => {
     control.classList.add("shrink-0");
     actionWrap.append(control);
   });
 
-  header.append(brand, actionWrap);
+  header.append(logoWrap, wordmarkWrap, actionWrap);
   root.prepend(header);
 }
 
