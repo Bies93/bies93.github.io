@@ -148,7 +148,7 @@ interface SidePanelRefs {
 
 interface UIRefs {
   root: HTMLElement;
-  title: HTMLHeadingElement;
+  headerTitle: HTMLHeadingElement;
   statsLabels: Map<string, HTMLElement>;
   statsMeta: Map<string, HTMLElement>;
   buds: HTMLElement;
@@ -337,7 +337,7 @@ function buildUI(state: GameState): UIRefs {
   prestigeControl.button.classList.add("text-amber-200");
   prestigeControl.button.classList.add("hover:border-amber-400/60", "hover:bg-amber-900/40");
 
-  mountHeader(root, [
+  const headerTitle = mountHeader(root, [
     muteControl.button,
     exportControl.button,
     importControl.button,
@@ -394,16 +394,15 @@ function buildUI(state: GameState): UIRefs {
   infoActions.appendChild(seedBadge);
   root.append(infoRibbon, layout);
 
-  const title = document.createElement("h1");
-  title.className = "click-card__title";
-  title.textContent = "CannaBies";
-
   const clickCard = document.createElement("section");
   clickCard.className = "card fade-in click-card";
 
   const clickHeader = document.createElement("div");
   clickHeader.className = "click-card__header";
-  clickHeader.appendChild(title);
+  const clickStats = document.createElement("div");
+  clickStats.className = "click-stats";
+
+  clickHeader.appendChild(clickStats);
   clickCard.appendChild(clickHeader);
 
   const clickBody = document.createElement("div");
@@ -430,10 +429,6 @@ function buildUI(state: GameState): UIRefs {
 
   clickButton.append(clickIcon, clickLabel);
   clickBody.appendChild(clickButton);
-
-  const clickStats = document.createElement("div");
-  clickStats.className = "click-stats";
-  clickBody.appendChild(clickStats);
 
   const budsStat = createStatBlock("stats.buds", clickStats, statsLabels, statsMeta);
   const bpsStat = createStatBlock("stats.bps", clickStats, statsLabels, statsMeta);
@@ -478,7 +473,7 @@ function buildUI(state: GameState): UIRefs {
 
   const uiRefs: UIRefs = {
     root,
-    title,
+    headerTitle,
     statsLabels,
     statsMeta,
     buds: budsStat,
@@ -513,10 +508,13 @@ function buildUI(state: GameState): UIRefs {
   return uiRefs;
 }
 
-function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
+function mountHeader(
+  root: HTMLElement,
+  controls: HTMLButtonElement[],
+): HTMLHeadingElement {
   const header = document.createElement("header");
   header.className =
-    "grid w-full gap-2 rounded-3xl border border-white/10 bg-neutral-900/80 px-3 py-2 shadow-[0_20px_48px_rgba(10,12,21,0.45)] backdrop-blur-xl sm:grid-cols-[auto_auto_1fr] sm:items-center sm:gap-3 sm:px-4 lg:px-5";
+    "grid w-full gap-2 rounded-3xl border border-white/10 bg-neutral-900/80 px-3 py-2 shadow-[0_20px_48px_rgba(10,12,21,0.45)] backdrop-blur-xl sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-3 sm:px-4 lg:px-5";
 
   const logoWrap = document.createElement("div");
   logoWrap.className =
@@ -531,18 +529,9 @@ function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
 
   logoWrap.appendChild(leaf);
 
-  const wordmarkWrap = document.createElement("div");
-  wordmarkWrap.className =
-    "flex items-center rounded-2xl bg-gradient-to-br from-neutral-900/90 via-neutral-900/75 to-neutral-800/70 px-3 py-1.5 shadow-[0_14px_28px_rgba(16,185,129,0.22)] ring-1 ring-emerald-400/20 backdrop-blur";
-
-  const wordmark = new Image();
-  wordmark.src = withBase("img/logo-wordmark.svg");
-  wordmark.alt = "CannaClicker wordmark";
-  wordmark.decoding = "async";
-  wordmark.className =
-    "h-12 w-auto drop-shadow-[0_18px_32px_rgba(56,220,120,0.5)] saturate-150 contrast-125 sm:h-14";
-
-  wordmarkWrap.append(wordmark);
+  const headerTitle = document.createElement("h1");
+  headerTitle.className = "app-header__title";
+  headerTitle.textContent = "CannaBies";
 
   const actionWrap = document.createElement("div");
   actionWrap.className =
@@ -552,8 +541,9 @@ function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): void {
     actionWrap.append(control);
   });
 
-  header.append(logoWrap, wordmarkWrap, actionWrap);
+  header.append(logoWrap, headerTitle, actionWrap);
   root.prepend(header);
+  return headerTitle;
 }
 
 function setupInteractions(refs: UIRefs, state: GameState): void {
@@ -779,7 +769,7 @@ function updateStrings(state: GameState): void {
     return;
   }
 
-  refs.title.textContent = "CannaBies";
+  refs.headerTitle.textContent = "CannaBies";
   refs.clickButton.setAttribute("aria-label", t(state.locale, "actions.click"));
   refs.clickLabel.textContent = t(state.locale, "actions.click");
 
