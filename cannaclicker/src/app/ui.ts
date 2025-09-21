@@ -953,7 +953,7 @@ function updateShop(state: GameState): void {
   const entries = getShopEntries(state);
   const sorted = sortShopEntries(entries, state.preferences.shopSortMode);
 
-  sorted.forEach((entry) => {
+  sorted.forEach((entry, index) => {
     let card = refs!.shopEntries.get(entry.definition.id);
     if (!card) {
       card = createShopCard(entry.definition.id, state);
@@ -1018,7 +1018,11 @@ function updateShop(state: GameState): void {
     card.owned.textContent = entry.owned.toString();
     card.payback.textContent = formatPayback(state.locale, entry.payback);
 
-    refs.sidePanel.shop.list.appendChild(card.container);
+    const list = refs.sidePanel.shop.list;
+    const currentChild = list.children.item(index);
+    if (currentChild !== card.container) {
+      list.insertBefore(card.container, currentChild ?? null);
+    }
   });
 }
 
@@ -1717,8 +1721,6 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
   media.appendChild(icon);
 
   container.append(info, media);
-  refs.sidePanel.shop.list.appendChild(container);
-
   buyButton.addEventListener("click", () => {
     if (buyItem(state, itemId, 1)) {
       audio.playPurchase();
