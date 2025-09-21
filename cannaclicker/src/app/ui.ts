@@ -5,7 +5,7 @@ import {
   recalcDerivedValues,
   evaluateAchievements,
 } from "./game";
-import { getShopEntries, getMaxAffordable, formatPayback, formatRoi, type ShopEntry } from "./shop";
+import { getShopEntries, getMaxAffordable, formatRoi, type ShopEntry } from "./shop";
 import { formatDecimal } from "./math";
 import type { AbilityId, GameState } from "./state";
 import { createDefaultState } from "./state";
@@ -161,12 +161,8 @@ interface ShopCardRefs {
   stageProgressText: HTMLElement;
   costLabel: HTMLElement;
   cost: HTMLElement;
-  nextLabel: HTMLElement;
-  next: HTMLElement;
   ownedLabel: HTMLElement;
   owned: HTMLElement;
-  paybackLabel: HTMLElement;
-  payback: HTMLElement;
   buyButton: HTMLButtonElement;
   maxButton: HTMLButtonElement;
 }
@@ -876,9 +872,7 @@ function updateShop(state: GameState): void {
     card.name.textContent = entry.definition.name[state.locale];
     card.description.textContent = entry.definition.description[state.locale];
     card.costLabel.textContent = t(state.locale, "shop.cost");
-    card.nextLabel.textContent = t(state.locale, "shop.nextPrice");
     card.ownedLabel.textContent = t(state.locale, "shop.owned");
-    card.paybackLabel.textContent = t(state.locale, "shop.paybackLabel");
     card.buyButton.textContent = t(state.locale, "actions.buy");
     card.maxButton.textContent = t(state.locale, "actions.max");
 
@@ -922,9 +916,7 @@ function updateShop(state: GameState): void {
     card.container.dataset.affordable = entry.affordable && entry.unlocked ? "true" : "false";
     card.container.classList.toggle("is-affordable", entry.affordable && entry.unlocked);
     card.cost.textContent = entry.formattedCost;
-    card.next.textContent = entry.formattedNextCost;
     card.owned.textContent = entry.owned.toString();
-    card.payback.textContent = formatPayback(state.locale, entry.payback);
 
     const list = refs.sidePanel.shop.list;
     const currentChild = list.children.item(index);
@@ -1491,9 +1483,7 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
   details.className = "grid grid-cols-2 gap-x-4 gap-y-1 text-sm opacity-90";
 
   const cost = createDetail(details, t(state.locale, "shop.cost"));
-  const next = createDetail(details, t(state.locale, "shop.nextPrice"));
   const owned = createDetail(details, t(state.locale, "shop.owned"));
-  const payback = createDetail(details, t(state.locale, "shop.paybackLabel"));
 
   info.appendChild(details);
 
@@ -1556,12 +1546,8 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
     stageProgressText,
     costLabel: cost.label,
     cost: cost.value,
-    nextLabel: next.label,
-    next: next.value,
     ownedLabel: owned.label,
     owned: owned.value,
-    paybackLabel: payback.label,
-    payback: payback.value,
     buyButton,
     maxButton,
   } satisfies ShopCardRefs;

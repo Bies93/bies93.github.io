@@ -1,6 +1,6 @@
 import Decimal from 'break_infinity.js';
 import { items, type ItemDefinition } from '../data/items';
-import { formatDecimal, paybackSeconds } from './math';
+import { formatDecimal } from './math';
 import type { GameState } from './state';
 import { t, type LocaleKey } from './i18n';
 
@@ -11,12 +11,9 @@ export interface ShopEntry {
   definition: ItemDefinition;
   owned: number;
   cost: Decimal;
-  nextCost: Decimal;
   formattedCost: string;
-  formattedNextCost: string;
   deltaBps: Decimal;
   roi: number | null;
-  payback: number | null;
   unlocked: boolean;
   affordable: boolean;
   tier: TierInfo;
@@ -130,24 +127,19 @@ export function getShopEntries(state: GameState): ShopEntry[] {
   return items.map((definition, index) => {
     const owned = state.items[definition.id] ?? 0;
     const cost = getItemCost(definition, owned, state.temp.costMultiplier);
-    const nextCost = getNextCost(definition, owned, state.temp.costMultiplier);
     const tier = getTierInfo(definition, owned);
     const baseMultiplier = state.temp.buildingBaseMultipliers[definition.id] ?? new Decimal(1);
     const deltaBase = deltaBpsNextBuy(definition, owned, baseMultiplier);
     const deltaBps = deltaBase.mul(state.temp.totalBpsMult);
-    const payback = paybackSeconds(cost, deltaBps);
     const roi = deltaBps.lessThanOrEqualTo(0) ? null : Number(cost.div(deltaBps).toFixed(2));
 
     return {
       definition,
       owned,
       cost,
-      nextCost,
       formattedCost: formatDecimal(cost),
-      formattedNextCost: formatDecimal(nextCost),
       deltaBps,
       roi,
-      payback,
       unlocked: canUnlockItem(state, definition),
       affordable: state.buds.greaterThanOrEqualTo(cost),
       tier,
@@ -193,14 +185,6 @@ export function getMaxAffordable(definition: ItemDefinition, state: GameState): 
   }
 
   return iterations;
-}
-
-export function formatPayback(locale: LocaleKey, value: number | null): string {
-  if (value === null || !Number.isFinite(value)) {
-    return '—';
-  }
-
-  return t(locale, 'shop.paybackValue', { seconds: value });
 }
 
 export function formatRoi(locale: LocaleKey, value: number | null): string {
