@@ -234,8 +234,87 @@ button {
 }
 
 .app-header__title {
-  @apply text-2xl font-semibold tracking-tight text-leaf-200 sm:text-3xl;
-  text-shadow: 0 14px 28px rgba(16, 185, 129, 0.3);
+  @apply text-4xl sm:text-5xl font-medium text-center;
+  font-size: clamp(2.6rem, 6.5vw, 4.6rem);
+  font-family: "Great Vibes", "Segoe Script", "Lucida Handwriting", cursive;
+  letter-spacing: 0.09em;
+  color: hsl(199 89% 82%);
+  background-image: linear-gradient(
+    118deg,
+    rgba(76, 29, 149, 0.92) 2%,
+    rgba(59, 130, 246, 0.9) 16%,
+    rgba(8, 145, 178, 0.92) 34%,
+    rgba(5, 150, 105, 0.92) 54%,
+    rgba(132, 204, 22, 0.88) 72%,
+    rgba(202, 138, 4, 0.86) 88%,
+    rgba(234, 88, 12, 0.84) 98%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 16px 34px rgba(14, 165, 233, 0.18),
+    0 0 18px rgba(76, 29, 149, 0.36),
+    0 0 10px rgba(202, 138, 4, 0.32);
+  -webkit-text-stroke: 1.2px rgba(6, 11, 26, 0.8);
+  text-stroke: 1.2px rgba(6, 11, 26, 0.8);
+  padding-inline: clamp(1.6rem, 6vw, 4rem);
+  justify-self: stretch;
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 18px 38px rgba(45, 212, 191, 0.32)) drop-shadow(0 0 20px rgba(148, 163, 184, 0.12));
+  position: relative;
+  isolation: isolate;
+}
+
+.app-header__title::before {
+  content: "";
+  position: absolute;
+  inset: 22% 12% 12%;
+  background:
+    radial-gradient(circle at 16% 32%, rgba(126, 34, 206, 0.32), transparent 58%),
+    radial-gradient(circle at 84% 24%, rgba(20, 184, 166, 0.28), transparent 60%),
+    radial-gradient(circle at 40% 78%, rgba(202, 138, 4, 0.26), transparent 66%),
+    conic-gradient(from 110deg at 50% 65%, rgba(37, 99, 235, 0.24) 0deg 30deg, transparent 30deg 150deg, rgba(202, 138, 4, 0.24) 150deg 210deg, transparent 210deg 360deg);
+  mix-blend-mode: screen;
+  opacity: 0.52;
+  filter: blur(28px) saturate(120%);
+  pointer-events: none;
+  animation: header-aurora 12s ease-in-out infinite;
+  border-radius: 999px;
+  z-index: -1;
+}
+
+.app-header__title::after {
+  content: "";
+  display: block;
+  width: min(82%, 20rem);
+  height: 4px;
+  margin: clamp(0.35rem, 1.2vw, 0.75rem) auto 0;
+  border-radius: 9999px;
+  background: linear-gradient(120deg, rgba(76, 29, 149, 0.82), rgba(14, 165, 233, 0.76), rgba(202, 138, 4, 0.7));
+  box-shadow:
+    0 14px 26px rgba(14, 165, 233, 0.26),
+    0 0 16px rgba(202, 138, 4, 0.34);
+}
+
+@keyframes header-aurora {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: translate3d(-3%, -2%, 0) scale(1);
+    filter: blur(24px) saturate(130%);
+  }
+  40% {
+    opacity: 0.75;
+    transform: translate3d(4%, 3%, 0) scale(1.08);
+    filter: blur(24px) saturate(170%);
+  }
+  70% {
+    opacity: 0.65;
+    transform: translate3d(-3%, 4%, 0) scale(0.96);
+    filter: blur(24px) saturate(150%);
+  }
 }
 
 .click-card__header {

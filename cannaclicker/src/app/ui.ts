@@ -514,7 +514,7 @@ function mountHeader(
 ): HTMLHeadingElement {
   const header = document.createElement("header");
   header.className =
-    "grid w-full gap-2 rounded-3xl border border-white/10 bg-neutral-900/80 px-3 py-2 shadow-[0_20px_48px_rgba(10,12,21,0.45)] backdrop-blur-xl sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-3 sm:px-4 lg:px-5";
+    "grid w-full gap-3 rounded-3xl border border-white/10 bg-neutral-900/80 px-3 py-2 shadow-[0_20px_48px_rgba(10,12,21,0.45)] backdrop-blur-xl sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-x-14 sm:gap-y-2 sm:px-6 lg:px-8";
 
   const logoWrap = document.createElement("div");
   logoWrap.className =
