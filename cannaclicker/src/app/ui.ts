@@ -22,6 +22,7 @@ import { spawnFloatingValue } from "./effects";
 import { asset } from "./assets";
 import { withBase } from "./paths";
 import { itemById } from "../data/items";
+import { achievements, type AchievementDefinition } from "../data/achievements";
 import {
   activateAbility,
   formatAbilityTooltip,
@@ -99,6 +100,53 @@ interface ShopControlsRefs {
   autoBuy: AutoBuyRefs;
 }
 
+interface PrestigePanelRefs {
+  container: HTMLElement;
+  description: HTMLElement;
+  currentSeedsLabel: HTMLElement;
+  currentSeedsValue: HTMLElement;
+  nextSeedsLabel: HTMLElement;
+  nextSeedsValue: HTMLElement;
+  gainLabel: HTMLElement;
+  gainValue: HTMLElement;
+  bonusLabel: HTMLElement;
+  bonusValue: HTMLElement;
+  requirement: HTMLElement;
+  actionButton: HTMLButtonElement;
+}
+
+interface AchievementCardRefs {
+  container: HTMLElement;
+  iconBase: HTMLImageElement;
+  iconOverlay: HTMLImageElement;
+  title: HTMLElement;
+  description: HTMLElement;
+  reward: HTMLElement;
+  status: HTMLElement;
+}
+
+interface SidePanelRefs {
+  section: HTMLElement;
+  title: HTMLElement;
+  tabList: HTMLElement;
+  tabs: Map<SidePanelTab, HTMLButtonElement>;
+  views: Record<SidePanelTab, HTMLElement>;
+  shop: {
+    controls: ShopControlsRefs;
+    list: HTMLElement;
+  };
+  research: {
+    container: HTMLElement;
+    filters: Map<string, HTMLButtonElement>;
+    list: HTMLElement;
+  };
+  prestige: PrestigePanelRefs;
+  achievements: {
+    list: HTMLElement;
+    entries: Map<string, AchievementCardRefs>;
+  };
+}
+
 interface UIRefs {
   root: HTMLElement;
   title: HTMLHeadingElement;
@@ -110,6 +158,8 @@ interface UIRefs {
   total: HTMLElement;
   seeds: HTMLElement;
   prestigeMult: HTMLElement;
+  seedBadge: HTMLButtonElement;
+  seedBadgeValue: HTMLElement;
   clickButton: HTMLButtonElement;
   clickLabel: HTMLSpanElement;
   clickIcon: HTMLDivElement;
@@ -121,17 +171,10 @@ interface UIRefs {
     prestige: ControlButtonRefs;
   };
   announcer: HTMLElement;
-  shopTitle: HTMLElement;
-  shopControls: ShopControlsRefs;
-  shopList: HTMLElement;
-  shopEntries: Map<string, ShopCardRefs>;
   abilityTitle: HTMLElement;
   abilityList: Map<string, AbilityButtonRefs>;
-  research: {
-    title: HTMLElement;
-    filters: Map<string, HTMLButtonElement>;
-    list: HTMLElement;
-  };
+  sidePanel: SidePanelRefs;
+  shopEntries: Map<string, ShopCardRefs>;
   prestigeModal: PrestigeModalRefs;
   toastContainer: HTMLElement;
 }
@@ -187,10 +230,20 @@ interface PrestigeModalRefs {
   statusLabel: HTMLElement;
 }
 
+type SidePanelTab = "shop" | "research" | "prestige" | "achievements";
+
+const SIDE_PANEL_TAB_KEYS: Record<SidePanelTab, string> = {
+  shop: "panel.tabs.shop",
+  research: "panel.tabs.research",
+  prestige: "panel.tabs.prestige",
+  achievements: "panel.tabs.achievements",
+};
+
 let refs: UIRefs | null = null;
 let audio = createAudioManager(false);
 let lastAnnounced = new Decimal(0);
 let activeResearchFilter: ResearchFilter = "available";
+let activeSidePanelTab: SidePanelTab = "shop";
 let prestigeOpen = false;
 let prestigeAcknowledged = false;
 
@@ -251,9 +304,12 @@ export function renderUI(state: GameState): void {
   updateStrings(state);
   updateStats(state);
   updateAbilities(state);
-  updateResearch(state);
+  updateSidePanel(state);
   updateShopControls(state);
   updateShop(state);
+  updateResearch(state);
+  updatePrestigePanel(state);
+  updateAchievements(state);
   updatePrestigeModal(state);
   updateOfflineToast(state);
 }
@@ -410,24 +466,8 @@ function buildUI(state: GameState): UIRefs {
 
   primaryColumn.appendChild(abilitySection);
 
-  const research = createResearchSection();
-  secondaryColumn.appendChild(research.section);
-
-  const shopSection = document.createElement("section");
-  shopSection.className = "card fade-in space-y-4";
-
-  const shopTitle = document.createElement("h2");
-  shopTitle.className = "text-xl font-semibold text-leaf-200";
-  shopSection.appendChild(shopTitle);
-
-  const shopControls = createShopControls(state);
-  shopSection.appendChild(shopControls.container);
-
-  const shopList = document.createElement("div");
-  shopList.className = "grid gap-3";
-  shopSection.appendChild(shopList);
-
-  secondaryColumn.appendChild(shopSection);
+  const sidePanel = createSidePanel(state);
+  secondaryColumn.appendChild(sidePanel.section);
 
   const toastContainer = document.createElement("div");
   toastContainer.className = "toast-stack";
@@ -460,17 +500,10 @@ function buildUI(state: GameState): UIRefs {
       prestige: prestigeControl,
     },
     announcer,
-    shopTitle,
-    shopControls,
-    shopList,
-    shopEntries: new Map(),
     abilityTitle,
     abilityList: abilityRefs,
-    research: {
-      title: research.title,
-      filters: research.filters,
-      list: research.list,
-    },
+    sidePanel,
+    shopEntries: new Map(),
     prestigeModal,
     toastContainer,
   };
@@ -619,7 +652,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
     abilityRefs.container.setAttribute('aria-label', labelText);
   });
 
-  refs.research.filters.forEach((button, key) => {
+  refs.sidePanel.research.filters.forEach((button, key) => {
     button.addEventListener("click", () => {
       if (activeResearchFilter === (key as ResearchFilter)) {
         return;
@@ -629,7 +662,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
     });
   });
 
-  refs.shopControls.sortButtons.forEach((button, mode) => {
+  refs.sidePanel.shop.controls.sortButtons.forEach((button, mode) => {
     button.addEventListener("click", () => {
       if (state.preferences.shopSortMode === mode) {
         return;
@@ -640,7 +673,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
     });
   });
 
-  const auto = refs.shopControls.autoBuy;
+  const auto = refs.sidePanel.shop.controls.autoBuy;
   auto.enableButton.addEventListener("click", () => {
     state.automation.autoBuy.enabled = !state.automation.autoBuy.enabled;
     save(state);
@@ -684,6 +717,20 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
 
   auto.reserveSlider.addEventListener("change", () => {
     save(state);
+  });
+
+  refs.sidePanel.tabs.forEach((button, tab) => {
+    button.addEventListener("click", () => {
+      if (activeSidePanelTab === tab) {
+        return;
+      }
+      activeSidePanelTab = tab;
+      renderUI(state);
+    });
+  });
+
+  refs.sidePanel.prestige.actionButton.addEventListener("click", () => {
+    openPrestigeModal(state);
   });
 }
 
@@ -732,7 +779,6 @@ function updateStrings(state: GameState): void {
   }
 
   refs.title.textContent = "CannaBies";
-  refs.shopTitle.textContent = t(state.locale, "shop.title");
   refs.clickButton.setAttribute("aria-label", t(state.locale, "actions.click"));
   refs.clickLabel.textContent = t(state.locale, "actions.click");
 
@@ -777,11 +823,25 @@ function updateStrings(state: GameState): void {
     abilityRefs.container.setAttribute('aria-label', labelText);
   });
 
-  refs.research.title.textContent = t(state.locale, "research.title");
-  refs.research.filters.forEach((button, key) => {
+  refs.sidePanel.tabs.forEach((button, tab) => {
+    const key = SIDE_PANEL_TAB_KEYS[tab];
+    const label = t(state.locale, key);
+    button.textContent = label;
+    button.setAttribute("aria-label", label);
+  });
+  refs.sidePanel.title.textContent = t(state.locale, SIDE_PANEL_TAB_KEYS[activeSidePanelTab]);
+
+  refs.sidePanel.research.filters.forEach((button, key) => {
     button.textContent = t(state.locale, `research.filter.${key}`);
     button.setAttribute("aria-label", button.textContent ?? "");
   });
+
+  refs.sidePanel.prestige.description.textContent = t(state.locale, "panel.prestige.description");
+  refs.sidePanel.prestige.currentSeedsLabel.textContent = t(state.locale, "prestige.modal.currentSeeds");
+  refs.sidePanel.prestige.nextSeedsLabel.textContent = t(state.locale, "prestige.modal.afterSeeds");
+  refs.sidePanel.prestige.gainLabel.textContent = t(state.locale, "prestige.modal.gainSeeds");
+  refs.sidePanel.prestige.bonusLabel.textContent = t(state.locale, "prestige.modal.globalBonus");
+  refs.sidePanel.prestige.actionButton.textContent = t(state.locale, "actions.prestige");
 
   refs.prestigeModal.title.textContent = t(state.locale, "prestige.modal.title");
   refs.prestigeModal.description.textContent = t(state.locale, "prestige.modal.description");
@@ -1089,12 +1149,38 @@ function updateAbilities(state: GameState): void {
   });
 }
 
+function updateSidePanel(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  refs.sidePanel.title.textContent = t(state.locale, SIDE_PANEL_TAB_KEYS[activeSidePanelTab]);
+
+  refs.sidePanel.tabs.forEach((button, tab) => {
+    const isActive = tab === activeSidePanelTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    button.setAttribute("aria-selected", isActive ? "true" : "false");
+    button.tabIndex = isActive ? 0 : -1;
+  });
+
+  (Object.entries(refs.sidePanel.views) as [SidePanelTab, HTMLElement][]).forEach(([tab, view]) => {
+    if (tab === activeSidePanelTab) {
+      view.classList.remove("hidden");
+      view.setAttribute("aria-hidden", "false");
+    } else {
+      view.classList.add("hidden");
+      view.setAttribute("aria-hidden", "true");
+    }
+  });
+}
+
 function updateResearch(state: GameState): void {
   if (!refs) {
     return;
   }
 
-  refs.research.filters.forEach((button, key) => {
+  refs.sidePanel.research.filters.forEach((button, key) => {
     const isActive = key === activeResearchFilter;
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", isActive ? "true" : "false");
@@ -1103,12 +1189,85 @@ function updateResearch(state: GameState): void {
   renderResearchList(state);
 }
 
+function updatePrestigePanel(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const preview = getPrestigePreview(state);
+  const panel = refs.sidePanel.prestige;
+
+  panel.currentSeedsValue.textContent = formatDecimal(preview.currentSeeds);
+  panel.nextSeedsValue.textContent = formatDecimal(preview.nextSeeds);
+  panel.gainValue.textContent = formatDecimal(preview.gain);
+
+  const bonusPercent = Math.max(0, preview.nextMultiplier.minus(1).mul(100).toNumber());
+  panel.bonusValue.textContent = `+${bonusPercent.toFixed(1)}%`;
+
+  const requirementLabel = t(state.locale, "panel.prestige.requirement", {
+    value: formatDecimal(PRESTIGE_MIN_REQUIREMENT),
+  });
+  const needsRequirement = !preview.requirementMet;
+  const needsGain = preview.requirementMet && preview.gain <= 0;
+  const canPrestige = preview.requirementMet && preview.gain > 0;
+
+  let status = "";
+  if (needsRequirement) {
+    status = requirementLabel;
+  } else if (needsGain) {
+    status = t(state.locale, "panel.prestige.tooSoon");
+  } else {
+    status = t(state.locale, "panel.prestige.ready");
+  }
+
+  panel.requirement.textContent = status;
+  panel.container.classList.toggle("is-ready", canPrestige);
+  panel.container.classList.toggle("is-locked", !canPrestige);
+
+  panel.actionButton.disabled = !canPrestige;
+  panel.actionButton.setAttribute("aria-disabled", canPrestige ? "false" : "true");
+  panel.actionButton.setAttribute("title", canPrestige ? t(state.locale, "actions.prestige") : status);
+}
+
+function updateAchievements(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const { achievements: achievementRefs } = refs.sidePanel;
+
+  achievements.forEach((definition) => {
+    const card = achievementRefs.entries.get(definition.id);
+    if (!card) {
+      return;
+    }
+
+    card.title.textContent = definition.name[state.locale];
+    card.description.textContent = definition.description[state.locale];
+
+    if (definition.rewardMultiplier) {
+      const percent = Math.round((definition.rewardMultiplier - 1) * 100);
+      card.reward.textContent = t(state.locale, "achievements.reward", { value: percent });
+      card.reward.classList.remove("hidden");
+    } else {
+      card.reward.textContent = "";
+      card.reward.classList.add("hidden");
+    }
+
+    const unlocked = Boolean(state.achievements[definition.id]);
+    card.status.textContent = unlocked
+      ? t(state.locale, "achievements.status.unlocked")
+      : t(state.locale, "achievements.status.locked");
+    card.container.classList.toggle("is-unlocked", unlocked);
+  });
+}
+
 function updateShopControls(state: GameState): void {
   if (!refs) {
     return;
   }
 
-  const controls = refs.shopControls;
+  const controls = refs.sidePanel.shop.controls;
   controls.sortLabel.textContent = t(state.locale, "shop.sort.label");
 
   controls.sortButtons.forEach((button, mode) => {
@@ -1178,19 +1337,19 @@ function renderResearchList(state: GameState): void {
   }
 
   const entries = getResearchList(state, activeResearchFilter);
-  refs.research.list.innerHTML = "";
+  refs.sidePanel.research.list.innerHTML = "";
 
   if (!entries.length) {
     const empty = document.createElement("p");
     empty.className = "text-sm text-neutral-400";
     empty.textContent = t(state.locale, "research.empty");
-    refs.research.list.appendChild(empty);
+    refs.sidePanel.research.list.appendChild(empty);
     return;
   }
 
   for (const entry of entries) {
     const card = buildResearchCard(entry, state);
-    refs.research.list.appendChild(card);
+    refs.sidePanel.research.list.appendChild(card);
   }
 }
 
@@ -1559,7 +1718,7 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
   media.appendChild(icon);
 
   container.append(info, media);
-  refs.shopList.appendChild(container);
+  refs.sidePanel.shop.list.appendChild(container);
 
   buyButton.addEventListener("click", () => {
     if (buyItem(state, itemId, 1)) {
@@ -1755,44 +1914,251 @@ function createAbilityButton(id: string, state: GameState): AbilityButtonRefs {
   return { container: button, icon, label, status, progressBar };
 }
 
-function createResearchSection(): {
-  section: HTMLElement;
-  title: HTMLElement;
-  filters: Map<string, HTMLButtonElement>;
-  list: HTMLElement;
-} {
+function createSidePanel(state: GameState): SidePanelRefs {
   const section = document.createElement("section");
-  section.className = "card fade-in space-y-4";
+  section.className = "card fade-in space-y-5";
 
   const header = document.createElement("div");
-  header.className = "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between";
+  header.className = "flex flex-col gap-3";
+
+  const titleRow = document.createElement("div");
+  titleRow.className =
+    "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between";
 
   const title = document.createElement("h2");
   title.className = "text-xl font-semibold text-leaf-200";
-  header.appendChild(title);
+  titleRow.appendChild(title);
 
+  const tabList = document.createElement("div");
+  tabList.className = "tab-strip";
+  tabList.setAttribute("role", "tablist");
+  titleRow.appendChild(tabList);
+
+  header.appendChild(titleRow);
+  section.appendChild(header);
+
+  const tabs = new Map<SidePanelTab, HTMLButtonElement>();
+  (['shop', 'research', 'prestige', 'achievements'] as SidePanelTab[]).forEach((tab) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.tab = tab;
+    button.className = "tab-button";
+    button.setAttribute("aria-pressed", "false");
+    button.setAttribute("role", "tab");
+    tabList.appendChild(button);
+    tabs.set(tab, button);
+  });
+
+  const viewsContainer = document.createElement("div");
+  viewsContainer.className = "space-y-5";
+  section.appendChild(viewsContainer);
+
+  const shopView = document.createElement("div");
+  shopView.className = "space-y-4";
+  const shopControls = createShopControls(state);
+  shopView.appendChild(shopControls.container);
+  const shopList = document.createElement("div");
+  shopList.className = "grid gap-3";
+  shopView.appendChild(shopList);
+  viewsContainer.appendChild(shopView);
+
+  const researchView = document.createElement("div");
+  researchView.className = "space-y-4";
+  const researchControls = document.createElement("div");
+  researchControls.className = "research-controls";
   const filterWrap = document.createElement("div");
   filterWrap.className = "research-filters";
-  const filters = new Map<string, HTMLButtonElement>();
-
-  const filterKeys: ResearchFilter[] = ["all", "available", "owned"];
-  filterKeys.forEach((key) => {
+  const researchFilters = new Map<string, HTMLButtonElement>();
+  (['all', 'available', 'owned'] as ResearchFilter[]).forEach((key) => {
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.filter = key;
     button.className = "filter-pill";
     filterWrap.appendChild(button);
-    filters.set(key, button);
+    researchFilters.set(key, button);
+  });
+  researchControls.appendChild(filterWrap);
+  researchView.appendChild(researchControls);
+  const researchList = document.createElement("div");
+  researchList.className = "grid gap-3";
+  researchView.appendChild(researchList);
+  viewsContainer.appendChild(researchView);
+
+  const prestigePanel = createPrestigePanel();
+  viewsContainer.appendChild(prestigePanel.container);
+
+  const achievementsView = document.createElement("div");
+  achievementsView.className = "space-y-4";
+  const achievementsList = document.createElement("div");
+  achievementsList.className = "grid gap-3";
+  achievementsView.appendChild(achievementsList);
+  viewsContainer.appendChild(achievementsView);
+
+  const achievementRefs = new Map<string, AchievementCardRefs>();
+  achievements.forEach((definition) => {
+    const card = createAchievementCard(definition);
+    achievementRefs.set(definition.id, card);
+    achievementsList.appendChild(card.container);
   });
 
-  header.appendChild(filterWrap);
-  section.appendChild(header);
+  const views: Record<SidePanelTab, HTMLElement> = {
+    shop: shopView,
+    research: researchView,
+    prestige: prestigePanel.container,
+    achievements: achievementsView,
+  };
 
-  const list = document.createElement("div");
-  list.className = "grid gap-3";
-  section.appendChild(list);
+  Object.entries(views).forEach(([tab, view]) => {
+    if (tab === activeSidePanelTab) {
+      view.setAttribute("aria-hidden", "false");
+    } else {
+      view.classList.add("hidden");
+      view.setAttribute("aria-hidden", "true");
+    }
+  });
 
-  return { section, title, filters, list };
+  return {
+    section,
+    title,
+    tabList,
+    tabs,
+    views,
+    shop: {
+      controls: shopControls,
+      list: shopList,
+    },
+    research: {
+      container: researchControls,
+      filters: researchFilters,
+      list: researchList,
+    },
+    prestige: prestigePanel,
+    achievements: {
+      list: achievementsList,
+      entries: achievementRefs,
+    },
+  } satisfies SidePanelRefs;
+}
+
+function createPrestigePanel(): PrestigePanelRefs {
+  const container = document.createElement("div");
+  container.className = "prestige-panel";
+
+  const description = document.createElement("p");
+  description.className = "prestige-panel__description";
+  container.appendChild(description);
+
+  const stats = document.createElement("div");
+  stats.className = "prestige-panel__stats";
+  container.appendChild(stats);
+
+  const current = createPrestigePanelStat(stats);
+  const next = createPrestigePanelStat(stats);
+  const gain = createPrestigePanelStat(stats);
+  const bonus = createPrestigePanelStat(stats);
+
+  const requirement = document.createElement("p");
+  requirement.className = "prestige-panel__requirement";
+  container.appendChild(requirement);
+
+  const actionButton = document.createElement("button");
+  actionButton.type = "button";
+  actionButton.className = "prestige-panel__action";
+  container.appendChild(actionButton);
+
+  return {
+    container,
+    description,
+    currentSeedsLabel: current.label,
+    currentSeedsValue: current.value,
+    nextSeedsLabel: next.label,
+    nextSeedsValue: next.value,
+    gainLabel: gain.label,
+    gainValue: gain.value,
+    bonusLabel: bonus.label,
+    bonusValue: bonus.value,
+    requirement,
+    actionButton,
+  } satisfies PrestigePanelRefs;
+}
+
+function createPrestigePanelStat(wrapper: HTMLElement): { label: HTMLElement; value: HTMLElement } {
+  const row = document.createElement("div");
+  row.className = "prestige-panel__stat";
+
+  const label = document.createElement("dt");
+  label.className = "prestige-panel__stat-label";
+  row.appendChild(label);
+
+  const value = document.createElement("dd");
+  value.className = "prestige-panel__stat-value";
+  row.appendChild(value);
+
+  wrapper.appendChild(row);
+  return { label, value };
+}
+
+function createAchievementCard(definition: AchievementDefinition): AchievementCardRefs {
+  const container = document.createElement("article");
+  container.className = "achievement-card";
+
+  const badge = document.createElement("div");
+  badge.className = "achievement-card__badge";
+
+  const base = new Image();
+  base.src = withBase("achievements/badge-base.png");
+  base.srcset = buildItemSrcset(withBase("achievements/badge-base.png"));
+  base.alt = "";
+  base.decoding = "async";
+  base.className = "achievement-card__badge-base";
+
+  const overlay = new Image();
+  overlay.src = definition.overlayIcon;
+  overlay.srcset = buildItemSrcset(definition.overlayIcon);
+  overlay.alt = "";
+  overlay.decoding = "async";
+  overlay.className = "achievement-card__badge-overlay";
+
+  const ribbon = new Image();
+  ribbon.src = withBase("achievements/badge-ribbon.png");
+  ribbon.srcset = buildItemSrcset(withBase("achievements/badge-ribbon.png"));
+  ribbon.alt = "";
+  ribbon.decoding = "async";
+  ribbon.className = "achievement-card__badge-ribbon";
+
+  badge.append(base, overlay, ribbon);
+  container.appendChild(badge);
+
+  const content = document.createElement("div");
+  content.className = "achievement-card__content";
+
+  const title = document.createElement("h3");
+  title.className = "achievement-card__title";
+  content.appendChild(title);
+
+  const description = document.createElement("p");
+  description.className = "achievement-card__description";
+  content.appendChild(description);
+
+  const reward = document.createElement("p");
+  reward.className = "achievement-card__reward";
+  content.appendChild(reward);
+
+  const status = document.createElement("span");
+  status.className = "achievement-card__status";
+  content.appendChild(status);
+
+  container.appendChild(content);
+
+  return {
+    container,
+    iconBase: base,
+    iconOverlay: overlay,
+    title,
+    description,
+    reward,
+    status,
+  } satisfies AchievementCardRefs;
 }
 
 function createShopControls(state: GameState): ShopControlsRefs {
