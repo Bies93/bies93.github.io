@@ -1028,7 +1028,7 @@ function updateShop(state: GameState): void {
     card.owned.textContent = entry.owned.toString();
     card.payback.textContent = formatPayback(state.locale, entry.payback);
 
-    refs!.shopList.appendChild(card.container);
+    refs.sidePanel.shop.list.appendChild(card.container);
   });
 }
 
