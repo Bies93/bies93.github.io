@@ -451,6 +451,21 @@ button {
   @apply border-white/10 bg-neutral-900/60;
 }
 
+.ability-header {
+  @apply flex items-center gap-3;
+}
+
+.ability-icon {
+  @apply flex h-12 w-12 items-center justify-center rounded-xl bg-neutral-800/80;
+}
+
+.ability-icon-img {
+  @apply h-10 w-10 object-contain;
+}
+
+.ability-meta {
+  @apply flex flex-col gap-1;
+}
 .ability-label {
   @apply text-base font-semibold text-neutral-100;
 }

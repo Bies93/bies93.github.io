@@ -39,7 +39,7 @@ export const RESEARCH: ResearchNode[] = [
     costType: "buds",
     cost: 1_000,
     effects: [{ id: "BPC_MULT", v: 1.2 }],
-    icon: asset("icons/ui/ui-help.png"),
+    icon: asset("icons/research/research-click.png"),
   },
   {
     id: "r_growth",
@@ -55,7 +55,7 @@ export const RESEARCH: ResearchNode[] = [
     cost: 2,
     requires: ["r_start_click"],
     effects: [{ id: "BPS_MULT", v: 1.15 }],
-    icon: asset("icons/ui/ui-save.png"),
+    icon: asset("icons/research/research-growth.png"),
   },
   {
     id: "r_costcut",
@@ -71,7 +71,7 @@ export const RESEARCH: ResearchNode[] = [
     cost: 25_000,
     requires: ["r_start_click"],
     effects: [{ id: "COST_REDUCE_ALL", v: 0.97 }],
-    icon: asset("icons/ui/ui-export.png"),
+    icon: asset("icons/research/research-costcut.png"),
   },
   {
     id: "r_autoclick",
@@ -87,7 +87,7 @@ export const RESEARCH: ResearchNode[] = [
     cost: 5,
     requires: ["r_growth"],
     effects: [{ id: "CLICK_AUTOMATION", v: 2 }],
-    icon: asset("icons/ui/ui-import.png"),
+    icon: asset("icons/research/research-autoclick.png"),
   },
   {
     id: "r_overdrive_plus",
@@ -103,8 +103,9 @@ export const RESEARCH: ResearchNode[] = [
     cost: 3,
     requires: ["r_growth"],
     effects: [{ id: "ABILITY_OVERDRIVE_PLUS", v: 0.2 }],
-    icon: asset("icons/ui/ui-reset.png"),
+    icon: asset("icons/research/research-overdrive-plus.png"),
   },
 ];
 
 export const researchById = new Map(RESEARCH.map((node) => [node.id, node] as const));
+

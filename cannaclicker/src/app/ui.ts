@@ -60,6 +60,11 @@ const STAT_META: Record<LocaleKey, Record<string, string>> = {
   },
 };
 
+const ABILITY_ICON_MAP: Record<AbilityId, string> = {
+  overdrive: "icons/abilities/ability-overdrive.png",
+  burst: "icons/abilities/ability-burst.png",
+};
+
 function formatTierBonus(locale: LocaleKey, value: number): string {
   return new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
@@ -155,9 +160,10 @@ interface ShopCardRefs {
 
 interface AbilityButtonRefs {
   container: HTMLButtonElement;
+  icon: HTMLImageElement;
   label: HTMLElement;
-  progressBar: HTMLElement;
   status: HTMLElement;
+  progressBar: HTMLElement;
 }
 
 interface PrestigeModalRefs {
@@ -202,7 +208,19 @@ const PLANT_STAGE_THRESHOLDS = [
   50_000_000,
 ];
 const PLANT_STAGE_MAX = PLANT_STAGE_THRESHOLDS.length - 1;
-const PLANT_STAGE_ASSET_SUFFIXES = ["01", "02", "03", "04", "05"];
+const PLANT_STAGE_ASSET_SUFFIXES = [
+  "01",
+  "02",
+  "03",
+  "04",
+  "05",
+  "06",
+  "07",
+  "08",
+  "09",
+  "10",
+  "11",
+];
 const preloadedPlantStages = new Set<string>();
 
 function appendRetinaSuffix(path: string): string {
@@ -310,7 +328,7 @@ function buildUI(state: GameState): UIRefs {
   seedBadge.type = "button";
   seedBadge.className = "prestige-badge";
   const seedIcon = new Image();
-  seedIcon.src = withBase("icons/ui/ui-save.png");
+  seedIcon.src = withBase("icons/ui/ui-seed.png");
   seedIcon.alt = "";
   seedIcon.decoding = "async";
   seedIcon.className = "prestige-badge__icon";
@@ -530,7 +548,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.import.button.addEventListener("click", () => {
-    const payload = window.prompt("Bitte Base64-Spielstand einfügen:");
+    const payload = window.prompt("Bitte Base64-Spielstand einfÃ¼gen:");
     if (!payload) {
       return;
     }
@@ -549,7 +567,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
   });
 
   refs.controls.reset.button.addEventListener("click", () => {
-    const confirmReset = window.confirm("Spielstand wirklich löschen?");
+    const confirmReset = window.confirm("Spielstand wirklich lÃ¶schen?");
     if (!confirmReset) {
       return;
     }
@@ -791,20 +809,16 @@ function resolvePlantStage(total: Decimal): number {
 
 function plantStageAsset(stage: number): string {
   const clamped = Math.max(0, Math.min(stage, PLANT_STAGE_MAX));
-  if (PLANT_STAGE_ASSET_SUFFIXES.length === 0) {
-    return `plant-stages/plant-stage-${clamped.toString().padStart(2, "0")}.png`;
+  if (PLANT_STAGE_ASSET_SUFFIXES.length > 0) {
+    const index = Math.min(clamped, PLANT_STAGE_ASSET_SUFFIXES.length - 1);
+    const suffix = PLANT_STAGE_ASSET_SUFFIXES[index];
+    if (suffix) {
+      return `plant-stages/plant-stage-${suffix}.png`;
+    }
   }
 
-  const normalized = PLANT_STAGE_MAX > 0 ? clamped / PLANT_STAGE_MAX : 0;
-  const scaledIndex = Math.floor(normalized * PLANT_STAGE_ASSET_SUFFIXES.length);
-  const mappedIndex = Math.min(
-    PLANT_STAGE_ASSET_SUFFIXES.length - 1,
-    Number.isFinite(scaledIndex) ? scaledIndex : 0,
-  );
-  const suffix = PLANT_STAGE_ASSET_SUFFIXES[mappedIndex] ?? PLANT_STAGE_ASSET_SUFFIXES[0];
-  return `plant-stages/plant-stage-${suffix}.png`;
+  return `plant-stages/plant-stage-${(clamped + 1).toString().padStart(2, "0")}.png`;
 }
-
 function preloadPlantStage(stage: number): void {
   const clamped = Math.max(0, Math.min(stage, PLANT_STAGE_MAX));
   const assetPath = plantStageAsset(clamped);
@@ -1197,6 +1211,7 @@ function buildResearchCard(entry: ResearchViewModel, state: GameState): HTMLElem
     const icon = new Image();
     icon.src = entry.node.icon;
     icon.alt = '';
+    icon.setAttribute('aria-hidden', 'true');
     icon.decoding = 'async';
     icon.className = 'research-icon';
     header.appendChild(icon);
@@ -1589,10 +1604,10 @@ function getStatIcon(key: string): string {
   const iconMap: Record<string, string> = {
     "stats.buds": "icons/ui/icon-leaf-click.png",
     "stats.bps": "icons/upgrades/upgrade-global-bps.png",
-    "stats.bpc": "icons/ui/icon-leaf-click.png",
-    "stats.total": "icons/ui/icon-leaf-click.png",
-    "stats.seeds": "icons/ui/ui-save.png",
-    "stats.prestigeMult": "icons/ui/ui-save.png",
+    "stats.bpc": "icons/ui/ui-stat-bpc.png",
+    "stats.total": "icons/ui/ui-stat-total.png",
+    "stats.seeds": "icons/ui/ui-seed.png",
+    "stats.prestigeMult": "icons/ui/ui-prestige-mult.png",
   };
   return iconMap[key] || "icons/ui/icon-leaf-click.png";
 }
@@ -1693,10 +1708,27 @@ function createDangerButton(iconPath: string): ControlButtonRefs {
 }
 
 function createAbilityButton(id: string, state: GameState): AbilityButtonRefs {
-  const definition = getAbilityDefinition(id);
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'ability-btn';
+
+  const header = document.createElement('div');
+  header.className = 'ability-header';
+
+  const iconWrap = document.createElement('span');
+  iconWrap.className = 'ability-icon';
+
+  const icon = document.createElement('img');
+  icon.className = 'ability-icon-img';
+  icon.decoding = 'async';
+  icon.loading = 'lazy';
+  icon.alt = '';
+    icon.setAttribute('aria-hidden', 'true');
+  icon.src = withBase(ABILITY_ICON_MAP[id as AbilityId] ?? 'icons/ui/icon-leaf-click.png');
+  iconWrap.appendChild(icon);
+
+  const meta = document.createElement('div');
+  meta.className = 'ability-meta';
 
   const label = document.createElement('span');
   label.className = 'ability-label';
@@ -1706,6 +1738,9 @@ function createAbilityButton(id: string, state: GameState): AbilityButtonRefs {
   const status = document.createElement('span');
   status.className = 'ability-status';
 
+  meta.append(label, status);
+  header.append(iconWrap, meta);
+
   const progress = document.createElement('div');
   progress.className = 'ability-progress';
 
@@ -1713,11 +1748,11 @@ function createAbilityButton(id: string, state: GameState): AbilityButtonRefs {
   progressBar.className = 'ability-progress-bar';
   progress.appendChild(progressBar);
 
-  button.append(label, status, progress);
+  button.append(header, progress);
   button.title = formatAbilityTooltip(state, id as AbilityId, state.locale);
   button.setAttribute('aria-label', labelText);
 
-  return { container: button, label, status, progressBar };
+  return { container: button, icon, label, status, progressBar };
 }
 
 function createResearchSection(): {
@@ -2001,6 +2036,18 @@ function announce(refs: UIRefs, total: Decimal): void {
 }
 
 export {};
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
