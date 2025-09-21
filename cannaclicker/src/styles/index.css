@@ -234,8 +234,33 @@ button {
 }
 
 .app-header__title {
-  @apply text-2xl font-semibold tracking-tight text-leaf-200 sm:text-3xl;
-  text-shadow: 0 14px 28px rgba(16, 185, 129, 0.3);
+  @apply text-3xl sm:text-4xl font-medium text-center justify-self-center;
+  font-family: "Great Vibes", "Segoe Script", "Lucida Handwriting", cursive;
+  letter-spacing: 0.06em;
+  color: hsl(199 89% 89%);
+  background-image: linear-gradient(120deg, rgba(125, 211, 252, 0.95), rgba(167, 243, 208, 0.95));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow:
+    0 22px 40px rgba(59, 130, 246, 0.35),
+    0 0 12px rgba(203, 213, 225, 0.45);
+  -webkit-text-stroke: 0.75px rgba(15, 23, 42, 0.35);
+  text-stroke: 0.75px rgba(15, 23, 42, 0.35);
+  padding-inline: clamp(1rem, 3vw, 2.5rem);
+  filter: drop-shadow(0 12px 26px rgba(15, 118, 110, 0.35));
+  position: relative;
+}
+
+.app-header__title::after {
+  content: "";
+  display: block;
+  width: min(65%, 13rem);
+  height: 3px;
+  margin: clamp(0.3rem, 1.1vw, 0.6rem) auto 0;
+  border-radius: 9999px;
+  background: linear-gradient(100deg, rgba(59, 130, 246, 0.65), rgba(74, 222, 128, 0.75));
+  box-shadow: 0 12px 24px rgba(15, 118, 110, 0.35);
 }
 
 .click-card__header {
