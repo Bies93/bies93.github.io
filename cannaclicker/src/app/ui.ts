@@ -242,7 +242,8 @@ const SIDE_PANEL_TAB_KEYS: Record<SidePanelTab, string> = {
 let refs: UIRefs | null = null;
 let audio = createAudioManager(false);
 let lastAnnounced = new Decimal(0);
-let activeResearchFilter: ResearchFilter = "available";
+let activeResearchFilter: ResearchFilter = "all";
+let researchFilterManuallySelected = false;
 let activeSidePanelTab: SidePanelTab = "shop";
 let prestigeOpen = false;
 let prestigeAcknowledged = false;
@@ -657,6 +658,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
       if (activeResearchFilter === (key as ResearchFilter)) {
         return;
       }
+      researchFilterManuallySelected = key !== "all";
       activeResearchFilter = key as ResearchFilter;
       renderUI(state);
     });
@@ -829,7 +831,7 @@ function updateStrings(state: GameState): void {
     button.textContent = label;
     button.setAttribute("aria-label", label);
   });
-  refs.sidePanel.title.textContent = t(state.locale, SIDE_PANEL_TAB_KEYS[activeSidePanelTab]);
+  refs.sidePanel.title.textContent = t(state.locale, "panel.title");
 
   refs.sidePanel.research.filters.forEach((button, key) => {
     button.textContent = t(state.locale, `research.filter.${key}`);
@@ -1154,8 +1156,6 @@ function updateSidePanel(state: GameState): void {
     return;
   }
 
-  refs.sidePanel.title.textContent = t(state.locale, SIDE_PANEL_TAB_KEYS[activeSidePanelTab]);
-
   refs.sidePanel.tabs.forEach((button, tab) => {
     const isActive = tab === activeSidePanelTab;
     button.classList.toggle("is-active", isActive);
@@ -1180,13 +1180,20 @@ function updateResearch(state: GameState): void {
     return;
   }
 
+  let entries = getResearchList(state, activeResearchFilter);
+
+  if (!researchFilterManuallySelected && entries.length === 0 && activeResearchFilter !== "all") {
+    activeResearchFilter = "all";
+    entries = getResearchList(state, activeResearchFilter);
+  }
+
   refs.sidePanel.research.filters.forEach((button, key) => {
     const isActive = key === activeResearchFilter;
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", isActive ? "true" : "false");
   });
 
-  renderResearchList(state);
+  renderResearchList(state, entries);
 }
 
 function updatePrestigePanel(state: GameState): void {
@@ -1331,25 +1338,26 @@ function updateShopControls(state: GameState): void {
   controls.autoBuy.container.classList.toggle("is-disabled", !auto.enabled);
 }
 
-function renderResearchList(state: GameState): void {
+function renderResearchList(state: GameState, entries?: ResearchViewModel[]): void {
   if (!refs) {
     return;
   }
 
-  const entries = getResearchList(state, activeResearchFilter);
-  refs.sidePanel.research.list.innerHTML = "";
+  const list = refs.sidePanel.research.list;
+  const data = entries ?? getResearchList(state, activeResearchFilter);
+  list.innerHTML = "";
 
-  if (!entries.length) {
+  if (!data.length) {
     const empty = document.createElement("p");
     empty.className = "text-sm text-neutral-400";
     empty.textContent = t(state.locale, "research.empty");
-    refs.sidePanel.research.list.appendChild(empty);
+    list.appendChild(empty);
     return;
   }
 
-  for (const entry of entries) {
+  for (const entry of data) {
     const card = buildResearchCard(entry, state);
-    refs.sidePanel.research.list.appendChild(card);
+    list.appendChild(card);
   }
 }
 
