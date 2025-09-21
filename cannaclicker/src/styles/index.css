@@ -654,6 +654,128 @@ button {
   }
 }
 
+.tab-strip {
+  @apply flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-neutral-900/60 p-1;
+}
+
+.tab-button {
+  @apply flex-1 whitespace-nowrap rounded-xl border border-transparent px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.3em] text-neutral-300 transition;
+}
+
+.tab-button:hover {
+  @apply text-emerald-200;
+}
+
+.tab-button.is-active {
+  @apply border-emerald-400/50 bg-emerald-500/20 text-emerald-100 shadow-[0_12px_32px_rgba(16,185,129,0.25)];
+}
+
+.prestige-panel {
+  @apply space-y-4 rounded-2xl border border-white/10 bg-neutral-900/70 p-5 transition;
+}
+
+.prestige-panel.is-locked {
+  @apply opacity-90;
+}
+
+.prestige-panel.is-ready {
+  @apply border-emerald-400/50 bg-emerald-500/10 shadow-[0_22px_40px_rgba(16,185,129,0.2)];
+}
+
+.prestige-panel__description {
+  @apply text-sm leading-relaxed text-neutral-300;
+}
+
+.prestige-panel__stats {
+  @apply grid gap-3 sm:grid-cols-2;
+}
+
+.prestige-panel__stat {
+  @apply flex flex-col gap-1 rounded-xl border border-white/5 bg-neutral-900/60 px-3 py-2;
+}
+
+.prestige-panel__stat-label {
+  @apply text-xs uppercase tracking-widest text-neutral-400;
+}
+
+.prestige-panel__stat-value {
+  @apply text-lg font-semibold text-neutral-100;
+}
+
+.prestige-panel__requirement {
+  @apply text-sm font-medium text-neutral-300;
+}
+
+.prestige-panel.is-ready .prestige-panel__requirement {
+  @apply text-emerald-200;
+}
+
+.prestige-panel__action {
+  @apply w-full rounded-xl border border-emerald-400/40 bg-emerald-500/20 px-4 py-2 text-sm font-semibold uppercase tracking-[0.35em] text-emerald-100 transition;
+}
+
+.prestige-panel__action:hover {
+  @apply border-emerald-300/60 bg-emerald-500/30;
+}
+
+.prestige-panel__action:disabled {
+  @apply cursor-not-allowed border-white/10 bg-neutral-900/60 text-neutral-400;
+}
+
+.achievement-card {
+  @apply flex items-center gap-4 rounded-2xl border border-white/10 bg-neutral-900/60 p-4 transition hover:border-emerald-400/40;
+}
+
+.achievement-card.is-unlocked {
+  @apply border-emerald-400/40 bg-emerald-500/10;
+}
+
+.achievement-card__badge {
+  position: relative;
+  width: 4.5rem;
+  aspect-ratio: 1;
+  @apply grid place-items-center;
+}
+
+.achievement-card__badge-base,
+.achievement-card__badge-overlay,
+.achievement-card__badge-ribbon {
+  @apply absolute inset-0 h-full w-full object-contain;
+}
+
+.achievement-card__badge-overlay {
+  z-index: 1;
+}
+
+.achievement-card__badge-ribbon {
+  @apply -bottom-2 left-1/2 w-[130%] -translate-x-1/2;
+  z-index: 2;
+}
+
+.achievement-card__content {
+  @apply flex-1 space-y-1;
+}
+
+.achievement-card__title {
+  @apply text-lg font-semibold text-neutral-100;
+}
+
+.achievement-card__description {
+  @apply text-sm text-neutral-400;
+}
+
+.achievement-card__reward {
+  @apply text-xs font-semibold uppercase tracking-widest text-emerald-200;
+}
+
+.achievement-card__status {
+  @apply inline-flex items-center rounded-full border border-white/10 bg-neutral-900/70 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-[0.35em] text-neutral-300;
+}
+
+.achievement-card.is-unlocked .achievement-card__status {
+  @apply border-emerald-400/40 bg-emerald-500/20 text-emerald-100;
+}
+
 .filter-pill.is-active {
   @apply border-emerald-400/60 bg-emerald-500/20 text-emerald-200;
 }
