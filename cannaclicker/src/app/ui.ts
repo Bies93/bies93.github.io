@@ -139,7 +139,6 @@ interface UIRefs {
     export: ControlButtonRefs;
     import: ControlButtonRefs;
     reset: ControlButtonRefs;
-    prestige: ControlButtonRefs;
   };
   announcer: HTMLElement;
   abilityTitle: HTMLElement;
@@ -304,15 +303,11 @@ function buildUI(state: GameState): UIRefs {
   const exportControl = createActionButton(withBase("icons/ui/ui-export.png"));
   const importControl = createActionButton(withBase("icons/ui/ui-import.png"));
   const resetControl = createDangerButton(withBase("icons/ui/ui-reset.png"));
-  const prestigeControl = createActionButton(withBase("icons/ui/ui-save.png"));
-  prestigeControl.button.classList.add("text-amber-200");
-  prestigeControl.button.classList.add("hover:border-amber-400/60", "hover:bg-amber-900/40");
 
   const headerTitle = mountHeader(root, [
     muteControl.button,
     exportControl.button,
     importControl.button,
-    prestigeControl.button,
     resetControl.button,
   ]);
 
@@ -463,7 +458,6 @@ function buildUI(state: GameState): UIRefs {
       export: exportControl,
       import: importControl,
       reset: resetControl,
-      prestige: prestigeControl,
     },
     announcer,
     abilityTitle,
@@ -574,7 +568,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
     renderUI(state);
   });
 
-  refs.controls.prestige.button.addEventListener("click", () => {
+  refs.seedBadge.addEventListener("click", () => {
     openPrestigeModal(state);
   });
 
@@ -718,10 +712,6 @@ function updateStrings(state: GameState): void {
   refs.controls.reset.button.setAttribute("aria-label", t(state.locale, "actions.reset"));
   refs.controls.reset.button.setAttribute("title", t(state.locale, "actions.reset"));
 
-  refs.controls.prestige.label.textContent = t(state.locale, "actions.prestige");
-  refs.controls.prestige.button.setAttribute("aria-label", t(state.locale, "actions.prestige"));
-  refs.controls.prestige.button.setAttribute("title", t(state.locale, "actions.prestige"));
-
   refs.statsLabels.forEach((label, key) => {
     label.textContent = t(state.locale, key);
   });
@@ -850,21 +840,15 @@ function updateStats(state: GameState): void {
 
   const bonusPercent = Math.max(0, state.prestige.mult.minus(1).mul(100).toNumber());
   refs.seedBadgeValue.textContent = formatDecimal(state.prestige.seeds);
-  const badgeTooltip = t(state.locale, 'prestige.badge.tooltip', { value: bonusPercent.toFixed(1) });
-  refs.seedBadge.setAttribute('title', badgeTooltip);
-  refs.seedBadge.setAttribute('aria-label', badgeTooltip);
-
   const canPrestige = preview.requirementMet && preview.gain > 0;
-  const controlLabel = canPrestige
-    ? t(state.locale, 'actions.prestige')
+  const badgeTooltip = canPrestige
+    ? t(state.locale, 'prestige.badge.tooltip', { value: bonusPercent.toFixed(1) })
     : t(state.locale, 'prestige.control.locked', {
         requirement: formatDecimal(PRESTIGE_MIN_REQUIREMENT),
       });
-  refs.controls.prestige.button.disabled = !canPrestige;
-  refs.controls.prestige.button.setAttribute('aria-disabled', canPrestige ? 'false' : 'true');
-  refs.controls.prestige.button.setAttribute('title', controlLabel);
-  refs.controls.prestige.button.setAttribute('aria-label', controlLabel);
-  refs.controls.prestige.label.textContent = t(state.locale, 'actions.prestige');
+  refs.seedBadge.classList.toggle('is-ready', canPrestige);
+  refs.seedBadge.setAttribute('title', badgeTooltip);
+  refs.seedBadge.setAttribute('aria-label', badgeTooltip);
 
   updatePlantStage(state);
 }
@@ -1604,10 +1588,16 @@ function createCompactStatBlock(
   wrapper.className = "stat-item";
   wrapper.dataset.variant = key;
 
+  const iconWrap = document.createElement("span");
+  iconWrap.className = "stat-item__icon-wrap";
+
   const icon = document.createElement("img");
   icon.className = "stat-item__icon";
   icon.src = withBase(getStatIcon(key));
   icon.alt = "";
+  icon.loading = "lazy";
+
+  iconWrap.append(icon);
 
   const contentDiv = document.createElement("div");
   contentDiv.className = "stat-item__content";
@@ -1621,7 +1611,7 @@ function createCompactStatBlock(
   value.textContent = "0";
 
   contentDiv.append(label, value);
-  wrapper.append(icon, contentDiv);
+  wrapper.append(iconWrap, contentDiv);
   container.appendChild(wrapper);
 
   labels.set(key, label);
