@@ -127,7 +127,6 @@ interface AchievementCardRefs {
 
 interface SidePanelRefs {
   section: HTMLElement;
-  title: HTMLElement;
   tabList: HTMLElement;
   tabs: Map<SidePanelTab, HTMLButtonElement>;
   views: Record<SidePanelTab, HTMLElement>;
@@ -831,7 +830,6 @@ function updateStrings(state: GameState): void {
     button.textContent = label;
     button.setAttribute("aria-label", label);
   });
-  refs.sidePanel.title.textContent = t(state.locale, "panel.title");
 
   refs.sidePanel.research.filters.forEach((button, key) => {
     button.textContent = t(state.locale, `research.filter.${key}`);
@@ -1180,11 +1178,14 @@ function updateResearch(state: GameState): void {
     return;
   }
 
-  let entries = getResearchList(state, activeResearchFilter);
+  const lists: Record<ResearchFilter, ResearchViewModel[]> = {
+    all: getResearchList(state, "all"),
+    available: getResearchList(state, "available"),
+    owned: getResearchList(state, "owned"),
+  };
 
-  if (!researchFilterManuallySelected && entries.length === 0 && activeResearchFilter !== "all") {
+  if (!researchFilterManuallySelected && activeResearchFilter !== "all" && lists[activeResearchFilter].length === 0) {
     activeResearchFilter = "all";
-    entries = getResearchList(state, activeResearchFilter);
   }
 
   refs.sidePanel.research.filters.forEach((button, key) => {
@@ -1193,7 +1194,7 @@ function updateResearch(state: GameState): void {
     button.setAttribute("aria-pressed", isActive ? "true" : "false");
   });
 
-  renderResearchList(state, entries);
+  renderResearchList(state, lists[activeResearchFilter]);
 }
 
 function updatePrestigePanel(state: GameState): void {
@@ -1926,24 +1927,10 @@ function createSidePanel(state: GameState): SidePanelRefs {
   const section = document.createElement("section");
   section.className = "card fade-in space-y-5";
 
-  const header = document.createElement("div");
-  header.className = "flex flex-col gap-3";
-
-  const titleRow = document.createElement("div");
-  titleRow.className =
-    "flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between";
-
-  const title = document.createElement("h2");
-  title.className = "text-xl font-semibold text-leaf-200";
-  titleRow.appendChild(title);
-
   const tabList = document.createElement("div");
   tabList.className = "tab-strip";
   tabList.setAttribute("role", "tablist");
-  titleRow.appendChild(tabList);
-
-  header.appendChild(titleRow);
-  section.appendChild(header);
+  section.appendChild(tabList);
 
   const tabs = new Map<SidePanelTab, HTMLButtonElement>();
   (['shop', 'research', 'prestige', 'achievements'] as SidePanelTab[]).forEach((tab) => {
@@ -2027,7 +2014,6 @@ function createSidePanel(state: GameState): SidePanelRefs {
 
   return {
     section,
-    title,
     tabList,
     tabs,
     views,
