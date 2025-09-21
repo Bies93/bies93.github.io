@@ -577,62 +577,6 @@ button {
   @apply border-emerald-400/40 text-neutral-100;
 }
 
-.segmented-control {
-  @apply inline-flex items-center gap-1 rounded-full border border-white/10 bg-neutral-900/50 p-1 shadow-inner;
-}
-
-.segmented-control__option {
-  @apply rounded-full px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-400 transition;
-}
-
-.segmented-control__option:hover {
-  @apply text-neutral-100;
-}
-
-.segmented-control__option.is-active {
-  @apply bg-emerald-500/20 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.35)];
-}
-
-.auto-buy-card {
-  @apply flex-1 rounded-xl border border-white/10 bg-neutral-900/40 p-4 shadow-inner backdrop-blur-sm transition;
-}
-
-.auto-buy-card.is-disabled {
-  @apply opacity-70;
-}
-
-.auto-buy-option {
-  @apply space-y-2;
-}
-
-.auto-buy-label {
-  @apply text-[0.65rem] uppercase tracking-[0.35em] text-neutral-400;
-}
-
-.auto-buy-value {
-  @apply text-sm font-semibold text-neutral-200;
-}
-
-.toggle-button {
-  @apply inline-flex items-center justify-center rounded-full border border-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-300 transition;
-}
-
-.toggle-button:hover:not(:disabled) {
-  @apply border-emerald-400/50 text-neutral-100;
-}
-
-.toggle-button.is-active {
-  @apply border-emerald-400/60 bg-emerald-500/15 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.3)];
-}
-
-.toggle-button:disabled {
-  @apply cursor-not-allowed opacity-50;
-}
-
-.range-input {
-  @apply w-full accent-emerald-400;
-}
-
 .tier-header {
   @apply flex items-center justify-between text-[0.7rem] uppercase tracking-[0.25em] text-neutral-400;
 }
