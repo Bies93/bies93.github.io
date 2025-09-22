@@ -45,9 +45,18 @@ export function recalcDerivedValues(state: GameState): void {
   const researchBpcMult = state.temp.researchBpcMult ?? new Decimal(1);
   const abilityBpsMult = new Decimal(abilityMultiplier(state, 'overdrive'));
   const abilityBpcMult = new Decimal(abilityMultiplier(state, 'burst'));
+  const eventBpsMult = state.temp.eventBpsMult ?? new Decimal(1);
+  const eventBpcMult = state.temp.eventBpcMult ?? new Decimal(1);
 
-  const totalBpsMultiplier = baseMultiplier.mul(researchBpsMult).mul(abilityBpsMult);
-  const totalBpcMultiplier = baseMultiplier.mul(clickMultiplier).mul(researchBpcMult).mul(abilityBpcMult);
+  const totalBpsMultiplier = baseMultiplier
+    .mul(researchBpsMult)
+    .mul(abilityBpsMult)
+    .mul(eventBpsMult);
+  const totalBpcMultiplier = baseMultiplier
+    .mul(clickMultiplier)
+    .mul(researchBpcMult)
+    .mul(abilityBpcMult)
+    .mul(eventBpcMult);
 
   state.bps = sum(...buildingProduction).mul(totalBpsMultiplier);
   state.bpc = new Decimal(1).mul(totalBpcMultiplier);

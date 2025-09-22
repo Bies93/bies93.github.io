@@ -15,6 +15,7 @@ import { exportSave, importSave, clearSave, save } from "./save";
 import { spawnFloatingValue } from "./effects";
 import { asset } from "./assets";
 import { withBase } from "./paths";
+import { applyEventReward, type EventClickResult, type EventId } from "./events";
 import { itemById } from "../data/items";
 import { achievements, type AchievementDefinition } from "../data/achievements";
 import {
@@ -147,6 +148,7 @@ interface UIRefs {
   shopEntries: Map<string, ShopCardRefs>;
   prestigeModal: PrestigeModalRefs;
   toastContainer: HTMLElement;
+  eventLayer: HTMLElement;
 }
 
 interface ShopCardRefs {
@@ -243,6 +245,29 @@ const PLANT_STAGE_ASSET_SUFFIXES = [
 ];
 const preloadedPlantStages = new Set<string>();
 
+interface RandomEventDefinition {
+  id: EventId;
+  icon: string;
+  labelKey: string;
+}
+
+const EVENT_DEFINITIONS: readonly RandomEventDefinition[] = [
+  { id: "golden_bud", icon: "icons/events/golden_bud.png", labelKey: "events.goldenBud.name" },
+  { id: "seed_pack", icon: "icons/events/seed_pack.png", labelKey: "events.seedPack.name" },
+  { id: "lucky_joint", icon: "icons/events/lucky_joint.png", labelKey: "events.luckyJoint.name" },
+];
+
+const EVENT_SPAWN_MIN_MS = 10_000;
+const EVENT_SPAWN_MAX_MS = 20_000;
+const EVENT_VISIBLE_MIN_MS = 7_000;
+const EVENT_VISIBLE_MAX_MS = 12_000;
+
+let eventSchedulerReady = false;
+let schedulerState: GameState | null = null;
+let eventSpawnTimer: number | null = null;
+let eventLifetimeTimer: number | null = null;
+let activeEventButton: HTMLButtonElement | null = null;
+
 function appendRetinaSuffix(path: string): string {
   const queryIndex = path.indexOf("?");
   const hasQuery = queryIndex !== -1;
@@ -268,6 +293,9 @@ export function renderUI(state: GameState): void {
     attachGlobalShortcuts(state);
   }
 
+  schedulerState = state;
+  ensureEventScheduler(state);
+
   updateStrings(state);
   updateStats(state);
   updateAbilities(state);
@@ -288,7 +316,7 @@ function buildUI(state: GameState): UIRefs {
 
   root.innerHTML = "";
   root.className =
-    "mx-auto flex w-full max-w-[92rem] flex-col gap-6 px-4 pb-8 pt-4 sm:px-6 lg:px-10";
+    "relative mx-auto flex w-full max-w-[92rem] flex-col gap-6 px-4 pb-8 pt-4 sm:px-6 lg:px-10";
 
   const heroImageSet = `image-set(url("${withBase("img/bg-hero-1920.png")}") type("image/png") 1x, url("${withBase("img/bg-hero-2560.png")}") type("image/png") 2x)`;
   document.documentElement.style.setProperty("--hero-image", heroImageSet);
@@ -355,6 +383,10 @@ function buildUI(state: GameState): UIRefs {
   seedBadge.append(seedIcon, seedBadgeValue);
   infoActions.appendChild(seedBadge);
   root.append(infoRibbon, layout);
+
+  const eventLayer = document.createElement("div");
+  eventLayer.className = "event-layer";
+  root.appendChild(eventLayer);
 
   const clickCard = document.createElement("section");
   clickCard.className = "card fade-in click-card";
@@ -462,6 +494,7 @@ function buildUI(state: GameState): UIRefs {
     shopEntries: new Map(),
     prestigeModal,
     toastContainer,
+    eventLayer,
   };
 
   setupInteractions(uiRefs, state);
@@ -1367,6 +1400,264 @@ function updateOfflineToast(state: GameState): void {
     state.temp.offlineBuds = null;
     state.temp.offlineDuration = 0;
   }
+}
+
+function ensureEventScheduler(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  if (!eventSchedulerReady) {
+    eventSchedulerReady = true;
+    document.addEventListener("visibilitychange", handleEventVisibilityChange);
+    scheduleNextEvent(state, true);
+    return;
+  }
+
+  if (!eventSpawnTimer && !activeEventButton) {
+    scheduleNextEvent(state);
+  }
+}
+
+function handleEventVisibilityChange(): void {
+  if (document.hidden) {
+    if (eventSpawnTimer) {
+      window.clearTimeout(eventSpawnTimer);
+      eventSpawnTimer = null;
+    }
+    if (eventLifetimeTimer) {
+      window.clearTimeout(eventLifetimeTimer);
+      eventLifetimeTimer = null;
+    }
+    if (activeEventButton) {
+      activeEventButton.remove();
+      activeEventButton = null;
+    }
+    return;
+  }
+
+  scheduleNextEvent();
+}
+
+function scheduleNextEvent(state?: GameState | null, immediate = false): void {
+  const targetState = state ?? schedulerState;
+  if (!targetState || !refs) {
+    return;
+  }
+
+  if (eventSpawnTimer) {
+    window.clearTimeout(eventSpawnTimer);
+  }
+
+  const delay = immediate
+    ? randomBetween(1_500, 3_500)
+    : randomBetween(EVENT_SPAWN_MIN_MS, EVENT_SPAWN_MAX_MS);
+
+  eventSpawnTimer = window.setTimeout(() => {
+    spawnRandomEvent(targetState);
+  }, delay);
+}
+
+function spawnRandomEvent(state: GameState): void {
+  eventSpawnTimer = null;
+
+  if (!refs || document.hidden) {
+    scheduleNextEvent(state, true);
+    return;
+  }
+
+  if (activeEventButton) {
+    return;
+  }
+
+  const layer = refs.eventLayer;
+  const rect = layer.getBoundingClientRect();
+  if (rect.width < 80 || rect.height < 80) {
+    scheduleNextEvent(state, true);
+    return;
+  }
+
+  const definition = EVENT_DEFINITIONS[Math.floor(Math.random() * EVENT_DEFINITIONS.length)];
+  const lifetime = randomBetween(EVENT_VISIBLE_MIN_MS, EVENT_VISIBLE_MAX_MS);
+  const path = computeEventPath(rect, lifetime);
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "event-icon";
+  button.style.left = `${path.startX}px`;
+  button.style.top = `${path.startY}px`;
+  button.style.transform = "translate(-50%, -50%)";
+  button.setAttribute("aria-label", t(state.locale, definition.labelKey));
+
+  const iconPath = asset(definition.icon);
+  const image = new Image();
+  image.src = iconPath;
+  image.srcset = buildItemSrcset(iconPath);
+  image.alt = "";
+  image.decoding = "async";
+  image.draggable = false;
+  image.className = "event-icon__img";
+
+  button.appendChild(image);
+  layer.appendChild(button);
+  activeEventButton = button;
+
+  button.animate(
+    [
+      { transform: "translate(-50%, -50%)" },
+      {
+        transform: `translate(calc(-50% + ${path.dx}px), calc(-50% + ${path.dy}px))`,
+      },
+    ],
+    {
+      duration: lifetime,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      fill: "forwards",
+    },
+  );
+
+  eventLifetimeTimer = window.setTimeout(() => {
+    removeActiveEvent("expired");
+  }, lifetime);
+
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    handleEventClick(state, definition, button);
+  });
+}
+
+function handleEventClick(
+  state: GameState,
+  definition: RandomEventDefinition,
+  element: HTMLButtonElement,
+): void {
+  const now = Date.now();
+  const hadActiveBoost =
+    state.temp.activeEventBoost === "lucky_joint" && state.temp.eventBoostEndsAt > now;
+
+  const result = applyEventReward(state, definition.id, now);
+  if (result.requiresRecalc) {
+    recalcDerivedValues(state);
+  }
+
+  showEventFeedback(state, definition.id, result, hadActiveBoost, element);
+  removeActiveEvent("clicked");
+  renderUI(state);
+}
+
+function showEventFeedback(
+  state: GameState,
+  id: EventId,
+  result: EventClickResult,
+  refreshed: boolean,
+  origin: HTMLElement,
+): void {
+  if (!refs) {
+    return;
+  }
+
+  if (id === "golden_bud" && result.budGain) {
+    const formatted = formatDecimal(result.budGain);
+    spawnFloatingValue(origin, `+${formatted}`);
+    showToast(
+      t(state.locale, "events.goldenBud.title"),
+      t(state.locale, "events.goldenBud.body", { buds: formatted }),
+    );
+    return;
+  }
+
+  if (id === "seed_pack" && typeof result.seedGain === "number") {
+    const formatted = result.seedGain.toString();
+    spawnFloatingValue(origin, `+${formatted}🌱`, "rgb(252 211 77)");
+    showToast(
+      t(state.locale, "events.seedPack.title"),
+      t(state.locale, "events.seedPack.body", { seeds: formatted }),
+    );
+    return;
+  }
+
+  if (id === "lucky_joint" && result.multiplier) {
+    const durationSeconds = Math.round((result.durationMs ?? 0) / 1000);
+    spawnFloatingValue(origin, `×${result.multiplier.toFixed(1)}`, "rgb(96 165 250)");
+    const bodyKey = refreshed ? "events.luckyJoint.refresh" : "events.luckyJoint.body";
+    showToast(
+      t(state.locale, "events.luckyJoint.title"),
+      t(state.locale, bodyKey, {
+        multiplier: result.multiplier,
+        duration: durationSeconds,
+      }),
+    );
+  }
+}
+
+function removeActiveEvent(reason: "clicked" | "expired"): void {
+  if (eventLifetimeTimer) {
+    window.clearTimeout(eventLifetimeTimer);
+    eventLifetimeTimer = null;
+  }
+
+  if (!activeEventButton) {
+    scheduleNextEvent();
+    return;
+  }
+
+  const element = activeEventButton;
+  activeEventButton = null;
+
+  element.remove();
+  scheduleNextEvent(undefined, reason === "clicked");
+}
+
+function computeEventPath(rect: DOMRect, lifetime: number): {
+  startX: number;
+  startY: number;
+  dx: number;
+  dy: number;
+} {
+  const width = rect.width;
+  const height = rect.height;
+  const horizontalMargin = Math.min(width * 0.1, 120);
+  const verticalMargin = Math.min(height * 0.15, 140);
+  const baseRatio = randomBetween(0.5, 0.7);
+  const travelDistance = (width * baseRatio * lifetime) / 10_000;
+  const direction = Math.random() < 0.5 ? -1 : 1;
+
+  let startX = randomBetween(horizontalMargin, width - horizontalMargin);
+  let endX = startX + direction * travelDistance;
+  const minX = horizontalMargin;
+  const maxX = width - horizontalMargin;
+  if (endX < minX) {
+    const correction = minX - endX;
+    startX += correction;
+    endX = minX;
+  } else if (endX > maxX) {
+    const correction = endX - maxX;
+    startX -= correction;
+    endX = maxX;
+  }
+
+  const startY = randomBetween(verticalMargin, height - verticalMargin);
+  const drift = Math.min(height * 0.12, 120);
+  let endY = startY + randomBetween(-drift, drift);
+  const minY = verticalMargin;
+  const maxY = height - verticalMargin;
+  if (endY < minY) {
+    endY = minY;
+  } else if (endY > maxY) {
+    endY = maxY;
+  }
+
+  return {
+    startX,
+    startY,
+    dx: endX - startX,
+    dy: endY - startY,
+  };
+}
+
+function randomBetween(min: number, max: number): number {
+  return Math.random() * (max - min) + min;
 }
 
 function showToast(title: string, message: string): void {
