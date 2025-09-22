@@ -1,6 +1,7 @@
 import Decimal from "break_infinity.js";
 import { DEFAULT_LOCALE, type LocaleKey } from "./i18n";
 import { createDefaultSettings, type SettingsState } from "./settings";
+import { OFFLINE_CAP_MS } from "./balance";
 
 export const SAVE_VERSION = 5 as const;
 
@@ -33,14 +34,20 @@ export interface TempState {
   costMultiplier: Decimal;
   autoClickRate: number;
   abilityPowerBonus: number;
+  abilityDurationMult: number;
+  offlineCapMs: number;
   offlineBuds: Decimal | null;
   offlineDuration: number;
   buildingBaseMultipliers: Record<string, Decimal>;
   buildingTierMultipliers: Record<string, Decimal>;
+  researchBuildingMultipliers: Record<string, Decimal>;
   eventBpsMult: Decimal;
   eventBpcMult: Decimal;
   eventBoostEndsAt: number;
   activeEventBoost: string | null;
+  hybridBuffPerBuff: number;
+  hybridActiveBuffs: number;
+  strainChoice: string | null;
 }
 
 export type ShopSortMode = "price" | "bps" | "roi";
@@ -168,14 +175,20 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       costMultiplier: new Decimal(1),
       autoClickRate: 0,
       abilityPowerBonus: 0,
+      abilityDurationMult: 1,
+      offlineCapMs: OFFLINE_CAP_MS,
       offlineBuds: null,
       offlineDuration: 0,
       buildingBaseMultipliers: {},
       buildingTierMultipliers: {},
+      researchBuildingMultipliers: {},
       eventBpsMult: new Decimal(1),
       eventBpcMult: new Decimal(1),
       eventBoostEndsAt: 0,
       activeEventBoost: null,
+      hybridBuffPerBuff: 0,
+      hybridActiveBuffs: 0,
+      strainChoice: null,
     },
     ...partial,
   } satisfies GameState;

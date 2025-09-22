@@ -57,7 +57,11 @@ export function activateAbility(state: GameState, id: AbilityId, now = Date.now(
 
   runtime.active = true;
   runtime.multiplier = computeAbilityStrength(state, ability);
-  runtime.endsAt = now + ability.durationSec * 1000;
+  const durationMult = Number.isFinite(state.temp.abilityDurationMult)
+    ? Math.max(0, state.temp.abilityDurationMult)
+    : 1;
+  const effectiveDuration = ability.durationSec * (durationMult > 0 ? durationMult : 1);
+  runtime.endsAt = now + effectiveDuration * 1000;
   runtime.readyAt = runtime.endsAt + ability.cooldownSec * 1000;
   return true;
 }
@@ -121,9 +125,13 @@ export function formatAbilityTooltip(state: GameState, id: AbilityId, locale: Lo
   }
 
   const strength = computeAbilityStrength(state, ability);
+  const durationMult = Number.isFinite(state.temp.abilityDurationMult)
+    ? Math.max(0, state.temp.abilityDurationMult)
+    : 1;
+  const effectiveDuration = Math.max(1, Math.round(ability.durationSec * (durationMult > 0 ? durationMult : 1)));
   const base = t(locale, ability.descriptionKey, {
     multiplier: strength.toFixed(2),
-    duration: ability.durationSec,
+    duration: effectiveDuration,
     cooldown: ability.cooldownSec,
   });
 

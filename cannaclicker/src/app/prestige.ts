@@ -2,6 +2,7 @@ import Decimal from "break_infinity.js";
 import { PRESTIGE_ALPHA, PRESTIGE_K, PRESTIGE_M, PRESTIGE_MIN_REQUIREMENT } from "./balance";
 import { createDefaultState, type GameState } from "./state";
 import { applyResearchEffects } from "./research";
+import { researchById } from "../data/research";
 
 export interface PrestigePreview {
   currentSeeds: number;
@@ -54,12 +55,16 @@ export function performPrestige(state: GameState): GameState {
   const now = Date.now();
   const seedsAfter = preview.nextSeeds;
   const multiplier = computePrestigeMultiplier(seedsAfter);
+  const preservedResearch = state.researchOwned.filter((researchId) => {
+    const node = researchById.get(researchId);
+    return !node?.resetsOnPrestige;
+  });
 
   const preserved: Partial<GameState> = {
     locale: state.locale,
     muted: state.muted,
     achievements: { ...state.achievements },
-    researchOwned: [...state.researchOwned],
+    researchOwned: preservedResearch,
     preferences: state.preferences,
     automation: state.automation,
     prestige: {

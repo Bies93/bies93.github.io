@@ -19,6 +19,15 @@ export function recalcDerivedValues(state: GameState): void {
   applyResearchEffects(state);
 
   const { globalMultiplier, buildingMultipliers, clickMultiplier } = collectUpgradeMultipliers(state);
+  const researchBuildingMultipliers = state.temp.researchBuildingMultipliers ?? {};
+  for (const [buildingId, multiplier] of Object.entries(researchBuildingMultipliers)) {
+    if (!multiplier) {
+      continue;
+    }
+    const safeMultiplier = multiplier instanceof Decimal ? multiplier : new Decimal(multiplier);
+    const current = buildingMultipliers.get(buildingId) ?? new Decimal(1);
+    buildingMultipliers.set(buildingId, current.mul(safeMultiplier));
+  }
   state.temp.buildingBaseMultipliers = {};
   state.temp.buildingTierMultipliers = {};
 
