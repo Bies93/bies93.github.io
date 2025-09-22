@@ -3,6 +3,7 @@ import type { GameState } from './state';
 import { updateAbilityTimers } from './abilities';
 import { recalcDerivedValues } from './game';
 import { runAutoBuy, AUTO_BUY_INTERVAL_SECONDS } from './autobuy';
+import { clearExpiredEventBoost } from './events';
 
 interface LoopOptions {
   autosaveSeconds?: number;
@@ -58,7 +59,8 @@ export function startLoop(
     }
 
     const abilityChanged = updateAbilityTimers(state, now);
-    if (abilityChanged) {
+    const eventEnded = clearExpiredEventBoost(state, now);
+    if (abilityChanged || eventEnded) {
       recalcDerivedValues(state);
     }
 

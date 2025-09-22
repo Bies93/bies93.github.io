@@ -37,6 +37,10 @@ export interface TempState {
   offlineDuration: number;
   buildingBaseMultipliers: Record<string, Decimal>;
   buildingTierMultipliers: Record<string, Decimal>;
+  eventBpsMult: Decimal;
+  eventBpcMult: Decimal;
+  eventBoostEndsAt: number;
+  activeEventBoost: string | null;
 }
 
 export type ShopSortMode = "price" | "bps" | "roi";
@@ -168,6 +172,10 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       offlineDuration: 0,
       buildingBaseMultipliers: {},
       buildingTierMultipliers: {},
+      eventBpsMult: new Decimal(1),
+      eventBpcMult: new Decimal(1),
+      eventBoostEndsAt: 0,
+      activeEventBoost: null,
     },
     ...partial,
   } satisfies GameState;
