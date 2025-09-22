@@ -4,6 +4,7 @@ import { updateAbilityTimers } from './abilities';
 import { recalcDerivedValues } from './game';
 import { runAutoBuy, AUTO_BUY_INTERVAL_SECONDS } from './autobuy';
 import { clearExpiredEventBoost } from './events';
+import { clearExpiredKickstart } from './milestones';
 
 interface LoopOptions {
   autosaveSeconds?: number;
@@ -60,7 +61,16 @@ export function startLoop(
 
     const abilityChanged = updateAbilityTimers(state, now);
     const eventEnded = clearExpiredEventBoost(state, now);
-    if (abilityChanged || eventEnded) {
+    const kickstartExpired = clearExpiredKickstart(state, now);
+    if (kickstartExpired) {
+      state.temp.kickstartRemainingMs = 0;
+    } else if (state.prestige.kickstart) {
+      state.temp.kickstartRemainingMs = Math.max(0, state.prestige.kickstart.endsAt - now);
+    } else if (state.temp.kickstartRemainingMs !== 0) {
+      state.temp.kickstartRemainingMs = 0;
+    }
+
+    if (abilityChanged || eventEnded || kickstartExpired) {
       recalcDerivedValues(state);
     }
 

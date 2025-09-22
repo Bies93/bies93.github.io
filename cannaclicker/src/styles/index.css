@@ -910,6 +910,70 @@ button {
   @apply cursor-not-allowed border-white/10 bg-neutral-900/60 text-neutral-400;
 }
 
+.milestone-list {
+  display: grid;
+  gap: clamp(0.65rem, 1.4vw, 1rem);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.milestone-card {
+  @apply flex flex-col gap-2 rounded-2xl border border-white/10 bg-neutral-900/60 p-4 transition;
+}
+
+.milestone-card:hover {
+  @apply border-emerald-400/40;
+  transform: translateY(-2px);
+}
+
+.milestone-card.is-active {
+  @apply border-emerald-400/40 bg-emerald-500/10 shadow-[0_18px_36px_rgba(16,185,129,0.18)];
+}
+
+.milestone-card__header {
+  @apply flex items-start justify-between gap-2;
+}
+
+.milestone-card__title {
+  @apply text-base font-semibold text-neutral-100;
+}
+
+.milestone-card__badge {
+  @apply inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold uppercase tracking-widest text-emerald-200;
+}
+
+.milestone-card__reward {
+  @apply text-sm font-semibold text-emerald-200;
+}
+
+.milestone-card__description {
+  @apply text-sm text-neutral-300;
+}
+
+.milestone-card__progress {
+  position: relative;
+  height: 0.5rem;
+  width: 100%;
+  border-radius: 9999px;
+  background: rgba(148, 163, 184, 0.18);
+  overflow: hidden;
+}
+
+.milestone-card__progress-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.9), rgba(34, 197, 94, 0.75));
+  border-radius: inherit;
+  transition: width 0.3s ease;
+}
+
+.milestone-card.is-active .milestone-card__progress-fill {
+  background: linear-gradient(90deg, rgba(52, 211, 153, 0.95), rgba(74, 222, 128, 0.85));
+}
+
+.milestone-card__progress-label {
+  @apply text-xs font-semibold uppercase tracking-widest text-neutral-400;
+}
+
 .achievement-card {
   @apply flex items-center gap-4 rounded-2xl border border-white/10 bg-neutral-900/60 p-4 transition hover:border-emerald-400/40;
 }

@@ -19,6 +19,7 @@ import { withBase } from "./paths";
 import { applyEventReward, type EventClickResult, type EventId } from "./events";
 import { itemById } from "../data/items";
 import { achievements, type AchievementDefinition } from "../data/achievements";
+import { milestones } from "../data/milestones";
 import {
   getUpgradeEntries,
   getUpgradeDefinition,
@@ -42,8 +43,8 @@ import {
   type ResearchLockReason,
 } from "./research";
 import type { ResearchEffect, ResearchUnlockCondition } from "../data/research";
-import { getPrestigePreview, performPrestige } from "./prestige";
-import { PRESTIGE_MIN_REQUIREMENT } from "./balance";
+import { getPrestigePreview, performPrestige, type PrestigePreview } from "./prestige";
+import type { MilestoneProgressDetail } from "./milestones";
 
 const STAT_META: Record<LocaleKey, Record<string, string>> = {
   de: {
@@ -85,16 +86,27 @@ interface ControlButtonRefs {
 interface PrestigePanelRefs {
   container: HTMLElement;
   description: HTMLElement;
-  currentSeedsLabel: HTMLElement;
-  currentSeedsValue: HTMLElement;
-  nextSeedsLabel: HTMLElement;
-  nextSeedsValue: HTMLElement;
-  gainLabel: HTMLElement;
-  gainValue: HTMLElement;
-  bonusLabel: HTMLElement;
-  bonusValue: HTMLElement;
+  permanentLabel: HTMLElement;
+  permanentValue: HTMLElement;
+  kickstartLabel: HTMLElement;
+  kickstartValue: HTMLElement;
+  activeKickstartLabel: HTMLElement;
+  activeKickstartValue: HTMLElement;
+  milestoneList: HTMLElement;
+  milestones: Map<string, MilestoneCardRefs>;
   requirement: HTMLElement;
   actionButton: HTMLButtonElement;
+}
+
+interface MilestoneCardRefs {
+  container: HTMLElement;
+  title: HTMLElement;
+  reward: HTMLElement;
+  description: HTMLElement;
+  badge: HTMLElement;
+  progressBar: HTMLElement;
+  progressFill: HTMLElement;
+  progressLabel: HTMLElement;
 }
 
 interface AchievementCardRefs {
@@ -643,7 +655,7 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
 
   refs.prestigeModal.confirmButton.addEventListener("click", () => {
     const preview = getPrestigePreview(state);
-    if (!prestigeAcknowledged || !preview.requirementMet || preview.gain <= 0) {
+    if (!prestigeAcknowledged || !preview.requirementMet) {
       return;
     }
 
@@ -801,15 +813,18 @@ function updateStrings(state: GameState): void {
   });
 
   refs.sidePanel.prestige.description.textContent = t(state.locale, "panel.prestige.description");
-  refs.sidePanel.prestige.currentSeedsLabel.textContent = t(state.locale, "prestige.modal.currentSeeds");
-  refs.sidePanel.prestige.nextSeedsLabel.textContent = t(state.locale, "prestige.modal.afterSeeds");
-  refs.sidePanel.prestige.gainLabel.textContent = t(state.locale, "prestige.modal.gainSeeds");
-  refs.sidePanel.prestige.bonusLabel.textContent = t(state.locale, "prestige.modal.globalBonus");
+  refs.sidePanel.prestige.permanentLabel.textContent = t(state.locale, "panel.prestige.permanent");
+  refs.sidePanel.prestige.kickstartLabel.textContent = t(state.locale, "panel.prestige.kickstartNext");
+  refs.sidePanel.prestige.activeKickstartLabel.textContent = t(state.locale, "panel.prestige.kickstartActive");
   refs.sidePanel.prestige.actionButton.textContent = t(state.locale, "actions.prestige");
 
   refs.prestigeModal.title.textContent = t(state.locale, "prestige.modal.title");
   refs.prestigeModal.description.textContent = t(state.locale, "prestige.modal.description");
   refs.prestigeModal.warning.textContent = t(state.locale, "prestige.modal.warning");
+  refs.prestigeModal.previewCurrentLabel.textContent = t(state.locale, 'prestige.modal.permanentBonus');
+  refs.prestigeModal.previewAfterLabel.textContent = t(state.locale, 'prestige.modal.kickstartNext');
+  refs.prestigeModal.previewGainLabel.textContent = t(state.locale, 'prestige.modal.kickstartActive');
+  refs.prestigeModal.previewBonusLabel.textContent = t(state.locale, 'prestige.modal.requirementProgress');
   refs.prestigeModal.checkboxLabel.textContent = t(state.locale, "prestige.modal.checkbox");
   refs.prestigeModal.confirmButton.textContent = t(state.locale, "prestige.modal.confirm");
   refs.prestigeModal.cancelButton.textContent = t(state.locale, "actions.cancel");
@@ -898,13 +913,14 @@ function updateStats(state: GameState): void {
   refs.seeds.textContent = formatDecimal(state.prestige.seeds);
   refs.prestigeMult.textContent = `${state.prestige.mult.toFixed(2)}\u00D7`;
 
-  const bonusPercent = Math.max(0, state.prestige.mult.minus(1).mul(100).toNumber());
   refs.seedBadgeValue.textContent = formatDecimal(state.prestige.seeds);
-  const canPrestige = preview.requirementMet && preview.gain > 0;
+  const canPrestige = preview.requirementMet;
   const badgeTooltip = canPrestige
-    ? t(state.locale, 'prestige.badge.tooltip', { value: bonusPercent.toFixed(1) })
+    ? t(state.locale, 'prestige.badge.tooltip', {
+        bonus: formatPermanentBonusSummary(state.locale, preview),
+      })
     : t(state.locale, 'prestige.control.locked', {
-        requirement: formatDecimal(PRESTIGE_MIN_REQUIREMENT),
+        requirement: formatDecimal(preview.requirementTarget),
       });
   refs.seedBadge.classList.toggle('is-ready', canPrestige);
   refs.seedBadge.setAttribute('title', badgeTooltip);
@@ -1320,36 +1336,166 @@ function updatePrestigePanel(state: GameState): void {
   const preview = getPrestigePreview(state);
   const panel = refs.sidePanel.prestige;
 
-  panel.currentSeedsValue.textContent = formatDecimal(preview.currentSeeds);
-  panel.nextSeedsValue.textContent = formatDecimal(preview.nextSeeds);
-  panel.gainValue.textContent = formatDecimal(preview.gain);
+  panel.description.textContent = t(state.locale, "panel.prestige.description");
 
-  const bonusPercent = Math.max(0, preview.nextMultiplier.minus(1).mul(100).toNumber());
-  panel.bonusValue.textContent = `+${bonusPercent.toFixed(1)}%`;
+  panel.permanentLabel.textContent = t(state.locale, "panel.prestige.permanent");
+  panel.permanentValue.textContent = formatPermanentBonusSummary(state.locale, preview);
 
-  const requirementLabel = t(state.locale, "panel.prestige.requirement", {
-    value: formatDecimal(PRESTIGE_MIN_REQUIREMENT),
+  panel.kickstartLabel.textContent = t(state.locale, "panel.prestige.kickstartNext");
+  panel.kickstartValue.textContent = formatNextKickstartSummary(state.locale, preview);
+
+  panel.activeKickstartLabel.textContent = t(state.locale, "panel.prestige.kickstartActive");
+  panel.activeKickstartValue.textContent = formatActiveKickstartSummary(state.locale, preview);
+
+  updateMilestoneCards(state, panel.milestones);
+
+  const requirementText = preview.requirementMet
+    ? t(state.locale, "panel.prestige.ready")
+    : t(state.locale, "panel.prestige.progress", {
+        current: formatDecimal(preview.lifetimeBuds),
+        target: formatDecimal(preview.requirementTarget),
+      });
+
+  panel.requirement.textContent = requirementText;
+  panel.container.classList.toggle("is-ready", preview.requirementMet);
+  panel.container.classList.toggle("is-locked", !preview.requirementMet);
+
+  panel.actionButton.disabled = !preview.requirementMet;
+  panel.actionButton.setAttribute("aria-disabled", preview.requirementMet ? "false" : "true");
+  panel.actionButton.setAttribute(
+    "title",
+    preview.requirementMet ? t(state.locale, "actions.prestige") : requirementText,
+  );
+}
+
+function updateMilestoneCards(state: GameState, cards: Map<string, MilestoneCardRefs>): void {
+  const locale = state.locale;
+  const progressList = state.temp.milestoneProgress ?? [];
+  const progressMap = new Map(progressList.map((snapshot) => [snapshot.id, snapshot]));
+
+  milestones.forEach((definition) => {
+    const card = cards.get(definition.id);
+    if (!card) {
+      return;
+    }
+
+    const snapshot = progressMap.get(definition.id);
+    const achieved = snapshot?.achieved ?? Boolean(state.prestige.milestones[definition.id]);
+    const progressValue = snapshot ? Math.max(0, Math.min(1, snapshot.progress)) : achieved ? 1 : 0;
+
+    card.title.textContent = `${definition.order}. ${definition.name[locale]}`;
+    card.reward.textContent = definition.rewardSummary[locale];
+    card.description.textContent = definition.description[locale];
+    card.container.classList.toggle("is-active", achieved);
+    card.badge.textContent = t(locale, "milestones.active");
+    card.badge.classList.toggle("hidden", !achieved);
+    card.badge.classList.toggle("is-active", achieved);
+    card.progressFill.style.width = `${Math.round(progressValue * 100)}%`;
+    if (snapshot) {
+      card.progressLabel.textContent = formatMilestoneProgressText(state, snapshot.detail);
+    } else {
+      card.progressLabel.textContent = "";
+    }
   });
-  const needsRequirement = !preview.requirementMet;
-  const needsGain = preview.requirementMet && preview.gain <= 0;
-  const canPrestige = preview.requirementMet && preview.gain > 0;
+}
 
-  let status = "";
-  if (needsRequirement) {
-    status = requirementLabel;
-  } else if (needsGain) {
-    status = t(state.locale, "panel.prestige.tooSoon");
-  } else {
-    status = t(state.locale, "panel.prestige.ready");
+function formatPermanentBonusSummary(locale: LocaleKey, preview: PrestigePreview): string {
+  const parts: string[] = [];
+  if (preview.totalBpsPercent > 0) {
+    parts.push(t(locale, "prestige.summary.bps", { value: formatPercent(locale, preview.totalBpsPercent) }));
+  }
+  if (preview.totalBpcPercent > 0) {
+    parts.push(t(locale, "prestige.summary.bpc", { value: formatPercent(locale, preview.totalBpcPercent) }));
+  }
+  if (preview.permanentGlobalPercent > 0) {
+    parts.push(t(locale, "prestige.summary.global", { value: formatPercent(locale, preview.permanentGlobalPercent) }));
   }
 
-  panel.requirement.textContent = status;
-  panel.container.classList.toggle("is-ready", canPrestige);
-  panel.container.classList.toggle("is-locked", !canPrestige);
+  if (!parts.length) {
+    return t(locale, "prestige.summary.none");
+  }
 
-  panel.actionButton.disabled = !canPrestige;
-  panel.actionButton.setAttribute("aria-disabled", canPrestige ? "false" : "true");
-  panel.actionButton.setAttribute("title", canPrestige ? t(state.locale, "actions.prestige") : status);
+  return parts.join(" · ");
+}
+
+function formatNextKickstartSummary(locale: LocaleKey, preview: PrestigePreview): string {
+  const config = preview.nextKickstartConfig;
+  if (!preview.nextKickstartLevel || !config) {
+    return t(locale, "prestige.kickstart.none");
+  }
+
+  const costBonus = config.costMult < 1
+    ? t(locale, "prestige.kickstart.discount", {
+        value: formatPercent(locale, (1 - config.costMult) * 100),
+      })
+    : "";
+
+  return t(locale, "prestige.kickstart.summary", {
+    level: preview.nextKickstartLevel,
+    duration: formatDuration(config.durationMs),
+    mult: formatInteger(locale, config.bpsMult),
+    cost: costBonus,
+  });
+}
+
+function formatActiveKickstartSummary(locale: LocaleKey, preview: PrestigePreview): string {
+  if (!preview.activeKickstartLevel || preview.activeKickstartRemainingMs <= 0) {
+    return t(locale, "prestige.kickstart.inactive");
+  }
+
+  const costBonus = preview.activeKickstartCostMult < 1
+    ? t(locale, "prestige.kickstart.discount", {
+        value: formatPercent(locale, (1 - preview.activeKickstartCostMult) * 100),
+      })
+    : "";
+
+  return t(locale, "prestige.kickstart.activeSummary", {
+    level: preview.activeKickstartLevel,
+    remaining: formatDuration(preview.activeKickstartRemainingMs),
+    mult: formatInteger(locale, preview.activeKickstartBpsMult),
+    cost: costBonus,
+  });
+}
+
+function formatMilestoneProgressText(state: GameState, detail: MilestoneProgressDetail): string {
+  const locale = state.locale;
+  switch (detail.type) {
+    case "unique_buildings":
+      return t(locale, "milestones.progress.unique", {
+        current: formatInteger(locale, detail.owned),
+        target: formatInteger(locale, detail.target),
+      });
+    case "buildings_at_least":
+      return t(locale, "milestones.progress.atLeast", {
+        current: formatInteger(locale, detail.satisfied),
+        target: formatInteger(locale, detail.target),
+        amount: formatInteger(locale, detail.amount),
+      });
+    case "any_building_at_least":
+      return t(locale, "milestones.progress.any", {
+        current: formatInteger(locale, detail.best),
+        target: formatInteger(locale, detail.target),
+      });
+    case "unlocked_and_any_at_least":
+      return t(locale, "milestones.progress.unlocked", {
+        unlocked: formatInteger(locale, detail.unlocked),
+        total: formatInteger(locale, detail.total),
+        current: formatInteger(locale, detail.best),
+        target: formatInteger(locale, detail.target),
+      });
+    default:
+      return "";
+  }
+}
+
+function formatPercent(locale: LocaleKey, value: number): string {
+  const formatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+  return formatter.format(Math.max(0, value));
+}
+
+function formatInteger(locale: LocaleKey, value: number): string {
+  const formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  return formatter.format(Math.max(0, Math.floor(value)));
 }
 
 function updateAchievements(state: GameState): void {
@@ -1624,36 +1770,27 @@ function updatePrestigeModal(state: GameState): void {
   const preview = getPrestigePreview(state);
   const modal = refs.prestigeModal;
 
-  modal.previewCurrentLabel.textContent = t(state.locale, 'prestige.modal.currentSeeds');
-  modal.previewAfterLabel.textContent = t(state.locale, 'prestige.modal.afterSeeds');
-  modal.previewGainLabel.textContent = t(state.locale, 'prestige.modal.gainSeeds');
-  modal.previewBonusLabel.textContent = t(state.locale, 'prestige.modal.globalBonus');
-
-  modal.previewCurrentValue.textContent = formatDecimal(preview.currentSeeds);
-  modal.previewAfterValue.textContent = formatDecimal(preview.nextSeeds);
-  modal.previewGainValue.textContent = formatDecimal(preview.gain);
-
-  const nextBonusPercent = Math.max(0, preview.nextMultiplier.minus(1).mul(100).toNumber());
-  modal.previewBonusValue.textContent = `+${nextBonusPercent.toFixed(1)}%`;
+  modal.previewCurrentValue.textContent = formatPermanentBonusSummary(state.locale, preview);
+  modal.previewAfterValue.textContent = formatNextKickstartSummary(state.locale, preview);
+  modal.previewGainValue.textContent = formatActiveKickstartSummary(state.locale, preview);
+  modal.previewBonusValue.textContent = t(state.locale, 'prestige.modal.requirementProgressValue', {
+    current: formatDecimal(preview.lifetimeBuds),
+    target: formatDecimal(preview.requirementTarget),
+  });
 
   modal.checkbox.checked = prestigeAcknowledged;
 
-  const requirementLabel = t(state.locale, 'prestige.modal.requirement', {
-    value: formatDecimal(PRESTIGE_MIN_REQUIREMENT),
-  });
-  const needsRequirement = !preview.requirementMet;
-  const needsGain = preview.requirementMet && preview.gain <= 0;
-  let status = '';
-  if (needsRequirement) {
-    status = requirementLabel;
-  } else if (needsGain) {
-    status = t(state.locale, 'prestige.modal.tooSoon');
-  }
+  const status = preview.requirementMet
+    ? ''
+    : t(state.locale, 'prestige.modal.requirementHint', {
+        target: formatDecimal(preview.requirementTarget),
+        current: formatDecimal(preview.lifetimeBuds),
+      });
 
   modal.statusLabel.textContent = status;
   modal.statusLabel.classList.toggle('hidden', status.length === 0);
 
-  modal.confirmButton.disabled = !prestigeAcknowledged || preview.gain <= 0 || !preview.requirementMet;
+  modal.confirmButton.disabled = !prestigeAcknowledged || !preview.requirementMet;
 }
 
 function openPrestigeModal(state: GameState): void {
@@ -2553,10 +2690,20 @@ function createPrestigePanel(): PrestigePanelRefs {
   stats.className = "prestige-panel__stats";
   container.appendChild(stats);
 
-  const current = createPrestigePanelStat(stats);
-  const next = createPrestigePanelStat(stats);
-  const gain = createPrestigePanelStat(stats);
-  const bonus = createPrestigePanelStat(stats);
+  const permanent = createPrestigePanelStat(stats);
+  const kickstart = createPrestigePanelStat(stats);
+  const active = createPrestigePanelStat(stats);
+
+  const milestoneList = document.createElement("div");
+  milestoneList.className = "milestone-list";
+  container.appendChild(milestoneList);
+
+  const milestoneRefs = new Map<string, MilestoneCardRefs>();
+  milestones.forEach((definition) => {
+    const card = createMilestoneCard();
+    milestoneRefs.set(definition.id, card);
+    milestoneList.appendChild(card.container);
+  });
 
   const requirement = document.createElement("p");
   requirement.className = "prestige-panel__requirement";
@@ -2570,14 +2717,14 @@ function createPrestigePanel(): PrestigePanelRefs {
   return {
     container,
     description,
-    currentSeedsLabel: current.label,
-    currentSeedsValue: current.value,
-    nextSeedsLabel: next.label,
-    nextSeedsValue: next.value,
-    gainLabel: gain.label,
-    gainValue: gain.value,
-    bonusLabel: bonus.label,
-    bonusValue: bonus.value,
+    permanentLabel: permanent.label,
+    permanentValue: permanent.value,
+    kickstartLabel: kickstart.label,
+    kickstartValue: kickstart.value,
+    activeKickstartLabel: active.label,
+    activeKickstartValue: active.value,
+    milestoneList,
+    milestones: milestoneRefs,
     requirement,
     actionButton,
   } satisfies PrestigePanelRefs;
@@ -2597,6 +2744,55 @@ function createPrestigePanelStat(wrapper: HTMLElement): { label: HTMLElement; va
 
   wrapper.appendChild(row);
   return { label, value };
+}
+
+function createMilestoneCard(): MilestoneCardRefs {
+  const container = document.createElement("article");
+  container.className = "milestone-card";
+
+  const header = document.createElement("div");
+  header.className = "milestone-card__header";
+
+  const title = document.createElement("h3");
+  title.className = "milestone-card__title";
+  header.appendChild(title);
+
+  const badge = document.createElement("span");
+  badge.className = "milestone-card__badge";
+  header.appendChild(badge);
+
+  container.appendChild(header);
+
+  const reward = document.createElement("p");
+  reward.className = "milestone-card__reward";
+  container.appendChild(reward);
+
+  const description = document.createElement("p");
+  description.className = "milestone-card__description";
+  container.appendChild(description);
+
+  const progressBar = document.createElement("div");
+  progressBar.className = "milestone-card__progress";
+
+  const progressFill = document.createElement("div");
+  progressFill.className = "milestone-card__progress-fill";
+  progressBar.appendChild(progressFill);
+  container.appendChild(progressBar);
+
+  const progressLabel = document.createElement("p");
+  progressLabel.className = "milestone-card__progress-label";
+  container.appendChild(progressLabel);
+
+  return {
+    container,
+    title,
+    reward,
+    description,
+    badge,
+    progressBar,
+    progressFill,
+    progressLabel,
+  } satisfies MilestoneCardRefs;
 }
 
 function createAchievementCard(definition: AchievementDefinition): AchievementCardRefs {

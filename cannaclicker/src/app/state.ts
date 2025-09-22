@@ -2,8 +2,9 @@ import Decimal from "break_infinity.js";
 import { DEFAULT_LOCALE, type LocaleKey } from "./i18n";
 import { createDefaultSettings, type SettingsState } from "./settings";
 import { OFFLINE_CAP_MS } from "./balance";
+import type { MilestoneProgressSnapshot } from "./milestones";
 
-export const SAVE_VERSION = 5 as const;
+export const SAVE_VERSION = 6 as const;
 
 export type DecimalLike = Decimal | number | string | null | undefined;
 
@@ -24,6 +25,13 @@ export interface PrestigeState {
   lifetimeBuds: Decimal;
   lastResetAt: number;
   version: number;
+  milestones: Record<string, boolean>;
+  kickstart: KickstartState | null;
+}
+
+export interface KickstartState {
+  level: number;
+  endsAt: number;
 }
 
 export interface TempState {
@@ -49,6 +57,19 @@ export interface TempState {
   hybridBuffPerBuff: number;
   hybridActiveBuffs: number;
   strainChoice: string | null;
+  milestoneGlobalMult: Decimal;
+  milestoneBpsMult: Decimal;
+  milestoneBpcMult: Decimal;
+  milestoneProgress: MilestoneProgressSnapshot[];
+  milestoneActiveCount: number;
+  nextKickstartLevel: number;
+  kickstartBpsMult: Decimal;
+  kickstartBpcMult: Decimal;
+  kickstartCostMult: Decimal;
+  kickstartLevel: number;
+  kickstartDurationMs: number;
+  kickstartRemainingMs: number;
+  kickstartEndsAt: number;
 }
 
 export type ShopSortMode = "price" | "bps" | "roi";
@@ -157,6 +178,8 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       lifetimeBuds: new Decimal(0),
       lastResetAt: now,
       version: 1,
+      milestones: {},
+      kickstart: null,
     },
     abilities: defaultAbilities,
     time: now,
@@ -191,6 +214,19 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       hybridBuffPerBuff: 0,
       hybridActiveBuffs: 0,
       strainChoice: null,
+      milestoneGlobalMult: new Decimal(1),
+      milestoneBpsMult: new Decimal(1),
+      milestoneBpcMult: new Decimal(1),
+      milestoneProgress: [],
+      milestoneActiveCount: 0,
+      nextKickstartLevel: 0,
+      kickstartBpsMult: new Decimal(1),
+      kickstartBpcMult: new Decimal(1),
+      kickstartCostMult: new Decimal(1),
+      kickstartLevel: 0,
+      kickstartDurationMs: 0,
+      kickstartRemainingMs: 0,
+      kickstartEndsAt: 0,
     },
     ...partial,
   } satisfies GameState;
