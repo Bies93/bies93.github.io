@@ -172,7 +172,9 @@ export function canUnlockItem(state: GameState, definition: ItemDefinition): boo
 export function getShopEntries(state: GameState): ShopEntry[] {
   return items.map((definition, index) => {
     const owned = state.items[definition.id] ?? 0;
-    const cost = getItemCost(definition, owned, state.temp.costMultiplier);
+    const buildingCostMult = state.temp.buildingCostMultipliers?.[definition.id] ?? new Decimal(1);
+    const totalCostMult = state.temp.costMultiplier.mul(buildingCostMult);
+    const cost = getItemCost(definition, owned, totalCostMult);
     const tier = getTierInfo(definition, owned);
     const softcap = getSoftcapInfo(definition, owned);
     const baseMultiplier = state.temp.buildingBaseMultipliers[definition.id] ?? new Decimal(1);
@@ -224,7 +226,9 @@ export function getMaxAffordable(definition: ItemDefinition, state: GameState): 
   const owned = state.items[definition.id] ?? 0;
   let iterations = 0;
   let totalCost = new Decimal(0);
-  let nextCost = getItemCost(definition, owned, state.temp.costMultiplier);
+  const buildingCostMult = state.temp.buildingCostMultipliers?.[definition.id] ?? new Decimal(1);
+  const totalCostMult = state.temp.costMultiplier.mul(buildingCostMult);
+  let nextCost = getItemCost(definition, owned, totalCostMult);
 
   while (state.buds.greaterThanOrEqualTo(totalCost.add(nextCost)) && iterations < 999) {
     totalCost = totalCost.add(nextCost);

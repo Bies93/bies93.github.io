@@ -706,6 +706,123 @@ button {
 .shop-card.is-affordable .buy-btn {
   box-shadow: 0 16px 32px rgba(16, 185, 129, 0.35);
 }
+
+.upgrade-card {
+  @apply relative grid gap-4 rounded-2xl border border-white/10 bg-neutral-900/60 p-4 shadow-card backdrop-blur-sm transition;
+  grid-template-columns: auto minmax(0, 1fr);
+  isolation: isolate;
+}
+
+@media (max-width: 640px) {
+  .upgrade-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .upgrade-card__media {
+    justify-self: center;
+  }
+}
+
+.upgrade-card__media {
+  @apply grid h-16 w-16 place-items-center rounded-xl border border-white/10 bg-neutral-900/70 shadow-inner;
+}
+
+.upgrade-card__icon {
+  @apply h-12 w-12 object-contain;
+}
+
+.upgrade-card__body {
+  @apply flex flex-col gap-3;
+}
+
+.upgrade-card__header {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+.upgrade-card__category {
+  @apply inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-neutral-300;
+}
+
+.upgrade-card__name {
+  @apply text-lg font-semibold text-neutral-100;
+}
+
+.upgrade-card__description {
+  @apply text-sm leading-snug text-neutral-400;
+}
+
+.upgrade-card__status {
+  @apply text-[0.65rem] font-semibold uppercase tracking-[0.4em] text-neutral-300;
+}
+
+.upgrade-card__progress {
+  @apply text-sm font-semibold text-emerald-200;
+}
+
+.upgrade-card__requirements {
+  @apply list-disc space-y-1 pl-5 text-xs text-neutral-400;
+}
+
+.upgrade-card__footer {
+  @apply flex flex-wrap items-center justify-between gap-3;
+}
+
+.upgrade-card__cost-wrap {
+  @apply flex items-baseline gap-2 text-sm text-neutral-200;
+}
+
+.upgrade-card__cost-label {
+  @apply text-[0.6rem] uppercase tracking-[0.35em] text-neutral-500;
+}
+
+.upgrade-card__cost {
+  @apply text-base font-semibold text-neutral-100;
+}
+
+.upgrade-card__button {
+  @apply h-10 rounded-lg border border-emerald-400/40 bg-emerald-500/15 px-4 text-xs font-semibold uppercase tracking-[0.4em] text-emerald-100 transition;
+}
+
+.upgrade-card__button:hover:not(:disabled) {
+  @apply border-emerald-300/60 bg-emerald-400/20 text-emerald-50;
+}
+
+.upgrade-card__button:disabled {
+  @apply cursor-not-allowed border-white/10 bg-neutral-800/50 text-neutral-500;
+}
+
+.upgrade-card[data-state='locked'] {
+  @apply opacity-60;
+  filter: saturate(0.6);
+}
+
+.upgrade-card[data-state='affordable'] {
+  @apply border-emerald-400/50 shadow-[0_22px_46px_rgba(16,185,129,0.25)];
+  transform: translateY(-1px);
+}
+
+.upgrade-card[data-state='affordable'] .upgrade-card__button:not(:disabled) {
+  box-shadow: 0 16px 32px rgba(16, 185, 129, 0.35);
+}
+
+.upgrade-card.is-celebrating {
+  animation: upgradePulse 720ms ease-out;
+}
+
+@keyframes upgradePulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(74, 222, 128, 0.3);
+  }
+  45% {
+    transform: scale(1.02);
+    box-shadow: 0 24px 48px rgba(74, 222, 128, 0.3);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(74, 222, 128, 0);
+  }
+}
 .click-icon.is-upgrading {
   animation: plantGlow 600ms ease-out;
 }
