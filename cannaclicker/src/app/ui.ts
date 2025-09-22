@@ -1011,12 +1011,13 @@ function updateStats(state: GameState): void {
   refs.bps.textContent = formatDecimal(state.bps);
   refs.bpc.textContent = formatDecimal(state.bpc);
   refs.total.textContent = formatDecimal(state.total);
-  refs.seeds.textContent = formatDecimal(state.prestige.seeds);
+  const seedText = formatInteger(state.locale, state.prestige.seeds);
+  refs.seeds.textContent = seedText;
   const seedRateValue = formatSeedRate(state.locale, state.temp.seedRatePerHour ?? 0);
   refs.seedRate.textContent = seedRateValue;
   refs.prestigeMult.textContent = `${state.prestige.mult.toFixed(2)}\u00D7`;
 
-  refs.seedBadgeValue.textContent = formatDecimal(state.prestige.seeds);
+  refs.seedBadgeValue.textContent = seedText;
   const seedRateMeta = refs.statsMeta.get("stats.seedRate");
   if (seedRateMeta) {
     if (state.temp.seedPassiveThrottled) {
