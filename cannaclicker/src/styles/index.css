@@ -175,6 +175,11 @@ button {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.stat-item__meta {
+  @apply text-[0.7rem] font-medium uppercase tracking-wider text-emerald-200/80;
+  letter-spacing: 0.04em;
+}
+
 .info-ribbon {
   display: flex;
   flex-wrap: wrap;

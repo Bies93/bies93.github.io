@@ -20,6 +20,7 @@ import { applyEventReward, type EventClickResult, type EventId } from "./events"
 import { itemById } from "../data/items";
 import { achievements, type AchievementDefinition } from "../data/achievements";
 import { milestones } from "../data/milestones";
+import { maybeRollClickSeed } from "./seeds";
 import {
   getUpgradeEntries,
   getUpgradeDefinition,
@@ -53,6 +54,7 @@ const STAT_META: Record<LocaleKey, Record<string, string>> = {
     "stats.bpc": "Ertrag pro Klick",
     "stats.total": "Lebenszeit-Ernte",
     "stats.seeds": "Prestige-Waehrung",
+    "stats.seedRate": "60-Minuten-Fenster",
     "stats.prestigeMult": "Aktiver Bonus",
   },
   en: {
@@ -61,6 +63,7 @@ const STAT_META: Record<LocaleKey, Record<string, string>> = {
     "stats.bpc": "Yield per click",
     "stats.total": "Lifetime harvest",
     "stats.seeds": "Prestige currency",
+    "stats.seedRate": "60-minute window",
     "stats.prestigeMult": "Active boost",
   },
 };
@@ -69,6 +72,15 @@ const ABILITY_ICON_MAP: Record<AbilityId, string> = {
   overdrive: "icons/abilities/ability-overdrive.png",
   burst: "icons/abilities/ability-burst.png",
 };
+
+function formatSeedRate(locale: LocaleKey, rate: number): string {
+  const safe = Number.isFinite(rate) ? rate : 0;
+  const options: Intl.NumberFormatOptions =
+    safe > 0 && safe < 10
+      ? { minimumFractionDigits: 1, maximumFractionDigits: 1 }
+      : { maximumFractionDigits: 0 };
+  return new Intl.NumberFormat(locale, options).format(safe);
+}
 
 function formatTierBonus(locale: LocaleKey, value: number): string {
   return new Intl.NumberFormat(locale, {
@@ -153,6 +165,7 @@ interface UIRefs {
   bpc: HTMLElement;
   total: HTMLElement;
   seeds: HTMLElement;
+  seedRate: HTMLElement;
   prestigeMult: HTMLElement;
   seedBadge: HTMLButtonElement;
   seedBadgeValue: HTMLElement;
@@ -290,13 +303,32 @@ interface RandomEventDefinition {
   id: EventId;
   icon: string;
   labelKey: string;
+  weight: number;
 }
 
 const EVENT_DEFINITIONS: readonly RandomEventDefinition[] = [
-  { id: "golden_bud", icon: "icons/events/golden_bud.png", labelKey: "events.goldenBud.name" },
-  { id: "seed_pack", icon: "icons/events/seed_pack.png", labelKey: "events.seedPack.name" },
-  { id: "lucky_joint", icon: "icons/events/lucky_joint.png", labelKey: "events.luckyJoint.name" },
+  { id: "golden_bud", icon: "icons/events/golden_bud.png", labelKey: "events.goldenBud.name", weight: 1 },
+  { id: "seed_pack", icon: "icons/events/seed_pack.png", labelKey: "events.seedPack.name", weight: 0.6 },
+  { id: "lucky_joint", icon: "icons/events/lucky_joint.png", labelKey: "events.luckyJoint.name", weight: 1 },
 ];
+
+function pickRandomEventDefinition(): RandomEventDefinition {
+  const totalWeight = EVENT_DEFINITIONS.reduce((sum, def) => sum + def.weight, 0);
+  if (totalWeight <= 0) {
+    return EVENT_DEFINITIONS[Math.floor(Math.random() * EVENT_DEFINITIONS.length)];
+  }
+
+  const roll = Math.random() * totalWeight;
+  let accumulator = 0;
+  for (const definition of EVENT_DEFINITIONS) {
+    accumulator += definition.weight;
+    if (roll < accumulator) {
+      return definition;
+    }
+  }
+
+  return EVENT_DEFINITIONS[EVENT_DEFINITIONS.length - 1];
+}
 
 const EVENT_SPAWN_MIN_MS = 10_000;
 const EVENT_SPAWN_MAX_MS = 20_000;
@@ -339,6 +371,7 @@ export function renderUI(state: GameState): void {
 
   updateStrings(state);
   updateStats(state);
+  processSeedNotifications(state);
   updateAbilities(state);
   updateSidePanel();
   updateShop(state);
@@ -348,6 +381,41 @@ export function renderUI(state: GameState): void {
   updateAchievements(state);
   updatePrestigeModal(state);
   updateOfflineToast(state);
+}
+
+function processSeedNotifications(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const queue = state.temp.seedNotifications;
+  if (!Array.isArray(queue) || queue.length === 0) {
+    return;
+  }
+
+  const badge = refs.seedBadge;
+  while (queue.length > 0) {
+    const notification = queue.shift();
+    if (!notification || notification.seeds <= 0) {
+      continue;
+    }
+
+    const seedsText = formatInteger(state.locale, notification.seeds);
+    spawnFloatingValue(badge, `+${seedsText}🌱`, "rgb(252 211 77)");
+
+    if (notification.type === "synergy") {
+      const name = t(state.locale, `seeds.synergy.${notification.id}`);
+      showToast(
+        t(state.locale, "seeds.toast.synergy.title"),
+        t(state.locale, "seeds.toast.synergy.body", { name, seeds: seedsText }),
+      );
+    } else if (notification.type === "passive") {
+      showToast(
+        t(state.locale, "seeds.toast.passive.title"),
+        t(state.locale, "seeds.toast.passive.body", { seeds: seedsText }),
+      );
+    }
+  }
 }
 
 function buildUI(state: GameState): UIRefs {
@@ -401,6 +469,7 @@ function buildUI(state: GameState): UIRefs {
 
   const totalStat = createStatBlock("stats.total", infoList, statsLabels, statsMeta);
   const seedsStat = createStatBlock("stats.seeds", infoList, statsLabels, statsMeta);
+  const seedRateStat = createStatBlock("stats.seedRate", infoList, statsLabels, statsMeta);
   const prestigeStat = createStatBlock(
     "stats.prestigeMult",
     infoList,
@@ -517,6 +586,7 @@ function buildUI(state: GameState): UIRefs {
     bpc: bpcStat,
     total: totalStat,
     seeds: seedsStat,
+    seedRate: seedRateStat,
     prestigeMult: prestigeStat,
     seedBadge,
     seedBadgeValue,
@@ -586,8 +656,17 @@ function mountHeader(
 function setupInteractions(refs: UIRefs, state: GameState): void {
   refs.clickButton.addEventListener("click", () => {
     const gained = handleManualClick(state);
+    const seedResult = maybeRollClickSeed(state);
     audio.playClick();
     spawnFloatingValue(refs.clickButton, `+${formatDecimal(gained)}`);
+    if (seedResult.gained > 0) {
+      const seedsText = formatInteger(state.locale, seedResult.gained);
+      spawnFloatingValue(refs.seedBadge, `+${seedsText}🌱`, "rgb(252 211 77)");
+      showToast(
+        t(state.locale, "seeds.toast.click.title"),
+        t(state.locale, "seeds.toast.click.body", { seeds: seedsText }),
+      );
+    }
     announce(refs, state.buds);
     renderUI(state);
   });
@@ -789,7 +868,11 @@ function updateStrings(state: GameState): void {
   });
 
   refs.statsMeta.forEach((meta, key) => {
-    meta.textContent = STAT_META[state.locale]?.[key] ?? "";
+    if (key === "stats.seedRate") {
+      meta.textContent = t(state.locale, "stats.seedRate.metaNoPassive");
+    } else {
+      meta.textContent = STAT_META[state.locale]?.[key] ?? "";
+    }
   });
 
   refs.abilityTitle.textContent = t(state.locale, "abilities.title");
@@ -911,9 +994,32 @@ function updateStats(state: GameState): void {
   refs.bpc.textContent = formatDecimal(state.bpc);
   refs.total.textContent = formatDecimal(state.total);
   refs.seeds.textContent = formatDecimal(state.prestige.seeds);
+  const seedRateValue = formatSeedRate(state.locale, state.temp.seedRatePerHour ?? 0);
+  refs.seedRate.textContent = seedRateValue;
   refs.prestigeMult.textContent = `${state.prestige.mult.toFixed(2)}\u00D7`;
 
   refs.seedBadgeValue.textContent = formatDecimal(state.prestige.seeds);
+  const seedRateMeta = refs.statsMeta.get("stats.seedRate");
+  if (seedRateMeta) {
+    if (state.temp.seedPassiveThrottled) {
+      const capText = formatSeedRate(state.locale, state.temp.seedRateCap ?? 0);
+      seedRateMeta.textContent = t(state.locale, "stats.seedRate.throttled", { cap: capText });
+    } else if (state.temp.seedPassiveConfig) {
+      const config = state.temp.seedPassiveConfig;
+      const progress = Math.round(Math.max(0, Math.min(1, state.temp.seedPassiveProgress ?? 0)) * 100);
+      const chance = Math.round(Math.max(0, Math.min(1, config.chance)) * 100);
+      const minutes = Math.max(1, Math.round(config.intervalMs / 60000));
+      const seeds = formatInteger(state.locale, config.seeds);
+      seedRateMeta.textContent = t(state.locale, "stats.seedRate.metaPassive", {
+        progress,
+        chance,
+        minutes,
+        seeds,
+      });
+    } else {
+      seedRateMeta.textContent = t(state.locale, "stats.seedRate.metaNoPassive");
+    }
+  }
   const canPrestige = preview.requirementMet;
   const badgeTooltip = canPrestige
     ? t(state.locale, 'prestige.badge.tooltip', {
@@ -1724,6 +1830,23 @@ function formatResearchEffect(locale: LocaleKey, effect: ResearchEffect): string
     }
     case 'STRAIN_CHOICE':
       return '';
+    case 'SEED_CLICK_BONUS': {
+      const percent = Math.round((effect.v ?? 0) * 100);
+      return t(locale, 'research.effect.seedClick', { value: percent });
+    }
+    case 'SEED_PASSIVE': {
+      if (effect.seedPassive) {
+        const minutes = Math.round(effect.seedPassive.intervalMinutes);
+        const chance = Math.round(effect.seedPassive.chance * 100);
+        const seeds = Math.max(1, Math.floor(effect.seedPassive.seeds));
+        return t(locale, 'research.effect.seedPassive', {
+          minutes,
+          chance,
+          seeds,
+        });
+      }
+      return '';
+    }
     default:
       return '';
   }
@@ -1917,7 +2040,7 @@ function spawnRandomEvent(state: GameState): void {
     return;
   }
 
-  const definition = EVENT_DEFINITIONS[Math.floor(Math.random() * EVENT_DEFINITIONS.length)];
+  const definition = pickRandomEventDefinition();
   const lifetime = randomBetween(EVENT_VISIBLE_MIN_MS, EVENT_VISIBLE_MAX_MS);
   const path = computeEventPath(rect, lifetime);
 
@@ -2004,17 +2127,25 @@ function showEventFeedback(
       t(state.locale, "events.goldenBud.title"),
       t(state.locale, "events.goldenBud.body", { buds: formatted }),
     );
-    return;
   }
 
-  if (id === "seed_pack" && typeof result.seedGain === "number") {
+  if (typeof result.seedGain === "number" && result.seedGain > 0) {
     const formatted = result.seedGain.toString();
     spawnFloatingValue(origin, `+${formatted}🌱`, "rgb(252 211 77)");
+
+    let messageKey: string;
+    if (id === "seed_pack") {
+      messageKey = "events.seedPack.body";
+    } else if (id === "golden_bud") {
+      messageKey = "events.goldenBud.seedBody";
+    } else {
+      messageKey = "events.luckyJoint.seedBody";
+    }
+
     showToast(
-      t(state.locale, "events.seedPack.title"),
-      t(state.locale, "events.seedPack.body", { seeds: formatted }),
+      t(state.locale, `events.${id}.title`),
+      t(state.locale, messageKey, { seeds: formatted }),
     );
-    return;
   }
 
   if (id === "lucky_joint" && result.multiplier) {
@@ -2404,6 +2535,7 @@ function getStatIcon(key: string): string {
     "stats.bpc": "icons/ui/ui-stat-bpc.png",
     "stats.total": "icons/ui/ui-stat-total.png",
     "stats.seeds": "icons/ui/ui-seed.png",
+    "stats.seedRate": "icons/ui/ui-seed.png",
     "stats.prestigeMult": "icons/ui/ui-prestige-mult.png",
   };
   return iconMap[key] || "icons/ui/icon-leaf-click.png";
@@ -2441,12 +2573,16 @@ function createCompactStatBlock(
   value.className = "stat-item__value";
   value.textContent = "0";
 
-  contentDiv.append(label, value);
+  const metaLine = document.createElement("div");
+  metaLine.className = "stat-item__meta";
+  metaLine.textContent = "";
+
+  contentDiv.append(label, value, metaLine);
   wrapper.append(iconWrap, contentDiv);
   container.appendChild(wrapper);
 
   labels.set(key, label);
-  meta.set(key, value); // Using value as the primary display element
+  meta.set(key, metaLine);
 
   return value;
 }

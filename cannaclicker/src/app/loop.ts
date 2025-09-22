@@ -5,6 +5,7 @@ import { recalcDerivedValues } from './game';
 import { runAutoBuy, AUTO_BUY_INTERVAL_SECONDS } from './autobuy';
 import { clearExpiredEventBoost } from './events';
 import { clearExpiredKickstart } from './milestones';
+import { processSeedSystems } from './seeds';
 
 interface LoopOptions {
   autosaveSeconds?: number;
@@ -73,6 +74,8 @@ export function startLoop(
     if (abilityChanged || eventEnded || kickstartExpired) {
       recalcDerivedValues(state);
     }
+
+    processSeedSystems(state, delta, now);
 
     accumulator += delta;
     autosaveTimer += delta;

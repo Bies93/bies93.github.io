@@ -9,6 +9,7 @@ import type { GameState } from "./state";
 import { computePrestigeMultiplier } from "./prestige";
 import { applyEffects } from "../game/effects";
 import { reapplyAbilityEffects } from "./abilities";
+import { recordInteraction } from "./seeds";
 
 export type ResearchFilter = "all" | "available" | "owned";
 
@@ -126,6 +127,7 @@ export function purchaseResearch(state: GameState, id: string): boolean {
   }
 
   state.researchOwned = [...state.researchOwned, node.id];
+  recordInteraction(state);
   applyResearchEffects(state);
   return true;
 }

@@ -14,6 +14,7 @@ import {
   type AutomationState,
   type MetaState,
   type KickstartState,
+  type SeedGainEntry,
   AUTO_BUY_ROI_MIN,
   AUTO_BUY_ROI_MAX,
   AUTO_BUY_RESERVE_MIN,
@@ -53,9 +54,20 @@ interface PersistedPrestigeState {
   kickstart?: PersistedKickstartState | null;
 }
 
+interface PersistedSeedEntry {
+  time?: number;
+  amount?: number;
+  source?: string;
+}
+
 interface PersistedMetaState {
   lastSeenAt?: number;
   lastBpsAtSave?: number;
+  seedHistory?: PersistedSeedEntry[];
+  seedSynergyClaims?: Record<string, boolean>;
+  lastInteractionAt?: number;
+  seedPassiveIdleMs?: number;
+  seedPassiveRollsDone?: number;
 }
 
 export interface PersistedStateV1Legacy {
@@ -157,23 +169,35 @@ export interface PersistedStateV5 extends PersistedStateBase {
 }
 
 export interface PersistedStateV6 extends PersistedStateBase {
+  v: 6;
+}
+
+export interface PersistedStateV7 extends PersistedStateBase {
   v: typeof SAVE_VERSION;
 }
 
 function normalisePersistedState(
-  data: PersistedStateV2 | PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6,
-): PersistedStateV6 {
+  data:
+    | PersistedStateV2
+    | PersistedStateV3
+    | PersistedStateV4
+    | PersistedStateV5
+    | PersistedStateV6
+    | PersistedStateV7,
+): PersistedStateV7 {
   const now = Date.now();
   const prestige = data.prestige ?? {};
   const preferences = normalisePreferences(
-    (data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6).preferences,
+    (data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6 | PersistedStateV7).preferences,
   );
   const automation = normaliseAutomation(
-    (data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6).automation,
+    (data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6 | PersistedStateV7).automation,
   );
-  const settings = normaliseSettings((data as PersistedStateV4 | PersistedStateV5 | PersistedStateV6).settings);
+  const settings = normaliseSettings(
+    (data as PersistedStateV4 | PersistedStateV5 | PersistedStateV6 | PersistedStateV7).settings,
+  );
   const meta = normaliseMeta(
-    (data as PersistedStateV4 | PersistedStateV5 | PersistedStateV6).meta,
+    (data as PersistedStateV4 | PersistedStateV5 | PersistedStateV6 | PersistedStateV7).meta,
     (data as any).lastSeenAt,
     now,
   );
@@ -210,7 +234,7 @@ function normalisePersistedState(
     automation,
     settings,
     meta,
-  } satisfies PersistedStateV6;
+  } satisfies PersistedStateV7;
 }
 function normalisePersistedAbilities(
   abilities?: Record<string, PersistedAbilityState>,
@@ -287,9 +311,52 @@ function normaliseMeta(meta: PersistedMetaState | undefined, fallbackLastSeen: n
   const safeLastSeen = lastSeen > 0 ? Math.floor(lastSeen) : now;
   const lastBps = Number.isFinite(meta?.lastBpsAtSave) ? Number(meta!.lastBpsAtSave) : 0;
 
+  const rawHistory = Array.isArray(meta?.seedHistory) ? meta!.seedHistory : [];
+  const history: SeedGainEntry[] = rawHistory
+    .map((entry) => {
+      const time = Number.isFinite(entry?.time) ? Math.floor(entry!.time!) : 0;
+      const amount = Number.isFinite(entry?.amount) ? Math.floor(entry!.amount!) : 0;
+      const source = entry?.source;
+      if (time <= 0 || amount <= 0) {
+        return null;
+      }
+      const safeSource =
+        source === 'event' || source === 'click' || source === 'synergy' || source === 'passive'
+          ? source
+          : 'event';
+      return { time, amount, source: safeSource } satisfies SeedGainEntry;
+    })
+    .filter((entry): entry is SeedGainEntry => !!entry);
+
+  const trimmedHistory = history.slice(-200);
+
+  const synergyClaims: Record<string, boolean> = {};
+  if (meta?.seedSynergyClaims) {
+    for (const [key, value] of Object.entries(meta.seedSynergyClaims)) {
+      if (typeof value === 'boolean') {
+        synergyClaims[key] = value;
+      }
+    }
+  }
+
+  const lastInteraction = Number.isFinite(meta?.lastInteractionAt)
+    ? Math.max(0, Math.floor(meta!.lastInteractionAt!))
+    : safeLastSeen;
+  const idleMs = Number.isFinite(meta?.seedPassiveIdleMs)
+    ? Math.max(0, Math.floor(meta!.seedPassiveIdleMs!))
+    : 0;
+  const rollsDone = Number.isFinite(meta?.seedPassiveRollsDone)
+    ? Math.max(0, Math.floor(meta!.seedPassiveRollsDone!))
+    : 0;
+
   return {
     lastSeenAt: safeLastSeen,
     lastBpsAtSave: lastBps >= 0 ? lastBps : 0,
+    seedHistory: trimmedHistory,
+    seedSynergyClaims: synergyClaims,
+    lastInteractionAt: lastInteraction,
+    seedPassiveIdleMs: idleMs,
+    seedPassiveRollsDone: rollsDone,
   } satisfies MetaState;
 }
 
@@ -340,7 +407,7 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
   return Math.min(max, Math.max(min, Math.round(value)));
 }
 
-function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV6 {
+function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV7 {
   const now = Date.now();
   return normalisePersistedState({
     v: SAVE_VERSION,
@@ -468,7 +535,7 @@ export function migrate(): void {
   }
 }
 
-export function load(): PersistedStateV6 | null {
+export function load(): PersistedStateV7 | null {
   try {
     const raw = window.localStorage.getItem(SAVE_KEY);
     if (!raw) {
@@ -476,6 +543,8 @@ export function load(): PersistedStateV6 | null {
     }
 
     const parsed = JSON.parse(raw) as
+      | PersistedStateV7
+      | PersistedStateV6
       | PersistedStateV5
       | PersistedStateV4
       | PersistedStateV3
@@ -487,17 +556,25 @@ export function load(): PersistedStateV6 | null {
     }
 
     if (parsed.v === SAVE_VERSION) {
-      return normalisePersistedState(parsed as PersistedStateV6);
+      const normalised = normalisePersistedState(parsed as PersistedStateV7);
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(normalised));
+      return normalised;
     }
 
-    if (parsed.v === 4) {
-      const upgraded = normalisePersistedState(parsed as PersistedStateV4);
+    if (parsed.v === 6) {
+      const upgraded = normalisePersistedState(parsed as PersistedStateV6);
       window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
       return upgraded;
     }
 
     if (parsed.v === 5) {
       const upgraded = normalisePersistedState(parsed as PersistedStateV5);
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
+      return upgraded;
+    }
+
+    if (parsed.v === 4) {
+      const upgraded = normalisePersistedState(parsed as PersistedStateV4);
       window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
       return upgraded;
     }
@@ -527,7 +604,7 @@ export function load(): PersistedStateV6 | null {
   }
 }
 
-export function initState(saved: PersistedStateV6 | null): GameState {
+export function initState(saved: PersistedStateV7 | null): GameState {
   if (!saved) {
     return createDefaultState({
       locale: detectLocale(),
@@ -547,7 +624,27 @@ export function initState(saved: PersistedStateV6 | null): GameState {
   const metaBps = Number.isFinite(saved.meta?.lastBpsAtSave) && saved.meta!.lastBpsAtSave >= 0
     ? saved.meta!.lastBpsAtSave
     : 0;
-  const initialMeta: MetaState = { lastSeenAt: safeLastSeen, lastBpsAtSave: metaBps };
+  const seedHistory = Array.isArray(saved.meta?.seedHistory) ? [...saved.meta.seedHistory] : [];
+  const seedSynergyClaims = saved.meta?.seedSynergyClaims ? { ...saved.meta.seedSynergyClaims } : {};
+  const lastInteraction = Number.isFinite(saved.meta?.lastInteractionAt)
+    ? Math.max(0, Math.floor(saved.meta!.lastInteractionAt!))
+    : safeLastSeen;
+  const idleMs = Number.isFinite(saved.meta?.seedPassiveIdleMs)
+    ? Math.max(0, Math.floor(saved.meta!.seedPassiveIdleMs!))
+    : 0;
+  const rollsDone = Number.isFinite(saved.meta?.seedPassiveRollsDone)
+    ? Math.max(0, Math.floor(saved.meta!.seedPassiveRollsDone!))
+    : 0;
+
+  const initialMeta: MetaState = {
+    lastSeenAt: safeLastSeen,
+    lastBpsAtSave: metaBps,
+    seedHistory,
+    seedSynergyClaims,
+    lastInteractionAt: lastInteraction,
+    seedPassiveIdleMs: idleMs,
+    seedPassiveRollsDone: rollsDone,
+  } satisfies MetaState;
 
   const state = createDefaultState({
     v: SAVE_VERSION,
@@ -629,7 +726,7 @@ export function save(state: GameState): void {
   state.meta.lastSeenAt = timestamp;
   state.meta.lastBpsAtSave = safeBps;
 
-  const payload: PersistedStateV6 = {
+  const payload: PersistedStateV7 = {
     v: SAVE_VERSION,
     buds: state.buds.toString(),
     total: state.total.toString(),
@@ -659,8 +756,13 @@ export function save(state: GameState): void {
     meta: {
       lastSeenAt: state.meta.lastSeenAt,
       lastBpsAtSave: state.meta.lastBpsAtSave,
+      seedHistory: state.meta.seedHistory.slice(-200),
+      seedSynergyClaims: state.meta.seedSynergyClaims,
+      lastInteractionAt: state.meta.lastInteractionAt,
+      seedPassiveIdleMs: state.meta.seedPassiveIdleMs,
+      seedPassiveRollsDone: state.meta.seedPassiveRollsDone,
     },
-  } satisfies PersistedStateV6;
+  } satisfies PersistedStateV7;
 
   window.localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
 }
@@ -674,7 +776,7 @@ export function exportSave(state: GameState): string {
   state.meta.lastSeenAt = timestamp;
   state.meta.lastBpsAtSave = safeBps;
 
-  const payload: PersistedStateV6 = {
+  const payload: PersistedStateV7 = {
     v: SAVE_VERSION,
     buds: state.buds.toString(),
     total: state.total.toString(),
@@ -704,8 +806,13 @@ export function exportSave(state: GameState): string {
     meta: {
       lastSeenAt: state.meta.lastSeenAt,
       lastBpsAtSave: state.meta.lastBpsAtSave,
+      seedHistory: state.meta.seedHistory.slice(-200),
+      seedSynergyClaims: state.meta.seedSynergyClaims,
+      lastInteractionAt: state.meta.lastInteractionAt,
+      seedPassiveIdleMs: state.meta.seedPassiveIdleMs,
+      seedPassiveRollsDone: state.meta.seedPassiveRollsDone,
     },
-  } satisfies PersistedStateV6;
+  } satisfies PersistedStateV7;
 
   const json = JSON.stringify(payload);
   return btoa(unescape(encodeURIComponent(json)));
@@ -714,6 +821,7 @@ export function exportSave(state: GameState): string {
 export function importSave(encoded: string): GameState {
   const decoded = decodeURIComponent(escape(atob(encoded.trim())));
   const parsed = JSON.parse(decoded) as
+    | PersistedStateV7
     | PersistedStateV6
     | PersistedStateV5
     | PersistedStateV4
@@ -725,7 +833,7 @@ export function importSave(encoded: string): GameState {
     throw new Error('Unbekanntes Save-Format');
   }
 
-  let normalised: PersistedStateV6;
+  let normalised: PersistedStateV7;
   if (parsed.v === 1) {
     normalised = upgradeFromLegacy(parsed as PersistedStateV1Legacy);
   } else if (parsed.v === 2) {
@@ -736,8 +844,10 @@ export function importSave(encoded: string): GameState {
     normalised = normalisePersistedState(parsed as PersistedStateV4);
   } else if (parsed.v === 5) {
     normalised = normalisePersistedState(parsed as PersistedStateV5);
-  } else if (parsed.v === SAVE_VERSION) {
+  } else if (parsed.v === 6) {
     normalised = normalisePersistedState(parsed as PersistedStateV6);
+  } else if (parsed.v === SAVE_VERSION) {
+    normalised = normalisePersistedState(parsed as PersistedStateV7);
   } else {
     throw new Error('Unbekannte Save-Version');
   }

@@ -88,5 +88,5 @@ export function runAutoBuy(state: GameState): boolean {
     return false;
   }
 
-  return buyItem(state, target.definition.id, 1);
+  return buyItem(state, target.definition.id, 1, 'auto');
 }
