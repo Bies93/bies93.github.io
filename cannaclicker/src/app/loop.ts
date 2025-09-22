@@ -3,6 +3,7 @@ import type { GameState } from './state';
 import { updateAbilityTimers } from './abilities';
 import { recalcDerivedValues } from './game';
 import { runAutoBuy, AUTO_BUY_INTERVAL_SECONDS } from './autobuy';
+import { updateEventTimers } from './events';
 
 interface LoopOptions {
   autosaveSeconds?: number;
@@ -58,7 +59,8 @@ export function startLoop(
     }
 
     const abilityChanged = updateAbilityTimers(state, now);
-    if (abilityChanged) {
+    const eventEffectChanged = updateEventTimers(state, now);
+    if (abilityChanged || eventEffectChanged) {
       recalcDerivedValues(state);
     }
 

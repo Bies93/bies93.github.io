@@ -8,6 +8,23 @@ export type DecimalLike = Decimal | number | string | null | undefined;
 
 export type AbilityId = "overdrive" | "burst";
 
+export type RandomEventId = "goldenBud" | "seedPack" | "luckyJoint";
+
+export interface ActiveEventState {
+  id: RandomEventId;
+  spawnedAt: number;
+  expiresAt: number;
+  x: number;
+  y: number;
+}
+
+export interface EventEffectState {
+  id: RandomEventId;
+  expiresAt: number;
+  bpsMultiplier: Decimal;
+  bpcMultiplier: Decimal;
+}
+
 export interface AbilityRuntimeState {
   active: boolean;
   endsAt: number;
@@ -37,6 +54,11 @@ export interface TempState {
   offlineDuration: number;
   buildingBaseMultipliers: Record<string, Decimal>;
   buildingTierMultipliers: Record<string, Decimal>;
+  eventBpsMult: Decimal;
+  eventBpcMult: Decimal;
+  activeEvent: ActiveEventState | null;
+  nextEventAt: number;
+  eventEffect: EventEffectState | null;
 }
 
 export type ShopSortMode = "price" | "bps" | "roi";
@@ -168,6 +190,11 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       offlineDuration: 0,
       buildingBaseMultipliers: {},
       buildingTierMultipliers: {},
+      eventBpsMult: new Decimal(1),
+      eventBpcMult: new Decimal(1),
+      activeEvent: null,
+      nextEventAt: now + 10000,
+      eventEffect: null,
     },
     ...partial,
   } satisfies GameState;

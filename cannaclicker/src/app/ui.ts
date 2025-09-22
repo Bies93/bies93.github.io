@@ -7,12 +7,13 @@ import {
 } from "./game";
 import { getShopEntries, getMaxAffordable, formatRoi, type ShopEntry } from "./shop";
 import { formatDecimal } from "./math";
-import type { AbilityId, GameState } from "./state";
+import type { AbilityId, GameState, RandomEventId } from "./state";
 import { createDefaultState } from "./state";
 import { createAudioManager } from "./audio";
 import { t, type LocaleKey } from "./i18n";
 import { exportSave, importSave, clearSave, save } from "./save";
 import { spawnFloatingValue } from "./effects";
+import { claimEvent, getEventDefinition, type EventReward } from "./events";
 import { asset } from "./assets";
 import { withBase } from "./paths";
 import { itemById } from "../data/items";
@@ -147,6 +148,7 @@ interface UIRefs {
   shopEntries: Map<string, ShopCardRefs>;
   prestigeModal: PrestigeModalRefs;
   toastContainer: HTMLElement;
+  eventLayer: HTMLElement;
 }
 
 interface ShopCardRefs {
@@ -278,6 +280,7 @@ export function renderUI(state: GameState): void {
   updateAchievements(state);
   updatePrestigeModal(state);
   updateOfflineToast(state);
+  updateEventOverlay(state);
 }
 
 function buildUI(state: GameState): UIRefs {
@@ -289,6 +292,7 @@ function buildUI(state: GameState): UIRefs {
   root.innerHTML = "";
   root.className =
     "mx-auto flex w-full max-w-[92rem] flex-col gap-6 px-4 pb-8 pt-4 sm:px-6 lg:px-10";
+  root.style.position = "relative";
 
   const heroImageSet = `image-set(url("${withBase("img/bg-hero-1920.png")}") type("image/png") 1x, url("${withBase("img/bg-hero-2560.png")}") type("image/png") 2x)`;
   document.documentElement.style.setProperty("--hero-image", heroImageSet);
@@ -355,6 +359,10 @@ function buildUI(state: GameState): UIRefs {
   seedBadge.append(seedIcon, seedBadgeValue);
   infoActions.appendChild(seedBadge);
   root.append(infoRibbon, layout);
+
+  const eventLayer = document.createElement("div");
+  eventLayer.className = "event-layer";
+  root.appendChild(eventLayer);
 
   const clickCard = document.createElement("section");
   clickCard.className = "card fade-in click-card";
@@ -462,6 +470,7 @@ function buildUI(state: GameState): UIRefs {
     shopEntries: new Map(),
     prestigeModal,
     toastContainer,
+    eventLayer,
   };
 
   setupInteractions(uiRefs, state);
@@ -513,6 +522,33 @@ function setupInteractions(refs: UIRefs, state: GameState): void {
     audio.playClick();
     spawnFloatingValue(refs.clickButton, `+${formatDecimal(gained)}`);
     announce(refs, state.buds);
+    renderUI(state);
+  });
+
+  refs.eventLayer.addEventListener("click", (event) => {
+    const target = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-event-id]");
+    if (!target) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const eventId = target.dataset.eventId as RandomEventId | undefined;
+    if (!eventId) {
+      return;
+    }
+
+    const reward = claimEvent(state, eventId);
+    if (!reward) {
+      return;
+    }
+
+    if (reward.requiresRecalc) {
+      recalcDerivedValues(state);
+    }
+
+    handleEventReward(target, reward, state);
     renderUI(state);
   });
 
@@ -1369,6 +1405,70 @@ function updateOfflineToast(state: GameState): void {
   }
 }
 
+function updateEventOverlay(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const container = refs.eventLayer;
+  const active = state.temp.activeEvent;
+  const existing = container.querySelector<HTMLButtonElement>("[data-event-id]");
+
+  if (!active) {
+    existing?.remove();
+    return;
+  }
+
+  let element = existing;
+  const definition = getEventDefinition(active.id);
+
+  if (!element || element.dataset.eventId !== active.id) {
+    element?.remove();
+    element = document.createElement("button");
+    element.type = "button";
+    element.className = "event-icon";
+    element.dataset.eventId = active.id;
+    const img = new Image();
+    img.decoding = "async";
+    img.alt = "";
+    img.className = "event-icon__img";
+    img.src = withBase(definition.icon);
+    element.appendChild(img);
+    container.appendChild(element);
+  }
+
+  if (!element) {
+    return;
+  }
+
+  const label = t(state.locale, definition.labelKey);
+  element.dataset.eventId = active.id;
+  element.setAttribute("aria-label", label);
+  element.setAttribute("title", label);
+
+  const img = element.querySelector<HTMLImageElement>(".event-icon__img");
+  const icon = withBase(definition.icon);
+  if (img && img.src !== icon) {
+    img.src = icon;
+  }
+
+  if (!element.dataset.floatOffset) {
+    const offset = (Math.random() * 16 - 8).toFixed(2);
+    element.dataset.floatOffset = offset;
+    element.style.setProperty("--event-float-offset", `${offset}px`);
+  }
+
+  element.dataset.spawnedAt = String(active.spawnedAt);
+  element.dataset.expiresAt = String(active.expiresAt);
+  element.style.left = `${(active.x * 100).toFixed(2)}%`;
+  element.style.top = `${(active.y * 100).toFixed(2)}%`;
+
+  const lifetime = active.expiresAt - active.spawnedAt;
+  const remaining = Math.max(0, active.expiresAt - Date.now());
+  const progress = lifetime > 0 ? remaining / lifetime : 0;
+  element.style.setProperty("--event-progress", progress.toFixed(3));
+}
+
 function showToast(title: string, message: string): void {
   if (!refs) {
     return;
@@ -2034,6 +2134,38 @@ function createModalStat(wrapper: HTMLElement): { label: HTMLElement; value: HTM
   wrapper.appendChild(row);
 
   return { label, value };
+}
+
+function handleEventReward(target: HTMLElement, reward: EventReward, state: GameState): void {
+  const definition = getEventDefinition(reward.id);
+  const title = t(state.locale, definition.toastTitleKey);
+
+  if (reward.type === "buds" && reward.budGain) {
+    const formatted = formatDecimal(reward.budGain);
+    spawnFloatingValue(target, `+${formatted}`);
+    const message = t(state.locale, definition.toastBodyKey, { buds: formatted });
+    showToast(title, message);
+    return;
+  }
+
+  if (reward.type === "seeds" && reward.seedGain) {
+    const formatted = `${reward.seedGain}`;
+    const label = t(state.locale, "stats.seeds");
+    spawnFloatingValue(target, `+${formatted} ${label}`, "rgb(251 191 36)");
+    const message = t(state.locale, definition.toastBodyKey, { seeds: formatted });
+    showToast(title, message);
+    return;
+  }
+
+  if (reward.type === "multiplier" && reward.multiplier) {
+    const durationSeconds = reward.durationMs ? Math.round(reward.durationMs / 1000) : 0;
+    spawnFloatingValue(target, `×${reward.multiplier.toFixed(1)}`, "rgb(129 140 248)");
+    const message = t(state.locale, definition.toastBodyKey, {
+      multiplier: reward.multiplier.toFixed(1),
+      duration: durationSeconds,
+    });
+    showToast(title, message);
+  }
 }
 
 function announce(refs: UIRefs, total: Decimal): void {
