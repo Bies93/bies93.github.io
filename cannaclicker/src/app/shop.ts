@@ -17,6 +17,7 @@ export interface ShopEntry {
   unlocked: boolean;
   affordable: boolean;
   tier: TierInfo;
+  softcap: SoftcapInfo;
   order: number;
 }
 
@@ -30,6 +31,13 @@ export interface TierInfo {
   bonus: number;
   softcapTier?: number;
   softcapMult?: number;
+}
+
+export interface SoftcapInfo {
+  active: boolean;
+  stacks: number;
+  multiplier: Decimal;
+  nextThreshold: number | null;
 }
 
 interface TierConfig {
@@ -74,6 +82,42 @@ export function getTierMultiplier(definition: ItemDefinition, owned: number): De
   return new Decimal(multiplier);
 }
 
+function getSoftcapStacks(definition: ItemDefinition, owned: number): number {
+  const copies = Number.isFinite(owned) && owned > 0 ? Math.floor(owned) : 0;
+  const step = definition.softcapCopies ?? 0;
+  if (!step || step <= 0) {
+    return 0;
+  }
+  return Math.max(0, Math.floor(copies / step));
+}
+
+export function getSoftcapMultiplier(definition: ItemDefinition, owned: number): Decimal {
+  const penalty = definition.softcapPenalty;
+  if (!penalty || penalty <= 0 || penalty >= 1) {
+    return new Decimal(1);
+  }
+  const stacks = getSoftcapStacks(definition, owned);
+  if (stacks <= 0) {
+    return new Decimal(1);
+  }
+  return new Decimal(penalty).pow(stacks);
+}
+
+export function getSoftcapInfo(definition: ItemDefinition, owned: number): SoftcapInfo {
+  const multiplier = getSoftcapMultiplier(definition, owned);
+  const stacks = getSoftcapStacks(definition, owned);
+  const step = definition.softcapCopies ?? null;
+  const nextThreshold = step && step > 0 ? (stacks + 1) * step : null;
+  const active = stacks > 0 && multiplier.lessThan(1);
+
+  return {
+    active,
+    stacks,
+    multiplier,
+    nextThreshold,
+  } satisfies SoftcapInfo;
+}
+
 export function deltaBpsNextBuy(
   definition: ItemDefinition,
   owned: number,
@@ -82,8 +126,10 @@ export function deltaBpsNextBuy(
   const perUnitBase = new Decimal(definition.bps).mul(baseMultiplier);
   const currentMultiplier = getTierMultiplier(definition, owned);
   const nextMultiplier = getTierMultiplier(definition, owned + 1);
-  const totalNow = perUnitBase.mul(currentMultiplier).mul(owned);
-  const totalNext = perUnitBase.mul(nextMultiplier).mul(owned + 1);
+  const currentSoftcap = getSoftcapMultiplier(definition, owned);
+  const nextSoftcap = getSoftcapMultiplier(definition, owned + 1);
+  const totalNow = perUnitBase.mul(currentMultiplier).mul(currentSoftcap).mul(owned);
+  const totalNext = perUnitBase.mul(nextMultiplier).mul(nextSoftcap).mul(owned + 1);
   return totalNext.sub(totalNow);
 }
 
@@ -128,6 +174,7 @@ export function getShopEntries(state: GameState): ShopEntry[] {
     const owned = state.items[definition.id] ?? 0;
     const cost = getItemCost(definition, owned, state.temp.costMultiplier);
     const tier = getTierInfo(definition, owned);
+    const softcap = getSoftcapInfo(definition, owned);
     const baseMultiplier = state.temp.buildingBaseMultipliers[definition.id] ?? new Decimal(1);
     const deltaBase = deltaBpsNextBuy(definition, owned, baseMultiplier);
     const deltaBps = deltaBase.mul(state.temp.totalBpsMult);
@@ -143,6 +190,7 @@ export function getShopEntries(state: GameState): ShopEntry[] {
       unlocked: canUnlockItem(state, definition),
       affordable: state.buds.greaterThanOrEqualTo(cost),
       tier,
+      softcap,
       order: index,
     } satisfies ShopEntry;
   });

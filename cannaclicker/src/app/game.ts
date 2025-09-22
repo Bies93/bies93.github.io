@@ -2,7 +2,7 @@ import Decimal from 'break_infinity.js';
 import { itemById } from '../data/items';
 import { achievements } from '../data/achievements';
 import { upgrades } from '../data/upgrades';
-import { getItemCost, getTierMultiplier } from './shop';
+import { getItemCost, getTierMultiplier, getSoftcapMultiplier } from './shop';
 import type { GameState } from './state';
 import { sum, toDecimal } from './math';
 import { applyResearchEffects } from './research';
@@ -28,6 +28,7 @@ export function recalcDerivedValues(state: GameState): void {
     const owned = state.items[id] ?? 0;
     const baseMultiplier = buildingMultipliers.get(id) ?? new Decimal(1);
     const tierMultiplier = getTierMultiplier(definition, owned);
+    const softcapMultiplier = getSoftcapMultiplier(definition, owned);
     state.temp.buildingBaseMultipliers[id] = baseMultiplier;
     state.temp.buildingTierMultipliers[id] = tierMultiplier;
 
@@ -35,7 +36,7 @@ export function recalcDerivedValues(state: GameState): void {
       return new Decimal(0);
     }
 
-    const totalMultiplier = baseMultiplier.mul(tierMultiplier);
+    const totalMultiplier = baseMultiplier.mul(tierMultiplier).mul(softcapMultiplier);
     return new Decimal(definition.bps).mul(owned).mul(totalMultiplier);
   });
 

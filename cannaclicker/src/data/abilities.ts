@@ -1,6 +1,6 @@
 export type AbilityId = "overdrive" | "burst";
 
-export type Ability = {
+export interface Ability {
   id: AbilityId;
   nameKey: string;
   descriptionKey: string;
@@ -8,7 +8,7 @@ export type Ability = {
   cooldownSec: number;
   baseMultiplier: number;
   appliesTo: "bps" | "bpc";
-};
+}
 
 export const ABILITIES: Ability[] = [
   {

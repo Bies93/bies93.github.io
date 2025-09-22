@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Decimal from 'break_infinity.js';
 import {
   createDefaultState,
@@ -18,7 +19,7 @@ import {
   AUTO_BUY_RESERVE_MAX,
 } from './state';
 import { computePrestigeMultiplier } from './prestige';
-import { OFFLINE_CAP_MS } from './balance';
+import { OFFLINE_CAP_MS, OFFLINE_GAIN_RATIO } from './balance';
 import { applyResearchEffects } from './research';
 import { reapplyAbilityEffects } from './abilities';
 import { DEFAULT_LOCALE, resolveLocale, type LocaleKey } from './i18n';
@@ -492,7 +493,7 @@ export function initState(saved: PersistedStateV5 | null): GameState {
       : 0;
   const safeBps = baseBps >= 0 ? baseBps : 0;
   state.meta.lastBpsAtSave = safeBps;
-  const earnedNumber = Math.floor(safeBps * (cappedDelta / 1000));
+  const earnedNumber = Math.floor(safeBps * (cappedDelta / 1000) * OFFLINE_GAIN_RATIO);
 
   if (earnedNumber > 0) {
     const offlineGain = new Decimal(earnedNumber);
