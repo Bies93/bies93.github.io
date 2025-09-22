@@ -4,7 +4,25 @@ import { createDefaultSettings, type SettingsState } from "./settings";
 import { OFFLINE_CAP_MS } from "./balance";
 import type { MilestoneProgressSnapshot } from "./milestones";
 
-export const SAVE_VERSION = 6 as const;
+export const SAVE_VERSION = 7 as const;
+
+export type SeedGainSource = "event" | "click" | "synergy" | "passive";
+
+export interface SeedGainEntry {
+  time: number;
+  amount: number;
+  source: SeedGainSource;
+}
+
+export interface SeedPassiveConfig {
+  intervalMs: number;
+  chance: number;
+  seeds: number;
+}
+
+export type SeedNotification =
+  | { type: "synergy"; id: string; seeds: number }
+  | { type: "passive"; seeds: number };
 
 export type DecimalLike = Decimal | number | string | null | undefined;
 
@@ -70,6 +88,13 @@ export interface TempState {
   kickstartDurationMs: number;
   kickstartRemainingMs: number;
   kickstartEndsAt: number;
+  seedClickBonus: number;
+  seedPassiveConfig: SeedPassiveConfig | null;
+  seedPassiveThrottled: boolean;
+  seedPassiveProgress: number;
+  seedNotifications: SeedNotification[];
+  seedRatePerHour: number;
+  seedRateCap: number;
 }
 
 export type ShopSortMode = "price" | "bps" | "roi";
@@ -101,6 +126,11 @@ export interface AutomationState {
 export interface MetaState {
   lastSeenAt: number;
   lastBpsAtSave: number;
+  seedHistory: SeedGainEntry[];
+  seedSynergyClaims: Record<string, boolean>;
+  lastInteractionAt: number;
+  seedPassiveIdleMs: number;
+  seedPassiveRollsDone: number;
 }
 
 export const AUTO_BUY_ROI_MIN = 60;
@@ -161,6 +191,11 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
   const defaultAutomation = createDefaultAutomation();
   const defaultSettings = createDefaultSettings();
   const defaultMeta: MetaState = { lastSeenAt: now, lastBpsAtSave: 0 };
+  defaultMeta.seedHistory = [];
+  defaultMeta.seedSynergyClaims = {};
+  defaultMeta.lastInteractionAt = now;
+  defaultMeta.seedPassiveIdleMs = 0;
+  defaultMeta.seedPassiveRollsDone = 0;
 
   return {
     v: SAVE_VERSION,
@@ -227,6 +262,13 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       kickstartDurationMs: 0,
       kickstartRemainingMs: 0,
       kickstartEndsAt: 0,
+      seedClickBonus: 0,
+      seedPassiveConfig: null,
+      seedPassiveThrottled: false,
+      seedPassiveProgress: 0,
+      seedNotifications: [],
+      seedRatePerHour: 0,
+      seedRateCap: 0,
     },
     ...partial,
   } satisfies GameState;

@@ -1,6 +1,6 @@
 import Decimal from "break_infinity.js";
 import { OFFLINE_CAP_MS } from "../app/balance";
-import type { GameState } from "../app/state";
+import type { GameState, SeedPassiveConfig } from "../app/state";
 import { researchById, type ResearchEffect, type StrainId } from "../data/research";
 
 export function applyEffects(state: GameState, owned: string[]): void {
@@ -13,6 +13,9 @@ export function applyEffects(state: GameState, owned: string[]): void {
   let offlineCapBonusHours = 0;
   let hybridPerBuff = 0;
   let strainChoice: StrainId | null = null;
+  let seedClickBonus = 0;
+  let passiveConfig: SeedPassiveConfig | null = null;
+  let passiveScore = 0;
   const buildingMultipliers = new Map<string, Decimal>();
   const buildingCostMultipliers = new Map<string, Decimal>();
 
@@ -58,6 +61,16 @@ export function applyEffects(state: GameState, owned: string[]): void {
           const current = buildingMultipliers.get(target) ?? new Decimal(1);
           buildingMultipliers.set(target, current.mul(value));
         },
+        addSeedClickBonus: (value) => {
+          seedClickBonus += value;
+        },
+        setSeedPassive: (config) => {
+          const expected = (config.chance * config.seeds * 3_600_000) / Math.max(1, config.intervalMs);
+          if (!passiveConfig || expected > passiveScore) {
+            passiveConfig = config;
+            passiveScore = expected;
+          }
+        },
       });
     }
   }
@@ -98,6 +111,12 @@ export function applyEffects(state: GameState, owned: string[]): void {
   state.temp.hybridActiveBuffs = activeBuffs;
   state.temp.strainChoice = strainChoice;
   state.temp.researchBuildingMultipliers = researchBuildingMultipliers;
+  state.temp.seedClickBonus = Math.max(0, Math.min(0.05, seedClickBonus));
+  state.temp.seedPassiveConfig = passiveConfig;
+  if (!passiveConfig) {
+    state.temp.seedPassiveProgress = 0;
+    state.temp.seedPassiveThrottled = false;
+  }
 }
 
 interface EffectContext {
@@ -114,6 +133,8 @@ interface EffectContext {
   addHybridPerBuff: (value: number) => void;
   setStrain: (value: StrainId | null) => void;
   multiplyBuilding: (target: string, value: number) => void;
+  addSeedClickBonus: (value: number) => void;
+  setSeedPassive: (config: SeedPassiveConfig) => void;
 }
 
 function applyEffect(effect: ResearchEffect, ctx: EffectContext): void {
@@ -175,6 +196,34 @@ function applyEffect(effect: ResearchEffect, ctx: EffectContext): void {
     }
     case "STRAIN_CHOICE": {
       ctx.setStrain(effect.strain ?? null);
+      break;
+    }
+    case "SEED_CLICK_BONUS": {
+      const bonus = Number.isFinite(value) ? value : 0;
+      if (bonus > 0) {
+        ctx.addSeedClickBonus(bonus);
+      }
+      break;
+    }
+    case "SEED_PASSIVE": {
+      if (effect.seedPassive) {
+        const minutes = Number.isFinite(effect.seedPassive.intervalMinutes)
+          ? Math.max(0.1, effect.seedPassive.intervalMinutes)
+          : 0;
+        const chance = Number.isFinite(effect.seedPassive.chance)
+          ? Math.min(1, Math.max(0, effect.seedPassive.chance))
+          : 0;
+        const seeds = Number.isFinite(effect.seedPassive.seeds)
+          ? Math.max(1, Math.floor(effect.seedPassive.seeds))
+          : 0;
+        if (minutes > 0 && chance > 0 && seeds > 0) {
+          ctx.setSeedPassive({
+            intervalMs: Math.floor(minutes * 60 * 1000),
+            chance,
+            seeds,
+          });
+        }
+      }
       break;
     }
     default:

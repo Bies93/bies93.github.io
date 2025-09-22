@@ -9,8 +9,10 @@ import { applyResearchEffects } from './research';
 import { abilityMultiplier } from './abilities';
 import { requirementsSatisfied } from './upgrades';
 import { computeMilestones, resolveKickstart } from './milestones';
+import { recordInteraction, checkSeedSynergies } from './seeds';
 
 export function handleManualClick(state: GameState): Decimal {
+  recordInteraction(state);
   state.buds = state.buds.add(state.bpc);
   state.total = state.total.add(state.bpc);
   state.prestige.lifetimeBuds = state.prestige.lifetimeBuds.add(state.bpc);
@@ -132,7 +134,12 @@ export function recalcDerivedValues(state: GameState): void {
   state.temp.totalBpcMult = totalBpcMultiplier;
 }
 
-export function buyItem(state: GameState, itemId: string, quantity = 1): boolean {
+export function buyItem(
+  state: GameState,
+  itemId: string,
+  quantity = 1,
+  source: 'manual' | 'auto' = 'manual',
+): boolean {
   const definition = itemById.get(itemId);
   if (!definition) {
     return false;
@@ -154,12 +161,16 @@ export function buyItem(state: GameState, itemId: string, quantity = 1): boolean
 
   state.buds = state.buds.sub(totalCost);
   state.items[itemId] = owned + quantity;
+  checkSeedSynergies(state);
+  if (source === 'manual') {
+    recordInteraction(state);
+  }
   recalcDerivedValues(state);
   evaluateAchievements(state);
   return true;
 }
 
-export function buyUpgrade(state: GameState, upgradeId: string): boolean {
+export function buyUpgrade(state: GameState, upgradeId: string, source: 'manual' | 'auto' = 'manual'): boolean {
   if (state.upgrades[upgradeId]) {
     return false;
   }
@@ -180,6 +191,9 @@ export function buyUpgrade(state: GameState, upgradeId: string): boolean {
 
   state.buds = state.buds.sub(cost);
   state.upgrades[upgradeId] = true;
+  if (source === 'manual') {
+    recordInteraction(state);
+  }
   recalcDerivedValues(state);
   evaluateAchievements(state);
   return true;

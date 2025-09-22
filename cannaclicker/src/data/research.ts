@@ -16,7 +16,9 @@ export type EffectId =
   | "OFFLINE_CAP_HOURS_ADD"
   | "ABILITY_DURATION_MULT"
   | "HYBRID_BUFF_PER_ACTIVE"
-  | "STRAIN_CHOICE";
+  | "STRAIN_CHOICE"
+  | "SEED_CLICK_BONUS"
+  | "SEED_PASSIVE";
 
 export type ResearchUnlockCondition =
   | { type: "total_buds"; value: number }
@@ -28,6 +30,11 @@ export interface ResearchEffect {
   targets?: string[];
   labelKey?: string;
   strain?: StrainId;
+  seedPassive?: {
+    intervalMinutes: number;
+    chance: number;
+    seeds: number;
+  };
 }
 
 export interface ResearchNode {
@@ -145,6 +152,24 @@ const EFFICIENCY_RESEARCH: ResearchNode[] = [
     effects: [{ id: "BPS_MULT", v: 1.35 }],
     icon: asset("icons/research/research-overdrive-plus.png"),
   },
+  {
+    id: "r_eff_seed_focus",
+    path: "efficiency",
+    order: 6,
+    name: {
+      de: "Seed-Fokussierung",
+      en: "Seed Focussing",
+    },
+    desc: {
+      de: "Klicks haben +2 Prozentpunkte Chance auf einen Seed.",
+      en: "Clicks gain +2 percentage points chance to drop a seed.",
+    },
+    costType: "seeds",
+    cost: 3,
+    requires: ["r_eff_genetics"],
+    effects: [{ id: "SEED_CLICK_BONUS", v: 0.02 }],
+    icon: asset("icons/research/research-click.png"),
+  },
 ];
 
 const CONTROL_RESEARCH: ResearchNode[] = [
@@ -235,6 +260,70 @@ const CONTROL_RESEARCH: ResearchNode[] = [
     cost: 4,
     requires: ["r_ctrl_time1"],
     effects: [{ id: "ABILITY_DURATION_MULT", v: 1.25 }],
+    icon: asset("icons/research/research-overdrive-plus.png"),
+  },
+  {
+    id: "r_ctrl_seed_drive",
+    path: "control",
+    order: 6,
+    name: {
+      de: "Seed-Tuning",
+      en: "Seed Drive",
+    },
+    desc: {
+      de: "Klick-Samenchance +3 Prozentpunkte.",
+      en: "Click seed chance +3 percentage points.",
+    },
+    costType: "seeds",
+    cost: 4,
+    requires: ["r_ctrl_energy"],
+    effects: [{ id: "SEED_CLICK_BONUS", v: 0.03 }],
+    icon: asset("icons/research/research-autoclick.png"),
+  },
+  {
+    id: "r_ctrl_lab_auto1",
+    path: "control",
+    order: 7,
+    name: {
+      de: "Labor-Autokollektor I",
+      en: "Lab Autocollector I",
+    },
+    desc: {
+      de: "Nach 5 Minuten Idle: 25 % Chance auf 1 Seed.",
+      en: "After 5 minutes idle: 25% chance to collect 1 seed.",
+    },
+    costType: "seeds",
+    cost: 5,
+    requires: ["r_ctrl_seed_drive"],
+    effects: [
+      {
+        id: "SEED_PASSIVE",
+        seedPassive: { intervalMinutes: 5, chance: 0.25, seeds: 1 },
+      },
+    ],
+    icon: asset("icons/research/research-growth.png"),
+  },
+  {
+    id: "r_ctrl_lab_auto2",
+    path: "control",
+    order: 8,
+    name: {
+      de: "Labor-Autokollektor II",
+      en: "Lab Autocollector II",
+    },
+    desc: {
+      de: "Nach 4 Minuten Idle: 45 % Chance auf 1 Seed.",
+      en: "After 4 minutes idle: 45% chance to collect 1 seed.",
+    },
+    costType: "seeds",
+    cost: 7,
+    requires: ["r_ctrl_lab_auto1"],
+    effects: [
+      {
+        id: "SEED_PASSIVE",
+        seedPassive: { intervalMinutes: 4, chance: 0.45, seeds: 1 },
+      },
+    ],
     icon: asset("icons/research/research-overdrive-plus.png"),
   },
 ];
