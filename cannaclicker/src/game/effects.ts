@@ -14,6 +14,7 @@ export function applyEffects(state: GameState, owned: string[]): void {
   let hybridPerBuff = 0;
   let strainChoice: StrainId | null = null;
   const buildingMultipliers = new Map<string, Decimal>();
+  const buildingCostMultipliers = new Map<string, Decimal>();
 
   for (const id of owned) {
     const node = researchById.get(id);
@@ -80,9 +81,15 @@ export function applyEffects(state: GameState, owned: string[]): void {
     researchBuildingMultipliers[key] = value;
   }
 
+  const researchBuildingCostMultipliers: Record<string, Decimal> = {};
+  for (const [key, value] of buildingCostMultipliers.entries()) {
+    researchBuildingCostMultipliers[key] = value;
+  }
+
   state.temp.researchBpsMult = bpsMult;
   state.temp.researchBpcMult = bpcMult;
   state.temp.costMultiplier = costMult;
+  state.temp.buildingCostMultipliers = researchBuildingCostMultipliers;
   state.temp.autoClickRate = autoClicks;
   state.temp.abilityPowerBonus = abilityBonus;
   state.temp.abilityDurationMult = abilityDurationMult;
