@@ -875,12 +875,20 @@ button {
   @apply flex-1;
 }
 
+.research-path {
+  @apply mb-1 inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-500/10 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.35em] text-emerald-200;
+}
+
 .research-name {
   @apply text-lg font-semibold text-neutral-100;
 }
 
 .research-desc {
   @apply text-sm text-neutral-400;
+}
+
+.research-lock {
+  @apply text-xs uppercase tracking-wider text-amber-200;
 }
 
 .research-requires {

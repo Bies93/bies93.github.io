@@ -1,5 +1,10 @@
 import Decimal from "break_infinity.js";
-import { RESEARCH, researchById, type ResearchNode } from "../data/research";
+import {
+  RESEARCH,
+  researchById,
+  type ResearchNode,
+  type ResearchUnlockCondition,
+} from "../data/research";
 import type { GameState } from "./state";
 import { computePrestigeMultiplier } from "./prestige";
 import { applyEffects } from "../game/effects";
@@ -12,7 +17,13 @@ export interface ResearchViewModel {
   owned: boolean;
   affordable: boolean;
   blocked: boolean;
+  lockReason: ResearchLockReason | null;
 }
+
+export type ResearchLockReason =
+  | { kind: "exclusive" }
+  | { kind: "unlock_all"; conditions: ResearchUnlockCondition[] }
+  | { kind: "unlock_any"; conditions: ResearchUnlockCondition[] };
 
 export function applyResearchEffects(state: GameState): void {
   applyEffects(state, state.researchOwned);
@@ -22,13 +33,15 @@ export function applyResearchEffects(state: GameState): void {
 export function getResearchList(state: GameState, filter: ResearchFilter = "all"): ResearchViewModel[] {
   return RESEARCH.map((node) => {
     const owned = state.researchOwned.includes(node.id);
-    const blocked = !requirementsMet(state, node);
+    const blocked = !owned && !requirementsMet(state, node);
     const affordable = !owned && canAfford(state, node);
+    const lockReason = !owned ? getResearchLockReason(state, node) : null;
     return {
       node,
       owned,
       blocked,
       affordable,
+      lockReason,
     } satisfies ResearchViewModel;
   }).filter((entry) => {
     if (filter === "available") {
@@ -52,11 +65,38 @@ export function canAfford(state: GameState, node: ResearchNode): boolean {
 }
 
 export function requirementsMet(state: GameState, node: ResearchNode): boolean {
-  if (!node.requires || node.requires.length === 0) {
-    return true;
+  if (node.exclusiveGroup) {
+    const ownsOther = state.researchOwned.some((id) => {
+      if (id === node.id) {
+        return false;
+      }
+      const other = researchById.get(id);
+      return other?.exclusiveGroup === node.exclusiveGroup;
+    });
+    if (ownsOther) {
+      return false;
+    }
   }
 
-  return node.requires.every((id) => state.researchOwned.includes(id));
+  if (node.requires && !node.requires.every((id) => state.researchOwned.includes(id))) {
+    return false;
+  }
+
+  if (node.unlockAll && node.unlockAll.length > 0) {
+    const allMet = node.unlockAll.every((condition) => meetsUnlockCondition(state, condition));
+    if (!allMet) {
+      return false;
+    }
+  }
+
+  if (node.unlockAny && node.unlockAny.length > 0) {
+    const anyMet = node.unlockAny.some((condition) => meetsUnlockCondition(state, condition));
+    if (!anyMet) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export function purchaseResearch(state: GameState, id: string): boolean {
@@ -92,4 +132,46 @@ export function purchaseResearch(state: GameState, id: string): boolean {
 
 export function getResearchNode(id: string): ResearchNode | undefined {
   return researchById.get(id);
+}
+
+function meetsUnlockCondition(state: GameState, condition: ResearchUnlockCondition): boolean {
+  switch (condition.type) {
+    case "total_buds":
+      return state.total.greaterThanOrEqualTo(new Decimal(condition.value));
+    case "prestige_seeds":
+      return state.prestige.seeds >= condition.value;
+    default:
+      return false;
+  }
+}
+
+function getResearchLockReason(state: GameState, node: ResearchNode): ResearchLockReason | null {
+  if (node.exclusiveGroup) {
+    const ownsOther = state.researchOwned.some((id) => {
+      if (id === node.id) {
+        return false;
+      }
+      const other = researchById.get(id);
+      return other?.exclusiveGroup === node.exclusiveGroup;
+    });
+    if (ownsOther) {
+      return { kind: "exclusive" } satisfies ResearchLockReason;
+    }
+  }
+
+  if (node.unlockAll && node.unlockAll.length > 0) {
+    const allMet = node.unlockAll.every((condition) => meetsUnlockCondition(state, condition));
+    if (!allMet) {
+      return { kind: "unlock_all", conditions: node.unlockAll } satisfies ResearchLockReason;
+    }
+  }
+
+  if (node.unlockAny && node.unlockAny.length > 0) {
+    const anyMet = node.unlockAny.some((condition) => meetsUnlockCondition(state, condition));
+    if (!anyMet) {
+      return { kind: "unlock_any", conditions: node.unlockAny } satisfies ResearchLockReason;
+    }
+  }
+
+  return null;
 }
