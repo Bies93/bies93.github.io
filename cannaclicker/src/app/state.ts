@@ -32,6 +32,7 @@ export interface TempState {
   totalBpsMult: Decimal;
   totalBpcMult: Decimal;
   costMultiplier: Decimal;
+  buildingCostMultipliers: Record<string, Decimal>;
   autoClickRate: number;
   abilityPowerBonus: number;
   abilityDurationMult: number;
@@ -173,6 +174,7 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       totalBpsMult: new Decimal(1),
       totalBpcMult: new Decimal(1),
       costMultiplier: new Decimal(1),
+      buildingCostMultipliers: {},
       autoClickRate: 0,
       abilityPowerBonus: 0,
       abilityDurationMult: 1,
