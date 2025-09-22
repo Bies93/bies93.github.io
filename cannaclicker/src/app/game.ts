@@ -8,6 +8,7 @@ import { sum, toDecimal } from './math';
 import { applyResearchEffects } from './research';
 import { abilityMultiplier } from './abilities';
 import { requirementsSatisfied } from './upgrades';
+import { computeMilestones, resolveKickstart } from './milestones';
 
 export function handleManualClick(state: GameState): Decimal {
   state.buds = state.buds.add(state.bpc);
@@ -18,6 +19,26 @@ export function handleManualClick(state: GameState): Decimal {
 
 export function recalcDerivedValues(state: GameState): void {
   applyResearchEffects(state);
+
+  const milestoneResult = computeMilestones(state);
+  state.temp.milestoneProgress = milestoneResult.progress;
+  state.temp.milestoneGlobalMult = milestoneResult.effects.global;
+  state.temp.milestoneBpsMult = milestoneResult.effects.bps;
+  state.temp.milestoneBpcMult = milestoneResult.effects.bpc;
+  state.temp.milestoneActiveCount = milestoneResult.effects.activeCount;
+  state.temp.nextKickstartLevel = milestoneResult.highestKickstartLevel;
+
+  const kickstartSnapshot = resolveKickstart(state, Date.now());
+  const kickstartBpsMult = new Decimal(kickstartSnapshot.bpsMult);
+  const kickstartBpcMult = new Decimal(kickstartSnapshot.bpcMult);
+  const kickstartCostMult = new Decimal(kickstartSnapshot.costMult);
+  state.temp.kickstartBpsMult = kickstartBpsMult;
+  state.temp.kickstartBpcMult = kickstartBpcMult;
+  state.temp.kickstartCostMult = kickstartCostMult;
+  state.temp.kickstartLevel = kickstartSnapshot.active ? kickstartSnapshot.level : 0;
+  state.temp.kickstartDurationMs = kickstartSnapshot.durationMs;
+  state.temp.kickstartRemainingMs = kickstartSnapshot.remainingMs;
+  state.temp.kickstartEndsAt = kickstartSnapshot.endsAt;
 
   const {
     globalMultiplier,
@@ -58,6 +79,13 @@ export function recalcDerivedValues(state: GameState): void {
   state.temp.autoClickRate += autoClickRate;
 
   const prestigeMultiplier = state.prestige.mult;
+  const milestoneGlobalMult = state.temp.milestoneGlobalMult ?? new Decimal(1);
+  const milestoneBpsMult = state.temp.milestoneBpsMult ?? new Decimal(1);
+  const milestoneBpcMult = state.temp.milestoneBpcMult ?? new Decimal(1);
+  const kickstartGlobalCost = state.temp.kickstartCostMult ?? new Decimal(1);
+  const kickstartBps = state.temp.kickstartBpsMult ?? new Decimal(1);
+  const kickstartBpc = state.temp.kickstartBpcMult ?? new Decimal(1);
+  state.temp.costMultiplier = state.temp.costMultiplier.mul(kickstartGlobalCost);
 
   const buildingProduction = Array.from(itemById.entries()).map(([id, definition]) => {
     const owned = state.items[id] ?? 0;
@@ -76,7 +104,7 @@ export function recalcDerivedValues(state: GameState): void {
   });
 
   const achievementMultiplier = collectAchievementMultiplier(state);
-  const baseMultiplier = globalMultiplier.mul(achievementMultiplier).mul(prestigeMultiplier);
+  const baseMultiplier = globalMultiplier.mul(achievementMultiplier).mul(prestigeMultiplier).mul(milestoneGlobalMult);
   const researchBpsMult = state.temp.researchBpsMult ?? new Decimal(1);
   const researchBpcMult = state.temp.researchBpcMult ?? new Decimal(1);
   const abilityBpsMult = new Decimal(abilityMultiplier(state, 'overdrive'));
@@ -87,12 +115,16 @@ export function recalcDerivedValues(state: GameState): void {
   const totalBpsMultiplier = baseMultiplier
     .mul(researchBpsMult)
     .mul(abilityBpsMult)
-    .mul(eventBpsMult);
+    .mul(eventBpsMult)
+    .mul(milestoneBpsMult)
+    .mul(kickstartBps);
   const totalBpcMultiplier = baseMultiplier
     .mul(clickMultiplier)
     .mul(researchBpcMult)
     .mul(abilityBpcMult)
-    .mul(eventBpcMult);
+    .mul(eventBpcMult)
+    .mul(milestoneBpcMult)
+    .mul(kickstartBpc);
 
   state.bps = sum(...buildingProduction).mul(totalBpsMultiplier);
   state.bpc = new Decimal(1).mul(totalBpcMultiplier);

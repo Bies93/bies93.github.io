@@ -13,6 +13,7 @@ import {
   type PreferencesState,
   type AutomationState,
   type MetaState,
+  type KickstartState,
   AUTO_BUY_ROI_MIN,
   AUTO_BUY_ROI_MAX,
   AUTO_BUY_RESERVE_MIN,
@@ -24,13 +25,22 @@ import { applyResearchEffects } from './research';
 import { reapplyAbilityEffects } from './abilities';
 import { DEFAULT_LOCALE, resolveLocale, type LocaleKey } from './i18n';
 import { createDefaultSettings, type SettingsState } from './settings';
+import { milestones } from '../data/milestones';
+import { getKickstartConfig } from './milestones';
 
 const SAVE_KEY = 'cannaclicker:save:v1';
+
+const VALID_MILESTONE_IDS = new Set(milestones.map((milestone) => milestone.id));
 
 interface PersistedAbilityState {
   active?: boolean;
   endsAt?: number;
   readyAt?: number;
+}
+
+interface PersistedKickstartState {
+  level?: number;
+  endsAt?: number;
 }
 
 interface PersistedPrestigeState {
@@ -39,6 +49,8 @@ interface PersistedPrestigeState {
   lifetimeBuds?: string;
   lastResetAt?: number;
   version?: number;
+  milestones?: Record<string, boolean>;
+  kickstart?: PersistedKickstartState | null;
 }
 
 interface PersistedMetaState {
@@ -119,8 +131,7 @@ export interface PersistedStateV4 {
   meta?: PersistedMetaState;
 }
 
-export interface PersistedStateV5 {
-  v: typeof SAVE_VERSION;
+interface PersistedStateBase {
   buds: string;
   total: string;
   bps: string;
@@ -140,15 +151,34 @@ export interface PersistedStateV5 {
   settings: SettingsState;
   meta: PersistedMetaState;
 }
+
+export interface PersistedStateV5 extends PersistedStateBase {
+  v: 5;
+}
+
+export interface PersistedStateV6 extends PersistedStateBase {
+  v: typeof SAVE_VERSION;
+}
+
 function normalisePersistedState(
-  data: PersistedStateV2 | PersistedStateV3 | PersistedStateV4 | PersistedStateV5,
-): PersistedStateV5 {
+  data: PersistedStateV2 | PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6,
+): PersistedStateV6 {
   const now = Date.now();
   const prestige = data.prestige ?? {};
-  const preferences = normalisePreferences((data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5).preferences);
-  const automation = normaliseAutomation((data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5).automation);
-  const settings = normaliseSettings((data as PersistedStateV4 | PersistedStateV5).settings);
-  const meta = normaliseMeta((data as PersistedStateV4 | PersistedStateV5).meta, (data as any).lastSeenAt, now);
+  const preferences = normalisePreferences(
+    (data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6).preferences,
+  );
+  const automation = normaliseAutomation(
+    (data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6).automation,
+  );
+  const settings = normaliseSettings((data as PersistedStateV4 | PersistedStateV5 | PersistedStateV6).settings);
+  const meta = normaliseMeta(
+    (data as PersistedStateV4 | PersistedStateV5 | PersistedStateV6).meta,
+    (data as any).lastSeenAt,
+    now,
+  );
+  const milestones = normaliseMilestoneFlags(prestige.milestones);
+  const kickstart = normalisePersistedKickstart(prestige.kickstart, now);
 
   return {
     v: SAVE_VERSION,
@@ -168,6 +198,8 @@ function normalisePersistedState(
       lifetimeBuds: prestige.lifetimeBuds ?? data.total ?? '0',
       lastResetAt: prestige.lastResetAt ?? (data as any).lastSeenAt ?? (data as any).time ?? now,
       version: Number.isFinite(prestige.version) ? Number(prestige.version) : 1,
+      milestones,
+      kickstart,
     },
     abilities: normalisePersistedAbilities((data as any).abilities),
     time: (data as any).time ?? now,
@@ -178,7 +210,7 @@ function normalisePersistedState(
     automation,
     settings,
     meta,
-  } satisfies PersistedStateV5;
+  } satisfies PersistedStateV6;
 }
 function normalisePersistedAbilities(
   abilities?: Record<string, PersistedAbilityState>,
@@ -211,6 +243,43 @@ function normaliseSettings(settings?: Partial<SettingsState>): SettingsState {
   return {
     showOfflineEarnings: typeof settings.showOfflineEarnings === 'boolean' ? settings.showOfflineEarnings : defaults.showOfflineEarnings,
   } satisfies SettingsState;
+}
+
+function normaliseMilestoneFlags(flags?: Record<string, boolean>): Record<string, boolean> {
+  const result: Record<string, boolean> = {};
+  if (!flags) {
+    return result;
+  }
+
+  for (const id of VALID_MILESTONE_IDS) {
+    if (flags[id]) {
+      result[id] = true;
+    }
+  }
+
+  return result;
+}
+
+function normalisePersistedKickstart(
+  kickstart: PersistedKickstartState | null | undefined,
+  now: number,
+): PersistedKickstartState | null {
+  if (!kickstart) {
+    return null;
+  }
+
+  const level = Number.isFinite(kickstart.level) ? Math.max(1, Math.floor(kickstart.level!)) : NaN;
+  const config = getKickstartConfig(level);
+  if (!config) {
+    return null;
+  }
+
+  const endsAt = Number.isFinite(kickstart.endsAt) ? Math.max(0, Math.floor(kickstart.endsAt!)) : 0;
+  if (endsAt <= now) {
+    return null;
+  }
+
+  return { level: config.level, endsAt } satisfies PersistedKickstartState;
 }
 
 function normaliseMeta(meta: PersistedMetaState | undefined, fallbackLastSeen: number | undefined, now: number): MetaState {
@@ -271,7 +340,7 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
   return Math.min(max, Math.max(min, Math.round(value)));
 }
 
-function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV5 {
+function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV6 {
   const now = Date.now();
   return normalisePersistedState({
     v: SAVE_VERSION,
@@ -288,6 +357,8 @@ function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV5 {
       mult: '1',
       lifetimeBuds: data.total ?? '0',
       lastResetAt: data.time ?? now,
+      milestones: {},
+      kickstart: null,
     },
     abilities: normalisePersistedAbilities(),
     time: data.time ?? now,
@@ -328,6 +399,26 @@ function restoreAbilities(
   }
 
   return restored;
+}
+
+function restoreKickstart(kickstart: PersistedKickstartState | null | undefined): KickstartState | null {
+  if (!kickstart) {
+    return null;
+  }
+
+  const level = Number.isFinite(kickstart.level) ? Math.max(1, Math.floor(kickstart.level!)) : NaN;
+  const config = getKickstartConfig(level);
+  if (!config) {
+    return null;
+  }
+
+  const now = Date.now();
+  const endsAt = Number.isFinite(kickstart.endsAt) ? Math.max(0, Math.floor(kickstart.endsAt!)) : 0;
+  if (endsAt <= now) {
+    return null;
+  }
+
+  return { level: config.level, endsAt } satisfies KickstartState;
 }
 
 function cleanAbilityFlags(state: AbilityState, now: number): void {
@@ -377,7 +468,7 @@ export function migrate(): void {
   }
 }
 
-export function load(): PersistedStateV5 | null {
+export function load(): PersistedStateV6 | null {
   try {
     const raw = window.localStorage.getItem(SAVE_KEY);
     if (!raw) {
@@ -396,11 +487,17 @@ export function load(): PersistedStateV5 | null {
     }
 
     if (parsed.v === SAVE_VERSION) {
-      return normalisePersistedState(parsed as PersistedStateV5);
+      return normalisePersistedState(parsed as PersistedStateV6);
     }
 
     if (parsed.v === 4) {
       const upgraded = normalisePersistedState(parsed as PersistedStateV4);
+      window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
+      return upgraded;
+    }
+
+    if (parsed.v === 5) {
+      const upgraded = normalisePersistedState(parsed as PersistedStateV5);
       window.localStorage.setItem(SAVE_KEY, JSON.stringify(upgraded));
       return upgraded;
     }
@@ -430,7 +527,7 @@ export function load(): PersistedStateV5 | null {
   }
 }
 
-export function initState(saved: PersistedStateV5 | null): GameState {
+export function initState(saved: PersistedStateV6 | null): GameState {
   if (!saved) {
     return createDefaultState({
       locale: detectLocale(),
@@ -468,6 +565,8 @@ export function initState(saved: PersistedStateV5 | null): GameState {
       lifetimeBuds: prestigeLifetime,
       lastResetAt: saved.prestige?.lastResetAt ?? saved.time ?? now,
       version: saved.prestige?.version ?? 1,
+      milestones: normaliseMilestoneFlags(saved.prestige?.milestones),
+      kickstart: restoreKickstart(saved.prestige?.kickstart),
     },
     abilities: restoreAbilities(saved.abilities, now),
     time: saved.time ?? now,
@@ -530,7 +629,7 @@ export function save(state: GameState): void {
   state.meta.lastSeenAt = timestamp;
   state.meta.lastBpsAtSave = safeBps;
 
-  const payload: PersistedStateV5 = {
+  const payload: PersistedStateV6 = {
     v: SAVE_VERSION,
     buds: state.buds.toString(),
     total: state.total.toString(),
@@ -546,6 +645,8 @@ export function save(state: GameState): void {
       lifetimeBuds: state.prestige.lifetimeBuds.toString(),
       lastResetAt: state.prestige.lastResetAt,
       version: state.prestige.version,
+      milestones: state.prestige.milestones,
+      kickstart: state.prestige.kickstart,
     },
     abilities: serialiseAbilities(state.abilities),
     time: timestamp,
@@ -559,7 +660,7 @@ export function save(state: GameState): void {
       lastSeenAt: state.meta.lastSeenAt,
       lastBpsAtSave: state.meta.lastBpsAtSave,
     },
-  } satisfies PersistedStateV5;
+  } satisfies PersistedStateV6;
 
   window.localStorage.setItem(SAVE_KEY, JSON.stringify(payload));
 }
@@ -573,7 +674,7 @@ export function exportSave(state: GameState): string {
   state.meta.lastSeenAt = timestamp;
   state.meta.lastBpsAtSave = safeBps;
 
-  const payload: PersistedStateV5 = {
+  const payload: PersistedStateV6 = {
     v: SAVE_VERSION,
     buds: state.buds.toString(),
     total: state.total.toString(),
@@ -589,6 +690,8 @@ export function exportSave(state: GameState): string {
       lifetimeBuds: state.prestige.lifetimeBuds.toString(),
       lastResetAt: state.prestige.lastResetAt,
       version: state.prestige.version,
+      milestones: state.prestige.milestones,
+      kickstart: state.prestige.kickstart,
     },
     abilities: serialiseAbilities(state.abilities),
     time: timestamp,
@@ -602,7 +705,7 @@ export function exportSave(state: GameState): string {
       lastSeenAt: state.meta.lastSeenAt,
       lastBpsAtSave: state.meta.lastBpsAtSave,
     },
-  } satisfies PersistedStateV5;
+  } satisfies PersistedStateV6;
 
   const json = JSON.stringify(payload);
   return btoa(unescape(encodeURIComponent(json)));
@@ -611,6 +714,7 @@ export function exportSave(state: GameState): string {
 export function importSave(encoded: string): GameState {
   const decoded = decodeURIComponent(escape(atob(encoded.trim())));
   const parsed = JSON.parse(decoded) as
+    | PersistedStateV6
     | PersistedStateV5
     | PersistedStateV4
     | PersistedStateV3
@@ -621,7 +725,7 @@ export function importSave(encoded: string): GameState {
     throw new Error('Unbekanntes Save-Format');
   }
 
-  let normalised: PersistedStateV5;
+  let normalised: PersistedStateV6;
   if (parsed.v === 1) {
     normalised = upgradeFromLegacy(parsed as PersistedStateV1Legacy);
   } else if (parsed.v === 2) {
@@ -630,8 +734,10 @@ export function importSave(encoded: string): GameState {
     normalised = normalisePersistedState(parsed as PersistedStateV3);
   } else if (parsed.v === 4) {
     normalised = normalisePersistedState(parsed as PersistedStateV4);
-  } else if (parsed.v === SAVE_VERSION) {
+  } else if (parsed.v === 5) {
     normalised = normalisePersistedState(parsed as PersistedStateV5);
+  } else if (parsed.v === SAVE_VERSION) {
+    normalised = normalisePersistedState(parsed as PersistedStateV6);
   } else {
     throw new Error('Unbekannte Save-Version');
   }
