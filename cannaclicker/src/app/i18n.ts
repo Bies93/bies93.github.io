@@ -46,6 +46,9 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'shop.stageLabel': 'Stufe {level}',
     'shop.stageProgress': 'noch {remaining} bis Stufe {next}',
     'shop.stageTooltip': 'Stufenbonus ×{bonus} je {count} Käufe',
+    'shop.softcapBadge': '↓SC ×{stacks}',
+    'shop.softcapTooltipNext': 'Basisproduktion -{percent}%. Nächste Reduktion bei {next}.',
+    'shop.softcapTooltipMax': 'Basisproduktion -{percent}%. Keine weiteren Reduktionen.',
     'upgrades.title': 'Upgrades',
     'achievements.title': 'Erfolge',
     'achievements.reward': 'Bonus +{value}%',
@@ -80,8 +83,8 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'prestige.modal.warning': 'Setzt Buds, Items und Faehigkeiten zurueck. Seeds bleiben erhalten.',
     'prestige.modal.currentSeeds': 'Aktuelle Seeds',
     'prestige.modal.afterSeeds': 'Seeds nach Prestige',
-    'prestige.modal.gainSeeds': 'Neue Seeds',
-    'prestige.modal.globalBonus': 'Globaler Bonus',
+    'prestige.modal.gainSeeds': 'Seeds heute',
+    'prestige.modal.globalBonus': 'Neuer Global-Bonus',
     'prestige.modal.requirement': 'Benoetigt {value} Lifetime-Buds',
     'prestige.modal.tooSoon': 'Zu wenige Buds fuer neue Seeds',
     'prestige.modal.checkbox': 'Ich verstehe den Soft-Reset',
@@ -136,6 +139,8 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'panel.prestige.requirement': 'Requires {value} lifetime buds',
     'panel.prestige.tooSoon': 'No new seeds available yet.',
     'panel.prestige.ready': 'Ready for prestige!',
+    'prestige.modal.gainSeeds': 'Seeds Today',
+    'prestige.modal.globalBonus': 'New Global Bonus',
     'shop.title': 'Grow Ops',
     'shop.empty': 'No buildings unlocked yet. Harvest more buds!',
     'shop.cost': 'Cost',
@@ -145,6 +150,9 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'shop.stageLabel': 'Stage {level}',
     'shop.stageProgress': '{remaining} until Stage {next}',
     'shop.stageTooltip': 'Tier bonus ×{bonus} per {count} purchases',
+    'shop.softcapBadge': '↓SC ×{stacks}',
+    'shop.softcapTooltipNext': 'Base production -{percent}%. Next reduction at {next}.',
+    'shop.softcapTooltipMax': 'Base production -{percent}%. No further reductions.',
     'upgrades.title': 'Upgrades',
     'achievements.title': 'Achievements',
     'achievements.reward': 'Bonus +{value}%',
@@ -204,12 +212,6 @@ export function resolveLocale(candidate?: string | null): LocaleKey {
 
   return SUPPORTED_LOCALES.includes(normalized) ? normalized : DEFAULT_LOCALE;
 }
-
-
-
-
-
-
 
 
 

@@ -161,6 +161,7 @@ interface ShopCardRefs {
   stageLabel: HTMLElement;
   stageProgressBar: HTMLElement;
   stageProgressText: HTMLElement;
+  softcapBadge: HTMLElement;
   costLabel: HTMLElement;
   cost: HTMLElement;
   ownedLabel: HTMLElement;
@@ -932,6 +933,27 @@ function updateShop(state: GameState): void {
     card.stageProgressText.setAttribute("aria-label", stageProgressLabel);
     const progressPercent = Math.max(0, Math.min(1, entry.tier.completion));
     card.stageProgressBar.style.width = `${(progressPercent * 100).toFixed(2)}%`;
+
+    if (entry.softcap.active) {
+      const badgeText = t(state.locale, "shop.softcapBadge", { stacks: entry.softcap.stacks });
+      const reduction = Math.max(0, 1 - entry.softcap.multiplier.toNumber());
+      const reductionPercent = (reduction * 100).toFixed(1);
+      const nextThreshold = entry.softcap.nextThreshold;
+      const tooltipKey = nextThreshold ? "shop.softcapTooltipNext" : "shop.softcapTooltipMax";
+      const tooltip = t(state.locale, tooltipKey, {
+        percent: reductionPercent,
+        next: nextThreshold?.toString() ?? "—",
+      });
+      card.softcapBadge.textContent = badgeText;
+      card.softcapBadge.classList.remove("hidden");
+      card.softcapBadge.setAttribute("title", tooltip);
+      card.softcapBadge.setAttribute("aria-label", tooltip);
+    } else {
+      card.softcapBadge.textContent = "";
+      card.softcapBadge.classList.add("hidden");
+      card.softcapBadge.removeAttribute("title");
+      card.softcapBadge.removeAttribute("aria-label");
+    }
 
     if (entry.unlocked) {
       card.container.classList.remove("opacity-40");
@@ -1753,9 +1775,18 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
   const tierHeader = document.createElement("div");
   tierHeader.className = "tier-header";
 
+  const stageWrap = document.createElement("div");
+  stageWrap.className = "flex items-center gap-2";
+
   const stageLabel = document.createElement("span");
   stageLabel.className = "tier-label";
-  tierHeader.appendChild(stageLabel);
+  stageWrap.appendChild(stageLabel);
+
+  const softcapBadge = document.createElement("span");
+  softcapBadge.className = "softcap-badge hidden";
+  stageWrap.appendChild(softcapBadge);
+
+  tierHeader.appendChild(stageWrap);
 
   const stageProgressText = document.createElement("span");
   stageProgressText.className = "tier-progress-text";
@@ -1835,6 +1866,7 @@ function createShopCard(itemId: string, state: GameState): ShopCardRefs {
     stageLabel,
     stageProgressBar: progressBar,
     stageProgressText,
+    softcapBadge,
     costLabel: cost.label,
     cost: cost.value,
     ownedLabel: owned.label,

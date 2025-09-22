@@ -638,6 +638,10 @@ button {
   @apply h-full w-0 rounded-full bg-gradient-to-r from-emerald-400/70 to-lime-300/70 transition-[width];
 }
 
+.softcap-badge {
+  @apply inline-flex items-center rounded-full border border-rose-400/50 bg-rose-500/15 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-[0.25em] text-rose-200 shadow-[0_0_10px_rgba(244,114,182,0.2)];
+}
+
 .roi-badge {
   @apply inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] text-neutral-300 transition;
 }
