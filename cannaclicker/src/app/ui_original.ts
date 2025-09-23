@@ -1,0 +1,3280 @@
+import Decimal from "break_infinity.js";
+import {
+  handleManualClick,
+  buyItem,
+  buyUpgrade,
+  recalcDerivedValues,
+  evaluateAchievements,
+} from "./game";
+import { getShopEntries, getMaxAffordable, formatRoi, type ShopEntry } from "./shop";
+import { formatDecimal } from "./math";
+import type { AbilityId, GameState } from "./state";
+import { createDefaultState } from "./state";
+import { createAudioManager } from "./audio";
+import { t, type LocaleKey } from "./i18n";
+import { exportSave, importSave, clearSave, save } from "./save";
+import { spawnFloatingValue } from "./effects";
+import { asset } from "./assets";
+import { withBase } from "./paths";
+import { applyEventReward, type EventClickResult, type EventId } from "./events";
+import { itemById } from "../data/items";
+import { achievements, type AchievementDefinition } from "../data/achievements";
+import { milestones } from "../data/milestones";
+import { maybeRollClickSeed } from "./seeds";
+import {
+  getUpgradeEntries,
+  getUpgradeDefinition,
+  type UpgradeEntry as UpgradeViewEntry,
+  type UpgradeRequirementDetail,
+} from "./upgrades";
+import {
+  activateAbility,
+  formatAbilityTooltip,
+  getAbilityDefinition,
+  getAbilityLabel,
+  getAbilityProgress,
+  listAbilities,
+} from "./abilities";
+import {
+  getResearchList,
+  purchaseResearch,
+  type ResearchFilter,
+  getResearchNode,
+  type ResearchViewModel,
+  type ResearchLockReason,
+  requirementsMet,
+  canAfford,
+} from "./research";
+import type { ResearchEffect, ResearchUnlockCondition } from "../data/research";
+import { getPrestigePreview, performPrestige, type PrestigePreview } from "./prestige";
+import type { MilestoneProgressDetail } from "./milestones";
+
+const STAT_META: Record<LocaleKey, Record<string, string>> = {
+  de: {
+    "stats.buds": "Aktueller Vorrat",
+    "stats.bps": "Produktion pro Sekunde",
+    "stats.bpc": "Ertrag pro Klick",
+    "stats.total": "Lebenszeit-Ernte",
+    "stats.seeds": "Prestige-Waehrung",
+    "stats.seedRate": "60-Minuten-Fenster",
+    "stats.prestigeMult": "Aktiver Bonus",
+  },
+  en: {
+    "stats.buds": "Current stock",
+    "stats.bps": "Production each second",
+    "stats.bpc": "Yield per click",
+    "stats.total": "Lifetime harvest",
+    "stats.seeds": "Prestige currency",
+    "stats.seedRate": "60-minute window",
+    "stats.prestigeMult": "Active boost",
+  },
+};
+
+const ABILITY_ICON_MAP: Record<AbilityId, string> = {
+  overdrive: "icons/abilities/ability-overdrive.png",
+  burst: "icons/abilities/ability-burst.png",
+};
+
+function formatSeedRate(locale: LocaleKey, rate: number): string {
+  const safe = Number.isFinite(rate) ? rate : 0;
+  const options: Intl.NumberFormatOptions =
+    safe > 0 && safe < 10
+      ? { minimumFractionDigits: 1, maximumFractionDigits: 1 }
+      : { maximumFractionDigits: 0 };
+  return new Intl.NumberFormat(locale, options).format(safe);
+}
+
+function formatTierBonus(locale: LocaleKey, value: number): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+interface ControlButtonRefs {
+  button: HTMLButtonElement;
+  icon: HTMLImageElement;
+  label: HTMLSpanElement;
+}
+
+interface PrestigePanelRefs {
+  container: HTMLElement;
+  description: HTMLElement;
+  permanentLabel: HTMLElement;
+  permanentValue: HTMLElement;
+  kickstartLabel: HTMLElement;
+  kickstartValue: HTMLElement;
+  activeKickstartLabel: HTMLElement;
+  activeKickstartValue: HTMLElement;
+  milestoneList: HTMLElement;
+  milestones: Map<string, MilestoneCardRefs>;
+  requirement: HTMLElement;
+  actionButton: HTMLButtonElement;
+}
+
+interface MilestoneCardRefs {
+  container: HTMLElement;
+  title: HTMLElement;
+  reward: HTMLElement;
+  description: HTMLElement;
+  badge: HTMLElement;
+  progressBar: HTMLElement;
+  progressFill: HTMLElement;
+  progressLabel: HTMLElement;
+}
+
+interface ResearchCardRefs {
+  id: string;
+  container: HTMLElement;
+  icon: HTMLImageElement | null;
+  path: HTMLElement;
+  title: HTMLElement;
+  description: HTMLElement;
+  effects: HTMLUListElement;
+  requires: HTMLElement;
+  lock: HTMLElement;
+  cost: HTMLElement;
+  button: HTMLButtonElement;
+}
+
+interface AchievementCardRefs {
+  container: HTMLElement;
+  iconBase: HTMLImageElement;
+  iconOverlay: HTMLImageElement;
+  title: HTMLElement;
+  description: HTMLElement;
+  reward: HTMLElement;
+  status: HTMLElement;
+}
+
+interface SidePanelRefs {
+  section: HTMLElement;
+  tabList: HTMLElement;
+  tabs: Map<SidePanelTab, HTMLButtonElement>;
+  views: Record<SidePanelTab, HTMLElement>;
+  shop: {
+    list: HTMLElement;
+  };
+  upgrades: {
+    list: HTMLElement;
+    entries: Map<string, UpgradeCardRefs>;
+  };
+  research: {
+    container: HTMLElement;
+    filters: Map<string, HTMLButtonElement>;
+    list: HTMLElement;
+    entries: Map<string, ResearchCardRefs>;
+    emptyState: HTMLElement;
+  };
+  prestige: PrestigePanelRefs;
+  achievements: {
+    list: HTMLElement;
+    entries: Map<string, AchievementCardRefs>;
+  };
+}
+
+interface UIRefs {
+  root: HTMLElement;
+  headerTitle: HTMLHeadingElement;
+  statsLabels: Map<string, HTMLElement>;
+  statsMeta: Map<string, HTMLElement>;
+  buds: HTMLElement;
+  bps: HTMLElement;
+  bpc: HTMLElement;
+  total: HTMLElement;
+  seeds: HTMLElement;
+  seedRate: HTMLElement;
+  prestigeMult: HTMLElement;
+  seedBadge: HTMLButtonElement;
+  seedBadgeValue: HTMLElement;
+  clickButton: HTMLButtonElement;
+  clickLabel: HTMLSpanElement;
+  clickIcon: HTMLDivElement;
+  controls: {
+    mute: ControlButtonRefs;
+    export: ControlButtonRefs;
+    import: ControlButtonRefs;
+    reset: ControlButtonRefs;
+  };
+  announcer: HTMLElement;
+  abilityTitle: HTMLElement;
+  abilityList: Map<string, AbilityButtonRefs>;
+  sidePanel: SidePanelRefs;
+  shopEntries: Map<string, ShopCardRefs>;
+  upgradeEntries: Map<string, UpgradeCardRefs>;
+  prestigeModal: PrestigeModalRefs;
+  toastContainer: HTMLElement;
+  eventLayer: HTMLElement;
+}
+
+interface ShopCardRefs {
+  container: HTMLElement;
+  icon: HTMLImageElement;
+  name: HTMLElement;
+  description: HTMLElement;
+  roiBadge: HTMLElement;
+  roiValue: HTMLElement;
+  stageLabel: HTMLElement;
+  stageProgressBar: HTMLElement;
+  stageProgressText: HTMLElement;
+  softcapBadge: HTMLElement;
+  costLabel: HTMLElement;
+  cost: HTMLElement;
+  ownedLabel: HTMLElement;
+  owned: HTMLElement;
+  buyButton: HTMLButtonElement;
+  maxButton: HTMLButtonElement;
+}
+
+interface UpgradeCardRefs {
+  container: HTMLElement;
+  icon: HTMLImageElement;
+  category: HTMLElement;
+  name: HTMLElement;
+  description: HTMLElement;
+  status: HTMLElement;
+  progress: HTMLElement;
+  requirementList: HTMLElement;
+  costLabel: HTMLElement;
+  costValue: HTMLElement;
+  buyButton: HTMLButtonElement;
+}
+
+interface AbilityButtonRefs {
+  container: HTMLButtonElement;
+  icon: HTMLImageElement;
+  label: HTMLElement;
+  status: HTMLElement;
+  progressBar: HTMLElement;
+}
+
+interface PrestigeModalRefs {
+  overlay: HTMLElement;
+  dialog: HTMLDivElement;
+  title: HTMLElement;
+  description: HTMLElement;
+  warning: HTMLElement;
+  previewCurrentLabel: HTMLElement;
+  previewCurrentValue: HTMLElement;
+  previewAfterLabel: HTMLElement;
+  previewAfterValue: HTMLElement;
+  previewGainLabel: HTMLElement;
+  previewGainValue: HTMLElement;
+  previewBonusLabel: HTMLElement;
+  previewBonusValue: HTMLElement;
+  checkbox: HTMLInputElement;
+  checkboxLabel: HTMLElement;
+  confirmButton: HTMLButtonElement;
+  cancelButton: HTMLButtonElement;
+  statusLabel: HTMLElement;
+}
+
+type SidePanelTab = "shop" | "upgrades" | "research" | "prestige" | "achievements";
+
+const SIDE_PANEL_TAB_KEYS: Record<SidePanelTab, string> = {
+  shop: "panel.tabs.shop",
+  upgrades: "panel.tabs.upgrades",
+  research: "panel.tabs.research",
+  prestige: "panel.tabs.prestige",
+  achievements: "panel.tabs.achievements",
+};
+
+let refs: UIRefs | null = null;
+let audio = createAudioManager(false);
+let lastAnnounced = new Decimal(0);
+let activeResearchFilter: ResearchFilter = "all";
+let researchFilterManuallySelected = false;
+let activeSidePanelTab: SidePanelTab = "shop";
+let prestigeOpen = false;
+let prestigeAcknowledged = false;
+
+const PLANT_STAGE_THRESHOLDS = [
+  0,
+  50,
+  250,
+  1_000,
+  5_000,
+  25_000,
+  100_000,
+  500_000,
+  2_500_000,
+  10_000_000,
+  50_000_000,
+];
+const PLANT_STAGE_MAX = PLANT_STAGE_THRESHOLDS.length - 1;
+const PLANT_STAGE_ASSET_SUFFIXES = [
+  "01",
+  "02",
+  "03",
+  "04",
+  "05",
+  "06",
+  "07",
+  "08",
+  "09",
+  "10",
+  "11",
+];
+const preloadedPlantStages = new Set<string>();
+
+interface RandomEventDefinition {
+  id: EventId;
+  icon: string;
+  labelKey: string;
+  weight: number;
+}
+
+const EVENT_DEFINITIONS: readonly RandomEventDefinition[] = [
+  { id: "golden_bud", icon: "icons/events/golden_bud.png", labelKey: "events.goldenBud.name", weight: 1 },
+  { id: "seed_pack", icon: "icons/events/seed_pack.png", labelKey: "events.seedPack.name", weight: 0.6 },
+  { id: "lucky_joint", icon: "icons/events/lucky_joint.png", labelKey: "events.luckyJoint.name", weight: 1 },
+];
+
+function pickRandomEventDefinition(): RandomEventDefinition {
+  const totalWeight = EVENT_DEFINITIONS.reduce((sum, def) => sum + def.weight, 0);
+  if (totalWeight <= 0) {
+    return EVENT_DEFINITIONS[Math.floor(Math.random() * EVENT_DEFINITIONS.length)];
+  }
+
+  const roll = Math.random() * totalWeight;
+  let accumulator = 0;
+  for (const definition of EVENT_DEFINITIONS) {
+    accumulator += definition.weight;
+    if (roll < accumulator) {
+      return definition;
+    }
+  }
+
+  return EVENT_DEFINITIONS[EVENT_DEFINITIONS.length - 1];
+}
+
+const EVENT_SPAWN_MIN_MS = 10_000;
+const EVENT_SPAWN_MAX_MS = 20_000;
+const EVENT_VISIBLE_MIN_MS = 7_000;
+const EVENT_VISIBLE_MAX_MS = 12_000;
+
+let eventSchedulerReady = false;
+let schedulerState: GameState | null = null;
+let eventSpawnTimer: number | null = null;
+let eventLifetimeTimer: number | null = null;
+let activeEventButton: HTMLButtonElement | null = null;
+
+function appendRetinaSuffix(path: string): string {
+  const queryIndex = path.indexOf("?");
+  const hasQuery = queryIndex !== -1;
+  const basePath = hasQuery ? path.slice(0, queryIndex) : path;
+  const query = hasQuery ? path.slice(queryIndex) : "";
+  const dotIndex = basePath.lastIndexOf(".");
+  if (dotIndex === -1) {
+    return `${basePath}@2x${query}`;
+  }
+  const retinaPath = `${basePath.slice(0, dotIndex)}@2x${basePath.slice(dotIndex)}`;
+  return `${retinaPath}${query}`;
+}
+
+function buildItemSrcset(path: string): string {
+  return `${path} 1x, ${appendRetinaSuffix(path)} 2x`;
+}
+export function renderUI(state: GameState): void {
+  if (!refs) {
+    refs = buildUI(state);
+    audio.setMuted(state.muted);
+    recalcDerivedValues(state);
+    evaluateAchievements(state);
+    attachGlobalShortcuts(state);
+  }
+
+  schedulerState = state;
+  ensureEventScheduler(state);
+
+  updateStrings(state);
+  updateStats(state);
+  processSeedNotifications(state);
+  updateAbilities(state);
+  updateSidePanel();
+  updateShop(state);
+  updateUpgrades(state);
+  updateResearch(state);
+  updatePrestigePanel(state);
+  updateAchievements(state);
+  updatePrestigeModal(state);
+  updateOfflineToast(state);
+}
+
+function processSeedNotifications(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const queue = state.temp.seedNotifications;
+  if (!Array.isArray(queue) || queue.length === 0) {
+    return;
+  }
+
+  const badge = refs.seedBadge;
+  while (queue.length > 0) {
+    const notification = queue.shift();
+    if (!notification || notification.seeds <= 0) {
+      continue;
+    }
+
+    const seedsText = formatInteger(state.locale, notification.seeds);
+    spawnFloatingValue(badge, `+${seedsText}🌱`, "rgb(252 211 77)");
+
+    if (notification.type === "synergy") {
+      const name = t(state.locale, `seeds.synergy.${notification.id}`);
+      showToast(
+        t(state.locale, "seeds.toast.synergy.title"),
+        t(state.locale, "seeds.toast.synergy.body", { name, seeds: seedsText }),
+      );
+    } else if (notification.type === "passive") {
+      showToast(
+        t(state.locale, "seeds.toast.passive.title"),
+        t(state.locale, "seeds.toast.passive.body", { seeds: seedsText }),
+      );
+    }
+  }
+}
+
+function buildUI(state: GameState): UIRefs {
+  const root = document.getElementById("app");
+  if (!root) {
+    throw new Error("#app root missing");
+  }
+
+  root.innerHTML = "";
+  root.className =
+    "relative mx-auto flex w-full max-w-[92rem] flex-col gap-6 px-4 pb-8 pt-4 sm:px-6 lg:px-10";
+
+  const heroImageSet = `image-set(url("${withBase("img/bg-hero-1920.png")}") type("image/png") 1x, url("${withBase("img/bg-hero-2560.png")}") type("image/png") 2x)`;
+  document.documentElement.style.setProperty("--hero-image", heroImageSet);
+  document.documentElement.style.setProperty("--bg-plants", `url("${withBase("img/bg-plants-1280.png")}")`);
+  document.documentElement.style.setProperty("--bg-noise", `url("${withBase("img/bg-noise-512.png")}")`);
+
+  const muteControl = createActionButton(withBase("icons/ui/ui-mute.png"));
+  const exportControl = createActionButton(withBase("icons/ui/ui-export.png"));
+  const importControl = createActionButton(withBase("icons/ui/ui-import.png"));
+  const resetControl = createDangerButton(withBase("icons/ui/ui-reset.png"));
+
+  const headerTitle = mountHeader(root, [
+    muteControl.button,
+    exportControl.button,
+    importControl.button,
+    resetControl.button,
+  ]);
+
+  const layout = document.createElement("div");
+  layout.className =
+    "grid gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] xl:gap-6 2xl:gap-8";
+
+  const primaryColumn = document.createElement("div");
+  primaryColumn.className = "space-y-4";
+
+  const secondaryColumn = document.createElement("div");
+  secondaryColumn.className = "space-y-4";
+
+  layout.append(primaryColumn, secondaryColumn);
+
+  const statsLabels = new Map<string, HTMLElement>();
+  const statsMeta = new Map<string, HTMLElement>();
+
+  const infoRibbon = document.createElement("section");
+  infoRibbon.className = "info-ribbon fade-in";
+
+  const infoList = document.createElement("div");
+  infoList.className = "info-ribbon__list";
+  infoRibbon.appendChild(infoList);
+
+  const totalStat = createStatBlock("stats.total", infoList, statsLabels, statsMeta);
+  const seedsStat = createStatBlock("stats.seeds", infoList, statsLabels, statsMeta);
+  const seedRateStat = createStatBlock("stats.seedRate", infoList, statsLabels, statsMeta);
+  const prestigeStat = createStatBlock(
+    "stats.prestigeMult",
+    infoList,
+    statsLabels,
+    statsMeta,
+  );
+
+  const infoActions = document.createElement("div");
+  infoActions.className = "info-ribbon__actions";
+  infoRibbon.appendChild(infoActions);
+
+  const seedBadge = document.createElement("button");
+  seedBadge.type = "button";
+  seedBadge.className = "prestige-badge";
+  const seedIcon = new Image();
+  seedIcon.src = withBase("icons/ui/ui-seed.png");
+  seedIcon.alt = "";
+  seedIcon.decoding = "async";
+  seedIcon.className = "prestige-badge__icon";
+  const seedBadgeValue = document.createElement("span");
+  seedBadgeValue.className = "prestige-badge__value";
+  seedBadge.append(seedIcon, seedBadgeValue);
+  infoActions.appendChild(seedBadge);
+  root.append(infoRibbon, layout);
+
+  const eventLayer = document.createElement("div");
+  eventLayer.className = "event-layer";
+  root.appendChild(eventLayer);
+
+  const clickCard = document.createElement("section");
+  clickCard.className = "card fade-in click-card";
+
+  const clickHeader = document.createElement("div");
+  clickHeader.className = "click-card__header";
+  const clickStats = document.createElement("div");
+  clickStats.className = "click-stats";
+
+  clickHeader.appendChild(clickStats);
+  clickCard.appendChild(clickHeader);
+
+  const clickBody = document.createElement("div");
+  clickBody.className = "click-card__body";
+  clickCard.appendChild(clickBody);
+
+  const clickButton = document.createElement("button");
+  clickButton.className = "click-button w-full";
+  clickButton.type = "button";
+
+  const clickIcon = document.createElement("div");
+  clickIcon.className = "click-icon";
+  clickIcon.setAttribute("aria-hidden", "true");
+  clickIcon.style.setProperty(
+    "background-image",
+    `url("${withBase(plantStageAsset(0))}")`,
+  );
+  clickIcon.dataset.stage = "0";
+  preloadPlantStage(0);
+  preloadPlantStage(1);
+
+  const clickLabel = document.createElement("span");
+  clickLabel.className = "click-label";
+
+  clickButton.append(clickIcon, clickLabel);
+  clickBody.appendChild(clickButton);
+
+  const budsStat = createStatBlock("stats.buds", clickStats, statsLabels, statsMeta);
+  const bpsStat = createStatBlock("stats.bps", clickStats, statsLabels, statsMeta);
+  const bpcStat = createStatBlock("stats.bpc", clickStats, statsLabels, statsMeta);
+
+  const announcer = document.createElement("p");
+  announcer.setAttribute("data-sr-only", "true");
+  announcer.setAttribute("aria-live", "polite");
+  clickCard.appendChild(announcer);
+
+  primaryColumn.appendChild(clickCard);
+
+  const abilitySection = document.createElement("section");
+  abilitySection.className = "card fade-in space-y-4";
+
+  const abilityTitle = document.createElement("h2");
+  abilityTitle.className = "text-xl font-semibold text-leaf-200";
+  abilitySection.appendChild(abilityTitle);
+
+  const abilityGrid = document.createElement("div");
+  abilityGrid.className = "ability-grid";
+  abilitySection.appendChild(abilityGrid);
+
+  const abilityRefs = new Map<string, AbilityButtonRefs>();
+  for (const ability of listAbilities()) {
+    const abilityButton = createAbilityButton(ability.id, state);
+    abilityRefs.set(ability.id, abilityButton);
+    abilityGrid.appendChild(abilityButton.container);
+  }
+
+  primaryColumn.appendChild(abilitySection);
+
+  const sidePanel = createSidePanel();
+  secondaryColumn.appendChild(sidePanel.section);
+
+  const toastContainer = document.createElement("div");
+  toastContainer.className = "toast-stack";
+  root.appendChild(toastContainer);
+
+  const prestigeModal = createPrestigeModal();
+  root.appendChild(prestigeModal.overlay);
+
+  const uiRefs: UIRefs = {
+    root,
+    headerTitle,
+    statsLabels,
+    statsMeta,
+    buds: budsStat,
+    bps: bpsStat,
+    bpc: bpcStat,
+    total: totalStat,
+    seeds: seedsStat,
+    seedRate: seedRateStat,
+    prestigeMult: prestigeStat,
+    seedBadge,
+    seedBadgeValue,
+    clickButton,
+    clickLabel,
+    clickIcon,
+    controls: {
+      mute: muteControl,
+      export: exportControl,
+      import: importControl,
+      reset: resetControl,
+    },
+    announcer,
+    abilityTitle,
+    abilityList: abilityRefs,
+    sidePanel,
+    shopEntries: new Map(),
+    upgradeEntries: new Map(),
+    prestigeModal,
+    toastContainer,
+    eventLayer,
+  };
+
+  setupInteractions(uiRefs, state);
+
+  return uiRefs;
+}
+
+function mountHeader(
+  root: HTMLElement,
+  controls: HTMLButtonElement[],
+): HTMLHeadingElement {
+  const header = document.createElement("header");
+  header.className =
+    "grid w-full gap-3 rounded-3xl border border-white/10 bg-neutral-900/80 px-3 py-2 shadow-[0_20px_48px_rgba(10,12,21,0.45)] backdrop-blur-xl sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-x-14 sm:gap-y-2 sm:px-6 lg:px-8";
+
+  const logoWrap = document.createElement("div");
+  logoWrap.className =
+    "grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-lime-300/35 via-emerald-300/25 to-emerald-500/30 shadow-[0_0_20px_rgba(202,255,120,0.45)] ring-1 ring-lime-200/35 sm:h-14 sm:w-14";
+
+  const leaf = new Image();
+  leaf.src = withBase("img/logo-leaf.svg");
+  leaf.alt = "";
+  leaf.decoding = "async";
+  leaf.className =
+    "h-8 w-8 drop-shadow-[0_12px_24px_rgba(202,255,150,0.55)] saturate-150 brightness-110 sm:h-10 sm:w-10";
+
+  logoWrap.appendChild(leaf);
+
+  const headerTitle = document.createElement("h1");
+  headerTitle.className = "app-header__title";
+  headerTitle.textContent = "CannaBies";
+
+  const actionWrap = document.createElement("div");
+  actionWrap.className =
+    "flex flex-nowrap items-center justify-self-stretch gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/70 px-3 py-1 shadow-[0_16px_30px_rgba(10,12,21,0.4)] ring-1 ring-white/10 backdrop-blur sm:justify-self-end";
+  controls.forEach((control) => {
+    control.classList.add("shrink-0");
+    actionWrap.append(control);
+  });
+
+  header.append(logoWrap, headerTitle, actionWrap);
+  root.prepend(header);
+  return headerTitle;
+}
+
+function setupInteractions(refs: UIRefs, state: GameState): void {
+  refs.clickButton.addEventListener("click", () => {
+    const gained = handleManualClick(state);
+    const seedResult = maybeRollClickSeed(state);
+    audio.playClick();
+    spawnFloatingValue(refs.clickButton, `+${formatDecimal(gained)}`);
+    if (seedResult.gained > 0) {
+      const seedsText = formatInteger(state.locale, seedResult.gained);
+      spawnFloatingValue(refs.seedBadge, `+${seedsText}🌱`, "rgb(252 211 77)");
+      showToast(
+        t(state.locale, "seeds.toast.click.title"),
+        t(state.locale, "seeds.toast.click.body", { seeds: seedsText }),
+      );
+    }
+    announce(refs, state.buds);
+    renderUI(state);
+  });
+
+  refs.controls.mute.button.addEventListener("click", () => {
+    state.muted = audio.toggleMute();
+    updateStrings(state);
+  });
+
+  refs.controls.export.button.addEventListener("click", async () => {
+    const payload = exportSave(state);
+    try {
+      await navigator.clipboard.writeText(payload);
+      alert("Save kopiert.");
+    } catch {
+      window.prompt("Save kopieren:", payload);
+    }
+  });
+
+  refs.controls.import.button.addEventListener("click", () => {
+    const payload = window.prompt("Bitte Base64-Spielstand einfÃ¼gen:");
+    if (!payload) {
+      return;
+    }
+
+    try {
+      const nextState = importSave(payload);
+      Object.assign(state, nextState);
+      recalcDerivedValues(state);
+      evaluateAchievements(state);
+      audio.setMuted(state.muted);
+      renderUI(state);
+    } catch (error) {
+      console.error(error);
+      alert("Import fehlgeschlagen.");
+    }
+  });
+
+  refs.controls.reset.button.addEventListener("click", () => {
+    const confirmReset = window.confirm("Spielstand wirklich lÃ¶schen?");
+    if (!confirmReset) {
+      return;
+    }
+
+    clearSave();
+    const fresh = createDefaultState({ locale: state.locale, muted: state.muted });
+    Object.assign(state, fresh);
+    recalcDerivedValues(state);
+    evaluateAchievements(state);
+    renderUI(state);
+  });
+
+  refs.seedBadge.addEventListener("click", () => {
+    openPrestigeModal(state);
+  });
+
+  refs.prestigeModal.checkbox.addEventListener("change", (event) => {
+    prestigeAcknowledged = (event.target as HTMLInputElement).checked;
+    updatePrestigeModal(state);
+  });
+
+  refs.prestigeModal.cancelButton.addEventListener("click", () => {
+    closePrestigeModal();
+  });
+
+  refs.prestigeModal.confirmButton.addEventListener("click", () => {
+    const preview = getPrestigePreview(state);
+    if (!prestigeAcknowledged || !preview.requirementMet) {
+      return;
+    }
+
+    performPrestige(state);
+    recalcDerivedValues(state);
+    evaluateAchievements(state);
+    closePrestigeModal();
+    renderUI(state);
+  });
+
+  refs.prestigeModal.overlay.addEventListener("click", (event) => {
+    if (event.target === refs?.prestigeModal.overlay) {
+      closePrestigeModal();
+    }
+  });
+
+  refs.abilityList.forEach((abilityRefs, abilityId) => {
+    const labelText = getAbilityLabel(state, abilityId as AbilityId, state.locale);
+    abilityRefs.label.textContent = labelText;
+    abilityRefs.container.title = formatAbilityTooltip(state, abilityId as AbilityId, state.locale);
+    abilityRefs.container.setAttribute('aria-label', labelText);
+  });
+
+  refs.sidePanel.research.filters.forEach((button, key) => {
+    button.addEventListener("click", () => {
+      if (activeResearchFilter === (key as ResearchFilter)) {
+        return;
+      }
+      researchFilterManuallySelected = key !== "all";
+      activeResearchFilter = key as ResearchFilter;
+      renderUI(state);
+    });
+  });
+
+  refs.sidePanel.tabs.forEach((button, tab) => {
+    button.addEventListener("click", () => {
+      if (activeSidePanelTab === tab) {
+        return;
+      }
+      activeSidePanelTab = tab;
+      renderUI(state);
+    });
+  });
+
+  refs.sidePanel.prestige.actionButton.addEventListener("click", () => {
+    openPrestigeModal(state);
+  });
+}
+
+function attachGlobalShortcuts(state: GameState): void {
+  window.addEventListener("keydown", (event) => {
+    if (event.repeat) {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+    const tagName = target?.tagName;
+    const isTextInput = tagName === 'INPUT' || tagName === 'TEXTAREA' || (target?.getAttribute('contenteditable') === 'true');
+
+    if ((event.code === "Space" || event.code === "Enter") && !isTextInput) {
+      event.preventDefault();
+      refs?.clickButton.click();
+      return;
+    }
+
+    if (event.code === "Escape" && prestigeOpen) {
+      event.preventDefault();
+      closePrestigeModal();
+      return;
+    }
+
+    if (isTextInput) {
+      return;
+    }
+
+    if (event.code === "KeyQ") {
+      event.preventDefault();
+      triggerAbility(state, "overdrive");
+      return;
+    }
+
+    if (event.code === "KeyE") {
+      event.preventDefault();
+      triggerAbility(state, "burst");
+    }
+  });
+}
+
+function triggerAbility(state: GameState, abilityId: AbilityId): void {
+  if (!activateAbility(state, abilityId)) {
+    return;
+  }
+
+  recalcDerivedValues(state);
+  evaluateAchievements(state);
+  renderUI(state);
+}
+
+function updateStrings(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  refs.headerTitle.textContent = "CannaBies";
+  refs.clickButton.setAttribute("aria-label", t(state.locale, "actions.click"));
+  refs.clickLabel.textContent = t(state.locale, "actions.click");
+
+  const muteAssets = state.muted
+    ? { label: t(state.locale, "actions.unmute"), icon: asset("icons/ui/ui-unmute.png") }
+    : { label: t(state.locale, "actions.mute"), icon: asset("icons/ui/ui-mute.png") };
+
+  refs.controls.mute.icon.src = muteAssets.icon;
+  refs.controls.mute.label.textContent = muteAssets.label;
+  refs.controls.mute.button.setAttribute("aria-label", muteAssets.label);
+  refs.controls.mute.button.setAttribute("title", muteAssets.label);
+
+  refs.controls.export.label.textContent = t(state.locale, "actions.export");
+  refs.controls.export.button.setAttribute("aria-label", t(state.locale, "actions.export"));
+  refs.controls.export.button.setAttribute("title", t(state.locale, "actions.export"));
+
+  refs.controls.import.label.textContent = t(state.locale, "actions.import");
+  refs.controls.import.button.setAttribute("aria-label", t(state.locale, "actions.import"));
+  refs.controls.import.button.setAttribute("title", t(state.locale, "actions.import"));
+
+  refs.controls.reset.label.textContent = t(state.locale, "actions.reset");
+  refs.controls.reset.button.setAttribute("aria-label", t(state.locale, "actions.reset"));
+  refs.controls.reset.button.setAttribute("title", t(state.locale, "actions.reset"));
+
+  refs.statsLabels.forEach((label, key) => {
+    label.textContent = t(state.locale, key);
+  });
+
+  refs.statsMeta.forEach((meta, key) => {
+    if (key === "stats.seedRate") {
+      meta.textContent = t(state.locale, "stats.seedRate.metaNoPassive");
+    } else {
+      meta.textContent = STAT_META[state.locale]?.[key] ?? "";
+    }
+  });
+
+  refs.abilityTitle.textContent = t(state.locale, "abilities.title");
+  refs.abilityList.forEach((abilityRefs, abilityId) => {
+    const labelText = getAbilityLabel(state, abilityId as AbilityId, state.locale);
+    abilityRefs.label.textContent = labelText;
+    abilityRefs.container.title = formatAbilityTooltip(state, abilityId as AbilityId, state.locale);
+    abilityRefs.container.setAttribute('aria-label', labelText);
+  });
+
+  refs.sidePanel.tabs.forEach((button, tab) => {
+    const key = SIDE_PANEL_TAB_KEYS[tab];
+    const label = t(state.locale, key);
+    button.textContent = label;
+    button.setAttribute("aria-label", label);
+  });
+
+  refs.sidePanel.research.filters.forEach((button, key) => {
+    button.textContent = t(state.locale, `research.filter.${key}`);
+    button.setAttribute("aria-label", button.textContent ?? "");
+  });
+
+  refs.sidePanel.prestige.description.textContent = t(state.locale, "panel.prestige.description");
+  refs.sidePanel.prestige.permanentLabel.textContent = t(state.locale, "panel.prestige.permanent");
+  refs.sidePanel.prestige.kickstartLabel.textContent = t(state.locale, "panel.prestige.kickstartNext");
+  refs.sidePanel.prestige.activeKickstartLabel.textContent = t(state.locale, "panel.prestige.kickstartActive");
+  refs.sidePanel.prestige.actionButton.textContent = t(state.locale, "actions.prestige");
+
+  refs.prestigeModal.title.textContent = t(state.locale, "prestige.modal.title");
+  refs.prestigeModal.description.textContent = t(state.locale, "prestige.modal.description");
+  refs.prestigeModal.warning.textContent = t(state.locale, "prestige.modal.warning");
+  refs.prestigeModal.previewCurrentLabel.textContent = t(state.locale, 'prestige.modal.permanentBonus');
+  refs.prestigeModal.previewAfterLabel.textContent = t(state.locale, 'prestige.modal.kickstartNext');
+  refs.prestigeModal.previewGainLabel.textContent = t(state.locale, 'prestige.modal.kickstartActive');
+  refs.prestigeModal.previewBonusLabel.textContent = t(state.locale, 'prestige.modal.requirementProgress');
+  refs.prestigeModal.checkboxLabel.textContent = t(state.locale, "prestige.modal.checkbox");
+  refs.prestigeModal.confirmButton.textContent = t(state.locale, "prestige.modal.confirm");
+  refs.prestigeModal.cancelButton.textContent = t(state.locale, "actions.cancel");
+}
+
+function resolvePlantStage(total: Decimal): number {
+  const totalValue = total.toNumber();
+  if (!Number.isFinite(totalValue)) {
+    return PLANT_STAGE_MAX;
+  }
+
+  let stage = 0;
+  for (let i = 0; i < PLANT_STAGE_THRESHOLDS.length; i += 1) {
+    if (totalValue >= PLANT_STAGE_THRESHOLDS[i]) {
+      stage = i;
+    }
+  }
+
+  return Math.min(stage, PLANT_STAGE_MAX);
+}
+
+function plantStageAsset(stage: number): string {
+  const clamped = Math.max(0, Math.min(stage, PLANT_STAGE_MAX));
+  if (PLANT_STAGE_ASSET_SUFFIXES.length > 0) {
+    const index = Math.min(clamped, PLANT_STAGE_ASSET_SUFFIXES.length - 1);
+    const suffix = PLANT_STAGE_ASSET_SUFFIXES[index];
+    if (suffix) {
+      return `plant-stages/plant-stage-${suffix}.png`;
+    }
+  }
+
+  return `plant-stages/plant-stage-${(clamped + 1).toString().padStart(2, "0")}.png`;
+}
+function preloadPlantStage(stage: number): void {
+  const clamped = Math.max(0, Math.min(stage, PLANT_STAGE_MAX));
+  const assetPath = plantStageAsset(clamped);
+  if (preloadedPlantStages.has(assetPath)) {
+    return;
+  }
+
+  const image = new Image();
+  image.src = withBase(assetPath);
+  preloadedPlantStages.add(assetPath);
+}
+
+function triggerPlantStageAnimation(icon: HTMLDivElement): void {
+  icon.classList.add("is-upgrading");
+  window.setTimeout(() => {
+    icon.classList.remove("is-upgrading");
+  }, 600);
+}
+
+function updatePlantStage(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const nextStage = resolvePlantStage(state.prestige.lifetimeBuds);
+  const currentStage = Number(refs.clickIcon.dataset.stage ?? "0");
+
+  if (currentStage === nextStage) {
+    return;
+  }
+
+  refs.clickIcon.dataset.stage = nextStage.toString();
+  preloadPlantStage(nextStage);
+  preloadPlantStage(nextStage + 1);
+  const assetPath = plantStageAsset(nextStage);
+  refs.clickIcon.style.setProperty(
+    "background-image",
+    `url("${withBase(assetPath)}")`,
+  );
+  triggerPlantStageAnimation(refs.clickIcon);
+}
+
+function updateStats(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const preview = getPrestigePreview(state);
+  refs.buds.textContent = formatDecimal(state.buds);
+  refs.bps.textContent = formatDecimal(state.bps);
+  refs.bpc.textContent = formatDecimal(state.bpc);
+  refs.total.textContent = formatDecimal(state.total);
+  const seedText = formatInteger(state.locale, state.prestige.seeds);
+  refs.seeds.textContent = seedText;
+  const seedRateValue = formatSeedRate(state.locale, state.temp.seedRatePerHour ?? 0);
+  refs.seedRate.textContent = seedRateValue;
+  refs.prestigeMult.textContent = `${state.prestige.mult.toFixed(2)}\u00D7`;
+
+  refs.seedBadgeValue.textContent = seedText;
+  const seedRateMeta = refs.statsMeta.get("stats.seedRate");
+  if (seedRateMeta) {
+    if (state.temp.seedPassiveThrottled) {
+      const capText = formatSeedRate(state.locale, state.temp.seedRateCap ?? 0);
+      seedRateMeta.textContent = t(state.locale, "stats.seedRate.throttled", { cap: capText });
+    } else if (state.temp.seedPassiveConfig) {
+      const config = state.temp.seedPassiveConfig;
+      const progress = Math.round(Math.max(0, Math.min(1, state.temp.seedPassiveProgress ?? 0)) * 100);
+      const chance = Math.round(Math.max(0, Math.min(1, config.chance)) * 100);
+      const minutes = Math.max(1, Math.round(config.intervalMs / 60000));
+      const seeds = formatInteger(state.locale, config.seeds);
+      seedRateMeta.textContent = t(state.locale, "stats.seedRate.metaPassive", {
+        progress,
+        chance,
+        minutes,
+        seeds,
+      });
+    } else {
+      seedRateMeta.textContent = t(state.locale, "stats.seedRate.metaNoPassive");
+    }
+  }
+  const canPrestige = preview.requirementMet;
+  const badgeTooltip = canPrestige
+    ? t(state.locale, 'prestige.badge.tooltip', {
+        bonus: formatPermanentBonusSummary(state.locale, preview),
+      })
+    : t(state.locale, 'prestige.control.locked', {
+        requirement: formatDecimal(preview.requirementTarget),
+      });
+  refs.seedBadge.classList.toggle('is-ready', canPrestige);
+  refs.seedBadge.setAttribute('title', badgeTooltip);
+  refs.seedBadge.setAttribute('aria-label', badgeTooltip);
+
+  updatePlantStage(state);
+}
+
+function updateShop(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const entries = getShopEntries(state);
+  const sorted = sortShopEntries(entries);
+
+  sorted.forEach((entry, index) => {
+    let card = refs!.shopEntries.get(entry.definition.id);
+    if (!card) {
+      card = createShopCard(entry.definition.id, state);
+      refs!.shopEntries.set(entry.definition.id, card);
+    }
+
+    const iconPath = entry.definition.icon;
+    card.icon.src = iconPath;
+    card.icon.srcset = buildItemSrcset(iconPath);
+    card.icon.alt = entry.definition.name[state.locale];
+
+    card.name.textContent = entry.definition.name[state.locale];
+    card.description.textContent = entry.definition.description[state.locale];
+    card.costLabel.textContent = t(state.locale, "shop.cost");
+    card.ownedLabel.textContent = t(state.locale, "shop.owned");
+    card.buyButton.textContent = t(state.locale, "actions.buy");
+    card.maxButton.textContent = t(state.locale, "actions.max");
+
+    const roiText = formatRoi(state.locale, entry.roi);
+    card.roiValue.textContent = roiText;
+    card.roiBadge.dataset.variant = resolveRoiVariant(entry.roi);
+    card.roiBadge.setAttribute("aria-label", roiText);
+    card.roiBadge.setAttribute("title", roiText);
+
+    const stageLabel = t(state.locale, "shop.stageLabel", { level: entry.tier.stage });
+    card.stageLabel.textContent = stageLabel;
+    const tierTooltip = t(state.locale, "shop.stageTooltip", {
+      bonus: formatTierBonus(state.locale, entry.tier.bonus),
+      count: entry.tier.size,
+    });
+    card.stageLabel.setAttribute("title", tierTooltip);
+    card.stageLabel.setAttribute("aria-label", `${stageLabel} (${tierTooltip})`);
+    const stageProgressLabel = t(state.locale, "shop.stageProgress", {
+      remaining: entry.tier.remainingCount,
+      next: entry.tier.stage + 1,
+    });
+    card.stageProgressText.textContent = stageProgressLabel;
+    card.stageProgressText.setAttribute("title", stageProgressLabel);
+    card.stageProgressText.setAttribute("aria-label", stageProgressLabel);
+    const progressPercent = Math.max(0, Math.min(1, entry.tier.completion));
+    card.stageProgressBar.style.width = `${(progressPercent * 100).toFixed(2)}%`;
+
+    if (entry.softcap.active) {
+      const badgeText = t(state.locale, "shop.softcapBadge", { stacks: entry.softcap.stacks });
+      const reduction = Math.max(0, 1 - entry.softcap.multiplier.toNumber());
+      const reductionPercent = (reduction * 100).toFixed(1);
+      const nextThreshold = entry.softcap.nextThreshold;
+      const tooltipKey = nextThreshold ? "shop.softcapTooltipNext" : "shop.softcapTooltipMax";
+      const tooltip = t(state.locale, tooltipKey, {
+        percent: reductionPercent,
+        next: nextThreshold?.toString() ?? "—",
+      });
+      card.softcapBadge.textContent = badgeText;
+      card.softcapBadge.classList.remove("hidden");
+      card.softcapBadge.setAttribute("title", tooltip);
+      card.softcapBadge.setAttribute("aria-label", tooltip);
+    } else {
+      card.softcapBadge.textContent = "";
+      card.softcapBadge.classList.add("hidden");
+      card.softcapBadge.removeAttribute("title");
+      card.softcapBadge.removeAttribute("aria-label");
+    }
+
+    if (entry.unlocked) {
+      card.container.classList.remove("opacity-40");
+      card.container.classList.remove("is-locked");
+      card.buyButton.disabled = !entry.affordable;
+      card.maxButton.disabled = getMaxAffordable(entry.definition, state) === 0;
+    } else {
+      card.container.classList.add("opacity-40");
+      card.container.classList.add("is-locked");
+      card.buyButton.disabled = true;
+      card.maxButton.disabled = true;
+    }
+
+    card.container.dataset.locked = entry.unlocked ? "false" : "true";
+    card.container.dataset.affordable = entry.affordable && entry.unlocked ? "true" : "false";
+    card.container.classList.toggle("is-affordable", entry.affordable && entry.unlocked);
+    card.cost.textContent = entry.formattedCost;
+    card.owned.textContent = entry.owned.toString();
+
+    const list = refs.sidePanel.shop.list;
+    const currentChild = list.children.item(index);
+    if (currentChild !== card.container) {
+      list.insertBefore(card.container, currentChild ?? null);
+    }
+  });
+}
+
+function updateUpgrades(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const entries = getUpgradeEntries(state);
+  entries.forEach((entry, index) => {
+    let card = refs!.upgradeEntries.get(entry.definition.id);
+    if (!card) {
+      card = createUpgradeCard(entry.definition.id, state);
+      refs!.upgradeEntries.set(entry.definition.id, card);
+    }
+
+    const definition = entry.definition;
+    card.icon.src = definition.icon;
+    card.icon.alt = definition.name[state.locale];
+    card.name.textContent = definition.name[state.locale];
+    card.description.textContent = definition.description[state.locale];
+    card.category.textContent = t(state.locale, `upgrades.category.${definition.category}`);
+    card.costLabel.textContent = t(state.locale, 'upgrades.cost');
+    card.costValue.textContent = entry.formattedCost;
+
+    const statusState = resolveUpgradeState(entry);
+    card.container.dataset.state = statusState;
+    const statusKey =
+      statusState === 'owned'
+        ? 'upgrades.status.owned'
+        : statusState === 'affordable'
+          ? 'upgrades.status.affordable'
+          : statusState === 'ready'
+            ? 'upgrades.status.ready'
+            : 'upgrades.status.locked';
+    card.status.textContent = t(state.locale, statusKey);
+
+    const progressMessage = formatUpgradeProgressMessage(state, entry);
+    if (progressMessage) {
+      card.progress.textContent = progressMessage;
+      card.progress.classList.remove('hidden');
+    } else {
+      card.progress.textContent = '';
+      card.progress.classList.add('hidden');
+    }
+
+    updateUpgradeRequirements(state, card.requirementList, entry);
+
+    if (entry.owned) {
+      card.buyButton.disabled = true;
+      card.buyButton.textContent = t(state.locale, 'upgrades.status.owned');
+      card.buyButton.setAttribute('aria-disabled', 'true');
+    } else {
+      card.buyButton.disabled = !entry.affordable;
+      card.buyButton.textContent = t(state.locale, 'upgrades.action.buy');
+      card.buyButton.setAttribute('aria-disabled', entry.affordable ? 'false' : 'true');
+    }
+
+    card.container.dataset.category = definition.category;
+
+    const list = refs.sidePanel.upgrades.list;
+    const currentChild = list.children.item(index);
+    if (currentChild !== card.container) {
+      list.insertBefore(card.container, currentChild ?? null);
+    }
+  });
+}
+
+function resolveUpgradeState(entry: UpgradeViewEntry): 'owned' | 'affordable' | 'ready' | 'locked' {
+  if (entry.owned) {
+    return 'owned';
+  }
+  if (!entry.unlocked) {
+    return 'locked';
+  }
+  if (entry.affordable) {
+    return 'affordable';
+  }
+  return 'ready';
+}
+
+function formatUpgradeProgressMessage(state: GameState, entry: UpgradeViewEntry): string | null {
+  if (entry.owned) {
+    return t(state.locale, 'upgrades.progress.active');
+  }
+
+  if (!entry.unlocked && entry.primaryLock) {
+    return formatLockMessage(state, entry.primaryLock);
+  }
+
+  return null;
+}
+
+function formatLockMessage(state: GameState, detail: UpgradeRequirementDetail): string {
+  switch (detail.kind) {
+    case 'itemsOwned': {
+      const item = itemById.get(detail.id);
+      const name = item ? item.name[state.locale] : detail.id;
+      return t(state.locale, 'upgrades.lock.items', { remaining: detail.remaining, name });
+    }
+    case 'totalBuds': {
+      const amount = formatDecimal(new Decimal(detail.remaining));
+      return t(state.locale, 'upgrades.lock.total', { amount });
+    }
+    case 'upgradesOwned': {
+      const upgrade = getUpgradeDefinition(detail.id);
+      const name = upgrade ? upgrade.name[state.locale] : detail.id;
+      return t(state.locale, 'upgrades.lock.upgrade', { name });
+    }
+    default:
+      return '';
+  }
+}
+
+function updateUpgradeRequirements(
+  state: GameState,
+  list: HTMLElement,
+  entry: UpgradeViewEntry,
+): void {
+  const shouldShow = entry.requirementDetails.length > 0 && !entry.owned;
+  list.innerHTML = '';
+
+  if (!shouldShow) {
+    list.classList.add('hidden');
+    return;
+  }
+
+  list.classList.remove('hidden');
+  entry.requirementDetails.forEach((detail) => {
+    const text = formatRequirementDetailText(state, detail);
+    if (!text) {
+      return;
+    }
+    const item = document.createElement('li');
+    item.textContent = text;
+    list.appendChild(item);
+  });
+}
+
+function formatRequirementDetailText(state: GameState, detail: UpgradeRequirementDetail): string {
+  switch (detail.kind) {
+    case 'itemsOwned': {
+      const item = itemById.get(detail.id);
+      const name = item ? item.name[state.locale] : detail.id;
+      return t(state.locale, 'upgrades.requirement.items', {
+        current: detail.current,
+        required: detail.required,
+        name,
+      });
+    }
+    case 'totalBuds': {
+      const current = formatDecimal(new Decimal(detail.current));
+      const required = formatDecimal(new Decimal(detail.required));
+      return t(state.locale, 'upgrades.requirement.total', { current, required });
+    }
+    case 'upgradesOwned': {
+      const upgrade = getUpgradeDefinition(detail.id);
+      const name = upgrade ? upgrade.name[state.locale] : detail.id;
+      return t(state.locale, 'upgrades.requirement.upgrade', { name });
+    }
+    default:
+      return '';
+  }
+}
+
+function celebrateUpgrade(container: HTMLElement): void {
+  container.classList.add('is-celebrating');
+  window.setTimeout(() => {
+    container.classList.remove('is-celebrating');
+  }, 900);
+}
+
+function sortShopEntries(entries: ShopEntry[]): ShopEntry[] {
+  const sorted = [...entries];
+  sorted.sort((a, b) => {
+    if (a.unlocked !== b.unlocked) {
+      return a.unlocked ? -1 : 1;
+    }
+
+    return a.order - b.order;
+  });
+  return sorted;
+}
+
+function resolveRoiVariant(roi: number | null): 'fast' | 'medium' | 'slow' | 'none' {
+  if (roi === null || !Number.isFinite(roi)) {
+    return 'none';
+  }
+
+  if (roi < 120) {
+    return 'fast';
+  }
+
+  if (roi <= 600) {
+    return 'medium';
+  }
+
+  return 'slow';
+}
+
+function updateAbilities(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const now = Date.now();
+  refs.abilityList.forEach((abilityRefs, abilityId) => {
+    const ability = getAbilityDefinition(abilityId as AbilityId);
+    const runtime = state.abilities[abilityId as AbilityId];
+    if (!ability || !runtime) {
+      return;
+    }
+
+    const labelText = getAbilityLabel(state, abilityId as AbilityId, state.locale);
+    abilityRefs.label.textContent = labelText;
+    abilityRefs.container.title = formatAbilityTooltip(state, abilityId as AbilityId, state.locale);
+    abilityRefs.container.setAttribute('aria-label', labelText);
+
+    const progress = getAbilityProgress(state, abilityId as AbilityId, now);
+    const button = abilityRefs.container;
+    const status = abilityRefs.status;
+    const progressBar = abilityRefs.progressBar;
+
+    button.classList.remove('is-active', 'is-ready', 'is-cooldown');
+
+    let widthPercent = 0;
+
+    if (runtime.active) {
+      button.classList.add('is-active');
+      button.disabled = true;
+      const remaining = Math.max(0, progress.remaining);
+      const filled = ability.durationSec > 0 ? (ability.durationSec - remaining) / ability.durationSec : 1;
+      widthPercent = Math.max(0, Math.min(1, filled)) * 100;
+      status.textContent = t(state.locale, 'abilities.status.active', {
+        seconds: Math.ceil(remaining),
+      });
+    } else if (progress.readyIn <= 0) {
+      button.classList.add('is-ready');
+      button.disabled = false;
+      widthPercent = 100;
+      status.textContent = t(state.locale, 'abilities.status.ready');
+    } else {
+      button.classList.add('is-cooldown');
+      button.disabled = true;
+      const remainingCooldown = Math.max(0, progress.readyIn);
+      const filled = ability.cooldownSec > 0 ? (ability.cooldownSec - remainingCooldown) / ability.cooldownSec : 0;
+      widthPercent = Math.max(0, Math.min(1, filled)) * 100;
+      status.textContent = t(state.locale, 'abilities.status.cooldown', {
+        seconds: Math.ceil(remainingCooldown),
+      });
+    }
+
+    progressBar.style.width = `${widthPercent.toFixed(1)}%`;
+  });
+}
+
+function updateSidePanel(): void {
+  if (!refs) {
+    return;
+  }
+
+  refs.sidePanel.tabs.forEach((button, tab) => {
+    const isActive = tab === activeSidePanelTab;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+    button.setAttribute("aria-selected", isActive ? "true" : "false");
+    button.tabIndex = isActive ? 0 : -1;
+  });
+
+  (Object.entries(refs.sidePanel.views) as [SidePanelTab, HTMLElement][]).forEach(([tab, view]) => {
+    if (tab === activeSidePanelTab) {
+      view.classList.remove("hidden");
+      view.setAttribute("aria-hidden", "false");
+    } else {
+      view.classList.add("hidden");
+      view.setAttribute("aria-hidden", "true");
+    }
+  });
+}
+
+function updateResearch(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const lists: Record<ResearchFilter, ResearchViewModel[]> = {
+    all: getResearchList(state, "all"),
+    available: getResearchList(state, "available"),
+    owned: getResearchList(state, "owned"),
+  };
+
+  if (!researchFilterManuallySelected && activeResearchFilter !== "all" && lists[activeResearchFilter].length === 0) {
+    activeResearchFilter = "all";
+  }
+
+  refs.sidePanel.research.filters.forEach((button, key) => {
+    const isActive = key === activeResearchFilter;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", isActive ? "true" : "false");
+  });
+
+  renderResearchList(state, lists[activeResearchFilter]);
+}
+
+function updatePrestigePanel(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const preview = getPrestigePreview(state);
+  const panel = refs.sidePanel.prestige;
+
+  panel.description.textContent = t(state.locale, "panel.prestige.description");
+
+  panel.permanentLabel.textContent = t(state.locale, "panel.prestige.permanent");
+  panel.permanentValue.textContent = formatPermanentBonusSummary(state.locale, preview);
+
+  panel.kickstartLabel.textContent = t(state.locale, "panel.prestige.kickstartNext");
+  panel.kickstartValue.textContent = formatNextKickstartSummary(state.locale, preview);
+
+  panel.activeKickstartLabel.textContent = t(state.locale, "panel.prestige.kickstartActive");
+  panel.activeKickstartValue.textContent = formatActiveKickstartSummary(state.locale, preview);
+
+  updateMilestoneCards(state, panel.milestones);
+
+  const requirementText = preview.requirementMet
+    ? t(state.locale, "panel.prestige.ready")
+    : t(state.locale, "panel.prestige.progress", {
+        current: formatDecimal(preview.lifetimeBuds),
+        target: formatDecimal(preview.requirementTarget),
+      });
+
+  panel.requirement.textContent = requirementText;
+  panel.container.classList.toggle("is-ready", preview.requirementMet);
+  panel.container.classList.toggle("is-locked", !preview.requirementMet);
+
+  panel.actionButton.disabled = !preview.requirementMet;
+  panel.actionButton.setAttribute("aria-disabled", preview.requirementMet ? "false" : "true");
+  panel.actionButton.setAttribute(
+    "title",
+    preview.requirementMet ? t(state.locale, "actions.prestige") : requirementText,
+  );
+}
+
+function updateMilestoneCards(state: GameState, cards: Map<string, MilestoneCardRefs>): void {
+  const locale = state.locale;
+  const progressList = state.temp.milestoneProgress ?? [];
+  const progressMap = new Map(progressList.map((snapshot) => [snapshot.id, snapshot]));
+
+  milestones.forEach((definition) => {
+    const card = cards.get(definition.id);
+    if (!card) {
+      return;
+    }
+
+    const snapshot = progressMap.get(definition.id);
+    const achieved = snapshot?.achieved ?? Boolean(state.prestige.milestones[definition.id]);
+    const progressValue = snapshot ? Math.max(0, Math.min(1, snapshot.progress)) : achieved ? 1 : 0;
+
+    card.title.textContent = `${definition.order}. ${definition.name[locale]}`;
+    card.reward.textContent = definition.rewardSummary[locale];
+    card.description.textContent = definition.description[locale];
+    card.container.classList.toggle("is-active", achieved);
+    card.badge.textContent = t(locale, "milestones.active");
+    card.badge.classList.toggle("hidden", !achieved);
+    card.badge.classList.toggle("is-active", achieved);
+    card.progressFill.style.width = `${Math.round(progressValue * 100)}%`;
+    if (snapshot) {
+      card.progressLabel.textContent = formatMilestoneProgressText(state, snapshot.detail);
+    } else {
+      card.progressLabel.textContent = "";
+    }
+  });
+}
+
+function formatPermanentBonusSummary(locale: LocaleKey, preview: PrestigePreview): string {
+  const parts: string[] = [];
+  if (preview.totalBpsPercent > 0) {
+    parts.push(t(locale, "prestige.summary.bps", { value: formatPercent(locale, preview.totalBpsPercent) }));
+  }
+  if (preview.totalBpcPercent > 0) {
+    parts.push(t(locale, "prestige.summary.bpc", { value: formatPercent(locale, preview.totalBpcPercent) }));
+  }
+  if (preview.permanentGlobalPercent > 0) {
+    parts.push(t(locale, "prestige.summary.global", { value: formatPercent(locale, preview.permanentGlobalPercent) }));
+  }
+
+  if (!parts.length) {
+    return t(locale, "prestige.summary.none");
+  }
+
+  return parts.join(" · ");
+}
+
+function formatNextKickstartSummary(locale: LocaleKey, preview: PrestigePreview): string {
+  const config = preview.nextKickstartConfig;
+  if (!preview.nextKickstartLevel || !config) {
+    return t(locale, "prestige.kickstart.none");
+  }
+
+  const costBonus = config.costMult < 1
+    ? t(locale, "prestige.kickstart.discount", {
+        value: formatPercent(locale, (1 - config.costMult) * 100),
+      })
+    : "";
+
+  return t(locale, "prestige.kickstart.summary", {
+    level: preview.nextKickstartLevel,
+    duration: formatDuration(config.durationMs),
+    mult: formatInteger(locale, config.bpsMult),
+    cost: costBonus,
+  });
+}
+
+function formatActiveKickstartSummary(locale: LocaleKey, preview: PrestigePreview): string {
+  if (!preview.activeKickstartLevel || preview.activeKickstartRemainingMs <= 0) {
+    return t(locale, "prestige.kickstart.inactive");
+  }
+
+  const costBonus = preview.activeKickstartCostMult < 1
+    ? t(locale, "prestige.kickstart.discount", {
+        value: formatPercent(locale, (1 - preview.activeKickstartCostMult) * 100),
+      })
+    : "";
+
+  return t(locale, "prestige.kickstart.activeSummary", {
+    level: preview.activeKickstartLevel,
+    remaining: formatDuration(preview.activeKickstartRemainingMs),
+    mult: formatInteger(locale, preview.activeKickstartBpsMult),
+    cost: costBonus,
+  });
+}
+
+function formatMilestoneProgressText(state: GameState, detail: MilestoneProgressDetail): string {
+  const locale = state.locale;
+  switch (detail.type) {
+    case "unique_buildings":
+      return t(locale, "milestones.progress.unique", {
+        current: formatInteger(locale, detail.owned),
+        target: formatInteger(locale, detail.target),
+      });
+    case "buildings_at_least":
+      return t(locale, "milestones.progress.atLeast", {
+        current: formatInteger(locale, detail.satisfied),
+        target: formatInteger(locale, detail.target),
+        amount: formatInteger(locale, detail.amount),
+      });
+    case "any_building_at_least":
+      return t(locale, "milestones.progress.any", {
+        current: formatInteger(locale, detail.best),
+        target: formatInteger(locale, detail.target),
+      });
+    case "unlocked_and_any_at_least":
+      return t(locale, "milestones.progress.unlocked", {
+        unlocked: formatInteger(locale, detail.unlocked),
+        total: formatInteger(locale, detail.total),
+        current: formatInteger(locale, detail.best),
+        target: formatInteger(locale, detail.target),
+      });
+    default:
+      return "";
+  }
+}
+
+function formatPercent(locale: LocaleKey, value: number): string {
+  const formatter = new Intl.NumberFormat(locale, { minimumFractionDigits: 0, maximumFractionDigits: 1 });
+  return formatter.format(Math.max(0, value));
+}
+
+function formatInteger(locale: LocaleKey, value: number): string {
+  const formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
+  return formatter.format(Math.max(0, Math.floor(value)));
+}
+
+function updateAchievements(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const { achievements: achievementRefs } = refs.sidePanel;
+
+  achievements.forEach((definition) => {
+    const card = achievementRefs.entries.get(definition.id);
+    if (!card) {
+      return;
+    }
+
+    card.title.textContent = definition.name[state.locale];
+    card.description.textContent = definition.description[state.locale];
+
+    if (definition.rewardMultiplier) {
+      const percent = Math.round((definition.rewardMultiplier - 1) * 100);
+      card.reward.textContent = t(state.locale, "achievements.reward", { value: percent });
+      card.reward.classList.remove("hidden");
+    } else {
+      card.reward.textContent = "";
+      card.reward.classList.add("hidden");
+    }
+
+    const unlocked = Boolean(state.achievements[definition.id]);
+    card.status.textContent = unlocked
+      ? t(state.locale, "achievements.status.unlocked")
+      : t(state.locale, "achievements.status.locked");
+    card.container.classList.toggle("is-unlocked", unlocked);
+  });
+}
+
+function renderResearchList(state: GameState, entries?: ResearchViewModel[]): void {
+  if (!refs) {
+    return;
+  }
+
+  const researchRefs = refs.sidePanel.research;
+  const list = researchRefs.list;
+  const data = entries ?? getResearchList(state, activeResearchFilter);
+
+  researchRefs.emptyState.textContent = t(state.locale, "research.empty");
+
+  if (!data.length) {
+    if (researchRefs.emptyState.parentElement !== list) {
+      while (list.firstChild) {
+        list.removeChild(list.firstChild);
+      }
+      list.appendChild(researchRefs.emptyState);
+    }
+    return;
+  }
+
+  if (researchRefs.emptyState.parentElement === list) {
+    list.removeChild(researchRefs.emptyState);
+  }
+
+  const visible = new Set<string>();
+
+  data.forEach((entry, index) => {
+    let card = researchRefs.entries.get(entry.node.id);
+    if (!card) {
+      card = createResearchCard(entry.node.id, state);
+      researchRefs.entries.set(entry.node.id, card);
+    }
+
+    updateResearchCard(card, entry, state);
+
+    const currentChild = list.children.item(index);
+    if (currentChild !== card.container) {
+      list.insertBefore(card.container, currentChild ?? null);
+    }
+
+    visible.add(entry.node.id);
+  });
+
+  researchRefs.entries.forEach((card, id) => {
+    if (!visible.has(id) && card.container.parentElement === list) {
+      list.removeChild(card.container);
+    }
+  });
+}
+
+function createResearchCard(id: string, state: GameState): ResearchCardRefs {
+  const node = getResearchNode(id);
+  if (!node) {
+    throw new Error(`Unknown research node ${id}`);
+  }
+
+  const container = document.createElement("article");
+  container.className = "research-card";
+  container.dataset.researchId = id;
+
+  const header = document.createElement("div");
+  header.className = "research-header";
+
+  let icon: HTMLImageElement | null = null;
+  if (node.icon) {
+    icon = new Image();
+    icon.src = node.icon;
+    icon.alt = "";
+    icon.setAttribute("aria-hidden", "true");
+    icon.decoding = "async";
+    icon.className = "research-icon";
+    header.appendChild(icon);
+  }
+
+  const heading = document.createElement("div");
+  heading.className = "research-heading";
+
+  const pathTag = document.createElement("span");
+  pathTag.className = "research-path";
+  heading.appendChild(pathTag);
+
+  const title = document.createElement("h3");
+  title.className = "research-name";
+  heading.appendChild(title);
+
+  const description = document.createElement("p");
+  description.className = "research-desc";
+  heading.appendChild(description);
+
+  header.appendChild(heading);
+  container.appendChild(header);
+
+  const effects = document.createElement("ul");
+  effects.className = "mt-3 flex flex-wrap gap-2";
+  container.appendChild(effects);
+
+  const requires = document.createElement("p");
+  requires.className = "research-requires hidden";
+  container.appendChild(requires);
+
+  const lock = document.createElement("p");
+  lock.className = "research-lock hidden";
+  container.appendChild(lock);
+
+  const cost = document.createElement("div");
+  cost.className =
+    "research-cost mt-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-neutral-900/60 px-3 py-1 text-sm text-neutral-200";
+  container.appendChild(cost);
+
+  const actions = document.createElement("div");
+  actions.className = "research-actions";
+  container.appendChild(actions);
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "research-btn";
+  button.dataset.researchId = id;
+  actions.appendChild(button);
+
+  button.addEventListener("click", () => {
+    const currentNode = getResearchNode(id);
+    if (!currentNode) {
+      return;
+    }
+
+    if (state.researchOwned.includes(id)) {
+      return;
+    }
+
+    if (!requirementsMet(state, currentNode) || !canAfford(state, currentNode)) {
+      return;
+    }
+
+    if (currentNode.confirmKey) {
+      const confirmation = t(state.locale, currentNode.confirmKey);
+      if (!window.confirm(confirmation)) {
+        return;
+      }
+    }
+
+    const purchased = purchaseResearch(state, id);
+    if (purchased) {
+      audio.playPurchase();
+      recalcDerivedValues(state);
+      renderUI(state);
+    }
+  });
+
+  return {
+    id,
+    container,
+    icon,
+    path: pathTag,
+    title,
+    description,
+    effects,
+    requires,
+    lock,
+    cost,
+    button,
+  } satisfies ResearchCardRefs;
+}
+
+function updateResearchCard(card: ResearchCardRefs, entry: ResearchViewModel, state: GameState): void {
+  const { node } = entry;
+
+  card.container.classList.toggle("is-owned", entry.owned);
+  card.container.classList.toggle("is-locked", entry.blocked);
+
+  if (card.icon && node.icon) {
+    card.icon.src = node.icon;
+  }
+
+  card.path.textContent = t(state.locale, `research.path.${node.path}`);
+  card.title.textContent = node.name[state.locale];
+  card.description.textContent = node.desc[state.locale];
+
+  if (node.effects.length > 0) {
+    card.effects.classList.remove("hidden");
+    card.effects.innerHTML = "";
+    node.effects.forEach((effect) => {
+      const chip = document.createElement("li");
+      chip.className =
+        "inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200";
+      chip.textContent = formatResearchEffect(state.locale, effect);
+      card.effects.appendChild(chip);
+    });
+  } else {
+    card.effects.innerHTML = "";
+    card.effects.classList.add("hidden");
+  }
+
+  if (node.requires && node.requires.length > 0) {
+    const names = node.requires
+      .map((id) => getResearchNode(id)?.name[state.locale] ?? id)
+      .join(", ");
+    card.requires.textContent = t(state.locale, "research.requires", { list: names });
+    card.requires.classList.remove("hidden");
+  } else {
+    card.requires.textContent = "";
+    card.requires.classList.add("hidden");
+  }
+
+  if (!entry.owned && entry.lockReason) {
+    card.lock.textContent = formatResearchLockReason(state, entry.lockReason);
+    card.lock.classList.remove("hidden");
+  } else {
+    card.lock.textContent = "";
+    card.lock.classList.add("hidden");
+  }
+
+  const costLabelKey = node.costType === "buds" ? "research.cost.buds" : "research.cost.seeds";
+  const costValue = node.costType === "buds" ? formatDecimal(node.cost) : node.cost.toString();
+  card.cost.textContent = `${t(state.locale, costLabelKey)}: ${costValue}`;
+
+  if (entry.owned) {
+    card.button.textContent = t(state.locale, "research.button.owned");
+    card.button.disabled = true;
+  } else if (entry.blocked) {
+    card.button.textContent = t(state.locale, "research.button.locked");
+    card.button.disabled = true;
+  } else {
+    card.button.textContent = t(state.locale, "research.button.buy");
+    card.button.disabled = !entry.affordable;
+  }
+
+  card.button.setAttribute("aria-disabled", card.button.disabled ? "true" : "false");
+}
+
+function formatResearchEffect(locale: LocaleKey, effect: ResearchEffect): string {
+  if (effect.labelKey) {
+    if (effect.id === 'BUILDING_MULT') {
+      const factor = Number.isFinite(effect.v) && effect.v ? effect.v : 1;
+      return t(locale, effect.labelKey, { value: factor.toFixed(2) });
+    }
+
+    if (effect.id === 'HYBRID_BUFF_PER_ACTIVE') {
+      const percent = Math.round((effect.v ?? 0) * 100);
+      return t(locale, effect.labelKey, { percent });
+    }
+
+    if (effect.id === 'STRAIN_CHOICE') {
+      return t(locale, effect.labelKey);
+    }
+  }
+
+  switch (effect.id) {
+    case 'BPC_MULT':
+      return t(locale, 'research.effect.bpc', { value: (effect.v ?? 1).toFixed(2) });
+    case 'BPS_MULT':
+      return t(locale, 'research.effect.bps', { value: (effect.v ?? 1).toFixed(2) });
+    case 'COST_REDUCE_ALL': {
+      const percent = Math.round((1 - (effect.v ?? 1)) * 100);
+      return t(locale, 'research.effect.cost', { value: percent });
+    }
+    case 'CLICK_AUTOMATION':
+      return t(locale, 'research.effect.autoclick', { value: effect.v ?? 0 });
+    case 'ABILITY_OVERDRIVE_PLUS': {
+      const percent = Math.round((effect.v ?? 0) * 100);
+      return t(locale, 'research.effect.overdrive', { value: percent });
+    }
+    case 'OFFLINE_CAP_HOURS_ADD': {
+      const hours = Math.round(effect.v ?? 0);
+      return t(locale, 'research.effect.offline', { value: hours });
+    }
+    case 'ABILITY_DURATION_MULT': {
+      const percent = Math.round(((effect.v ?? 1) - 1) * 100);
+      return t(locale, 'research.effect.abilityDuration', { value: percent });
+    }
+    case 'HYBRID_BUFF_PER_ACTIVE': {
+      const percent = Math.round((effect.v ?? 0) * 100);
+      return t(locale, 'research.effect.hybridBuff', { percent });
+    }
+    case 'STRAIN_CHOICE':
+      return '';
+    case 'SEED_CLICK_BONUS': {
+      const percent = Math.round((effect.v ?? 0) * 100);
+      return t(locale, 'research.effect.seedClick', { value: percent });
+    }
+    case 'SEED_PASSIVE': {
+      if (effect.seedPassive) {
+        const minutes = Math.round(effect.seedPassive.intervalMinutes);
+        const chance = Math.round(effect.seedPassive.chance * 100);
+        const seeds = Math.max(1, Math.floor(effect.seedPassive.seeds));
+        return t(locale, 'research.effect.seedPassive', {
+          minutes,
+          chance,
+          seeds,
+        });
+      }
+      return '';
+    }
+    default:
+      return '';
+  }
+}
+
+function formatResearchLockReason(state: GameState, reason: ResearchLockReason): string {
+  const locale = state.locale;
+  if (reason.kind === 'exclusive') {
+    return t(locale, 'research.lock.exclusive');
+  }
+
+  const entries = reason.conditions
+    .map((condition) => describeUnlockCondition(state, condition))
+    .filter((text): text is string => text.length > 0);
+
+  const list = entries.join(', ');
+  if (reason.kind === 'unlock_all') {
+    return t(locale, 'research.lock.all', { list });
+  }
+
+  return t(locale, 'research.lock.any', { list });
+}
+
+function describeUnlockCondition(state: GameState, condition: ResearchUnlockCondition): string {
+  const locale = state.locale;
+  switch (condition.type) {
+    case 'total_buds':
+      return t(locale, 'research.lock.totalBuds', { value: formatDecimal(condition.value) });
+    case 'prestige_seeds':
+      return t(locale, 'research.lock.prestigeSeeds', {
+        value: condition.value,
+        current: state.prestige.seeds,
+      });
+    default:
+      return '';
+  }
+}
+
+function updatePrestigeModal(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  const preview = getPrestigePreview(state);
+  const modal = refs.prestigeModal;
+
+  modal.previewCurrentValue.textContent = formatPermanentBonusSummary(state.locale, preview);
+  modal.previewAfterValue.textContent = formatNextKickstartSummary(state.locale, preview);
+  modal.previewGainValue.textContent = formatActiveKickstartSummary(state.locale, preview);
+  modal.previewBonusValue.textContent = t(state.locale, 'prestige.modal.requirementProgressValue', {
+    current: formatDecimal(preview.lifetimeBuds),
+    target: formatDecimal(preview.requirementTarget),
+  });
+
+  modal.checkbox.checked = prestigeAcknowledged;
+
+  const status = preview.requirementMet
+    ? ''
+    : t(state.locale, 'prestige.modal.requirementHint', {
+        target: formatDecimal(preview.requirementTarget),
+        current: formatDecimal(preview.lifetimeBuds),
+      });
+
+  modal.statusLabel.textContent = status;
+  modal.statusLabel.classList.toggle('hidden', status.length === 0);
+
+  modal.confirmButton.disabled = !prestigeAcknowledged || !preview.requirementMet;
+}
+
+function openPrestigeModal(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  prestigeOpen = true;
+  prestigeAcknowledged = false;
+  refs.prestigeModal.checkbox.checked = false;
+  refs.prestigeModal.overlay.classList.remove('hidden');
+  refs.prestigeModal.overlay.setAttribute('aria-hidden', 'false');
+  requestAnimationFrame(() => refs.prestigeModal.overlay.classList.add('visible'));
+  updatePrestigeModal(state);
+}
+
+function closePrestigeModal(): void {
+  if (!refs) {
+    return;
+  }
+
+  prestigeOpen = false;
+  prestigeAcknowledged = false;
+  refs.prestigeModal.checkbox.checked = false;
+  refs.prestigeModal.overlay.classList.remove('visible');
+  refs.prestigeModal.overlay.setAttribute('aria-hidden', 'true');
+  setTimeout(() => {
+    refs?.prestigeModal.overlay.classList.add('hidden');
+  }, 200);
+}
+
+function updateOfflineToast(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  if (state.temp.offlineBuds && state.temp.offlineDuration > 0) {
+    if (state.settings.showOfflineEarnings) {
+      const title = t(state.locale, "toast.offline.title");
+      const message = t(state.locale, "toast.offline.body", {
+        buds: formatDecimal(state.temp.offlineBuds),
+        duration: formatDuration(state.temp.offlineDuration),
+      });
+      showToast(title, message);
+    }
+
+    state.temp.offlineBuds = null;
+    state.temp.offlineDuration = 0;
+  }
+}
+
+function ensureEventScheduler(state: GameState): void {
+  if (!refs) {
+    return;
+  }
+
+  if (!eventSchedulerReady) {
+    eventSchedulerReady = true;
+    document.addEventListener("visibilitychange", handleEventVisibilityChange);
+    scheduleNextEvent(state, true);
+    return;
+  }
+
+  if (!eventSpawnTimer && !activeEventButton) {
+    scheduleNextEvent(state);
+  }
+}
+
+function handleEventVisibilityChange(): void {
+  if (document.hidden) {
+    if (eventSpawnTimer) {
+      window.clearTimeout(eventSpawnTimer);
+      eventSpawnTimer = null;
+    }
+    if (eventLifetimeTimer) {
+      window.clearTimeout(eventLifetimeTimer);
+      eventLifetimeTimer = null;
+    }
+    if (activeEventButton) {
+      activeEventButton.remove();
+      activeEventButton = null;
+    }
+    return;
+  }
+
+  scheduleNextEvent();
+}
+
+function scheduleNextEvent(state?: GameState | null, immediate = false): void {
+  const targetState = state ?? schedulerState;
+  if (!targetState || !refs) {
+    return;
+  }
+
+  if (eventSpawnTimer) {
+    window.clearTimeout(eventSpawnTimer);
+  }
+
+  const delay = immediate
+    ? randomBetween(1_500, 3_500)
+    : randomBetween(EVENT_SPAWN_MIN_MS, EVENT_SPAWN_MAX_MS);
+
+  eventSpawnTimer = window.setTimeout(() => {
+    spawnRandomEvent(targetState);
+  }, delay);
+}
+
+function spawnRandomEvent(state: GameState): void {
+  eventSpawnTimer = null;
+
+  if (!refs || document.hidden) {
+    scheduleNextEvent(state, true);
+    return;
+  }
+
+  if (activeEventButton) {
+    return;
+  }
+
+  const layer = refs.eventLayer;
+  const rect = layer.getBoundingClientRect();
+  if (rect.width < 80 || rect.height < 80) {
+    scheduleNextEvent(state, true);
+    return;
+  }
+
+  const definition = pickRandomEventDefinition();
+  const lifetime = randomBetween(EVENT_VISIBLE_MIN_MS, EVENT_VISIBLE_MAX_MS);
+  const path = computeEventPath(rect, lifetime);
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "event-icon";
+  button.style.left = `${path.startX}px`;
+  button.style.top = `${path.startY}px`;
+  button.style.transform = "translate(-50%, -50%)";
+  button.setAttribute("aria-label", t(state.locale, definition.labelKey));
+
+  const iconPath = asset(definition.icon);
+  const image = new Image();
+  image.src = iconPath;
+  image.srcset = buildItemSrcset(iconPath);
+  image.alt = "";
+  image.decoding = "async";
+  image.draggable = false;
+  image.className = "event-icon__img";
+
+  button.appendChild(image);
+  layer.appendChild(button);
+  activeEventButton = button;
+
+  button.animate(
+    [
+      { transform: "translate(-50%, -50%)" },
+      {
+        transform: `translate(calc(-50% + ${path.dx}px), calc(-50% + ${path.dy}px))`,
+      },
+    ],
+    {
+      duration: lifetime,
+      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+      fill: "forwards",
+    },
+  );
+
+  eventLifetimeTimer = window.setTimeout(() => {
+    removeActiveEvent("expired");
+  }, lifetime);
+
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    handleEventClick(state, definition, button);
+  });
+}
+
+function handleEventClick(
+  state: GameState,
+  definition: RandomEventDefinition,
+  element: HTMLButtonElement,
+): void {
+  const now = Date.now();
+  const hadActiveBoost =
+    state.temp.activeEventBoost === "lucky_joint" && state.temp.eventBoostEndsAt > now;
+
+  const result = applyEventReward(state, definition.id, now);
+  if (result.requiresRecalc) {
+    recalcDerivedValues(state);
+  }
+
+  showEventFeedback(state, definition.id, result, hadActiveBoost, element);
+  removeActiveEvent("clicked");
+  renderUI(state);
+}
+
+function showEventFeedback(
+  state: GameState,
+  id: EventId,
+  result: EventClickResult,
+  refreshed: boolean,
+  origin: HTMLElement,
+): void {
+  if (!refs) {
+    return;
+  }
+
+  if (id === "golden_bud" && result.budGain) {
+    const formatted = formatDecimal(result.budGain);
+    spawnFloatingValue(origin, `+${formatted}`);
+    showToast(
+      t(state.locale, "events.goldenBud.title"),
+      t(state.locale, "events.goldenBud.body", { buds: formatted }),
+    );
+  }
+
+  if (typeof result.seedGain === "number" && result.seedGain > 0) {
+    const formatted = result.seedGain.toString();
+    spawnFloatingValue(origin, `+${formatted}🌱`, "rgb(252 211 77)");
+
+    let messageKey: string;
+    if (id === "seed_pack") {
+      messageKey = "events.seedPack.body";
+    } else if (id === "golden_bud") {
+      messageKey = "events.goldenBud.seedBody";
+    } else {
+      messageKey = "events.luckyJoint.seedBody";
+    }
+
+    showToast(
+      t(state.locale, `events.${id}.title`),
+      t(state.locale, messageKey, { seeds: formatted }),
+    );
+  }
+
+  if (id === "lucky_joint" && result.multiplier) {
+    const durationSeconds = Math.round((result.durationMs ?? 0) / 1000);
+    spawnFloatingValue(origin, `×${result.multiplier.toFixed(1)}`, "rgb(96 165 250)");
+    const bodyKey = refreshed ? "events.luckyJoint.refresh" : "events.luckyJoint.body";
+    showToast(
+      t(state.locale, "events.luckyJoint.title"),
+      t(state.locale, bodyKey, {
+        multiplier: result.multiplier,
+        duration: durationSeconds,
+      }),
+    );
+  }
+}
+
+function removeActiveEvent(reason: "clicked" | "expired"): void {
+  if (eventLifetimeTimer) {
+    window.clearTimeout(eventLifetimeTimer);
+    eventLifetimeTimer = null;
+  }
+
+  if (!activeEventButton) {
+    scheduleNextEvent();
+    return;
+  }
+
+  const element = activeEventButton;
+  activeEventButton = null;
+
+  element.remove();
+  scheduleNextEvent(undefined, reason === "clicked");
+}
+
+function computeEventPath(rect: DOMRect, lifetime: number): {
+  startX: number;
+  startY: number;
+  dx: number;
+  dy: number;
+} {
+  const width = rect.width;
+  const height = rect.height;
+  const horizontalMargin = Math.min(width * 0.1, 120);
+  const verticalMargin = Math.min(height * 0.15, 140);
+  const baseRatio = randomBetween(0.5, 0.7);
+  const travelDistance = (width * baseRatio * lifetime) / 10_000;
+  const direction = Math.random() < 0.5 ? -1 : 1;
+
+  let startX = randomBetween(horizontalMargin, width - horizontalMargin);
+  let endX = startX + direction * travelDistance;
+  const minX = horizontalMargin;
+  const maxX = width - horizontalMargin;
+  if (endX < minX) {
+    const correction = minX - endX;
+    startX += correction;
+    endX = minX;
+  } else if (endX > maxX) {
+    const correction = endX - maxX;
+    startX -= correction;
+    endX = maxX;
+  }
+
+  const startY = randomBetween(verticalMargin, height - verticalMargin);
+  const drift = Math.min(height * 0.12, 120);
+  let endY = startY + randomBetween(-drift, drift);
+  const minY = verticalMargin;
+  const maxY = height - verticalMargin;
+  if (endY < minY) {
+    endY = minY;
+  } else if (endY > maxY) {
+    endY = maxY;
+  }
+
+  return {
+    startX,
+    startY,
+    dx: endX - startX,
+    dy: endY - startY,
+  };
+}
+
+function randomBetween(min: number, max: number): number {
+  return Math.random() * (max - min) + min;
+}
+
+function showToast(title: string, message: string): void {
+  if (!refs) {
+    return;
+  }
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+
+  const heading = document.createElement("strong");
+  heading.className = "toast-title";
+  heading.textContent = title;
+
+  const body = document.createElement("span");
+  body.className = "toast-message";
+  body.textContent = message;
+
+  toast.appendChild(heading);
+  toast.appendChild(body);
+  refs.toastContainer.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add("visible"));
+
+  setTimeout(() => {
+    toast.classList.remove("visible");
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+}
+
+function formatDuration(durationMs: number): string {
+  const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  const parts: string[] = [];
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+  if (minutes > 0 || hours > 0) {
+    parts.push(`${minutes}m`);
+  }
+  parts.push(`${seconds}s`);
+
+  return parts.join(" ");
+}
+
+function createShopCard(itemId: string, state: GameState): ShopCardRefs {
+  if (!refs) {
+    throw new Error("UI refs missing");
+  }
+
+  const definition = itemById.get(itemId);
+  if (!definition) {
+    throw new Error(`Unknown item ${itemId}`);
+  }
+
+  const container = document.createElement("article");
+  container.className =
+    "relative grid gap-4 rounded-xl border border-white/10 bg-neutral-900/70 p-4 shadow-card backdrop-blur-sm transition hover:border-emerald-400/40 sm:grid-cols-[1fr_auto] sm:items-center sm:p-5";
+  container.classList.add("shop-card");
+
+  const info = document.createElement("div");
+  info.className = "flex flex-col gap-3";
+
+  const headerRow = document.createElement("div");
+  headerRow.className = "flex items-start justify-between gap-3";
+
+  const titleWrap = document.createElement("div");
+  titleWrap.className = "space-y-1 flex-1";
+
+  const name = document.createElement("h3");
+  name.className = "text-lg font-semibold text-neutral-100";
+  name.textContent = definition.name[state.locale];
+  titleWrap.appendChild(name);
+
+  const description = document.createElement("p");
+  description.className = "text-sm leading-snug text-neutral-400";
+  description.textContent = definition.description[state.locale];
+  titleWrap.appendChild(description);
+
+  const roiBadge = document.createElement("span");
+  roiBadge.className = "roi-badge";
+
+  const roiValue = document.createElement("span");
+  roiValue.className = "roi-badge__value";
+  roiBadge.appendChild(roiValue);
+
+  headerRow.append(titleWrap, roiBadge);
+  info.appendChild(headerRow);
+
+  const tierHeader = document.createElement("div");
+  tierHeader.className = "tier-header";
+
+  const stageWrap = document.createElement("div");
+  stageWrap.className = "flex items-center gap-2";
+
+  const stageLabel = document.createElement("span");
+  stageLabel.className = "tier-label";
+  stageWrap.appendChild(stageLabel);
+
+  const softcapBadge = document.createElement("span");
+  softcapBadge.className = "softcap-badge hidden";
+  stageWrap.appendChild(softcapBadge);
+
+  tierHeader.appendChild(stageWrap);
+
+  const stageProgressText = document.createElement("span");
+  stageProgressText.className = "tier-progress-text";
+  tierHeader.appendChild(stageProgressText);
+
+  const progressTrack = document.createElement("div");
+  progressTrack.className = "tier-progress-track";
+
+  const progressBar = document.createElement("div");
+  progressBar.className = "tier-progress-bar";
+  progressTrack.appendChild(progressBar);
+
+  info.append(tierHeader, progressTrack);
+
+  const details = document.createElement("dl");
+  details.className = "grid grid-cols-2 gap-x-4 gap-y-1 text-sm opacity-90";
+
+  const cost = createDetail(details, t(state.locale, "shop.cost"));
+  const owned = createDetail(details, t(state.locale, "shop.owned"));
+
+  info.appendChild(details);
+
+  const actions = document.createElement("div");
+  actions.className = "mt-3 flex flex-wrap gap-2 sm:flex-nowrap";
+
+  const buyButton = document.createElement("button");
+  buyButton.type = "button";
+  buyButton.className = "buy-btn h-10 flex-1";
+  buyButton.textContent = t(state.locale, "actions.buy");
+
+  const maxButton = document.createElement("button");
+  maxButton.type = "button";
+  maxButton.className =
+    "h-10 shrink-0 rounded-lg border border-white/10 px-4 text-sm font-semibold text-neutral-200 transition hover:border-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300";
+  maxButton.textContent = t(state.locale, "actions.max");
+
+  actions.append(buyButton, maxButton);
+  info.appendChild(actions);
+
+  const media = document.createElement("div");
+  media.className = "w-24 aspect-square shrink-0 justify-self-center sm:justify-self-end sm:w-28 md:w-32";
+
+  const icon = document.createElement("img");
+  icon.src = definition.icon;
+  icon.srcset = buildItemSrcset(definition.icon);
+  icon.alt = definition.name[state.locale];
+  icon.decoding = "async";
+  icon.className = "h-full w-full object-contain";
+
+  media.appendChild(icon);
+
+  container.append(info, media);
+  buyButton.addEventListener("click", () => {
+    if (buyItem(state, itemId, 1)) {
+      audio.playPurchase();
+      save(state);
+      renderUI(state);
+    }
+  });
+
+  maxButton.addEventListener("click", () => {
+    const count = getMaxAffordable(definition, state);
+    if (count > 0 && buyItem(state, itemId, count)) {
+      audio.playPurchase();
+      save(state);
+      renderUI(state);
+    }
+  });
+
+  return {
+    container,
+    icon,
+    name,
+    description,
+    roiBadge,
+    roiValue,
+    stageLabel,
+    stageProgressBar: progressBar,
+    stageProgressText,
+    softcapBadge,
+    costLabel: cost.label,
+    cost: cost.value,
+    ownedLabel: owned.label,
+    owned: owned.value,
+    buyButton,
+    maxButton,
+  } satisfies ShopCardRefs;
+}
+
+function createUpgradeCard(upgradeId: string, state: GameState): UpgradeCardRefs {
+  if (!refs) {
+    throw new Error('UI refs missing');
+  }
+
+  const definition = getUpgradeDefinition(upgradeId);
+  if (!definition) {
+    throw new Error(`Unknown upgrade ${upgradeId}`);
+  }
+
+  const container = document.createElement('article');
+  container.className = 'upgrade-card';
+  container.dataset.upgradeId = upgradeId;
+
+  const iconWrap = document.createElement('div');
+  iconWrap.className = 'upgrade-card__media';
+  const icon = document.createElement('img');
+  icon.className = 'upgrade-card__icon';
+  icon.src = definition.icon;
+  icon.alt = definition.name[state.locale];
+  icon.decoding = 'async';
+  iconWrap.appendChild(icon);
+
+  const body = document.createElement('div');
+  body.className = 'upgrade-card__body';
+
+  const header = document.createElement('div');
+  header.className = 'upgrade-card__header';
+
+  const category = document.createElement('span');
+  category.className = 'upgrade-card__category';
+  category.textContent = t(state.locale, `upgrades.category.${definition.category}`);
+
+  const name = document.createElement('h3');
+  name.className = 'upgrade-card__name';
+  name.textContent = definition.name[state.locale];
+
+  header.append(category, name);
+
+  const description = document.createElement('p');
+  description.className = 'upgrade-card__description';
+  description.textContent = definition.description[state.locale];
+
+  const status = document.createElement('span');
+  status.className = 'upgrade-card__status';
+
+  const progress = document.createElement('p');
+  progress.className = 'upgrade-card__progress hidden';
+
+  const requirementList = document.createElement('ul');
+  requirementList.className = 'upgrade-card__requirements hidden';
+
+  const footer = document.createElement('div');
+  footer.className = 'upgrade-card__footer';
+
+  const costWrap = document.createElement('div');
+  costWrap.className = 'upgrade-card__cost-wrap';
+  const costLabel = document.createElement('span');
+  costLabel.className = 'upgrade-card__cost-label';
+  costLabel.textContent = t(state.locale, 'upgrades.cost');
+  const costValue = document.createElement('span');
+  costValue.className = 'upgrade-card__cost';
+  costValue.textContent = formatDecimal(new Decimal(definition.cost));
+  costWrap.append(costLabel, costValue);
+
+  const buyButton = document.createElement('button');
+  buyButton.type = 'button';
+  buyButton.className = 'upgrade-card__button';
+  buyButton.textContent = t(state.locale, 'upgrades.action.buy');
+
+  footer.append(costWrap, buyButton);
+
+  body.append(header, description, status, progress, requirementList, footer);
+  container.append(iconWrap, body);
+
+  buyButton.addEventListener('click', () => {
+    if (buyUpgrade(state, upgradeId)) {
+      audio.playPurchase();
+      const locale = state.locale;
+      const title = t(locale, 'upgrades.toast.title');
+      const message = t(locale, 'upgrades.toast.message', { name: definition.name[locale] });
+      showToast(title, message);
+      save(state);
+      celebrateUpgrade(container);
+      spawnFloatingValue(container, t(locale, 'upgrades.fx.spark'), 'rgb(74 222 128)');
+      renderUI(state);
+    }
+  });
+
+  return {
+    container,
+    icon,
+    category,
+    name,
+    description,
+    status,
+    progress,
+    requirementList,
+    costLabel,
+    costValue,
+    buyButton,
+  } satisfies UpgradeCardRefs;
+}
+function getStatIcon(key: string): string {
+  const iconMap: Record<string, string> = {
+    "stats.buds": "icons/ui/icon-leaf-click.png",
+    "stats.bps": "icons/upgrades/upgrade-global-bps.png",
+    "stats.bpc": "icons/ui/ui-stat-bpc.png",
+    "stats.total": "icons/ui/ui-stat-total.png",
+    "stats.seeds": "icons/ui/ui-seed.png",
+    "stats.seedRate": "icons/ui/ui-seed.png",
+    "stats.prestigeMult": "icons/ui/ui-prestige-mult.png",
+  };
+  return iconMap[key] || "icons/ui/icon-leaf-click.png";
+}
+
+function createCompactStatBlock(
+  key: string,
+  container: HTMLElement,
+  labels: Map<string, HTMLElement>,
+  meta: Map<string, HTMLElement>,
+): HTMLElement {
+  const wrapper = document.createElement("div");
+  wrapper.className = "stat-item";
+  wrapper.dataset.variant = key;
+
+  const iconWrap = document.createElement("span");
+  iconWrap.className = "stat-item__icon-wrap";
+
+  const icon = document.createElement("img");
+  icon.className = "stat-item__icon";
+  icon.src = withBase(getStatIcon(key));
+  icon.alt = "";
+  icon.loading = "lazy";
+
+  iconWrap.append(icon);
+
+  const contentDiv = document.createElement("div");
+  contentDiv.className = "stat-item__content";
+
+  const label = document.createElement("div");
+  label.className = "stat-item__label";
+  label.textContent = t("en", key); // Default to English for now
+
+  const value = document.createElement("div");
+  value.className = "stat-item__value";
+  value.textContent = "0";
+
+  const metaLine = document.createElement("div");
+  metaLine.className = "stat-item__meta";
+  metaLine.textContent = "";
+
+  contentDiv.append(label, value, metaLine);
+  wrapper.append(iconWrap, contentDiv);
+  container.appendChild(wrapper);
+
+  labels.set(key, label);
+  meta.set(key, metaLine);
+
+  return value;
+}
+
+function createStatBlock(
+  key: string,
+  container: HTMLElement,
+  labels: Map<string, HTMLElement>,
+  meta: Map<string, HTMLElement>,
+): HTMLElement {
+  return createCompactStatBlock(key, container, labels, meta);
+}
+
+function createDetail(wrapper: HTMLElement, labelText: string): { label: HTMLElement; value: HTMLElement } {
+  const label = document.createElement("dt");
+  label.textContent = labelText;
+  label.className = "text-neutral-400";
+  const value = document.createElement("dd");
+  value.className = "justify-self-end font-medium text-neutral-100";
+  wrapper.append(label, value);
+  return { label, value };
+}
+
+function wrapIcon(icon: HTMLImageElement): HTMLSpanElement {
+  const wrapper = document.createElement("span");
+  wrapper.className = "icon-badge";
+  icon.classList.add("icon-img", "icon-dark");
+  wrapper.append(icon);
+  return wrapper;
+}
+
+function createActionButton(iconPath: string): ControlButtonRefs {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className =
+    "inline-flex items-center gap-2 rounded-lg border border-white/10 bg-neutral-900/60 px-2.5 py-1.5 text-sm font-medium text-neutral-200 shadow-[0_10px_24px_rgba(9,11,19,0.45)] transition hover:border-emerald-400/40 hover:bg-neutral-800/70 focus-visible:ring-2 focus-visible:ring-emerald-300/70 focus-visible:ring-offset-0";
+
+  const icon = new Image();
+  icon.src = iconPath;
+  icon.alt = "";
+  icon.decoding = "async";
+
+  const iconWrap = wrapIcon(icon);
+  iconWrap.classList.add("control-icon-badge");
+  icon.classList.add("control-icon-img");
+
+  const label = document.createElement("span");
+  label.className = "hidden whitespace-nowrap text-sm font-medium text-neutral-200 sm:inline";
+
+  button.append(iconWrap, label);
+
+  return { button, icon, label };
+}
+function createDangerButton(iconPath: string): ControlButtonRefs {
+  const control = createActionButton(iconPath);
+  control.button.className = control.button.className
+    .replace("hover:border-emerald-400/40", "hover:border-rose-400/60")
+    .replace("hover:bg-neutral-800/70", "hover:bg-rose-900/30")
+    .replace("focus-visible:ring-emerald-300/70", "focus-visible:ring-rose-300/70");
+  control.button.classList.add("text-rose-300");
+  return control;
+}
+
+function createAbilityButton(id: string, state: GameState): AbilityButtonRefs {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'ability-btn';
+
+  const header = document.createElement('div');
+  header.className = 'ability-header';
+
+  const iconWrap = document.createElement('span');
+  iconWrap.className = 'ability-icon';
+
+  const icon = document.createElement('img');
+  icon.className = 'ability-icon-img';
+  icon.decoding = 'async';
+  icon.loading = 'lazy';
+  icon.alt = '';
+    icon.setAttribute('aria-hidden', 'true');
+  icon.src = withBase(ABILITY_ICON_MAP[id as AbilityId] ?? 'icons/ui/icon-leaf-click.png');
+  iconWrap.appendChild(icon);
+
+  const meta = document.createElement('div');
+  meta.className = 'ability-meta';
+
+  const label = document.createElement('span');
+  label.className = 'ability-label';
+  const labelText = getAbilityLabel(state, id as AbilityId, state.locale);
+  label.textContent = labelText;
+
+  const status = document.createElement('span');
+  status.className = 'ability-status';
+
+  meta.append(label, status);
+  header.append(iconWrap, meta);
+
+  const progress = document.createElement('div');
+  progress.className = 'ability-progress';
+
+  const progressBar = document.createElement('div');
+  progressBar.className = 'ability-progress-bar';
+  progress.appendChild(progressBar);
+
+  button.append(header, progress);
+  button.title = formatAbilityTooltip(state, id as AbilityId, state.locale);
+  button.setAttribute('aria-label', labelText);
+
+  return { container: button, icon, label, status, progressBar };
+}
+
+function createSidePanel(): SidePanelRefs {
+  const section = document.createElement("section");
+  section.className = "card fade-in space-y-5";
+
+  const tabList = document.createElement("div");
+  tabList.className = "tab-strip";
+  tabList.setAttribute("role", "tablist");
+  section.appendChild(tabList);
+
+  const tabs = new Map<SidePanelTab, HTMLButtonElement>();
+  (['shop', 'upgrades', 'research', 'prestige', 'achievements'] as SidePanelTab[]).forEach((tab) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.tab = tab;
+    button.className = "tab-button";
+    button.setAttribute("aria-pressed", "false");
+    button.setAttribute("role", "tab");
+    tabList.appendChild(button);
+    tabs.set(tab, button);
+  });
+
+  const viewsContainer = document.createElement("div");
+  viewsContainer.className = "space-y-5";
+  section.appendChild(viewsContainer);
+
+  const shopView = document.createElement("div");
+  shopView.className = "space-y-4";
+  const shopList = document.createElement("div");
+  shopList.className = "grid gap-3";
+  shopView.appendChild(shopList);
+  viewsContainer.appendChild(shopView);
+
+  const upgradesView = document.createElement("div");
+  upgradesView.className = "space-y-4";
+  const upgradeList = document.createElement("div");
+  upgradeList.className = "grid gap-3";
+  upgradesView.appendChild(upgradeList);
+  viewsContainer.appendChild(upgradesView);
+
+  const researchView = document.createElement("div");
+  researchView.className = "space-y-4";
+  const researchControls = document.createElement("div");
+  researchControls.className = "research-controls";
+  const filterWrap = document.createElement("div");
+  filterWrap.className = "research-filters";
+  const researchFilters = new Map<string, HTMLButtonElement>();
+  (['all', 'available', 'owned'] as ResearchFilter[]).forEach((key) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.filter = key;
+    button.className = "filter-pill";
+    filterWrap.appendChild(button);
+    researchFilters.set(key, button);
+  });
+  researchControls.appendChild(filterWrap);
+  researchView.appendChild(researchControls);
+  const researchList = document.createElement("div");
+  researchList.className = "grid gap-3";
+  researchView.appendChild(researchList);
+  const researchEmpty = document.createElement("p");
+  researchEmpty.className = "research-empty text-sm text-neutral-400";
+  viewsContainer.appendChild(researchView);
+
+  const prestigePanel = createPrestigePanel();
+  viewsContainer.appendChild(prestigePanel.container);
+
+  const achievementsView = document.createElement("div");
+  achievementsView.className = "space-y-4";
+  const achievementsList = document.createElement("div");
+  achievementsList.className = "grid gap-3";
+  achievementsView.appendChild(achievementsList);
+  viewsContainer.appendChild(achievementsView);
+
+  const achievementRefs = new Map<string, AchievementCardRefs>();
+  achievements.forEach((definition) => {
+    const card = createAchievementCard(definition);
+    achievementRefs.set(definition.id, card);
+    achievementsList.appendChild(card.container);
+  });
+
+  const views: Record<SidePanelTab, HTMLElement> = {
+    shop: shopView,
+    upgrades: upgradesView,
+    research: researchView,
+    prestige: prestigePanel.container,
+    achievements: achievementsView,
+  };
+
+  Object.entries(views).forEach(([tab, view]) => {
+    if (tab === activeSidePanelTab) {
+      view.setAttribute("aria-hidden", "false");
+    } else {
+      view.classList.add("hidden");
+      view.setAttribute("aria-hidden", "true");
+    }
+  });
+
+  return {
+    section,
+    tabList,
+    tabs,
+    views,
+    shop: {
+      list: shopList,
+    },
+    upgrades: {
+      list: upgradeList,
+      entries: new Map(),
+    },
+    research: {
+      container: researchView,
+      filters: researchFilters,
+      list: researchList,
+      entries: new Map(),
+      emptyState: researchEmpty,
+    },
+    prestige: prestigePanel,
+    achievements: {
+      list: achievementsList,
+      entries: achievementRefs,
+    },
+  } satisfies SidePanelRefs;
+}
+
+function createPrestigePanel(): PrestigePanelRefs {
+  const container = document.createElement("div");
+  container.className = "prestige-panel";
+
+  const description = document.createElement("p");
+  description.className = "prestige-panel__description";
+  container.appendChild(description);
+
+  const stats = document.createElement("div");
+  stats.className = "prestige-panel__stats";
+  container.appendChild(stats);
+
+  const permanent = createPrestigePanelStat(stats);
+  const kickstart = createPrestigePanelStat(stats);
+  const active = createPrestigePanelStat(stats);
+
+  const milestoneList = document.createElement("div");
+  milestoneList.className = "milestone-list";
+  container.appendChild(milestoneList);
+
+  const milestoneRefs = new Map<string, MilestoneCardRefs>();
+  milestones.forEach((definition) => {
+    const card = createMilestoneCard();
+    milestoneRefs.set(definition.id, card);
+    milestoneList.appendChild(card.container);
+  });
+
+  const requirement = document.createElement("p");
+  requirement.className = "prestige-panel__requirement";
+  container.appendChild(requirement);
+
+  const actionButton = document.createElement("button");
+  actionButton.type = "button";
+  actionButton.className = "prestige-panel__action";
+  container.appendChild(actionButton);
+
+  return {
+    container,
+    description,
+    permanentLabel: permanent.label,
+    permanentValue: permanent.value,
+    kickstartLabel: kickstart.label,
+    kickstartValue: kickstart.value,
+    activeKickstartLabel: active.label,
+    activeKickstartValue: active.value,
+    milestoneList,
+    milestones: milestoneRefs,
+    requirement,
+    actionButton,
+  } satisfies PrestigePanelRefs;
+}
+
+function createPrestigePanelStat(wrapper: HTMLElement): { label: HTMLElement; value: HTMLElement } {
+  const row = document.createElement("div");
+  row.className = "prestige-panel__stat";
+
+  const label = document.createElement("dt");
+  label.className = "prestige-panel__stat-label";
+  row.appendChild(label);
+
+  const value = document.createElement("dd");
+  value.className = "prestige-panel__stat-value";
+  row.appendChild(value);
+
+  wrapper.appendChild(row);
+  return { label, value };
+}
+
+function createMilestoneCard(): MilestoneCardRefs {
+  const container = document.createElement("article");
+  container.className = "milestone-card";
+
+  const header = document.createElement("div");
+  header.className = "milestone-card__header";
+
+  const title = document.createElement("h3");
+  title.className = "milestone-card__title";
+  header.appendChild(title);
+
+  const badge = document.createElement("span");
+  badge.className = "milestone-card__badge";
+  header.appendChild(badge);
+
+  container.appendChild(header);
+
+  const reward = document.createElement("p");
+  reward.className = "milestone-card__reward";
+  container.appendChild(reward);
+
+  const description = document.createElement("p");
+  description.className = "milestone-card__description";
+  container.appendChild(description);
+
+  const progressBar = document.createElement("div");
+  progressBar.className = "milestone-card__progress";
+
+  const progressFill = document.createElement("div");
+  progressFill.className = "milestone-card__progress-fill";
+  progressBar.appendChild(progressFill);
+  container.appendChild(progressBar);
+
+  const progressLabel = document.createElement("p");
+  progressLabel.className = "milestone-card__progress-label";
+  container.appendChild(progressLabel);
+
+  return {
+    container,
+    title,
+    reward,
+    description,
+    badge,
+    progressBar,
+    progressFill,
+    progressLabel,
+  } satisfies MilestoneCardRefs;
+}
+
+function createAchievementCard(definition: AchievementDefinition): AchievementCardRefs {
+  const container = document.createElement("article");
+  container.className = "achievement-card";
+
+  const badge = document.createElement("div");
+  badge.className = "achievement-card__badge";
+
+  const base = new Image();
+  base.src = withBase("achievements/badge-base.png");
+  base.srcset = buildItemSrcset(withBase("achievements/badge-base.png"));
+  base.alt = "";
+  base.decoding = "async";
+  base.className = "achievement-card__badge-base";
+
+  const overlay = new Image();
+  overlay.src = definition.overlayIcon;
+  overlay.srcset = buildItemSrcset(definition.overlayIcon);
+  overlay.alt = "";
+  overlay.decoding = "async";
+  overlay.className = "achievement-card__badge-overlay";
+
+  const ribbon = new Image();
+  ribbon.src = withBase("achievements/badge-ribbon.png");
+  ribbon.srcset = buildItemSrcset(withBase("achievements/badge-ribbon.png"));
+  ribbon.alt = "";
+  ribbon.decoding = "async";
+  ribbon.className = "achievement-card__badge-ribbon";
+
+  badge.append(base, overlay, ribbon);
+  container.appendChild(badge);
+
+  const content = document.createElement("div");
+  content.className = "achievement-card__content";
+
+  const title = document.createElement("h3");
+  title.className = "achievement-card__title";
+  content.appendChild(title);
+
+  const description = document.createElement("p");
+  description.className = "achievement-card__description";
+  content.appendChild(description);
+
+  const reward = document.createElement("p");
+  reward.className = "achievement-card__reward";
+  content.appendChild(reward);
+
+  const status = document.createElement("span");
+  status.className = "achievement-card__status";
+  content.appendChild(status);
+
+  container.appendChild(content);
+
+  return {
+    container,
+    iconBase: base,
+    iconOverlay: overlay,
+    title,
+    description,
+    reward,
+    status,
+  } satisfies AchievementCardRefs;
+}
+
+function createPrestigeModal(): PrestigeModalRefs {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay hidden';
+  overlay.setAttribute('aria-hidden', 'true');
+
+  const dialog = document.createElement('div');
+  dialog.className = 'modal-card';
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
+
+  const title = document.createElement('h2');
+  title.className = 'modal-title';
+
+  const description = document.createElement('p');
+  description.className = 'text-sm text-neutral-300';
+
+  const stats = document.createElement('dl');
+  stats.className = 'modal-stats grid gap-3 sm:grid-cols-2';
+
+  const current = createModalStat(stats);
+  const after = createModalStat(stats);
+  const gain = createModalStat(stats);
+  const bonus = createModalStat(stats);
+
+  const warning = document.createElement('p');
+  warning.className = 'modal-warning';
+
+  const checkboxWrap = document.createElement('label');
+  checkboxWrap.className = 'mt-3 flex items-center gap-2 text-sm text-neutral-300';
+
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.className = 'h-4 w-4 rounded border border-emerald-500/50 bg-transparent text-emerald-300 focus-visible:ring-emerald-300/70';
+
+  const checkboxLabel = document.createElement('span');
+
+  checkboxWrap.append(checkbox, checkboxLabel);
+
+  const statusLabel = document.createElement('p');
+  statusLabel.className = 'text-sm font-medium text-amber-300';
+
+  const actions = document.createElement('div');
+  actions.className = 'modal-actions';
+
+  const cancelButton = document.createElement('button');
+  cancelButton.type = 'button';
+  cancelButton.className = 'modal-button secondary';
+
+  const confirmButton = document.createElement('button');
+  confirmButton.type = 'button';
+  confirmButton.className = 'modal-button primary';
+
+  actions.append(cancelButton, confirmButton);
+  dialog.append(title, description, stats, warning, checkboxWrap, statusLabel, actions);
+  overlay.appendChild(dialog);
+
+  return {
+    overlay,
+    dialog,
+    title,
+    description,
+    warning,
+    previewCurrentLabel: current.label,
+    previewCurrentValue: current.value,
+    previewAfterLabel: after.label,
+    previewAfterValue: after.value,
+    previewGainLabel: gain.label,
+    previewGainValue: gain.value,
+    previewBonusLabel: bonus.label,
+    previewBonusValue: bonus.value,
+    checkbox,
+    checkboxLabel,
+    confirmButton,
+    cancelButton,
+    statusLabel,
+  } satisfies PrestigeModalRefs;
+}
+
+function createModalStat(wrapper: HTMLElement): { label: HTMLElement; value: HTMLElement } {
+  const row = document.createElement("div");
+  row.className = "modal-stat";
+
+  const label = document.createElement("dt");
+  label.className = "modal-stat-label";
+
+  const value = document.createElement("dd");
+  value.className = "modal-stat-value";
+
+  row.append(label, value);
+  wrapper.appendChild(row);
+
+  return { label, value };
+}
+
+function announce(refs: UIRefs, total: Decimal): void {
+  if (total.minus(lastAnnounced).lessThan(10)) {
+    return;
+  }
+
+  refs.announcer.textContent = `Buds: ${formatDecimal(total)}`;
+  lastAnnounced = total;
+}
+
+export {};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
