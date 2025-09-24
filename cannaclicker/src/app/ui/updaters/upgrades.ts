@@ -8,7 +8,7 @@ import {
   type UpgradeEntry as UpgradeViewEntry,
   type UpgradeRequirementDetail,
 } from "../../upgrades";
-import { itemById } from "../../data/items";
+import { itemById } from "../../../data/items";
 import { buyUpgrade } from "../../game";
 import type { UIRefs, UpgradeCardRefs } from "../types";
 

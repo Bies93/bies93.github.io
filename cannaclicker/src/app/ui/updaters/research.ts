@@ -11,7 +11,7 @@ import {
   type ResearchLockReason,
   type ResearchViewModel,
 } from "../../research";
-import type { ResearchEffect, ResearchUnlockCondition } from "../../data/research";
+import type { ResearchEffect, ResearchUnlockCondition } from "../../../data/research";
 import type { ResearchCardRefs, UIRefs } from "../types";
 
 export interface ResearchUpdateResult {

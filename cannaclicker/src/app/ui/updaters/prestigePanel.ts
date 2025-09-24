@@ -2,7 +2,7 @@ import { t } from "../../i18n";
 import { formatDecimal } from "../../math";
 import type { GameState } from "../../state";
 import { getPrestigePreview } from "../../prestige";
-import { milestones } from "../../data/milestones";
+import { milestones } from "../../../data/milestones";
 import type { UIRefs, MilestoneCardRefs } from "../types";
 import {
   formatActiveKickstartSummary,

@@ -1,6 +1,6 @@
 import { t } from "../../i18n";
 import type { GameState } from "../../state";
-import { achievements } from "../../data/achievements";
+import { achievements } from "../../../data/achievements";
 import type { UIRefs } from "../types";
 
 export function updateAchievements(state: GameState, refs: UIRefs): void {

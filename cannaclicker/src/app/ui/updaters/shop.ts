@@ -11,7 +11,7 @@ import {
   formatRoi,
   type ShopEntry,
 } from "../../shop";
-import { itemById } from "../../data/items";
+import { itemById } from "../../../data/items";
 import type { ShopCardRefs, UIRefs } from "../types";
 
 export interface ShopUpdateOptions {
