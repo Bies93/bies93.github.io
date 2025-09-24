@@ -1,6 +1,6 @@
-import { withBase } from "../paths";
+import { withBase } from "../../paths";
 import { buildItemSrcset } from "./media";
-import type { AchievementDefinition } from "../../data/achievements";
+import type { AchievementDefinition } from "../../../data/achievements";
 import type { AchievementCardRefs } from "../types";
 
 export function createAchievementCard(definition: AchievementDefinition): AchievementCardRefs {

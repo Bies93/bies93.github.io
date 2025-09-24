@@ -1,4 +1,4 @@
-import { milestones } from "../../data/milestones";
+import { milestones } from "../../../data/milestones";
 import type { MilestoneCardRefs, PrestigePanelRefs } from "../types";
 import { createMilestoneCard } from "./milestoneCard";
 

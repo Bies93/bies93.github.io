@@ -1,6 +1,6 @@
-import { withBase } from "../paths";
-import { formatAbilityTooltip, getAbilityLabel } from "../abilities";
-import type { AbilityId, GameState } from "../state";
+import { withBase } from "../../paths";
+import { formatAbilityTooltip, getAbilityLabel } from "../../abilities";
+import type { AbilityId, GameState } from "../../state";
 import type { ControlButtonRefs, AbilityButtonRefs } from "../types";
 
 const ABILITY_ICON_MAP: Record<AbilityId, string> = {

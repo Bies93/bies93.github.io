@@ -1,5 +1,5 @@
-import { achievements } from "../../data/achievements";
-import type { ResearchFilter } from "../research";
+import { achievements } from "../../../data/achievements";
+import type { ResearchFilter } from "../../research";
 import { createAchievementCard } from "../components/achievementCard";
 import { createPrestigePanel } from "../components/prestigePanel";
 import type { AchievementCardRefs, SidePanelRefs, SidePanelTab } from "../types";

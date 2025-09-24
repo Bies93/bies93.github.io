@@ -1,5 +1,5 @@
-import { t } from "../i18n";
-import { withBase } from "../paths";
+import { t } from "../../i18n";
+import { withBase } from "../../paths";
 
 export function getStatIcon(key: string): string {
   const iconMap: Record<string, string> = {
