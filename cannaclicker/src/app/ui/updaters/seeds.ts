@@ -3,8 +3,13 @@ import { t } from "../../i18n";
 import { formatInteger } from "../utils/format";
 import type { GameState } from "../../state";
 import type { UIRefs } from "../types";
+import type { ToastOptions } from "../services/toast";
 
-export function processSeedNotifications(state: GameState, refs: UIRefs, showToast: (title: string, message: string) => void): void {
+export function processSeedNotifications(
+  state: GameState,
+  refs: UIRefs,
+  showToast: (options: ToastOptions) => void,
+): void {
   const queue = state.temp.seedNotifications;
   if (!Array.isArray(queue) || queue.length === 0) {
     return;
@@ -22,15 +27,15 @@ export function processSeedNotifications(state: GameState, refs: UIRefs, showToa
 
     if (notification.type === "synergy") {
       const name = t(state.locale, `seeds.synergy.${notification.id}`);
-      showToast(
-        t(state.locale, "seeds.toast.synergy.title"),
-        t(state.locale, "seeds.toast.synergy.body", { name, seeds: seedsText }),
-      );
+      showToast({
+        title: t(state.locale, "seeds.toast.synergy.title"),
+        message: t(state.locale, "seeds.toast.synergy.body", { name, seeds: seedsText }),
+      });
     } else if (notification.type === "passive") {
-      showToast(
-        t(state.locale, "seeds.toast.passive.title"),
-        t(state.locale, "seeds.toast.passive.body", { seeds: seedsText }),
-      );
+      showToast({
+        title: t(state.locale, "seeds.toast.passive.title"),
+        message: t(state.locale, "seeds.toast.passive.body", { seeds: seedsText }),
+      });
     }
   }
 }

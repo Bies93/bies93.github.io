@@ -47,7 +47,10 @@ export function createEventButton(
   lifetime: number,
   refs: UIRefs,
 ): HTMLButtonElement {
-  const layer = refs.eventLayer;
+  const layer = refs.eventLayer ?? refs.eventRoot;
+  if (!layer) {
+    throw new Error('Missing event layer');
+  }
   const rect = layer.getBoundingClientRect();
   const path = computeEventPath(rect, lifetime);
 
