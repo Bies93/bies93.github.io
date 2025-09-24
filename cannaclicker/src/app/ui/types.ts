@@ -96,7 +96,7 @@ export interface AbilityButtonRefs {
 }
 
 export interface PrestigeModalRefs {
-  overlay: HTMLElement;
+  overlay?: HTMLElement;
   dialog: HTMLDivElement;
   title: HTMLElement;
   description: HTMLElement;
@@ -174,7 +174,9 @@ export interface UIRefs {
   shopEntries: Map<string, ShopCardRefs>;
   upgradeEntries: Map<string, UpgradeCardRefs>;
   prestigeModal: PrestigeModalRefs;
-  toastContainer: HTMLElement;
-  eventLayer: HTMLElement;
+  toastContainer?: HTMLElement;
+  eventLayer?: HTMLElement;
+  modalOverlay?: HTMLElement;
+  eventRoot?: HTMLElement;
 }
 

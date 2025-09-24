@@ -2,7 +2,7 @@ import '../styles/index.css';
 import { trackFocusVisible } from '@zag-js/focus-visible';
 import { migrate, load, initState, save } from './save';
 import { startLoop } from './loop';
-import { renderUI } from './ui';
+import { startUI } from './ui';
 import { flags } from './flags';
 import type { GameState } from './state';
 
@@ -17,13 +17,13 @@ migrate();
 const persisted = load();
 const state = initState(persisted);
 
-renderUI(state);
+const ui = startUI(state);
 
 startLoop(
   state,
   {
     onTick: (current) => {
-      renderUI(current);
+      ui.render(current);
     },
     onAutosave: (current) => {
       save(current);

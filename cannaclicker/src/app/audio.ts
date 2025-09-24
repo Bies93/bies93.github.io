@@ -1,7 +1,7 @@
 import { Howl, Howler } from 'howler';
 import { persistAudioPreference } from './save';
 
-interface AudioManager {
+export interface AudioManager {
   playClick(): void;
   playPurchase(): void;
   toggleMute(): boolean;
