@@ -19,6 +19,8 @@ export interface ResearchUpdateResult {
   researchFilterManuallySelected: boolean;
 }
 
+const wiredCards = new WeakSet<ResearchCardRefs>();
+
 export function updateResearch(
   state: GameState,
   refs: UIRefs,
@@ -43,12 +45,12 @@ export function updateResearch(
     button.setAttribute("aria-pressed", isActive ? "true" : "false");
   });
 
-  renderResearchList(state, refs, nextFilter, onPurchase, lists[nextFilter]);
+  renderList(state, refs, nextFilter, onPurchase, lists[nextFilter]);
 
   return { activeFilter: nextFilter, researchFilterManuallySelected };
 }
 
-function renderResearchList(
+export function renderList(
   state: GameState,
   refs: UIRefs,
   activeFilter: ResearchFilter,
@@ -80,11 +82,12 @@ function renderResearchList(
   data.forEach((entry, index) => {
     let card = researchRefs.entries.get(entry.node.id);
     if (!card) {
-      card = createResearchCard(entry.node.id, state, onPurchase);
+      card = createResearchCard(entry.node.id);
       researchRefs.entries.set(entry.node.id, card);
+      wireCard(state, card, onPurchase);
     }
 
-    updateResearchCard(card, entry, state);
+    renderCard(card, entry, state);
 
     const currentChild = list.children.item(index);
     if (currentChild !== card.container) {
@@ -101,7 +104,108 @@ function renderResearchList(
   });
 }
 
-function createResearchCard(id: string, state: GameState, onPurchase: () => void): ResearchCardRefs {
+export function renderCard(card: ResearchCardRefs, entry: ResearchViewModel, state: GameState): void {
+  const { node } = entry;
+
+  card.container.classList.toggle("is-owned", entry.owned);
+  card.container.classList.toggle("is-locked", entry.blocked);
+
+  if (card.icon && node.icon) {
+    card.icon.src = node.icon;
+  }
+
+  card.path.textContent = t(state.locale, `research.path.${node.path}`);
+  card.title.textContent = node.name[state.locale];
+  card.description.textContent = node.desc[state.locale];
+
+  if (node.effects.length > 0) {
+    card.effects.classList.remove("hidden");
+    card.effects.innerHTML = "";
+    node.effects.forEach((effect) => {
+      const chip = document.createElement("li");
+      chip.className =
+        "inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200";
+      chip.textContent = formatResearchEffect(state.locale, effect);
+      card.effects.appendChild(chip);
+    });
+  } else {
+    card.effects.innerHTML = "";
+    card.effects.classList.add("hidden");
+  }
+
+  if (node.requires && node.requires.length > 0) {
+    const names = node.requires
+      .map((requirementId) => getResearchNode(requirementId)?.name[state.locale] ?? requirementId)
+      .join(", ");
+    card.requires.textContent = t(state.locale, "research.requires", { list: names });
+    card.requires.classList.remove("hidden");
+  } else {
+    card.requires.textContent = "";
+    card.requires.classList.add("hidden");
+  }
+
+  if (!entry.owned && entry.lockReason) {
+    card.lock.textContent = formatResearchLockReason(state, entry.lockReason);
+    card.lock.classList.remove("hidden");
+  } else {
+    card.lock.textContent = "";
+    card.lock.classList.add("hidden");
+  }
+
+  const costLabelKey = node.costType === "buds" ? "research.cost.buds" : "research.cost.seeds";
+  const costValue = node.costType === "buds" ? formatDecimal(node.cost) : node.cost.toString();
+  card.cost.textContent = `${t(state.locale, costLabelKey)}: ${costValue}`;
+
+  if (entry.owned) {
+    card.button.textContent = t(state.locale, "research.button.owned");
+    card.button.disabled = true;
+  } else if (entry.blocked) {
+    card.button.textContent = t(state.locale, "research.button.locked");
+    card.button.disabled = true;
+  } else {
+    card.button.textContent = t(state.locale, "research.button.buy");
+    card.button.disabled = !entry.affordable;
+  }
+
+  card.button.setAttribute("aria-disabled", card.button.disabled ? "true" : "false");
+}
+
+export function wireCard(state: GameState, card: ResearchCardRefs, onPurchase: () => void): void {
+  if (wiredCards.has(card)) {
+    return;
+  }
+
+  wiredCards.add(card);
+
+  card.button.addEventListener("click", () => {
+    const node = getResearchNode(card.id);
+    if (!node) {
+      return;
+    }
+
+    if (state.researchOwned.includes(card.id)) {
+      return;
+    }
+
+    if (!requirementsMet(state, node) || !canAfford(state, node)) {
+      return;
+    }
+
+    if (node.confirmKey) {
+      const confirmation = t(state.locale, node.confirmKey);
+      if (!window.confirm(confirmation)) {
+        return;
+      }
+    }
+
+    const purchased = purchaseResearch(state, card.id);
+    if (purchased) {
+      onPurchase();
+    }
+  });
+}
+
+function createResearchCard(id: string): ResearchCardRefs {
   const node = getResearchNode(id);
   if (!node) {
     throw new Error(`Unknown research node ${id}`);
@@ -170,33 +274,6 @@ function createResearchCard(id: string, state: GameState, onPurchase: () => void
   button.dataset.researchId = id;
   actions.appendChild(button);
 
-  button.addEventListener("click", () => {
-    const currentNode = getResearchNode(id);
-    if (!currentNode) {
-      return;
-    }
-
-    if (state.researchOwned.includes(id)) {
-      return;
-    }
-
-    if (!requirementsMet(state, currentNode) || !canAfford(state, currentNode)) {
-      return;
-    }
-
-    if (currentNode.confirmKey) {
-      const confirmation = t(state.locale, currentNode.confirmKey);
-      if (!window.confirm(confirmation)) {
-        return;
-      }
-    }
-
-    const purchased = purchaseResearch(state, id);
-    if (purchased) {
-      onPurchase();
-    }
-  });
-
   return {
     id,
     container,
@@ -210,72 +287,6 @@ function createResearchCard(id: string, state: GameState, onPurchase: () => void
     cost,
     button,
   } satisfies ResearchCardRefs;
-}
-
-function updateResearchCard(card: ResearchCardRefs, entry: ResearchViewModel, state: GameState): void {
-  const { node } = entry;
-
-  card.container.classList.toggle("is-owned", entry.owned);
-  card.container.classList.toggle("is-locked", entry.blocked);
-
-  if (card.icon && node.icon) {
-    card.icon.src = node.icon;
-  }
-
-  card.path.textContent = t(state.locale, `research.path.${node.path}`);
-  card.title.textContent = node.name[state.locale];
-  card.description.textContent = node.desc[state.locale];
-
-  if (node.effects.length > 0) {
-    card.effects.classList.remove("hidden");
-    card.effects.innerHTML = "";
-    node.effects.forEach((effect) => {
-      const chip = document.createElement("li");
-      chip.className =
-        "inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200";
-      chip.textContent = formatResearchEffect(state.locale, effect);
-      card.effects.appendChild(chip);
-    });
-  } else {
-    card.effects.innerHTML = "";
-    card.effects.classList.add("hidden");
-  }
-
-  if (node.requires && node.requires.length > 0) {
-    const names = node.requires
-      .map((requirementId) => getResearchNode(requirementId)?.name[state.locale] ?? requirementId)
-      .join(", ");
-    card.requires.textContent = t(state.locale, "research.requires", { list: names });
-    card.requires.classList.remove("hidden");
-  } else {
-    card.requires.textContent = "";
-    card.requires.classList.add("hidden");
-  }
-
-  if (!entry.owned && entry.lockReason) {
-    card.lock.textContent = formatResearchLockReason(state, entry.lockReason);
-    card.lock.classList.remove("hidden");
-  } else {
-    card.lock.textContent = "";
-    card.lock.classList.add("hidden");
-  }
-
-  const costLabelKey = node.costType === "buds" ? "research.cost.buds" : "research.cost.seeds";
-  const costValue = node.costType === "buds" ? formatDecimal(node.cost) : node.cost.toString();
-  card.cost.textContent = `${t(state.locale, costLabelKey)}: ${costValue}`;
-
-  if (entry.owned) {
-    card.button.textContent = t(state.locale, "research.button.owned");
-    card.button.disabled = true;
-  } else if (entry.blocked) {
-    card.button.textContent = t(state.locale, "research.button.locked");
-    card.button.disabled = true;
-  } else {
-    card.button.textContent = t(state.locale, "research.button.buy");
-    card.button.disabled = !entry.affordable;
-  }
-
-  card.button.setAttribute("aria-disabled", card.button.disabled ? "true" : "false");
 }
 
 function formatResearchEffect(locale: LocaleKey, effect: ResearchEffect): string {
@@ -378,4 +389,3 @@ function describeUnlockCondition(state: GameState, condition: ResearchUnlockCond
       return "";
   }
 }
-

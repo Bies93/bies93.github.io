@@ -11,6 +11,7 @@ interface UITicker {
   refs: UIInitResult['refs'];
 }
 
+/** Main entry point for bootstrapping the UI from the game loop. */
 export function startUI(state: GameState): UITicker {
   const audio = createAudioManager(state.muted);
   const runtime = initUI(state, audio, { t });
