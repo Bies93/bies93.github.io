@@ -2,8 +2,9 @@ import { t } from "../../i18n";
 import { formatDecimal } from "../../math";
 import { formatDuration } from "../utils/format";
 import type { GameState } from "../../state";
+import type { ToastOptions } from "../services/toast";
 
-export function updateOfflineToast(state: GameState, showToast: (title: string, message: string) => void): void {
+export function updateOfflineToast(state: GameState, showToast: (options: ToastOptions) => void): void {
   if (state.temp.offlineBuds && state.temp.offlineDuration > 0) {
     if (state.settings.showOfflineEarnings) {
       const title = t(state.locale, "toast.offline.title");
@@ -11,7 +12,7 @@ export function updateOfflineToast(state: GameState, showToast: (title: string, 
         buds: formatDecimal(state.temp.offlineBuds),
         duration: formatDuration(state.temp.offlineDuration),
       });
-      showToast(title, message);
+      showToast({ title, message });
     }
 
     state.temp.offlineBuds = null;
