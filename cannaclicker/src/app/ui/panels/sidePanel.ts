@@ -110,6 +110,7 @@ export function createSidePanel(
     views,
     shop: {
       list: shopList,
+      entries: new Map(),
     },
     upgrades: {
       list: upgradeList,

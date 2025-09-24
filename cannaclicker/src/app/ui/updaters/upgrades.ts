@@ -16,52 +16,23 @@ export interface UpgradeUpdateOptions {
   onPurchase: (definition: UpgradeViewEntry["definition"], container: HTMLElement) => void;
 }
 
-export function updateUpgrades(state: GameState, refs: UIRefs, options: UpgradeUpdateOptions): void {
+const wiredCards = new WeakSet<UpgradeCardRefs>();
+
+export function renderList(state: GameState, refs: UIRefs, options: UpgradeUpdateOptions): void {
   const entries = getUpgradeEntries(state);
+  const list = refs.sidePanel.upgrades.list;
+
   entries.forEach((entry, index) => {
-    let card = refs.upgradeEntries.get(entry.definition.id);
+    const { definition } = entry;
+    let card = refs.sidePanel.upgrades.entries.get(definition.id);
     if (!card) {
-      card = createUpgradeCard(entry.definition.id, state, options);
-      refs.upgradeEntries.set(entry.definition.id, card);
+      card = createUpgradeCard(definition, state);
+      refs.sidePanel.upgrades.entries.set(definition.id, card);
+      wireCard(state, card, definition, options);
     }
 
-    const definition = entry.definition;
-    card.icon.src = definition.icon;
-    card.icon.alt = definition.name[state.locale];
-    card.name.textContent = definition.name[state.locale];
-    card.description.textContent = definition.description[state.locale];
-    card.category.textContent = t(state.locale, `upgrades.category.${definition.category}`);
-    card.costLabel.textContent = t(state.locale, "upgrades.cost");
-    card.costValue.textContent = entry.formattedCost;
+    renderCard(state, card, entry);
 
-    const statusState = resolveUpgradeState(entry);
-    card.container.dataset.state = statusState;
-    const statusKey =
-      statusState === "owned"
-        ? "upgrades.status.owned"
-        : statusState === "affordable"
-          ? "upgrades.status.affordable"
-          : statusState === "ready"
-            ? "upgrades.status.ready"
-            : "upgrades.status.locked";
-    card.status.textContent = t(state.locale, statusKey);
-
-    const progressMessage = formatUpgradeProgressMessage(state, entry);
-    if (progressMessage) {
-      card.progress.textContent = progressMessage;
-      card.progress.classList.remove("hidden");
-    } else {
-      card.progress.textContent = "";
-      card.progress.classList.add("hidden");
-    }
-
-    updateUpgradeRequirements(state, card.requirementList, entry);
-
-    card.buyButton.disabled = !entry.affordable;
-    card.buyButton.setAttribute("aria-disabled", entry.affordable ? "false" : "true");
-    card.container.dataset.category = definition.category;
-
-    const list = refs.sidePanel.upgrades.list;
     const currentChild = list.children.item(index);
     if (currentChild !== card.container) {
       list.insertBefore(card.container, currentChild ?? null);
@@ -69,19 +40,55 @@ export function updateUpgrades(state: GameState, refs: UIRefs, options: UpgradeU
   });
 }
 
-function createUpgradeCard(
-  upgradeId: string,
-  state: GameState,
-  options: UpgradeUpdateOptions,
-): UpgradeCardRefs {
-  const definition = getUpgradeDefinition(upgradeId);
-  if (!definition) {
-    throw new Error(`Unknown upgrade ${upgradeId}`);
+export function updateUpgrades(state: GameState, refs: UIRefs, options: UpgradeUpdateOptions): void {
+  renderList(state, refs, options);
+}
+
+export function renderCard(state: GameState, card: UpgradeCardRefs, entry: UpgradeViewEntry): void {
+  const definition = entry.definition;
+  card.icon.src = definition.icon;
+  card.icon.alt = definition.name[state.locale];
+  card.name.textContent = definition.name[state.locale];
+  card.description.textContent = definition.description[state.locale];
+  card.category.textContent = t(state.locale, `upgrades.category.${definition.category}`);
+  card.costLabel.textContent = t(state.locale, "upgrades.cost");
+  card.costValue.textContent = entry.formattedCost;
+
+  const statusState = resolveUpgradeState(entry);
+  card.container.dataset.state = statusState;
+  const statusKey =
+    statusState === "owned"
+      ? "upgrades.status.owned"
+      : statusState === "affordable"
+        ? "upgrades.status.affordable"
+        : statusState === "ready"
+          ? "upgrades.status.ready"
+          : "upgrades.status.locked";
+  card.status.textContent = t(state.locale, statusKey);
+
+  const progressMessage = formatUpgradeProgressMessage(state, entry);
+  if (progressMessage) {
+    card.progress.textContent = progressMessage;
+    card.progress.classList.remove("hidden");
+  } else {
+    card.progress.textContent = "";
+    card.progress.classList.add("hidden");
   }
 
+  updateUpgradeRequirements(state, card.requirementList, entry);
+
+  card.buyButton.disabled = !entry.affordable;
+  card.buyButton.setAttribute("aria-disabled", entry.affordable ? "false" : "true");
+  card.container.dataset.category = definition.category;
+}
+
+function createUpgradeCard(
+  definition: UpgradeViewEntry["definition"],
+  state: GameState,
+): UpgradeCardRefs {
   const container = document.createElement("article");
   container.className = "upgrade-card";
-  container.dataset.upgradeId = upgradeId;
+  container.dataset.upgradeId = definition.id;
 
   const iconWrap = document.createElement("div");
   iconWrap.className = "upgrade-card__media";
@@ -144,13 +151,6 @@ function createUpgradeCard(
   body.append(header, description, status, progress, requirementList, footer);
   container.append(iconWrap, body);
 
-  buyButton.addEventListener("click", () => {
-    if (buyUpgrade(state, upgradeId)) {
-      celebrateUpgrade(container);
-      options.onPurchase(definition, container);
-    }
-  });
-
   return {
     container,
     icon,
@@ -165,6 +165,27 @@ function createUpgradeCard(
     buyButton,
   } satisfies UpgradeCardRefs;
 }
+
+export function wireCard(
+  state: GameState,
+  card: UpgradeCardRefs,
+  definition: UpgradeViewEntry["definition"],
+  options: UpgradeUpdateOptions,
+): void {
+  if (wiredCards.has(card)) {
+    return;
+  }
+
+  wiredCards.add(card);
+
+  card.buyButton.addEventListener("click", () => {
+    if (buyUpgrade(state, definition.id)) {
+      celebrateUpgrade(card.container);
+      options.onPurchase(definition, card.container);
+    }
+  });
+}
+
 
 function resolveUpgradeState(entry: UpgradeViewEntry): "owned" | "affordable" | "ready" | "locked" {
   if (entry.owned) {

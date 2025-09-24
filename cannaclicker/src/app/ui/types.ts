@@ -123,6 +123,7 @@ export interface SidePanelRefs {
   views: Record<SidePanelTab, HTMLElement>;
   shop: {
     list: HTMLElement;
+    entries: Map<string, ShopCardRefs>;
   };
   upgrades: {
     list: HTMLElement;
@@ -142,11 +143,22 @@ export interface SidePanelRefs {
   };
 }
 
-export type SidePanelTab = "shop" | "upgrades" | "research" | "prestige" | "achievements";
+export type SidePanelTab = 'shop' | 'upgrades' | 'research' | 'prestige' | 'achievements';
 
-export interface UIRefs {
-  root: HTMLElement;
+export interface UIHeaderRefs {
   headerTitle: HTMLHeadingElement;
+}
+
+export interface UIControlGroupRefs {
+  controls: {
+    mute: ControlButtonRefs;
+    export: ControlButtonRefs;
+    import: ControlButtonRefs;
+    reset: ControlButtonRefs;
+  };
+}
+
+export interface UIStatRefs {
   statsLabels: Map<string, HTMLElement>;
   statsMeta: Map<string, HTMLElement>;
   buds: HTMLElement;
@@ -156,27 +168,45 @@ export interface UIRefs {
   seeds: HTMLElement;
   seedRate: HTMLElement;
   prestigeMult: HTMLElement;
+}
+
+export interface UISeedRefs {
   seedBadge: HTMLButtonElement;
   seedBadgeValue: HTMLElement;
+}
+
+export interface UIClickerRefs {
   clickButton: HTMLButtonElement;
   clickLabel: HTMLSpanElement;
   clickIcon: HTMLDivElement;
-  controls: {
-    mute: ControlButtonRefs;
-    export: ControlButtonRefs;
-    import: ControlButtonRefs;
-    reset: ControlButtonRefs;
-  };
   announcer: HTMLElement;
+}
+
+export interface UIAbilityPanelRefs {
   abilityTitle: HTMLElement;
   abilityList: Map<string, AbilityButtonRefs>;
-  sidePanel: SidePanelRefs;
-  shopEntries: Map<string, ShopCardRefs>;
-  upgradeEntries: Map<string, UpgradeCardRefs>;
-  prestigeModal: PrestigeModalRefs;
+}
+
+export interface UIServiceRefs {
   toastContainer?: HTMLElement;
   eventLayer?: HTMLElement;
   modalOverlay?: HTMLElement;
   eventRoot?: HTMLElement;
 }
 
+export interface UIPrestigeModalHost {
+  prestigeModal: PrestigeModalRefs;
+}
+
+export interface UIRefs
+  extends UIHeaderRefs,
+    UIControlGroupRefs,
+    UIStatRefs,
+    UISeedRefs,
+    UIClickerRefs,
+    UIAbilityPanelRefs,
+    UIServiceRefs,
+    UIPrestigeModalHost {
+  root: HTMLElement;
+  sidePanel: SidePanelRefs;
+}
