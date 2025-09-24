@@ -4,6 +4,7 @@ import { evaluateAchievements, recalcDerivedValues } from './game';
 import type { GameState } from './state';
 import { initUI, type UIInitResult } from './ui/index';
 
+
 interface UITicker {
   render(state: GameState): void;
   stop(): void;
