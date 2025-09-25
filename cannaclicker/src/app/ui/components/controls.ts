@@ -8,7 +8,7 @@ const ABILITY_ICON_MAP: Record<AbilityId, string> = {
   burst: "icons/abilities/ability-burst.png",
 };
 
-export function wrapIcon(icon: HTMLImageElement): HTMLSpanElement {
+function wrapIcon(icon: HTMLImageElement): HTMLSpanElement {
   const wrapper = document.createElement("span");
   wrapper.className = "icon-badge";
   icon.classList.add("icon-img", "icon-dark");

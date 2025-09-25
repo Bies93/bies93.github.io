@@ -10,7 +10,7 @@ import {
   performPrestigeAction,
   setPrestigeAcknowledged,
   updatePrestigeModal,
-} from "./components/prestigeModalController";
+} from "./services/prestigeModal";
 import type { WireContext } from "./wire";
 
 export function wireCoreClicks(context: WireContext): void {

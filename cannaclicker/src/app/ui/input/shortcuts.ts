@@ -3,7 +3,7 @@ import { activateAbility } from '../../abilities';
 import { evaluateAchievements, recalcDerivedValues } from '../../game';
 import type { AudioManager } from '../../audio';
 import type { UIRefs } from '../types';
-import { closePrestigeModal, isPrestigeModalOpen } from '../components/prestigeModalController';
+import { closePrestigeModal, isPrestigeModalOpen } from '../services/prestigeModal';
 
 interface ShortcutContext {
   refs: UIRefs;

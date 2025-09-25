@@ -1,5 +1,5 @@
 import { asset } from "../../assets";
-import { buildItemSrcset } from "../components/media";
+import { createItemSrcset } from "../components/media";
 import { t } from "../../i18n";
 import type { EventId } from "../../events";
 import type { GameState } from "../../state";
@@ -65,7 +65,7 @@ export function createEventButton(
   const iconPath = asset(definition.icon);
   const image = new Image();
   image.src = iconPath;
-  image.srcset = buildItemSrcset(iconPath);
+  image.srcset = createItemSrcset(iconPath);
   image.alt = "";
   image.decoding = "async";
   image.draggable = false;

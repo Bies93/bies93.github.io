@@ -1,7 +1,7 @@
 import { t } from "../../../i18n";
 import type { GameState } from "../../../state";
 import { formatTierBonus } from "../stats";
-import { buildItemSrcset } from "../../components/media";
+import { createItemSrcset } from "../../components/media";
 import {
   formatRoi,
   getMaxAffordable,
@@ -27,7 +27,7 @@ export function renderShopCard(
 function updateCoreDetails(card: ShopCardRefs, entry: ShopEntry, locale: GameState["locale"]): void {
   const definition = entry.definition;
   card.icon.src = definition.icon;
-  card.icon.srcset = buildItemSrcset(definition.icon);
+  card.icon.srcset = createItemSrcset(definition.icon);
   card.icon.alt = definition.name[locale];
 
   card.name.textContent = definition.name[locale];
