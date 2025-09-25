@@ -8,7 +8,7 @@ import {
   SAVE_VERSION,
 } from '../state';
 import { createDefaultSettings, type SettingsState } from '../settings';
-import { milestones } from '../data/milestones';
+import { milestones } from '../../data/milestones';
 import { getKickstartConfig } from '../milestones';
 import type {
   PersistedAbilityRecord,
