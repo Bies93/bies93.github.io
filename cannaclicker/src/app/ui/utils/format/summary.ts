@@ -1,8 +1,9 @@
-import type { GameState } from "../../state";
-import { t, type LocaleKey } from "../../i18n";
-import type { MilestoneProgressDetail } from "../../milestones";
-import type { PrestigePreview } from "../../prestige";
-import { formatDecimal } from "../../math";
+import type { GameState } from "../../../state";
+import { t, type LocaleKey } from "../../../i18n";
+import type { MilestoneProgressDetail } from "../../../milestones";
+import type { PrestigePreview } from "../../../prestige";
+import { formatDecimal } from "../../../math";
+import { formatInteger, formatPercent } from "./number";
 
 export function formatPermanentBonusSummary(
   locale: LocaleKey,
@@ -126,35 +127,3 @@ export function formatMilestoneProgressText(
       return "";
   }
 }
-
-export function formatPercent(locale: LocaleKey, value: number): string {
-  const formatter = new Intl.NumberFormat(locale, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 1,
-  });
-  return formatter.format(Math.max(0, value));
-}
-
-export function formatInteger(locale: LocaleKey, value: number): string {
-  const formatter = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
-  return formatter.format(Math.max(0, Math.floor(value)));
-}
-
-export function formatDuration(durationMs: number): string {
-  const totalSeconds = Math.max(0, Math.floor(durationMs / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  const parts: string[] = [];
-  if (hours > 0) {
-    parts.push(`${hours}h`);
-  }
-  if (minutes > 0 || hours > 0) {
-    parts.push(`${minutes}m`);
-  }
-  parts.push(`${seconds}s`);
-
-  return parts.join(" ");
-}
-
