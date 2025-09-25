@@ -26,3 +26,7 @@ dist-ssr
 # Environment files
 setup.env.bat
 setup_env.bat
+.roo/rules-architect/AGENTS.md
+.roo/rules-ask/AGENTS.md
+.roo/rules-debug/AGENTS.md
+.roo/rules-code/AGENTS.md
