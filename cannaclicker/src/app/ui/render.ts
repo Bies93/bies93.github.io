@@ -14,7 +14,7 @@ import { updateUpgrades } from "./updaters/upgrades";
 import { updateResearch } from "./updaters/research";
 import { updatePrestigePanel } from "./updaters/prestigePanel";
 import { updateAchievements } from "./updaters/achievements";
-import { updatePrestigeModal } from "./components/prestigeModalController";
+import { updatePrestigeModal } from "./services/prestigeModal";
 import { updateOfflineToast } from "./updaters/offline";
 import { save } from "../save";
 import { spawnFloatingValue } from "../effects";

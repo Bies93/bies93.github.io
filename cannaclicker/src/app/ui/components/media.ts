@@ -1,4 +1,4 @@
-export function appendRetinaSuffix(path: string): string {
+function appendRetinaSuffix(path: string): string {
   const queryIndex = path.indexOf("?");
   const hasQuery = queryIndex !== -1;
   const basePath = hasQuery ? path.slice(0, queryIndex) : path;
@@ -11,6 +11,6 @@ export function appendRetinaSuffix(path: string): string {
   return `${retinaPath}${query}`;
 }
 
-export function buildItemSrcset(path: string): string {
+export function createItemSrcset(path: string): string {
   return `${path} 1x, ${appendRetinaSuffix(path)} 2x`;
 }

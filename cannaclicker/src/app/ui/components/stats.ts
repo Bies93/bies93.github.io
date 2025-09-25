@@ -1,7 +1,7 @@
 import { t } from "../../i18n";
 import { withBase } from "../../paths";
 
-export function getStatIcon(key: string): string {
+function getStatIcon(key: string): string {
   const iconMap: Record<string, string> = {
     "stats.buds": "icons/ui/icon-leaf-click.png",
     "stats.bps": "icons/upgrades/upgrade-global-bps.png",

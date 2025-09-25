@@ -1,5 +1,5 @@
 import type { ResearchFilter } from "../research";
-import { openPrestigeModal } from "./components/prestigeModalController";
+import { openPrestigeModal } from "./services/prestigeModal";
 import type { WireContext } from "./wire";
 
 export function wireSidePanel(context: WireContext): void {

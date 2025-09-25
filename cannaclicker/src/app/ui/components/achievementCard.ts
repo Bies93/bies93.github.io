@@ -1,5 +1,5 @@
 import { withBase } from "../../paths";
-import { buildItemSrcset } from "./media";
+import { createItemSrcset } from "./media";
 import type { AchievementDefinition } from "../../../data/achievements";
 import type { AchievementCardRefs } from "../types";
 
@@ -12,21 +12,21 @@ export function createAchievementCard(definition: AchievementDefinition): Achiev
 
   const base = new Image();
   base.src = withBase("achievements/badge-base.png");
-  base.srcset = buildItemSrcset(withBase("achievements/badge-base.png"));
+  base.srcset = createItemSrcset(withBase("achievements/badge-base.png"));
   base.alt = "";
   base.decoding = "async";
   base.className = "achievement-card__badge-base";
 
   const overlay = new Image();
   overlay.src = definition.overlayIcon;
-  overlay.srcset = buildItemSrcset(definition.overlayIcon);
+  overlay.srcset = createItemSrcset(definition.overlayIcon);
   overlay.alt = "";
   overlay.decoding = "async";
   overlay.className = "achievement-card__badge-overlay";
 
   const ribbon = new Image();
   ribbon.src = withBase("achievements/badge-ribbon.png");
-  ribbon.srcset = buildItemSrcset(withBase("achievements/badge-ribbon.png"));
+  ribbon.srcset = createItemSrcset(withBase("achievements/badge-ribbon.png"));
   ribbon.alt = "";
   ribbon.decoding = "async";
   ribbon.className = "achievement-card__badge-ribbon";

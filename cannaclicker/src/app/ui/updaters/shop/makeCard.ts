@@ -1,6 +1,6 @@
 import { t } from "../../../i18n";
 import type { GameState } from "../../../state";
-import { buildItemSrcset } from "../../components/media";
+import { createItemSrcset } from "../../components/media";
 import { createDetail } from "../../components/stats";
 import type { ItemDefinition } from "../../../../data/items";
 import type { ShopCardRefs } from "../../types";
@@ -97,7 +97,7 @@ export function createShopCard(definition: ItemDefinition, state: GameState): Sh
 
   const icon = document.createElement("img");
   icon.src = definition.icon;
-  icon.srcset = buildItemSrcset(definition.icon);
+  icon.srcset = createItemSrcset(definition.icon);
   icon.alt = definition.name[state.locale];
   icon.decoding = "async";
   icon.className = "h-full w-full object-contain";
