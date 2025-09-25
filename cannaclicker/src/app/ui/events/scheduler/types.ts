@@ -1,0 +1,28 @@
+import type { EventClickResult, EventId } from "../../../events";
+import type { GameState } from "../../../state";
+import type { UIRefs } from "../../types";
+import type { RandomEventDefinition } from "../random";
+
+export interface SchedulerContext {
+  refs: UIRefs;
+  render(state: GameState): void;
+}
+
+export interface SchedulerBindings {
+  mountEvent(
+    context: SchedulerContext,
+    state: GameState,
+    definition: RandomEventDefinition,
+    lifetime: number,
+    onClick: (element: HTMLButtonElement) => void,
+  ): HTMLButtonElement | null;
+  removeEvent(element: HTMLButtonElement): void;
+  showEventFeedback(
+    context: SchedulerContext,
+    state: GameState,
+    id: EventId,
+    result: EventClickResult,
+    refreshed: boolean,
+    origin: HTMLElement,
+  ): void;
+}
