@@ -3,6 +3,8 @@ import { formatDecimal } from "../../math";
 import type { GameState } from "../../state";
 import { getPrestigePreview } from "../../prestige";
 import { milestones } from "../../../data/milestones";
+import type { MilestoneId } from "../../../data/milestones";
+import type { MilestoneProgressSnapshot } from "../../milestones";
 import type { UIRefs, MilestoneCardRefs } from "../types";
 import {
   formatActiveKickstartSummary,
@@ -47,10 +49,15 @@ export function updatePrestigePanel(state: GameState, refs: UIRefs): void {
   );
 }
 
-function updateMilestoneCards(state: GameState, cards: Map<string, MilestoneCardRefs>): void {
+function updateMilestoneCards(
+  state: GameState,
+  cards: Map<MilestoneId, MilestoneCardRefs>,
+): void {
   const locale = state.locale;
   const progressList = state.temp.milestoneProgress ?? [];
-  const progressMap = new Map(progressList.map((snapshot) => [snapshot.id, snapshot]));
+  const progressMap = new Map<MilestoneId, MilestoneProgressSnapshot>(
+    progressList.map((snapshot) => [snapshot.id, snapshot]),
+  );
 
   milestones.forEach((definition) => {
     const card = cards.get(definition.id);

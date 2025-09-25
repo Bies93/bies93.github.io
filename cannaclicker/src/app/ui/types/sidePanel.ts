@@ -1,7 +1,12 @@
+import type { AchievementId } from "../../../data/achievements";
+import type { ItemId } from "../../../data/items";
+import type { ResearchId } from "../../../data/research";
+import type { UpgradeId } from "../../../data/upgrades";
+import type { ResearchFilter } from "../../research";
 import type { PrestigePanelRefs } from "./prestige";
 
 export interface ResearchCardRefs {
-  id: string;
+  id: ResearchId;
   container: HTMLElement;
   icon: HTMLImageElement | null;
   path: HTMLElement;
@@ -64,23 +69,23 @@ export interface SidePanelRefs {
   views: Record<SidePanelTab, HTMLElement>;
   shop: {
     list: HTMLElement;
-    entries: Map<string, ShopCardRefs>;
+    entries: Map<ItemId, ShopCardRefs>;
   };
   upgrades: {
     list: HTMLElement;
-    entries: Map<string, UpgradeCardRefs>;
+    entries: Map<UpgradeId, UpgradeCardRefs>;
   };
   research: {
     container: HTMLElement;
-    filters: Map<string, HTMLButtonElement>;
+    filters: Map<ResearchFilter, HTMLButtonElement>;
     list: HTMLElement;
-    entries: Map<string, ResearchCardRefs>;
+    entries: Map<ResearchId, ResearchCardRefs>;
     emptyState: HTMLElement;
   };
   prestige: PrestigePanelRefs;
   achievements: {
     list: HTMLElement;
-    entries: Map<string, AchievementCardRefs>;
+    entries: Map<AchievementId, AchievementCardRefs>;
   };
 }
 

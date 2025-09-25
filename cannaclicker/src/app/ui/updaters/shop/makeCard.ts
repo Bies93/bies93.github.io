@@ -82,12 +82,18 @@ export function createShopCard(definition: ItemDefinition, state: GameState): Sh
   buyButton.type = "button";
   buyButton.className = "buy-btn h-10 flex-1";
   buyButton.textContent = t(state.locale, "actions.buy");
+  buyButton.dataset.id = definition.id;
+  buyButton.dataset.role = "shop-buy";
+  buyButton.dataset.kind = "shop";
 
   const maxButton = document.createElement("button");
   maxButton.type = "button";
   maxButton.className =
     "h-10 shrink-0 rounded-lg border border-white/10 px-4 text-sm font-semibold text-neutral-200 transition hover:border-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300";
   maxButton.textContent = t(state.locale, "actions.max");
+  maxButton.dataset.id = definition.id;
+  maxButton.dataset.role = "shop-max";
+  maxButton.dataset.kind = "shop";
 
   actions.append(buyButton, maxButton);
   info.appendChild(actions);

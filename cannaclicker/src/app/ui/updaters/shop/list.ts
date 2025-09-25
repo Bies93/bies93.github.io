@@ -1,5 +1,6 @@
 import type { GameState } from "../../../state";
 import { getShopEntries, type ShopEntry } from "../../../shop";
+import type { ItemId } from "../../../../data/items";
 import type { ShopCardRefs, UIRefs } from "../../types";
 import { renderShopCard } from "./renderCard";
 import { createShopCard } from "./makeCard";
@@ -23,7 +24,7 @@ export function renderShopList(
 
 function ensureShopCard(
   state: GameState,
-  entries: Map<string, ShopCardRefs>,
+  entries: Map<ItemId, ShopCardRefs>,
   entry: ShopEntry,
   options: ShopUpdateOptions,
 ): ShopCardRefs {

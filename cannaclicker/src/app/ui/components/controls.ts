@@ -21,6 +21,9 @@ export function createActionButton(iconPath: string): ControlButtonRefs {
   button.type = "button";
   button.className =
     "inline-flex items-center gap-2 rounded-lg border border-white/10 bg-neutral-900/60 px-2.5 py-1.5 text-sm font-medium text-neutral-200 shadow-[0_10px_24px_rgba(9,11,19,0.45)] transition hover:border-emerald-400/40 hover:bg-neutral-800/70 focus-visible:ring-2 focus-visible:ring-emerald-300/70 focus-visible:ring-offset-0";
+  button.dataset.id = iconPath;
+  button.dataset.role = "control";
+  button.dataset.kind = "control";
 
   const icon = new Image();
   icon.src = iconPath;
@@ -49,10 +52,13 @@ export function createDangerButton(iconPath: string): ControlButtonRefs {
   return control;
 }
 
-export function createAbilityButton(id: string, state: GameState): AbilityButtonRefs {
+export function createAbilityButton(id: AbilityId, state: GameState): AbilityButtonRefs {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "ability-btn";
+  button.dataset.id = id;
+  button.dataset.role = "ability";
+  button.dataset.kind = "ability";
 
   const header = document.createElement("div");
   header.className = "ability-header";
@@ -66,7 +72,7 @@ export function createAbilityButton(id: string, state: GameState): AbilityButton
   icon.loading = "lazy";
   icon.alt = "";
   icon.setAttribute("aria-hidden", "true");
-  icon.src = withBase(ABILITY_ICON_MAP[id as AbilityId] ?? "icons/ui/icon-leaf-click.png");
+  icon.src = withBase(ABILITY_ICON_MAP[id] ?? "icons/ui/icon-leaf-click.png");
   iconWrap.appendChild(icon);
 
   const meta = document.createElement("div");
@@ -74,7 +80,7 @@ export function createAbilityButton(id: string, state: GameState): AbilityButton
 
   const label = document.createElement("span");
   label.className = "ability-label";
-  const labelText = getAbilityLabel(state, id as AbilityId, state.locale);
+  const labelText = getAbilityLabel(state, id, state.locale);
   label.textContent = labelText;
 
   const status = document.createElement("span");
@@ -91,7 +97,7 @@ export function createAbilityButton(id: string, state: GameState): AbilityButton
   progress.appendChild(progressBar);
 
   button.append(header, progress);
-  button.title = formatAbilityTooltip(state, id as AbilityId, state.locale);
+  button.title = formatAbilityTooltip(state, id, state.locale);
   button.setAttribute("aria-label", labelText);
 
   return { container: button, icon, label, status, progressBar };

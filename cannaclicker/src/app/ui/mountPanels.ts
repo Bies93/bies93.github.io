@@ -1,6 +1,7 @@
 import { listAbilities } from "../abilities";
 import { withBase } from "../paths";
 import type { GameState } from "../state";
+import type { AbilityId } from "../../data/abilities";
 import { createAbilityButton } from "./components/controls";
 import { createPrestigeModal } from "./components/prestigeModal";
 import { createStatBlock } from "./components/stats";
@@ -125,7 +126,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   abilityGrid.className = "ability-grid";
   abilitySection.appendChild(abilityGrid);
 
-  const abilityRefs = new Map<string, AbilityButtonRefs>();
+  const abilityRefs = new Map<AbilityId, AbilityButtonRefs>();
   for (const ability of listAbilities()) {
     const abilityButton = createAbilityButton(ability.id, state);
     abilityRefs.set(ability.id, abilityButton);

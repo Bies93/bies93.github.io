@@ -2,6 +2,7 @@ import Decimal from "break_infinity.js";
 import {
   RESEARCH,
   researchById,
+  type ResearchId,
   type ResearchNode,
   type ResearchUnlockCondition,
 } from "../data/research";
@@ -100,7 +101,7 @@ export function requirementsMet(state: GameState, node: ResearchNode): boolean {
   return true;
 }
 
-export function purchaseResearch(state: GameState, id: string): boolean {
+export function purchaseResearch(state: GameState, id: ResearchId): boolean {
   if (state.researchOwned.includes(id)) {
     return false;
   }
@@ -132,7 +133,7 @@ export function purchaseResearch(state: GameState, id: string): boolean {
   return true;
 }
 
-export function getResearchNode(id: string): ResearchNode | undefined {
+export function getResearchNode(id: ResearchId): ResearchNode | undefined {
   return researchById.get(id);
 }
 

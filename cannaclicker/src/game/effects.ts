@@ -1,9 +1,10 @@
 import Decimal from "break_infinity.js";
 import { OFFLINE_CAP_MS } from "../app/balance";
 import type { GameState, SeedPassiveConfig } from "../app/state";
-import { researchById, type ResearchEffect, type StrainId } from "../data/research";
+import { researchById, type ResearchEffect, type StrainId, type ResearchId } from "../data/research";
+import type { ItemId } from "../data/items";
 
-export function applyEffects(state: GameState, owned: string[]): void {
+export function applyEffects(state: GameState, owned: ResearchId[]): void {
   let bpsMult = new Decimal(1);
   let bpcMult = new Decimal(1);
   let costMult = new Decimal(1);
@@ -16,8 +17,8 @@ export function applyEffects(state: GameState, owned: string[]): void {
   let seedClickBonus = 0;
   let passiveConfig: SeedPassiveConfig | null = null;
   let passiveScore = 0;
-  const buildingMultipliers = new Map<string, Decimal>();
-  const buildingCostMultipliers = new Map<string, Decimal>();
+  const buildingMultipliers = new Map<ItemId, Decimal>();
+  const buildingCostMultipliers = new Map<ItemId, Decimal>();
 
   for (const id of owned) {
     const node = researchById.get(id);
@@ -89,12 +90,12 @@ export function applyEffects(state: GameState, owned: string[]): void {
 
   const offlineCapMs = OFFLINE_CAP_MS + Math.max(0, offlineCapBonusHours) * 60 * 60 * 1000;
 
-  const researchBuildingMultipliers: Record<string, Decimal> = {};
+  const researchBuildingMultipliers: Partial<Record<ItemId, Decimal>> = {};
   for (const [key, value] of buildingMultipliers.entries()) {
     researchBuildingMultipliers[key] = value;
   }
 
-  const researchBuildingCostMultipliers: Record<string, Decimal> = {};
+  const researchBuildingCostMultipliers: Partial<Record<ItemId, Decimal>> = {};
   for (const [key, value] of buildingCostMultipliers.entries()) {
     researchBuildingCostMultipliers[key] = value;
   }
@@ -132,7 +133,7 @@ interface EffectContext {
   addOfflineHours: (value: number) => void;
   addHybridPerBuff: (value: number) => void;
   setStrain: (value: StrainId | null) => void;
-  multiplyBuilding: (target: string, value: number) => void;
+  multiplyBuilding: (target: ItemId, value: number) => void;
   addSeedClickBonus: (value: number) => void;
   setSeedPassive: (config: SeedPassiveConfig) => void;
 }

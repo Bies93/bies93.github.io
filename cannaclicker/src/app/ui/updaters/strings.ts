@@ -1,4 +1,4 @@
-import type { AbilityId, GameState } from "../../state";
+import type { GameState } from "../../state";
 import { asset } from "../../assets";
 import { t, type LocaleKey } from "../../i18n";
 import { formatAbilityTooltip, getAbilityLabel } from "../../abilities";
@@ -73,9 +73,9 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
 
   refs.abilityTitle.textContent = t(state.locale, "abilities.title");
   refs.abilityList.forEach((abilityRefs, abilityId) => {
-    const labelText = getAbilityLabel(state, abilityId as AbilityId, state.locale);
+    const labelText = getAbilityLabel(state, abilityId, state.locale);
     abilityRefs.label.textContent = labelText;
-    abilityRefs.container.title = formatAbilityTooltip(state, abilityId as AbilityId, state.locale);
+    abilityRefs.container.title = formatAbilityTooltip(state, abilityId, state.locale);
     abilityRefs.container.setAttribute("aria-label", labelText);
   });
 

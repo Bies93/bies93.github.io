@@ -9,6 +9,8 @@ import {
 } from '../state';
 import { createDefaultSettings, type SettingsState } from '../settings';
 import { milestones } from '../../data/milestones';
+import type { MilestoneId } from '../../data/milestones';
+import { RESEARCH, type ResearchId } from '../../data/research';
 import { getKickstartConfig } from '../milestones';
 import type {
   PersistedAbilityRecord,
@@ -27,9 +29,20 @@ import type {
   RestoredSeedGainEntry,
 } from './types';
 import type { AbilityId, AutomationState, MetaState, PreferencesState } from '../state';
+import { SEED_SYNERGY_IDS, type SeedSynergyId } from '../seeds';
 
 const VALID_MILESTONE_IDS = new Set(milestones.map((milestone) => milestone.id));
 const ABILITY_IDS: AbilityId[] = ['overdrive', 'burst'];
+const VALID_RESEARCH_IDS = new Set<string>(RESEARCH.map((entry) => entry.id));
+const VALID_SEED_SYNERGY_IDS = new Set<string>(SEED_SYNERGY_IDS);
+
+function isSeedSynergyId(value: unknown): value is SeedSynergyId {
+  return typeof value === 'string' && VALID_SEED_SYNERGY_IDS.has(value);
+}
+
+function isResearchId(value: unknown): value is ResearchId {
+  return typeof value === 'string' && VALID_RESEARCH_IDS.has(value);
+}
 
 export function normalisePersistedState(
   data: PersistedStateV2 | PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6 | PersistedStateV7,
@@ -62,7 +75,7 @@ export function normalisePersistedState(
   const kickstart = normalisePersistedKickstart(prestige.kickstart, now);
   const rawResearch = legacyData.researchOwned;
   const researchOwned = Array.isArray(rawResearch)
-    ? [...new Set(rawResearch.filter((entry): entry is string => typeof entry === 'string'))]
+    ? [...new Set(rawResearch.filter(isResearchId))]
     : [];
   const abilities = legacyData.abilities;
 
@@ -131,8 +144,10 @@ export function normaliseSettings(settings?: Partial<SettingsState>): SettingsSt
   } satisfies SettingsState;
 }
 
-export function normaliseMilestoneFlags(flags?: Record<string, boolean>): Record<string, boolean> {
-  const result: Record<string, boolean> = {};
+export function normaliseMilestoneFlags(
+  flags?: Record<string, boolean>,
+): Partial<Record<MilestoneId, boolean>> {
+  const result: Partial<Record<MilestoneId, boolean>> = {};
   if (!flags) {
     return result;
   }
@@ -193,10 +208,10 @@ export function normaliseMeta(
 
   const trimmedHistory = history.slice(-200);
 
-  const synergyClaims: Record<string, boolean> = {};
+  const synergyClaims: Partial<Record<SeedSynergyId, boolean>> = {};
   if (meta?.seedSynergyClaims) {
     for (const [key, value] of Object.entries(meta.seedSynergyClaims)) {
-      if (typeof value === 'boolean') {
+      if (typeof value === 'boolean' && isSeedSynergyId(key)) {
         synergyClaims[key] = value;
       }
     }

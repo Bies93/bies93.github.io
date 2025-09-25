@@ -5,6 +5,13 @@ import type {
   SeedGainSource,
   SeedNotification,
 } from './state';
+import type { ItemId } from '../data/items';
+import type { ResearchId } from '../data/research';
+import type { UpgradeId } from '../data/upgrades';
+
+export const SEED_SYNERGY_IDS = ['closed_loop', 'hydro_link', 'climate_genetics'] as const;
+
+export type SeedSynergyId = (typeof SEED_SYNERGY_IDS)[number];
 
 const SEED_HISTORY_WINDOW_MS = 60 * 60 * 1000;
 const MAX_HISTORY_ENTRIES = 200;
@@ -12,13 +19,13 @@ const BASE_CLICK_SEED_CHANCE = 0.01;
 const MAX_CLICK_BONUS = 0.05;
 
 interface SeedSynergyDefinition {
-  id: string;
+  id: SeedSynergyId;
   seeds: number;
   labelKey: string;
   requirements: {
-    items?: Record<string, number>;
-    research?: string[];
-    upgrades?: string[];
+    items?: Partial<Record<ItemId, number>>;
+    research?: readonly ResearchId[];
+    upgrades?: readonly UpgradeId[];
   };
 }
 

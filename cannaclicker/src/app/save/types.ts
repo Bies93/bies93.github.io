@@ -9,6 +9,12 @@ import type {
   PreferencesState,
   SeedGainEntry,
 } from '../state';
+import type { SeedSynergyId } from '../seeds';
+import type { AchievementId } from '../data/achievements';
+import type { ItemId } from '../data/items';
+import type { MilestoneId } from '../data/milestones';
+import type { ResearchId } from '../data/research';
+import type { UpgradeId } from '../data/upgrades';
 import type { LocaleKey } from '../i18n';
 import type { SettingsState } from '../settings';
 
@@ -29,7 +35,7 @@ export interface PersistedPrestigeState {
   lifetimeBuds?: string;
   lastResetAt?: number;
   version?: number;
-  milestones?: Record<string, boolean>;
+  milestones?: Partial<Record<MilestoneId, boolean>>;
   kickstart?: PersistedKickstartState | null;
 }
 
@@ -43,7 +49,7 @@ export interface PersistedMetaState {
   lastSeenAt?: number;
   lastBpsAtSave?: number;
   seedHistory?: PersistedSeedEntry[];
-  seedSynergyClaims?: Record<string, boolean>;
+  seedSynergyClaims?: Partial<Record<SeedSynergyId, boolean>>;
   lastInteractionAt?: number;
   seedPassiveIdleMs?: number;
   seedPassiveRollsDone?: number;
@@ -55,9 +61,9 @@ export interface PersistedStateV1Legacy {
   total: string;
   bps: string;
   bpc: string;
-  items?: Record<string, number>;
-  upgrades?: Record<string, boolean>;
-  achievements?: Record<string, boolean>;
+  items?: Partial<Record<ItemId, number>>;
+  upgrades?: Partial<Record<UpgradeId, boolean>>;
+  achievements?: Partial<Record<AchievementId, boolean>>;
   time?: number;
   locale?: LocaleKey;
   muted?: boolean;
@@ -69,13 +75,13 @@ export interface PersistedStateV2 {
   total: string;
   bps: string;
   bpc: string;
-  researchOwned: string[];
+  researchOwned: ResearchId[];
   prestige: PersistedPrestigeState;
-  abilities: Record<string, PersistedAbilityState>;
+  abilities: Record<AbilityId, PersistedAbilityState>;
   lastSeenAt: number;
-  items?: Record<string, number>;
-  upgrades?: Record<string, boolean>;
-  achievements?: Record<string, boolean>;
+  items?: Partial<Record<ItemId, number>>;
+  upgrades?: Partial<Record<UpgradeId, boolean>>;
+  achievements?: Partial<Record<AchievementId, boolean>>;
   locale?: LocaleKey;
   muted?: boolean;
 }
@@ -86,12 +92,12 @@ export interface PersistedStateV3 {
   total: string;
   bps: string;
   bpc: string;
-  items?: Record<string, number>;
-  upgrades?: Record<string, boolean>;
-  achievements?: Record<string, boolean>;
-  researchOwned?: string[];
+  items?: Partial<Record<ItemId, number>>;
+  upgrades?: Partial<Record<UpgradeId, boolean>>;
+  achievements?: Partial<Record<AchievementId, boolean>>;
+  researchOwned?: ResearchId[];
   prestige: PersistedPrestigeState;
-  abilities?: Record<string, PersistedAbilityState>;
+  abilities?: Record<AbilityId, PersistedAbilityState>;
   time?: number;
   lastSeenAt?: number;
   locale?: LocaleKey;
@@ -106,10 +112,10 @@ export interface PersistedStateV4 {
   total: string;
   bps: string;
   bpc: string;
-  items?: Record<string, number>;
-  upgrades?: Record<string, boolean>;
-  achievements?: Record<string, boolean>;
-  researchOwned: string[];
+  items?: Partial<Record<ItemId, number>>;
+  upgrades?: Partial<Record<UpgradeId, boolean>>;
+  achievements?: Partial<Record<AchievementId, boolean>>;
+  researchOwned: ResearchId[];
   prestige: PersistedPrestigeState;
   abilities: Record<AbilityId, PersistedAbilityState>;
   time?: number;
@@ -127,10 +133,10 @@ interface PersistedStateBase {
   total: string;
   bps: string;
   bpc: string;
-  items: Record<string, number>;
-  upgrades: Record<string, boolean>;
-  achievements: Record<string, boolean>;
-  researchOwned: string[];
+  items: Partial<Record<ItemId, number>>;
+  upgrades: Partial<Record<UpgradeId, boolean>>;
+  achievements: Partial<Record<AchievementId, boolean>>;
+  researchOwned: ResearchId[];
   prestige: PersistedPrestigeState;
   abilities: Record<AbilityId, PersistedAbilityState>;
   time: number;

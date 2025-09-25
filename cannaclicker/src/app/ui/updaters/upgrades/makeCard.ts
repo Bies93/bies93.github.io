@@ -68,6 +68,9 @@ export function createUpgradeCard(
   buyButton.type = "button";
   buyButton.className = "upgrade-card__button";
   buyButton.textContent = t(state.locale, "upgrades.action.buy");
+  buyButton.dataset.id = definition.id;
+  buyButton.dataset.role = "upgrade-buy";
+  buyButton.dataset.kind = "upgrade";
 
   footer.append(costWrap, buyButton);
 

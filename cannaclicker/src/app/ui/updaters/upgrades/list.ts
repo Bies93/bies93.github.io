@@ -1,5 +1,6 @@
 import type { GameState } from "../../../state";
 import { getUpgradeEntries, type UpgradeEntry as UpgradeViewEntry } from "../../../upgrades";
+import type { UpgradeId } from "../../../../data/upgrades";
 import type { UIRefs, UpgradeCardRefs } from "../../types";
 import { createUpgradeCard } from "./makeCard";
 import { renderUpgradeCard } from "./renderCard";
@@ -23,7 +24,7 @@ export function renderUpgradeList(
 
 function ensureUpgradeCard(
   state: GameState,
-  entries: Map<string, UpgradeCardRefs>,
+  entries: Map<UpgradeId, UpgradeCardRefs>,
   entry: UpgradeViewEntry,
   options: UpgradeUpdateOptions,
 ): UpgradeCardRefs {

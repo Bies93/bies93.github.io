@@ -1,4 +1,5 @@
 import { asset } from "../app/assets";
+import type { ItemId } from "./items";
 
 export type ResearchCostType = "buds" | "seeds";
 
@@ -27,7 +28,7 @@ export type ResearchUnlockCondition =
 export interface ResearchEffect {
   id: EffectId;
   v?: number;
-  targets?: string[];
+  targets?: readonly ItemId[];
   labelKey?: string;
   strain?: StrainId;
   seedPassive?: {
@@ -37,7 +38,7 @@ export interface ResearchEffect {
   };
 }
 
-export interface ResearchNode {
+interface ResearchNodeSpec {
   id: string;
   path: ResearchPath;
   order: number;
@@ -45,17 +46,17 @@ export interface ResearchNode {
   desc: Record<"de" | "en", string>;
   costType: ResearchCostType;
   cost: number;
-  requires?: string[];
-  unlockAll?: ResearchUnlockCondition[];
-  unlockAny?: ResearchUnlockCondition[];
+  requires?: readonly string[];
+  unlockAll?: readonly ResearchUnlockCondition[];
+  unlockAny?: readonly ResearchUnlockCondition[];
   exclusiveGroup?: string;
   confirmKey?: string;
   resetsOnPrestige?: boolean;
-  effects: ResearchEffect[];
+  effects: readonly ResearchEffect[];
   icon?: string;
 }
 
-const EFFICIENCY_RESEARCH: ResearchNode[] = [
+const EFFICIENCY_RESEARCH = [
   {
     id: "r_eff_foundation",
     path: "efficiency",
@@ -170,9 +171,9 @@ const EFFICIENCY_RESEARCH: ResearchNode[] = [
     effects: [{ id: "SEED_CLICK_BONUS", v: 0.02 }],
     icon: asset("icons/research/research-click.png"),
   },
-];
+] as const satisfies readonly ResearchNodeSpec[];
 
-const CONTROL_RESEARCH: ResearchNode[] = [
+const CONTROL_RESEARCH = [
   {
     id: "r_ctrl_tuning",
     path: "control",
@@ -326,9 +327,9 @@ const CONTROL_RESEARCH: ResearchNode[] = [
     ],
     icon: asset("icons/research/research-overdrive-plus.png"),
   },
-];
+] as const satisfies readonly ResearchNodeSpec[];
 
-const STRAIN_RESEARCH: ResearchNode[] = [
+const STRAIN_RESEARCH = [
   {
     id: "r_strain_lab",
     path: "strain",
@@ -426,9 +427,26 @@ const STRAIN_RESEARCH: ResearchNode[] = [
     ],
     icon: asset("icons/research/research-overdrive-plus.png"),
   },
-];
+] as const satisfies readonly ResearchNodeSpec[];
 
-export const RESEARCH_PATHS: Record<ResearchPath, ResearchNode[]> = {
+const RESEARCH_ENTRIES = [
+  ...EFFICIENCY_RESEARCH,
+  ...CONTROL_RESEARCH,
+  ...STRAIN_RESEARCH,
+] as const;
+
+type RawResearchNode = (typeof RESEARCH_ENTRIES)[number];
+
+export type ResearchId = RawResearchNode["id"];
+
+export type ResearchNode = RawResearchNode & {
+  id: ResearchId;
+  requires?: readonly ResearchId[];
+  unlockAll?: readonly ResearchUnlockCondition[];
+  unlockAny?: readonly ResearchUnlockCondition[];
+};
+
+export const RESEARCH_PATHS: Record<ResearchPath, readonly ResearchNode[]> = {
   efficiency: EFFICIENCY_RESEARCH,
   control: CONTROL_RESEARCH,
   strain: STRAIN_RESEARCH,
@@ -440,11 +458,7 @@ const PATH_ORDER: Record<ResearchPath, number> = {
   strain: 2,
 };
 
-export const RESEARCH: ResearchNode[] = [
-  ...EFFICIENCY_RESEARCH,
-  ...CONTROL_RESEARCH,
-  ...STRAIN_RESEARCH,
-].sort((a, b) => {
+export const RESEARCH: readonly ResearchNode[] = [...RESEARCH_ENTRIES].sort((a, b) => {
   const pathDiff = PATH_ORDER[a.path] - PATH_ORDER[b.path];
   if (pathDiff !== 0) {
     return pathDiff;
@@ -453,5 +467,7 @@ export const RESEARCH: ResearchNode[] = [
   return a.order - b.order;
 });
 
-export const researchById = new Map(RESEARCH.map((node) => [node.id, node] as const));
+export const researchById = new Map<ResearchId, ResearchNode>(
+  RESEARCH.map((node) => [node.id, node]),
+);
 

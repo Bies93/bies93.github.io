@@ -13,7 +13,7 @@ export interface MilestoneBonus {
   value: number;
 }
 
-export interface MilestoneDefinition {
+interface MilestoneDefinitionSpec {
   id: string;
   order: number;
   name: Record<LocaleKey, string>;
@@ -24,7 +24,7 @@ export interface MilestoneDefinition {
   kickstartLevel?: number;
 }
 
-export const milestones: MilestoneDefinition[] = [
+const MILESTONE_DATA = [
   {
     id: "m1",
     order: 1,
@@ -211,6 +211,16 @@ export const milestones: MilestoneDefinition[] = [
     bonuses: [{ type: "bps", value: 0.15 }],
     kickstartLevel: 6,
   },
-];
+] as const satisfies readonly MilestoneDefinitionSpec[];
 
-export const milestoneById = new Map(milestones.map((milestone) => [milestone.id, milestone]));
+type RawMilestoneDefinition = (typeof MILESTONE_DATA)[number];
+
+export type MilestoneId = RawMilestoneDefinition["id"];
+
+export type MilestoneDefinition = RawMilestoneDefinition & { id: MilestoneId };
+
+export const milestones: readonly MilestoneDefinition[] = MILESTONE_DATA;
+
+export const milestoneById = new Map<MilestoneId, MilestoneDefinition>(
+  milestones.map((milestone) => [milestone.id, milestone]),
+);
