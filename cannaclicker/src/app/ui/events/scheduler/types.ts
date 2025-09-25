@@ -1,7 +1,7 @@
 import type { EventClickResult, EventId } from "../../../events";
 import type { GameState } from "../../../state";
 import type { UIRefs } from "../../types";
-import type { RandomEventDefinition } from "../random";
+import type { EventPresentation } from "../random";
 
 export interface SchedulerContext {
   refs: UIRefs;
@@ -13,7 +13,7 @@ export interface SchedulerBindings {
   mountEvent(
     context: SchedulerContext,
     state: GameState,
-    definition: RandomEventDefinition,
+    definition: EventPresentation,
     lifetime: number,
     onClick: (element: HTMLButtonElement) => void,
   ): HTMLButtonElement | null;

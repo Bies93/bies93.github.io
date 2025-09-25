@@ -3,7 +3,7 @@ import type { GameState } from './state';
 import { updateAbilityTimers } from './abilities';
 import { recalcDerivedValues } from './game';
 import { runAutoBuy, AUTO_BUY_INTERVAL_SECONDS } from './autobuy';
-import { clearExpiredEventBoost } from './events';
+import { advanceEventPipeline, clearExpiredEventBoost } from './events';
 import { clearExpiredKickstart } from './milestones';
 import { processSeedSystems } from './seeds';
 
@@ -76,6 +76,7 @@ export function startLoop(
     }
 
     processSeedSystems(state, delta, now);
+    advanceEventPipeline(state, delta, now);
 
     accumulator += delta;
     autosaveTimer += delta;

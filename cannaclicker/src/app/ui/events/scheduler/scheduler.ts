@@ -1,67 +1,75 @@
-import { applyEventReward, type EventId } from "../../../events";
+import { resolveEventClick, type EventId } from "../../../events";
 import type { GameState } from "../../../state";
+import { getEventPresentation } from "../random";
 import type { SchedulerBindings, SchedulerContext } from "./types";
-import { createEventTimers, type EventTimers } from "./timers";
 
 export function createScheduler(
   context: SchedulerContext,
   bindings: SchedulerBindings,
 ): { start(state: GameState): void; stop(): void } {
-  let schedulerState: GameState | null = null;
-  let initialized = false;
-  let timers: EventTimers;
+  const rendered = new Map<string, HTMLButtonElement>();
 
-  function handleEventClick(state: GameState, id: EventId, element: HTMLButtonElement): void {
+  function syncActiveEvents(state: GameState): void {
+    const now = Date.now();
+    const active = state.events.active;
+    const activeTokens = new Set(active.map((entry) => entry.token));
+
+    for (const [token, element] of rendered) {
+      if (!activeTokens.has(token)) {
+        bindings.removeEvent(element);
+        rendered.delete(token);
+      }
+    }
+
+    for (const entry of active) {
+      if (rendered.has(entry.token)) {
+        continue;
+      }
+
+      const definition = getEventPresentation(entry.id);
+      const remainingLifetime = Math.max(0, entry.expiresAt - now);
+      const button = bindings.mountEvent(context, state, definition, remainingLifetime, (element) => {
+        handleEventClick(state, entry.id, entry.token, element);
+      });
+
+      if (button) {
+        rendered.set(entry.token, button);
+      }
+    }
+  }
+
+  function handleEventClick(
+    state: GameState,
+    id: EventId,
+    token: string,
+    element: HTMLButtonElement,
+  ): void {
     const now = Date.now();
     const hadActiveBoost =
       state.temp.activeEventBoost === "lucky_joint" && state.temp.eventBoostEndsAt > now;
 
-    const result = applyEventReward(state, id, now);
-    if (result.requiresRecalc) {
-      state.temp.needsRecalc = true;
-    }
-
-    bindings.showEventFeedback(context, state, id, result, hadActiveBoost, element);
-    timers.removeActiveEvent("clicked");
-    context.render(state);
-  }
-
-  timers = createEventTimers({
-    context,
-    bindings,
-    getState: () => schedulerState,
-    onEventClick: handleEventClick,
-  });
-
-  const handleVisibilityChange = () => {
-    if (document.hidden) {
-      timers.clearAll();
+    const resolution = resolveEventClick(state, token, now);
+    if (!resolution) {
       return;
     }
 
-    timers.scheduleNext();
-  };
+    bindings.showEventFeedback(context, state, id, resolution.result, hadActiveBoost, element);
+    if (rendered.has(token)) {
+      bindings.removeEvent(element);
+      rendered.delete(token);
+    }
+    context.render(state);
+  }
 
   return {
     start(state: GameState) {
-      schedulerState = state;
-
-      if (!initialized) {
-        initialized = true;
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-        timers.scheduleNext(state, true);
-        return;
-      }
-
-      if (!timers.hasScheduledEvent() && !timers.hasActiveEvent()) {
-        timers.scheduleNext(state);
-      }
+      syncActiveEvents(state);
     },
     stop() {
-      timers.clearAll();
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      initialized = false;
-      schedulerState = null;
+      for (const element of rendered.values()) {
+        bindings.removeEvent(element);
+      }
+      rendered.clear();
     },
   };
 }

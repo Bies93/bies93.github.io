@@ -125,6 +125,7 @@ export function createPersistedPayload(state: GameState, timestamp: number): Per
       lastInteractionAt: state.meta.lastInteractionAt,
       seedPassiveIdleMs: state.meta.seedPassiveIdleMs,
       seedPassiveRollsDone: state.meta.seedPassiveRollsDone,
+      eventStats: state.meta.eventStats,
     },
   } satisfies PersistedStateV7;
 }

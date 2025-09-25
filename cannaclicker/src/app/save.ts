@@ -37,6 +37,7 @@ import {
 import type { PersistedStateV7 } from './save/types';
 import { RESEARCH, type ResearchId } from '../data/research';
 import { SEED_SYNERGY_IDS, type SeedSynergyId } from './seeds';
+import { createDefaultEventStats } from './events';
 
 export type { PersistedStateV7 } from './save/types';
 
@@ -126,6 +127,7 @@ export function initState(saved: PersistedStateV7 | null): GameState {
     lastInteractionAt: lastInteraction,
     seedPassiveIdleMs: idleMs,
     seedPassiveRollsDone: rollsDone,
+    eventStats: saved.meta?.eventStats ?? createDefaultEventStats(safeLastSeen),
   } satisfies MetaState;
 
   const state = createDefaultState({

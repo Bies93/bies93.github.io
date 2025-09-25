@@ -10,6 +10,12 @@ import type { MilestoneId } from "../data/milestones";
 import type { ResearchId } from "../data/research";
 import type { UpgradeId } from "../data/upgrades";
 import type { SeedSynergyId } from "./seeds";
+import {
+  createDefaultEventState,
+  createDefaultEventStats,
+  type EventRuntimeState,
+  type EventStats,
+} from "./events";
 export type { AbilityId } from "../data/abilities";
 
 export const SAVE_VERSION = 7 as const;
@@ -137,6 +143,7 @@ export interface MetaState {
   lastInteractionAt: number;
   seedPassiveIdleMs: number;
   seedPassiveRollsDone: number;
+  eventStats: EventStats;
 }
 
 export const AUTO_BUY_ROI_MIN = 60;
@@ -183,6 +190,7 @@ export interface GameState extends SaveV5 {
   muted: boolean;
   lastTick: number;
   temp: TempState;
+  events: EventRuntimeState;
 }
 
 export function createDefaultState(partial: Partial<GameState> = {}): GameState {
@@ -202,6 +210,7 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
   defaultMeta.lastInteractionAt = now;
   defaultMeta.seedPassiveIdleMs = 0;
   defaultMeta.seedPassiveRollsDone = 0;
+  defaultMeta.eventStats = createDefaultEventStats(now);
 
   return {
     v: SAVE_VERSION,
@@ -276,6 +285,7 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       seedRatePerHour: 0,
       seedRateCap: 0,
     },
+    events: createDefaultEventState(now),
     ...partial,
   } satisfies GameState;
 }
