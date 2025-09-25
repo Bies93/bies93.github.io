@@ -1,8 +1,4 @@
 import {
-  AUTO_BUY_RESERVE_MAX,
-  AUTO_BUY_RESERVE_MIN,
-  AUTO_BUY_ROI_MAX,
-  AUTO_BUY_ROI_MIN,
   createDefaultAutomation,
   createDefaultPreferences,
   SAVE_VERSION,
@@ -339,33 +335,7 @@ export function normalisePreferences(preferences?: Partial<PreferencesState>): P
 
 export function normaliseAutomation(automation?: Partial<AutomationState>): AutomationState {
   const defaults = createDefaultAutomation();
-  const autoBuy = automation?.autoBuy;
-  const roi = autoBuy?.roi;
-  const reserve = autoBuy?.reserve;
-
-  return {
-    autoBuy: {
-      enabled: typeof autoBuy?.enabled === 'boolean' ? autoBuy.enabled : defaults.autoBuy.enabled,
-      roi: {
-        enabled: typeof roi?.enabled === 'boolean' ? roi.enabled : defaults.autoBuy.roi.enabled,
-        thresholdSeconds: clampNumber(
-          roi?.thresholdSeconds,
-          AUTO_BUY_ROI_MIN,
-          AUTO_BUY_ROI_MAX,
-          defaults.autoBuy.roi.thresholdSeconds,
-        ),
-      },
-      reserve: {
-        enabled: typeof reserve?.enabled === 'boolean' ? reserve.enabled : defaults.autoBuy.reserve.enabled,
-        percent: clampNumber(
-          reserve?.percent,
-          AUTO_BUY_RESERVE_MIN,
-          AUTO_BUY_RESERVE_MAX,
-          defaults.autoBuy.reserve.percent,
-        ),
-      },
-    },
-  } satisfies AutomationState;
+  return defaults;
 }
 
 function clampNumber(value: unknown, min: number, max: number, fallback: number): number {

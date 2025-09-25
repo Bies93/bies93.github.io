@@ -139,7 +139,6 @@ export function buyItem(
   state: GameState,
   itemId: ItemId,
   quantity = 1,
-  source: 'manual' | 'auto' = 'manual',
 ): boolean {
   const definition = itemById.get(itemId);
   if (!definition) {
@@ -163,9 +162,7 @@ export function buyItem(
   state.buds = state.buds.sub(totalCost);
   state.items[itemId] = owned + quantity;
   checkSeedSynergies(state);
-  if (source === 'manual') {
-    recordInteraction(state);
-  }
+  recordInteraction(state);
   recalcDerivedValues(state);
   evaluateAchievements(state);
   return true;
@@ -174,7 +171,6 @@ export function buyItem(
 export function buyUpgrade(
   state: GameState,
   upgradeId: UpgradeId,
-  source: 'manual' | 'auto' = 'manual',
 ): boolean {
   if (state.upgrades[upgradeId]) {
     return false;
@@ -196,9 +192,7 @@ export function buyUpgrade(
 
   state.buds = state.buds.sub(cost);
   state.upgrades[upgradeId] = true;
-  if (source === 'manual') {
-    recordInteraction(state);
-  }
+  recordInteraction(state);
   recalcDerivedValues(state);
   evaluateAchievements(state);
   return true;

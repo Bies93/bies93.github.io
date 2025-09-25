@@ -115,25 +115,6 @@ export interface PreferencesState {
   shopSortMode: ShopSortMode;
 }
 
-export interface AutoBuyRoiConfig {
-  enabled: boolean;
-  thresholdSeconds: number;
-}
-
-export interface AutoBuyReserveConfig {
-  enabled: boolean;
-  percent: number;
-}
-
-export interface AutoBuyState {
-  enabled: boolean;
-  roi: AutoBuyRoiConfig;
-  reserve: AutoBuyReserveConfig;
-}
-
-export interface AutomationState {
-  autoBuy: AutoBuyState;
-}
 
 export interface MetaState {
   lastSeenAt: number;
@@ -146,23 +127,13 @@ export interface MetaState {
   eventStats: EventStats;
 }
 
-export const AUTO_BUY_ROI_MIN = 60;
-export const AUTO_BUY_ROI_MAX = 600;
-export const AUTO_BUY_RESERVE_MIN = 0;
-export const AUTO_BUY_RESERVE_MAX = 30;
 
 export function createDefaultPreferences(): PreferencesState {
   return { shopSortMode: "price" } satisfies PreferencesState;
 }
 
-export function createDefaultAutomation(): AutomationState {
-  return {
-    autoBuy: {
-      enabled: false,
-      roi: { enabled: false, thresholdSeconds: 180 },
-      reserve: { enabled: false, percent: 0 },
-    },
-  } satisfies AutomationState;
+export function createDefaultAutomation(): {} {
+  return {};
 }
 
 export interface SaveV5 {
@@ -180,7 +151,7 @@ export interface SaveV5 {
   time: number;
   lastSeenAt: number;
   preferences: PreferencesState;
-  automation: AutomationState;
+  automation: {};
   settings: SettingsState;
   meta: MetaState;
 }

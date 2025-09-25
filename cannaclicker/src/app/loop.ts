@@ -2,7 +2,6 @@ import Decimal from 'break_infinity.js';
 import type { GameState } from './state';
 import { updateAbilityTimers } from './abilities';
 import { recalcDerivedValues } from './game';
-import { runAutoBuy, AUTO_BUY_INTERVAL_SECONDS } from './autobuy';
 import { advanceEventPipeline, clearExpiredEventBoost } from './events';
 import { clearExpiredKickstart } from './milestones';
 import { processSeedSystems } from './seeds';
@@ -27,7 +26,6 @@ export function startLoop(
   let last = performance.now();
   let accumulator = 0;
   let autosaveTimer = 0;
-  let autoBuyTimer = 0;
   let frame = 0;
 
   const step = (timestamp: number) => {
@@ -80,16 +78,10 @@ export function startLoop(
 
     accumulator += delta;
     autosaveTimer += delta;
-    autoBuyTimer += delta;
 
     if (accumulator >= 0.1) {
       handlers.onTick(state);
       accumulator = 0;
-    }
-
-    if (autoBuyTimer >= AUTO_BUY_INTERVAL_SECONDS) {
-      autoBuyTimer = 0;
-      runAutoBuy(state);
     }
 
     if (autosaveTimer >= autosaveTarget) {
