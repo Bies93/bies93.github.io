@@ -26,10 +26,10 @@ export function createEventButton(
   state: GameState,
   lifetime: number,
   refs: UIRefs,
-): HTMLButtonElement {
-  const layer = refs.eventLayer ?? refs.eventRoot;
+): HTMLButtonElement | null {
+  const layer = refs.eventLayer ?? refs.eventRoot ?? null;
   if (!layer) {
-    throw new Error('Missing event layer');
+    return null;
   }
   const rect = layer.getBoundingClientRect();
   const path = computeEventPath(rect, lifetime);

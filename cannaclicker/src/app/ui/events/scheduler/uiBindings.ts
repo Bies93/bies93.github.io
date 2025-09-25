@@ -22,6 +22,10 @@ export const defaultSchedulerBindings: SchedulerBindings = {
     }
 
     const button = createEventButton(definition, state, lifetime, context.refs);
+    if (!button) {
+      return null;
+    }
+
     layer.appendChild(button);
     button.addEventListener("click", (event) => {
       event.preventDefault();
