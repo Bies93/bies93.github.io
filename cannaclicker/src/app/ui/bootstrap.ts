@@ -51,7 +51,13 @@ export function initUI(
     getActiveSidePanelTab: () => activeSidePanelTab,
   });
 
-  const scheduler = createEventScheduler({ refs, render });
+  const scheduler = createEventScheduler({
+    refs,
+    render,
+    translate(key, params) {
+      return i18n.t(initialState.locale, key, params);
+    },
+  });
 
   attachGlobalShortcuts({ refs, render }, initialState, audio);
 

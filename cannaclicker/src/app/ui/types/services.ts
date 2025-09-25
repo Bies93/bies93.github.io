@@ -3,4 +3,5 @@ export interface UIServiceRefs {
   eventLayer?: HTMLElement;
   modalOverlay?: HTMLElement;
   eventRoot?: HTMLElement;
+  hudNotice?: HTMLElement;
 }

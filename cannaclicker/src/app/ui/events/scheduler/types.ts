@@ -6,6 +6,7 @@ import type { RandomEventDefinition } from "../random";
 export interface SchedulerContext {
   refs: UIRefs;
   render(state: GameState): void;
+  translate(key: string, params?: Record<string, string | number>): string;
 }
 
 export interface SchedulerBindings {

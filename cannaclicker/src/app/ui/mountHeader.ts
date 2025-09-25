@@ -4,10 +4,15 @@ export function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): H
   const header = document.createElement("header");
   header.className =
     "grid w-full gap-3 rounded-3xl border border-white/10 bg-neutral-900/80 px-3 py-2 shadow-[0_20px_48px_rgba(10,12,21,0.45)] backdrop-blur-xl sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-x-14 sm:gap-y-2 sm:px-6 lg:px-8";
+  header.dataset.uiRole = "app-header";
+  header.dataset.testid = "app-header";
+  header.setAttribute("role", "banner");
 
   const logoWrap = document.createElement("div");
   logoWrap.className =
     "grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-lime-300/35 via-emerald-300/25 to-emerald-500/30 shadow-[0_0_20px_rgba(202,255,120,0.45)] ring-1 ring-lime-200/35 sm:h-14 sm:w-14";
+  logoWrap.dataset.uiRole = "app-logo";
+  logoWrap.dataset.testid = "app-logo";
 
   const leaf = new Image();
   leaf.src = withBase("img/logo-leaf.svg");
@@ -25,6 +30,8 @@ export function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): H
   const actionWrap = document.createElement("div");
   actionWrap.className =
     "flex flex-nowrap items-center justify-self-stretch gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/70 px-3 py-1 shadow-[0_16px_30px_rgba(10,12,21,0.4)] ring-1 ring-white/10 backdrop-blur sm:justify-self-end";
+  actionWrap.dataset.uiRole = "control-strip";
+  actionWrap.dataset.testid = "control-strip";
   controls.forEach((control) => {
     control.classList.add("shrink-0");
     actionWrap.append(control);

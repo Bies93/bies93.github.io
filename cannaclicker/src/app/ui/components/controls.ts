@@ -8,6 +8,8 @@ const ABILITY_ICON_MAP: Record<AbilityId, string> = {
   burst: "icons/abilities/ability-burst.png",
 };
 
+let controlIdCounter = 0;
+
 function wrapIcon(icon: HTMLImageElement): HTMLSpanElement {
   const wrapper = document.createElement("span");
   wrapper.className = "icon-badge";
@@ -24,6 +26,13 @@ export function createActionButton(iconPath: string): ControlButtonRefs {
   button.dataset.id = iconPath;
   button.dataset.role = "control";
   button.dataset.kind = "control";
+  button.dataset.uiRole = "ui-control";
+  button.dataset.testid = "control-button";
+
+  const controlId = `ui-control-${++controlIdCounter}`;
+  const labelId = `${controlId}-label`;
+  button.id = controlId;
+  button.setAttribute("aria-labelledby", labelId);
 
   const icon = new Image();
   icon.src = iconPath;
@@ -36,6 +45,9 @@ export function createActionButton(iconPath: string): ControlButtonRefs {
 
   const label = document.createElement("span");
   label.className = "hidden whitespace-nowrap text-sm font-medium text-neutral-200 sm:inline";
+  label.id = labelId;
+  label.dataset.uiRole = "control-label";
+  label.dataset.testid = "control-label";
 
   button.append(iconWrap, label);
 
@@ -59,12 +71,18 @@ export function createAbilityButton(id: AbilityId, state: GameState): AbilityBut
   button.dataset.id = id;
   button.dataset.role = "ability";
   button.dataset.kind = "ability";
+  button.dataset.uiRole = "ability-button";
+  button.dataset.testid = `ability-button-${id}`;
 
   const header = document.createElement("div");
   header.className = "ability-header";
+  header.dataset.uiRole = "ability-header";
+  header.dataset.testid = "ability-header";
 
   const iconWrap = document.createElement("span");
   iconWrap.className = "ability-icon";
+  iconWrap.dataset.uiRole = "ability-icon";
+  iconWrap.dataset.testid = "ability-icon";
 
   const icon = document.createElement("img");
   icon.className = "ability-icon-img";
@@ -77,23 +95,33 @@ export function createAbilityButton(id: AbilityId, state: GameState): AbilityBut
 
   const meta = document.createElement("div");
   meta.className = "ability-meta";
+  meta.dataset.uiRole = "ability-meta";
+  meta.dataset.testid = "ability-meta";
 
   const label = document.createElement("span");
   label.className = "ability-label";
+  label.dataset.uiRole = "ability-label";
+  label.dataset.testid = `ability-label-${id}`;
   const labelText = getAbilityLabel(state, id, state.locale);
   label.textContent = labelText;
 
   const status = document.createElement("span");
   status.className = "ability-status";
+  status.dataset.uiRole = "ability-status";
+  status.dataset.testid = `ability-status-${id}`;
 
   meta.append(label, status);
   header.append(iconWrap, meta);
 
   const progress = document.createElement("div");
   progress.className = "ability-progress";
+  progress.dataset.uiRole = "ability-progress";
+  progress.dataset.testid = `ability-progress-${id}`;
 
   const progressBar = document.createElement("div");
   progressBar.className = "ability-progress-bar";
+  progressBar.dataset.uiRole = "ability-progress-bar";
+  progressBar.dataset.testid = `ability-progress-bar-${id}`;
   progress.appendChild(progressBar);
 
   button.append(header, progress);

@@ -57,6 +57,8 @@ export function createEventButton(
   const button = document.createElement("button");
   button.type = "button";
   button.className = "event-icon";
+  button.dataset.uiRole = "random-event";
+  button.dataset.testid = "random-event";
   button.style.left = `${path.startX}px`;
   button.style.top = `${path.startY}px`;
   button.style.transform = "translate(-50%, -50%)";
