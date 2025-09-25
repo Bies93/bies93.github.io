@@ -1,3 +1,4 @@
+import { t } from "../../i18n";
 import { listAbilities } from "../../abilities";
 import type { GameState } from "../../state";
 import type { AbilityId } from "../../../data/abilities";
@@ -34,6 +35,10 @@ export function mountPrimaryPanels(args: MountPanelsArgs): MountPanelsResult {
 
   const clickCard = document.createElement("section");
   clickCard.className = "card fade-in click-card";
+  clickCard.dataset.uiRole = "clicker-card";
+  clickCard.dataset.testid = "clicker-card";
+  clickCard.setAttribute("role", "region");
+  clickCard.setAttribute("aria-label", t(state.locale, "ui.sections.clicker"));
 
   const clickHeader = document.createElement("div");
   clickHeader.className = "click-card__header";
@@ -45,14 +50,20 @@ export function mountPrimaryPanels(args: MountPanelsArgs): MountPanelsResult {
 
   const clickBody = document.createElement("div");
   clickBody.className = "click-card__body";
+  clickBody.dataset.uiRole = "click-body";
+  clickBody.dataset.testid = "click-body";
   clickCard.appendChild(clickBody);
 
   const clickButton = document.createElement("button");
   clickButton.className = "click-button w-full";
   clickButton.type = "button";
+  clickButton.dataset.uiRole = "click-button";
+  clickButton.dataset.testid = "click-button";
 
   const clickIcon = document.createElement("div");
   clickIcon.className = "click-icon";
+  clickIcon.dataset.uiRole = "click-icon";
+  clickIcon.dataset.testid = "click-icon";
   clickIcon.setAttribute("aria-hidden", "true");
   clickIcon.style.setProperty("background-image", `url("${withBase(plantStageAsset(0))}")`);
   clickIcon.dataset.stage = "0";
@@ -61,6 +72,8 @@ export function mountPrimaryPanels(args: MountPanelsArgs): MountPanelsResult {
 
   const clickLabel = document.createElement("span");
   clickLabel.className = "click-label";
+  clickLabel.dataset.uiRole = "click-label";
+  clickLabel.dataset.testid = "click-label";
 
   clickButton.append(clickIcon, clickLabel);
   clickBody.appendChild(clickButton);
@@ -78,13 +91,21 @@ export function mountPrimaryPanels(args: MountPanelsArgs): MountPanelsResult {
 
   const abilitySection = document.createElement("section");
   abilitySection.className = "card fade-in space-y-4";
+  abilitySection.dataset.uiRole = "ability-panel";
+  abilitySection.dataset.testid = "ability-panel";
+  abilitySection.setAttribute("role", "region");
+  abilitySection.setAttribute("aria-label", t(state.locale, "ui.sections.abilities"));
 
   const abilityTitle = document.createElement("h2");
   abilityTitle.className = "text-xl font-semibold text-leaf-200";
+  abilityTitle.dataset.uiRole = "ability-title";
+  abilityTitle.dataset.testid = "ability-title";
   abilitySection.appendChild(abilityTitle);
 
   const abilityGrid = document.createElement("div");
   abilityGrid.className = "ability-grid";
+  abilityGrid.dataset.uiRole = "ability-grid";
+  abilityGrid.dataset.testid = "ability-grid";
   abilitySection.appendChild(abilityGrid);
 
   const abilityList = new Map<AbilityId, AbilityButtonRefs>();
@@ -97,6 +118,10 @@ export function mountPrimaryPanels(args: MountPanelsArgs): MountPanelsResult {
   primaryColumn.appendChild(abilitySection);
 
   const sidePanel = createSidePanel("shop");
+  sidePanel.section.dataset.uiRole = "side-panel";
+  sidePanel.section.dataset.testid = "side-panel";
+  sidePanel.section.setAttribute("role", "region");
+  sidePanel.section.setAttribute("aria-label", t(state.locale, "ui.sections.sidePanel"));
   secondaryColumn.appendChild(sidePanel.section);
 
   return {

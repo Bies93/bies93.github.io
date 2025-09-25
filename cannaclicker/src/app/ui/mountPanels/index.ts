@@ -36,7 +36,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   const statsLabels = new Map<string, HTMLElement>();
   const statsMeta = new Map<string, HTMLElement>();
 
-  const headerRefs = mountHeader({ root, statsLabels, statsMeta });
+  const headerRefs = mountHeader({ root, statsLabels, statsMeta, locale: state.locale });
   root.appendChild(layout);
 
   const panelRefs = mountPrimaryPanels({
@@ -47,7 +47,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     statsMeta,
   });
 
-  const serviceRefs = mountRootServices({ root });
+  const serviceRefs = mountRootServices({ root, locale: state.locale });
 
   return {
     statsLabels,
