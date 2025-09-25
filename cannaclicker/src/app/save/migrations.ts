@@ -16,6 +16,8 @@ import type {
   PersistedAbilityRecord,
   PersistedAbilityState,
   PersistedKickstartState,
+  PersistedEventStats,
+  PersistedEventStatsPerEvent,
   PersistedMetaState,
   PersistedStateAny,
   PersistedStateV1Legacy,
@@ -29,15 +31,23 @@ import type {
   RestoredSeedGainEntry,
 } from './types';
 import type { AbilityId, AutomationState, MetaState, PreferencesState } from '../state';
+import { createDefaultEventStats, type EventStats, type EventStatsPerEvent } from '../events';
+import type { EventId } from '../events';
 import { SEED_SYNERGY_IDS, type SeedSynergyId } from '../seeds';
 
 const VALID_MILESTONE_IDS = new Set(milestones.map((milestone) => milestone.id));
 const ABILITY_IDS: AbilityId[] = ['overdrive', 'burst'];
 const VALID_RESEARCH_IDS = new Set<string>(RESEARCH.map((entry) => entry.id));
 const VALID_SEED_SYNERGY_IDS = new Set<string>(SEED_SYNERGY_IDS);
+const VALID_EVENT_IDS: EventId[] = ['golden_bud', 'seed_pack', 'lucky_joint'];
+const EVENT_ID_SET = new Set<EventId>(VALID_EVENT_IDS);
 
 function isSeedSynergyId(value: unknown): value is SeedSynergyId {
   return typeof value === 'string' && VALID_SEED_SYNERGY_IDS.has(value);
+}
+
+function isEventId(value: unknown): value is EventId {
+  return typeof value === 'string' && EVENT_ID_SET.has(value as EventId);
 }
 
 function isResearchId(value: unknown): value is ResearchId {
@@ -183,6 +193,84 @@ export function normalisePersistedKickstart(
   return { level: config.level, endsAt } satisfies PersistedKickstartState;
 }
 
+function toPositiveInteger(value: unknown, fallback: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.max(0, Math.floor(value));
+}
+
+function toRate(value: unknown, fallback: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.max(0, Math.min(1, value));
+}
+
+function toTimestamp(value: unknown, fallback: number): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    return fallback;
+  }
+  return Math.max(0, Math.floor(value));
+}
+
+function createDefaultPerEventStats(): EventStatsPerEvent {
+  return {
+    spawns: 0,
+    clicks: 0,
+    expired: 0,
+    pityActivations: 0,
+    clickRate: 0,
+    lastSpawnAt: 0,
+    lastClickAt: 0,
+  } satisfies EventStatsPerEvent;
+}
+
+function normaliseEventStats(
+  stats: PersistedEventStats | undefined,
+  fallbackLastSeen: number,
+  now: number,
+): EventStats {
+  const defaults = createDefaultEventStats(now);
+  if (!stats) {
+    return defaults;
+  }
+
+  const safe: EventStats = {
+    totalSpawns: toPositiveInteger(stats.totalSpawns, defaults.totalSpawns),
+    totalClicks: toPositiveInteger(stats.totalClicks, defaults.totalClicks),
+    totalExpired: toPositiveInteger(stats.totalExpired, defaults.totalExpired),
+    pityActivations: toPositiveInteger(stats.pityActivations, defaults.pityActivations),
+    pityTimerMs: toPositiveInteger(stats.pityTimerMs, defaults.pityTimerMs),
+    clickRate: toRate(stats.clickRate, defaults.clickRate),
+    lastSpawnAt: toTimestamp(stats.lastSpawnAt, fallbackLastSeen ?? defaults.lastSpawnAt),
+    lastClickAt: toTimestamp(stats.lastClickAt, defaults.lastClickAt),
+    perEvent: {},
+  } satisfies EventStats;
+
+  if (stats.perEvent) {
+    for (const [key, value] of Object.entries(stats.perEvent)) {
+      if (!isEventId(key) || !value) {
+        continue;
+      }
+      const entry = value as PersistedEventStatsPerEvent;
+      const defaultsPer = createDefaultPerEventStats();
+      const per: EventStatsPerEvent = {
+        spawns: toPositiveInteger(entry.spawns, defaultsPer.spawns),
+        clicks: toPositiveInteger(entry.clicks, defaultsPer.clicks),
+        expired: toPositiveInteger(entry.expired, defaultsPer.expired),
+        pityActivations: toPositiveInteger(entry.pityActivations, defaultsPer.pityActivations),
+        clickRate: toRate(entry.clickRate, defaultsPer.clickRate),
+        lastSpawnAt: toTimestamp(entry.lastSpawnAt, defaultsPer.lastSpawnAt),
+        lastClickAt: toTimestamp(entry.lastClickAt, defaultsPer.lastClickAt),
+      } satisfies EventStatsPerEvent;
+      safe.perEvent[key] = per;
+    }
+  }
+
+  return safe;
+}
+
 export function normaliseMeta(
   meta: PersistedMetaState | undefined,
   fallbackLastSeen: number | undefined,
@@ -226,6 +314,7 @@ export function normaliseMeta(
   const rollsDone = Number.isFinite(meta?.seedPassiveRollsDone)
     ? Math.max(0, Math.floor(meta!.seedPassiveRollsDone!))
     : 0;
+  const eventStats = normaliseEventStats(meta?.eventStats, safeLastSeen, now);
 
   return {
     lastSeenAt: safeLastSeen,
@@ -235,6 +324,7 @@ export function normaliseMeta(
     lastInteractionAt: lastInteraction,
     seedPassiveIdleMs: idleMs,
     seedPassiveRollsDone: rollsDone,
+    eventStats,
   } satisfies MetaState;
 }
 

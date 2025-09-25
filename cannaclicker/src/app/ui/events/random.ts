@@ -5,44 +5,24 @@ import type { EventId } from "../../events";
 import type { GameState } from "../../state";
 import type { UIRefs } from "../types";
 
-export interface RandomEventDefinition {
+export interface EventPresentation {
   id: EventId;
   icon: string;
   labelKey: string;
-  weight: number;
 }
 
-export const EVENT_DEFINITIONS: readonly RandomEventDefinition[] = [
-  { id: "golden_bud", icon: "icons/events/golden_bud.png", labelKey: "events.goldenBud.name", weight: 1 },
-  { id: "seed_pack", icon: "icons/events/seed_pack.png", labelKey: "events.seedPack.name", weight: 0.6 },
-  { id: "lucky_joint", icon: "icons/events/lucky_joint.png", labelKey: "events.luckyJoint.name", weight: 1 },
+export const EVENT_PRESENTATIONS: readonly EventPresentation[] = [
+  { id: "golden_bud", icon: "icons/events/golden_bud.png", labelKey: "events.goldenBud.name" },
+  { id: "seed_pack", icon: "icons/events/seed_pack.png", labelKey: "events.seedPack.name" },
+  { id: "lucky_joint", icon: "icons/events/lucky_joint.png", labelKey: "events.luckyJoint.name" },
 ];
 
-export const EVENT_SPAWN_MIN_MS = 10_000;
-export const EVENT_SPAWN_MAX_MS = 20_000;
-export const EVENT_VISIBLE_MIN_MS = 7_000;
-export const EVENT_VISIBLE_MAX_MS = 12_000;
-
-export function pickRandomEventDefinition(): RandomEventDefinition {
-  const totalWeight = EVENT_DEFINITIONS.reduce((sum, def) => sum + def.weight, 0);
-  if (totalWeight <= 0) {
-    return EVENT_DEFINITIONS[Math.floor(Math.random() * EVENT_DEFINITIONS.length)];
-  }
-
-  const roll = Math.random() * totalWeight;
-  let accumulator = 0;
-  for (const definition of EVENT_DEFINITIONS) {
-    accumulator += definition.weight;
-    if (roll < accumulator) {
-      return definition;
-    }
-  }
-
-  return EVENT_DEFINITIONS[EVENT_DEFINITIONS.length - 1];
+export function getEventPresentation(id: EventId): EventPresentation {
+  return EVENT_PRESENTATIONS.find((entry) => entry.id === id) ?? EVENT_PRESENTATIONS[0];
 }
 
 export function createEventButton(
-  definition: RandomEventDefinition,
+  definition: EventPresentation,
   state: GameState,
   lifetime: number,
   refs: UIRefs,

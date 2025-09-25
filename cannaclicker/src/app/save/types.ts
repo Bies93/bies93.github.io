@@ -9,6 +9,7 @@ import type {
   PreferencesState,
   SeedGainEntry,
 } from '../state';
+import type { EventId } from '../events';
 import type { SeedSynergyId } from '../seeds';
 import type { AchievementId } from '../data/achievements';
 import type { ItemId } from '../data/items';
@@ -53,6 +54,29 @@ export interface PersistedMetaState {
   lastInteractionAt?: number;
   seedPassiveIdleMs?: number;
   seedPassiveRollsDone?: number;
+  eventStats?: PersistedEventStats;
+}
+
+export interface PersistedEventStatsPerEvent {
+  spawns?: number;
+  clicks?: number;
+  expired?: number;
+  pityActivations?: number;
+  clickRate?: number;
+  lastSpawnAt?: number;
+  lastClickAt?: number;
+}
+
+export interface PersistedEventStats {
+  totalSpawns?: number;
+  totalClicks?: number;
+  totalExpired?: number;
+  pityActivations?: number;
+  pityTimerMs?: number;
+  clickRate?: number;
+  lastSpawnAt?: number;
+  lastClickAt?: number;
+  perEvent?: Partial<Record<EventId, PersistedEventStatsPerEvent>>;
 }
 
 export interface PersistedStateV1Legacy {
