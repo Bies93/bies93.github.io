@@ -1,11 +1,10 @@
-import { createAudioManager } from './audio';
-import { t } from './i18n';
-import { evaluateAchievements, recalcDerivedValues } from './game';
-import type { GameState } from './state';
-import { initUI, type UIInitResult } from './ui';
+import { createAudioManager } from '../audio';
+import { t } from '../i18n';
+import { evaluateAchievements, recalcDerivedValues } from '../game';
+import type { GameState } from '../state';
+import { initUI, type UIInitResult } from './bootstrap';
 
-
-interface UITicker {
+export interface UITicker {
   render(state: GameState): void;
   stop(): void;
   refs: UIInitResult['refs'];
