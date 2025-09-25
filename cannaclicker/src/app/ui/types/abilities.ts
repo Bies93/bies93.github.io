@@ -1,3 +1,5 @@
+import type { AbilityId } from "../../../data/abilities";
+
 export interface AbilityButtonRefs {
   container: HTMLButtonElement;
   icon: HTMLImageElement;
@@ -8,5 +10,5 @@ export interface AbilityButtonRefs {
 
 export interface UIAbilityPanelRefs {
   abilityTitle: HTMLElement;
-  abilityList: Map<string, AbilityButtonRefs>;
+  abilityList: Map<AbilityId, AbilityButtonRefs>;
 }

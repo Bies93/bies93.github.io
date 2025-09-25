@@ -1,4 +1,5 @@
 import { milestones } from "../../../data/milestones";
+import type { MilestoneId } from "../../../data/milestones";
 import type { MilestoneCardRefs, PrestigePanelRefs } from "../types";
 import { createMilestoneCard } from "./milestoneCard";
 
@@ -22,7 +23,7 @@ export function createPrestigePanel(): PrestigePanelRefs {
   milestoneList.className = "milestone-list";
   container.appendChild(milestoneList);
 
-  const milestoneRefs = new Map<string, MilestoneCardRefs>();
+  const milestoneRefs = new Map<MilestoneId, MilestoneCardRefs>();
   milestones.forEach((definition) => {
     const card = createMilestoneCard();
     milestoneRefs.set(definition.id, card);
@@ -36,6 +37,9 @@ export function createPrestigePanel(): PrestigePanelRefs {
   const actionButton = document.createElement("button");
   actionButton.type = "button";
   actionButton.className = "prestige-panel__action";
+  actionButton.dataset.id = "prestige";
+  actionButton.dataset.role = "prestige-action";
+  actionButton.dataset.kind = "prestige";
   container.appendChild(actionButton);
 
   return {

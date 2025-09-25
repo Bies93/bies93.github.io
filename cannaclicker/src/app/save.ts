@@ -35,8 +35,21 @@ import {
   writeMutedPreference,
 } from './save/storage';
 import type { PersistedStateV7 } from './save/types';
+import { RESEARCH, type ResearchId } from '../data/research';
+import { SEED_SYNERGY_IDS, type SeedSynergyId } from './seeds';
 
 export type { PersistedStateV7 } from './save/types';
+
+const RESEARCH_ID_SET = new Set<string>(RESEARCH.map((entry) => entry.id));
+const SEED_SYNERGY_ID_SET = new Set<string>(SEED_SYNERGY_IDS);
+
+function isResearchId(value: unknown): value is ResearchId {
+  return typeof value === 'string' && RESEARCH_ID_SET.has(value);
+}
+
+function isSeedSynergyId(value: unknown): value is SeedSynergyId {
+  return typeof value === 'string' && SEED_SYNERGY_ID_SET.has(value);
+}
 
 export function migrate(): void {
   const raw = readRawSave();
@@ -75,6 +88,9 @@ export function initState(saved: PersistedStateV7 | null): GameState {
   const prestigeSeeds = Math.max(0, Math.floor(saved.prestige?.seeds ?? 0));
   const prestigeMult = computePrestigeMultiplier(prestigeSeeds);
   const prestigeLifetime = ensureDecimal(saved.prestige?.lifetimeBuds ?? saved.total ?? '0');
+  const researchOwned = Array.isArray(saved.researchOwned)
+    ? [...new Set(saved.researchOwned.filter(isResearchId))]
+    : [];
 
   const metaLastSeen = Number.isFinite(saved.meta?.lastSeenAt)
     ? Math.floor(saved.meta!.lastSeenAt)
@@ -84,7 +100,14 @@ export function initState(saved: PersistedStateV7 | null): GameState {
     ? saved.meta!.lastBpsAtSave
     : 0;
   const seedHistory = Array.isArray(saved.meta?.seedHistory) ? [...saved.meta.seedHistory] : [];
-  const seedSynergyClaims = saved.meta?.seedSynergyClaims ? { ...saved.meta.seedSynergyClaims } : {};
+  const seedSynergyClaims: Partial<Record<SeedSynergyId, boolean>> = {};
+  if (saved.meta?.seedSynergyClaims) {
+    for (const [key, value] of Object.entries(saved.meta.seedSynergyClaims)) {
+      if (typeof value === 'boolean' && isSeedSynergyId(key)) {
+        seedSynergyClaims[key] = value;
+      }
+    }
+  }
   const lastInteraction = Number.isFinite(saved.meta?.lastInteractionAt)
     ? Math.max(0, Math.floor(saved.meta!.lastInteractionAt!))
     : safeLastSeen;
@@ -114,7 +137,7 @@ export function initState(saved: PersistedStateV7 | null): GameState {
     items: saved.items ?? {},
     upgrades: saved.upgrades ?? {},
     achievements: saved.achievements ?? {},
-    researchOwned: Array.from(new Set(saved.researchOwned ?? [])),
+    researchOwned,
     prestige: {
       seeds: prestigeSeeds,
       mult: prestigeMult,

@@ -1,5 +1,10 @@
 import Decimal from "break_infinity.js";
-import { milestones, type MilestoneDefinition, type MilestoneRequirement } from "../data/milestones";
+import {
+  milestones,
+  type MilestoneDefinition,
+  type MilestoneId,
+  type MilestoneRequirement,
+} from "../data/milestones";
 import { items } from "../data/items";
 import type { GameState, KickstartState } from "./state";
 import { canUnlockItem } from "./shop";
@@ -42,7 +47,7 @@ export type MilestoneProgressDetail =
   | UnlockedAndAnyDetail;
 
 export interface MilestoneProgressSnapshot {
-  id: string;
+  id: MilestoneId;
   definition: MilestoneDefinition;
   achieved: boolean;
   progress: number;

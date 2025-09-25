@@ -1,8 +1,19 @@
 import { achievements } from "../../../data/achievements";
+import type { AchievementId } from "../../../data/achievements";
+import type { ItemId } from "../../../data/items";
+import type { ResearchId } from "../../../data/research";
+import type { UpgradeId } from "../../../data/upgrades";
 import type { ResearchFilter } from "../../research";
 import { createAchievementCard } from "../components/achievementCard";
 import { createPrestigePanel } from "../components/prestigePanel";
-import type { AchievementCardRefs, SidePanelRefs, SidePanelTab } from "../types";
+import type {
+  AchievementCardRefs,
+  ResearchCardRefs,
+  ShopCardRefs,
+  SidePanelRefs,
+  SidePanelTab,
+  UpgradeCardRefs,
+} from "../types";
 
 export function createSidePanel(
   activeSidePanelTab: SidePanelTab,
@@ -19,7 +30,9 @@ export function createSidePanel(
   (['shop', 'upgrades', 'research', 'prestige', 'achievements'] as SidePanelTab[]).forEach((tab) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.dataset.tab = tab;
+    button.dataset.id = tab;
+    button.dataset.role = "side-panel-tab";
+    button.dataset.kind = "side-panel";
     button.className = "tab-button";
     button.setAttribute("aria-pressed", "false");
     button.setAttribute("role", "tab");
@@ -51,11 +64,13 @@ export function createSidePanel(
   researchControls.className = "research-controls";
   const filterWrap = document.createElement("div");
   filterWrap.className = "research-filters";
-  const researchFilters = new Map<string, HTMLButtonElement>();
+  const researchFilters = new Map<ResearchFilter, HTMLButtonElement>();
   (['all', 'available', 'owned'] as ResearchFilter[]).forEach((key) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.dataset.filter = key;
+    button.dataset.id = key;
+    button.dataset.role = "research-filter";
+    button.dataset.kind = "research";
     button.className = "filter-pill";
     filterWrap.appendChild(button);
     researchFilters.set(key, button);
@@ -79,7 +94,7 @@ export function createSidePanel(
   achievementsView.appendChild(achievementsList);
   viewsContainer.appendChild(achievementsView);
 
-  const achievementRefs = new Map<string, AchievementCardRefs>();
+  const achievementRefs = new Map<AchievementId, AchievementCardRefs>();
   achievements.forEach((definition) => {
     const card = createAchievementCard(definition);
     achievementRefs.set(definition.id, card);
@@ -110,17 +125,17 @@ export function createSidePanel(
     views,
     shop: {
       list: shopList,
-      entries: new Map(),
+      entries: new Map<ItemId, ShopCardRefs>(),
     },
     upgrades: {
       list: upgradeList,
-      entries: new Map(),
+      entries: new Map<UpgradeId, UpgradeCardRefs>(),
     },
     research: {
       container: researchView,
       filters: researchFilters,
       list: researchList,
-      entries: new Map(),
+      entries: new Map<ResearchId, ResearchCardRefs>(),
       emptyState: researchEmpty,
     },
     prestige: prestigePanel,

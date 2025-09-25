@@ -1,29 +1,6 @@
-﻿import { asset } from "../app/assets";
+import { asset } from "../app/assets";
 
-export interface UnlockCondition {
-  totalBuds?: number;
-  itemsOwned?: Record<string, number>;
-}
-
-export interface ItemDefinition {
-  id: string;
-  name: Record<'de' | 'en', string>;
-  description: Record<'de' | 'en', string>;
-  tier: number;
-  baseCost: number;
-  costFactor: number;
-  bps: number;
-  icon: string;
-  tierSize?: number;
-  tierBonusMult?: number;
-  softcapTier?: number;
-  softcapMult?: number;
-  softcapCopies?: number;
-  softcapPenalty?: number;
-  unlock?: UnlockCondition;
-}
-
-export const items: ItemDefinition[] = [
+const ITEM_DATA = [
   {
     id: 'seedling',
     name: {
@@ -287,5 +264,18 @@ export const items: ItemDefinition[] = [
   },
 ];
 
-export const itemById = new Map(items.map((item) => [item.id, item] as const));
+type RawItemDefinition = (typeof ITEM_DATA)[number];
+
+export type ItemId = RawItemDefinition["id"];
+
+export interface UnlockCondition {
+  totalBuds?: number;
+  itemsOwned?: Partial<Record<ItemId, number>>;
+}
+
+export type ItemDefinition = RawItemDefinition & { unlock?: UnlockCondition };
+
+export const items: readonly ItemDefinition[] = ITEM_DATA;
+
+export const itemById = new Map<ItemId, ItemDefinition>(items.map((item) => [item.id, item]));
 

@@ -3,6 +3,14 @@ import { DEFAULT_LOCALE, type LocaleKey } from "./i18n";
 import { createDefaultSettings, type SettingsState } from "./settings";
 import { OFFLINE_CAP_MS } from "./balance";
 import type { MilestoneProgressSnapshot } from "./milestones";
+import type { AbilityId } from "../data/abilities";
+import type { AchievementId } from "../data/achievements";
+import type { ItemId } from "../data/items";
+import type { MilestoneId } from "../data/milestones";
+import type { ResearchId } from "../data/research";
+import type { UpgradeId } from "../data/upgrades";
+import type { SeedSynergyId } from "./seeds";
+export type { AbilityId } from "../data/abilities";
 
 export const SAVE_VERSION = 7 as const;
 
@@ -21,12 +29,10 @@ export interface SeedPassiveConfig {
 }
 
 export type SeedNotification =
-  | { type: "synergy"; id: string; seeds: number }
+  | { type: "synergy"; id: SeedSynergyId; seeds: number }
   | { type: "passive"; seeds: number };
 
 export type DecimalLike = Decimal | number | string | null | undefined;
-
-export type AbilityId = "overdrive" | "burst";
 
 export interface AbilityRuntimeState {
   active: boolean;
@@ -43,7 +49,7 @@ export interface PrestigeState {
   lifetimeBuds: Decimal;
   lastResetAt: number;
   version: number;
-  milestones: Record<string, boolean>;
+  milestones: Partial<Record<MilestoneId, boolean>>;
   kickstart: KickstartState | null;
 }
 
@@ -58,16 +64,16 @@ export interface TempState {
   totalBpsMult: Decimal;
   totalBpcMult: Decimal;
   costMultiplier: Decimal;
-  buildingCostMultipliers: Record<string, Decimal>;
+  buildingCostMultipliers: Partial<Record<ItemId, Decimal>>;
   autoClickRate: number;
   abilityPowerBonus: number;
   abilityDurationMult: number;
   offlineCapMs: number;
   offlineBuds: Decimal | null;
   offlineDuration: number;
-  buildingBaseMultipliers: Record<string, Decimal>;
-  buildingTierMultipliers: Record<string, Decimal>;
-  researchBuildingMultipliers: Record<string, Decimal>;
+  buildingBaseMultipliers: Partial<Record<ItemId, Decimal>>;
+  buildingTierMultipliers: Partial<Record<ItemId, Decimal>>;
+  researchBuildingMultipliers: Partial<Record<ItemId, Decimal>>;
   eventBpsMult: Decimal;
   eventBpcMult: Decimal;
   eventBoostEndsAt: number;
@@ -127,7 +133,7 @@ export interface MetaState {
   lastSeenAt: number;
   lastBpsAtSave: number;
   seedHistory: SeedGainEntry[];
-  seedSynergyClaims: Record<string, boolean>;
+  seedSynergyClaims: Partial<Record<SeedSynergyId, boolean>>;
   lastInteractionAt: number;
   seedPassiveIdleMs: number;
   seedPassiveRollsDone: number;
@@ -158,10 +164,10 @@ export interface SaveV5 {
   total: Decimal;
   bps: Decimal;
   bpc: Decimal;
-  items: Record<string, number>;
-  upgrades: Record<string, boolean>;
-  achievements: Record<string, boolean>;
-  researchOwned: string[];
+  items: Partial<Record<ItemId, number>>;
+  upgrades: Partial<Record<UpgradeId, boolean>>;
+  achievements: Partial<Record<AchievementId, boolean>>;
+  researchOwned: ResearchId[];
   prestige: PrestigeState;
   abilities: AbilityState;
   time: number;

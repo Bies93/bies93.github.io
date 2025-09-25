@@ -3,9 +3,11 @@ import {
   upgradeById,
   upgrades,
   type UpgradeDefinition,
+  type UpgradeId,
   type UpgradeRequirement,
 } from "../data/upgrades";
 import { itemById } from "../data/items";
+import type { ItemId } from "../data/items";
 import { formatDecimal } from "./math";
 import type { GameState } from "./state";
 import type { LocaleKey } from "./i18n";
@@ -13,7 +15,7 @@ import type { LocaleKey } from "./i18n";
 export type UpgradeRequirementDetail =
   | {
       kind: "itemsOwned";
-      id: string;
+      id: ItemId;
       required: number;
       current: number;
       remaining: number;
@@ -26,7 +28,7 @@ export type UpgradeRequirementDetail =
     }
   | {
       kind: "upgradesOwned";
-      id: string;
+      id: UpgradeId;
       owned: boolean;
     };
 
@@ -41,7 +43,7 @@ export interface UpgradeEntry {
   primaryLock: UpgradeRequirementDetail | null;
 }
 
-export function getUpgradeDefinition(id: string): UpgradeDefinition | undefined {
+export function getUpgradeDefinition(id: UpgradeId): UpgradeDefinition | undefined {
   return upgradeById.get(id);
 }
 
@@ -85,7 +87,7 @@ function describeRequirement(
   const details: UpgradeRequirementDetail[] = [];
 
   if (requirement.itemsOwned) {
-    for (const [itemId, required] of Object.entries(requirement.itemsOwned)) {
+    for (const [itemId, required] of Object.entries(requirement.itemsOwned) as [ItemId, number][]) {
       const current = state.items[itemId] ?? 0;
       const remaining = Math.max(0, required - current);
       details.push({

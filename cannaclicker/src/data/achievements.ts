@@ -1,22 +1,8 @@
-﻿import { asset } from "../app/assets";
+import { asset } from "../app/assets";
 
-import type { LocaleKey } from '../app/i18n';
+import type { ItemId } from "./items";
 
-export interface AchievementRequirement {
-  totalBuds?: number;
-  itemsOwned?: Record<string, number>;
-}
-
-export interface AchievementDefinition {
-  id: string;
-  name: Record<LocaleKey, string>;
-  description: Record<LocaleKey, string>;
-  overlayIcon: string;
-  requirement: AchievementRequirement;
-  rewardMultiplier?: number;
-}
-
-export const achievements: AchievementDefinition[] = [
+const ACHIEVEMENT_DATA = [
   {
     id: 'seedling_10',
     overlayIcon: asset('achievements/badge-overlay-leaf.png'),
@@ -67,6 +53,23 @@ export const achievements: AchievementDefinition[] = [
   },
 ];
 
-export const achievementById = new Map(achievements.map((entry) => [entry.id, entry] as const));
+type RawAchievementDefinition = (typeof ACHIEVEMENT_DATA)[number];
+
+export type AchievementId = RawAchievementDefinition["id"];
+
+export interface AchievementRequirement {
+  totalBuds?: number;
+  itemsOwned?: Partial<Record<ItemId, number>>;
+}
+
+export type AchievementDefinition = RawAchievementDefinition & {
+  requirement: AchievementRequirement;
+};
+
+export const achievements: readonly AchievementDefinition[] = ACHIEVEMENT_DATA;
+
+export const achievementById = new Map<AchievementId, AchievementDefinition>(
+  achievements.map((entry) => [entry.id, entry]),
+);
 
 

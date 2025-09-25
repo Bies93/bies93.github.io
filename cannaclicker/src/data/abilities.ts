@@ -1,16 +1,4 @@
-export type AbilityId = "overdrive" | "burst";
-
-export interface Ability {
-  id: AbilityId;
-  nameKey: string;
-  descriptionKey: string;
-  durationSec: number;
-  cooldownSec: number;
-  baseMultiplier: number;
-  appliesTo: "bps" | "bpc";
-}
-
-export const ABILITIES: Ability[] = [
+const ABILITY_DATA = [
   {
     id: "overdrive",
     nameKey: "abilities.overdrive.name",
@@ -30,3 +18,11 @@ export const ABILITIES: Ability[] = [
     appliesTo: "bpc",
   },
 ];
+
+type RawAbility = (typeof ABILITY_DATA)[number];
+
+export type AbilityId = RawAbility["id"];
+
+export type Ability = RawAbility & { id: AbilityId };
+
+export const ABILITIES: readonly Ability[] = ABILITY_DATA;

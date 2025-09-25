@@ -1,7 +1,8 @@
 import { getResearchNode } from "../../../research";
+import type { ResearchId } from "../../../../data/research";
 import type { ResearchCardRefs } from "../../types";
 
-export function createResearchCard(id: string): ResearchCardRefs {
+export function createResearchCard(id: ResearchId): ResearchCardRefs {
   const node = getResearchNode(id);
   if (!node) {
     throw new Error(`Unknown research node ${id}`);
@@ -9,7 +10,9 @@ export function createResearchCard(id: string): ResearchCardRefs {
 
   const container = document.createElement("article");
   container.className = "research-card";
-  container.dataset.researchId = id;
+  container.dataset.id = id;
+  container.dataset.kind = "research";
+  container.dataset.role = "card";
 
   const header = document.createElement("div");
   header.className = "research-header";
@@ -67,7 +70,9 @@ export function createResearchCard(id: string): ResearchCardRefs {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "research-btn";
-  button.dataset.researchId = id;
+  button.dataset.id = id;
+  button.dataset.role = "research-buy";
+  button.dataset.kind = "research";
   actions.appendChild(button);
 
   return {

@@ -5,6 +5,7 @@ import {
   type ResearchFilter,
   type ResearchViewModel,
 } from "../../../research";
+import type { ResearchId } from "../../../../data/research";
 import type { UIRefs } from "../../types";
 import type { ResearchCardRefs } from "../../types";
 import { renderResearchCard } from "./renderCard";
@@ -31,7 +32,7 @@ export function renderResearchList(
 
   removeEmptyState(list, researchRefs.emptyState);
 
-  const visible = new Set<string>();
+  const visible = new Set<ResearchId>();
 
   data.forEach((entry, index) => {
     const card = ensureResearchCard(state, researchRefs.entries, entry, onPurchase);
@@ -63,7 +64,7 @@ function removeEmptyState(list: Element, emptyState: HTMLElement): void {
 
 function ensureResearchCard(
   state: GameState,
-  entries: Map<string, ResearchCardRefs>,
+  entries: Map<ResearchId, ResearchCardRefs>,
   entry: ResearchViewModel,
   onPurchase: () => void,
 ): ResearchCardRefs {
@@ -85,8 +86,8 @@ function syncListOrder(list: Element, card: HTMLElement, targetIndex: number): v
 
 function removeHiddenCards(
   list: Element,
-  entries: Map<string, ResearchCardRefs>,
-  visible: Set<string>,
+  entries: Map<ResearchId, ResearchCardRefs>,
+  visible: Set<ResearchId>,
 ): void {
   entries.forEach((card, id) => {
     if (!visible.has(id) && card.container.parentElement === list) {

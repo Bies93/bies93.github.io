@@ -1,7 +1,8 @@
 import Decimal from 'break_infinity.js';
 import { itemById } from '../data/items';
+import type { ItemId } from '../data/items';
 import { achievements } from '../data/achievements';
-import { upgradeById, upgrades } from '../data/upgrades';
+import { upgradeById, upgrades, type UpgradeId } from '../data/upgrades';
 import { getItemCost, getTierMultiplier, getSoftcapMultiplier } from './shop';
 import type { GameState } from './state';
 import { sum, toDecimal } from './math';
@@ -61,9 +62,9 @@ export function recalcDerivedValues(state: GameState): void {
   state.temp.buildingBaseMultipliers = {};
   state.temp.buildingTierMultipliers = {};
 
-  const combinedCostMultipliers = new Map<string, Decimal>();
+  const combinedCostMultipliers = new Map<ItemId, Decimal>();
   const baseCostMultipliers = state.temp.buildingCostMultipliers ?? {};
-  for (const [key, value] of Object.entries(baseCostMultipliers)) {
+  for (const [key, value] of Object.entries(baseCostMultipliers) as [ItemId, Decimal][]) {
     const multiplier = value instanceof Decimal ? value : new Decimal(value);
     combinedCostMultipliers.set(key, multiplier);
   }
@@ -73,7 +74,7 @@ export function recalcDerivedValues(state: GameState): void {
     combinedCostMultipliers.set(target, current.mul(multiplier));
   }
 
-  const nextCostMultipliers: Record<string, Decimal> = {};
+  const nextCostMultipliers: Partial<Record<ItemId, Decimal>> = {};
   for (const [key, value] of combinedCostMultipliers.entries()) {
     nextCostMultipliers[key] = value;
   }
@@ -136,7 +137,7 @@ export function recalcDerivedValues(state: GameState): void {
 
 export function buyItem(
   state: GameState,
-  itemId: string,
+  itemId: ItemId,
   quantity = 1,
   source: 'manual' | 'auto' = 'manual',
 ): boolean {
@@ -170,7 +171,11 @@ export function buyItem(
   return true;
 }
 
-export function buyUpgrade(state: GameState, upgradeId: string, source: 'manual' | 'auto' = 'manual'): boolean {
+export function buyUpgrade(
+  state: GameState,
+  upgradeId: UpgradeId,
+  source: 'manual' | 'auto' = 'manual',
+): boolean {
   if (state.upgrades[upgradeId]) {
     return false;
   }
@@ -223,13 +228,13 @@ export function evaluateAchievements(state: GameState): void {
 
 function collectUpgradeEffects(state: GameState): {
   globalMultiplier: Decimal;
-  buildingMultipliers: Map<string, Decimal>;
-  buildingCostMultipliers: Map<string, Decimal>;
+  buildingMultipliers: Map<ItemId, Decimal>;
+  buildingCostMultipliers: Map<ItemId, Decimal>;
   clickMultiplier: Decimal;
   autoClickRate: number;
 } {
-  const buildingMultipliers = new Map<string, Decimal>();
-  const buildingCostMultipliers = new Map<string, Decimal>();
+  const buildingMultipliers = new Map<ItemId, Decimal>();
+  const buildingCostMultipliers = new Map<ItemId, Decimal>();
   let globalMultiplier = new Decimal(1);
   let clickMultiplier = new Decimal(1);
   let autoClickRate = 0;

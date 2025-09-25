@@ -9,6 +9,8 @@ export interface MilestoneCardRefs {
   progressLabel: HTMLElement;
 }
 
+import type { MilestoneId } from "../../../data/milestones";
+
 export interface PrestigePanelRefs {
   container: HTMLElement;
   description: HTMLElement;
@@ -19,7 +21,7 @@ export interface PrestigePanelRefs {
   activeKickstartLabel: HTMLElement;
   activeKickstartValue: HTMLElement;
   milestoneList: HTMLElement;
-  milestones: Map<string, MilestoneCardRefs>;
+  milestones: Map<MilestoneId, MilestoneCardRefs>;
   requirement: HTMLElement;
   actionButton: HTMLButtonElement;
 }

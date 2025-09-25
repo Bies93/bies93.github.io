@@ -5,24 +5,24 @@ import {
   getAbilityLabel,
   getAbilityProgress,
 } from "../../abilities";
-import type { AbilityId, GameState } from "../../state";
+import type { GameState } from "../../state";
 import type { UIRefs } from "../types";
 
 export function updateAbilities(state: GameState, refs: UIRefs): void {
   const now = Date.now();
   refs.abilityList.forEach((abilityRefs, abilityId) => {
-    const ability = getAbilityDefinition(abilityId as AbilityId);
-    const runtime = state.abilities[abilityId as AbilityId];
+    const ability = getAbilityDefinition(abilityId);
+    const runtime = state.abilities[abilityId];
     if (!ability || !runtime) {
       return;
     }
 
-    const labelText = getAbilityLabel(state, abilityId as AbilityId, state.locale);
+    const labelText = getAbilityLabel(state, abilityId, state.locale);
     abilityRefs.label.textContent = labelText;
-    abilityRefs.container.title = formatAbilityTooltip(state, abilityId as AbilityId, state.locale);
+    abilityRefs.container.title = formatAbilityTooltip(state, abilityId, state.locale);
     abilityRefs.container.setAttribute("aria-label", labelText);
 
-    const progress = getAbilityProgress(state, abilityId as AbilityId, now);
+    const progress = getAbilityProgress(state, abilityId, now);
     const button = abilityRefs.container;
     const status = abilityRefs.status;
     const progressBar = abilityRefs.progressBar;
