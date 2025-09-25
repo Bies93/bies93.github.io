@@ -1,88 +1,15 @@
 import { applyEventReward, type EventId } from "../../../events";
 import type { GameState } from "../../../state";
-import {
-  EVENT_SPAWN_MAX_MS,
-  EVENT_SPAWN_MIN_MS,
-  EVENT_VISIBLE_MAX_MS,
-  EVENT_VISIBLE_MIN_MS,
-  pickRandomEventDefinition,
-  randomBetween,
-} from "../random";
 import type { SchedulerBindings, SchedulerContext } from "./types";
+import { createEventTimers, type EventTimers } from "./timers";
 
 export function createScheduler(
   context: SchedulerContext,
   bindings: SchedulerBindings,
 ): { start(state: GameState): void; stop(): void } {
   let schedulerState: GameState | null = null;
-  let eventSpawnTimer: number | null = null;
-  let eventLifetimeTimer: number | null = null;
-  let activeEventButton: HTMLButtonElement | null = null;
   let initialized = false;
-
-  const handleVisibilityChange = () => {
-    if (document.hidden) {
-      if (eventSpawnTimer) {
-        window.clearTimeout(eventSpawnTimer);
-        eventSpawnTimer = null;
-      }
-      if (eventLifetimeTimer) {
-        window.clearTimeout(eventLifetimeTimer);
-        eventLifetimeTimer = null;
-      }
-      if (activeEventButton) {
-        bindings.removeEvent(activeEventButton);
-        activeEventButton = null;
-      }
-      return;
-    }
-
-    scheduleNextEvent();
-  };
-
-  function scheduleNextEvent(state?: GameState | null, immediate = false): void {
-    const targetState = state ?? schedulerState;
-    if (!targetState) {
-      return;
-    }
-
-    if (eventSpawnTimer) {
-      window.clearTimeout(eventSpawnTimer);
-    }
-
-    const delay = immediate
-      ? randomBetween(1_500, 3_500)
-      : randomBetween(EVENT_SPAWN_MIN_MS, EVENT_SPAWN_MAX_MS);
-
-    eventSpawnTimer = window.setTimeout(() => {
-      spawnRandomEvent(targetState);
-    }, delay);
-  }
-
-  function spawnRandomEvent(state: GameState): void {
-    eventSpawnTimer = null;
-
-    if (document.hidden || activeEventButton) {
-      scheduleNextEvent(state, true);
-      return;
-    }
-
-    const definition = pickRandomEventDefinition();
-    const lifetime = randomBetween(EVENT_VISIBLE_MIN_MS, EVENT_VISIBLE_MAX_MS);
-    const button = bindings.mountEvent(context, state, definition, lifetime, (element) => {
-      handleEventClick(state, definition.id, element);
-    });
-
-    if (!button) {
-      scheduleNextEvent(state, true);
-      return;
-    }
-
-    activeEventButton = button;
-    eventLifetimeTimer = window.setTimeout(() => {
-      removeActiveEvent("expired");
-    }, lifetime);
-  }
+  let timers: EventTimers;
 
   function handleEventClick(state: GameState, id: EventId, element: HTMLButtonElement): void {
     const now = Date.now();
@@ -95,27 +22,25 @@ export function createScheduler(
     }
 
     bindings.showEventFeedback(context, state, id, result, hadActiveBoost, element);
-    removeActiveEvent("clicked");
+    timers.removeActiveEvent("clicked");
     context.render(state);
   }
 
-  function removeActiveEvent(reason: "clicked" | "expired"): void {
-    if (eventLifetimeTimer) {
-      window.clearTimeout(eventLifetimeTimer);
-      eventLifetimeTimer = null;
-    }
+  timers = createEventTimers({
+    context,
+    bindings,
+    getState: () => schedulerState,
+    onEventClick: handleEventClick,
+  });
 
-    if (!activeEventButton) {
-      scheduleNextEvent(undefined, reason === "clicked");
+  const handleVisibilityChange = () => {
+    if (document.hidden) {
+      timers.clearAll();
       return;
     }
 
-    const element = activeEventButton;
-    activeEventButton = null;
-
-    bindings.removeEvent(element);
-    scheduleNextEvent(undefined, reason === "clicked");
-  }
+    timers.scheduleNext();
+  };
 
   return {
     start(state: GameState) {
@@ -124,27 +49,16 @@ export function createScheduler(
       if (!initialized) {
         initialized = true;
         document.addEventListener("visibilitychange", handleVisibilityChange);
-        scheduleNextEvent(state, true);
+        timers.scheduleNext(state, true);
         return;
       }
 
-      if (!eventSpawnTimer && !activeEventButton) {
-        scheduleNextEvent(state);
+      if (!timers.hasScheduledEvent() && !timers.hasActiveEvent()) {
+        timers.scheduleNext(state);
       }
     },
     stop() {
-      if (eventSpawnTimer) {
-        window.clearTimeout(eventSpawnTimer);
-        eventSpawnTimer = null;
-      }
-      if (eventLifetimeTimer) {
-        window.clearTimeout(eventLifetimeTimer);
-        eventLifetimeTimer = null;
-      }
-      if (activeEventButton) {
-        bindings.removeEvent(activeEventButton);
-        activeEventButton = null;
-      }
+      timers.clearAll();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       initialized = false;
       schedulerState = null;
