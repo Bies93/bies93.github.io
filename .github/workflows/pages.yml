@@ -1,7 +1,10 @@
-name: deploy
+# .github/workflows/pages.yml
+name: Deploy to GitHub Pages
+
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -9,12 +12,15 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cannaclicker
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -23,22 +29,17 @@ jobs:
           cache: npm
           cache-dependency-path: cannaclicker/package-lock.json
       - run: npm ci
-        working-directory: cannaclicker
       - run: npm run build
-        working-directory: cannaclicker
-      - name: Verify dist
-        run: |
-          test -f cannaclicker/dist/index.html
-          test -d cannaclicker/dist/icons
-          test -d cannaclicker/dist/assets
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: cannaclicker/dist
+          path: cannaclicker/dist   # muss index.html enthalten
   deploy:
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - id: deploy
+      - id: deployment
         uses: actions/deploy-pages@v4
+
