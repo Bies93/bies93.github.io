@@ -4,55 +4,86 @@ import type { MilestoneProgressDetail } from "../../../milestones";
 import type { PrestigePreview } from "../../../prestige";
 import { formatDecimal } from "../../../math";
 import { formatInteger, formatPercent } from "./number";
+import { formatDuration } from "./time";
+
+function formatMultiplier(locale: LocaleKey, value: number): string {
+  const formatter = new Intl.NumberFormat(locale, {
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+  return formatter.format(Math.max(0, value));
+}
 
 export function formatPermanentBonusSummary(
   locale: LocaleKey,
   preview: PrestigePreview,
 ): string {
-  const permanent = preview.permanentBonus;
-  return permanent.length
-    ? permanent
-        .map((entry) =>
-          t(locale, `prestige.permanent.${entry.id}`, {
-            value: entry.value,
-          }),
-        )
-        .join(", ")
-    : t(locale, "prestige.permanent.empty");
+  const permanent = [
+    { id: "global" as const, value: preview.permanentGlobalPercent },
+    { id: "bps" as const, value: preview.permanentBpsPercent },
+    { id: "bpc" as const, value: preview.permanentBpcPercent },
+  ].filter((entry) => entry.value > 0);
+
+  if (!permanent.length) {
+    return t(locale, "prestige.summary.none");
+  }
+
+  return permanent
+    .map((entry) =>
+      t(locale, `prestige.summary.${entry.id}`, {
+        value: formatPercent(locale, entry.value),
+      }),
+    )
+    .join(", ");
 }
 
 export function formatNextKickstartSummary(
   locale: LocaleKey,
   preview: PrestigePreview,
 ): string {
-  if (!preview.kickstartNext) {
-    return t(locale, "prestige.kickstartNext.empty");
+  const config = preview.nextKickstartConfig;
+  if (!config) {
+    return t(locale, "prestige.kickstart.none");
   }
 
-  return preview.kickstartNext
-    .map((entry) =>
-      t(locale, `prestige.kickstart.${entry.id}`, {
-        value: entry.value,
-      }),
-    )
-    .join(", ");
+  const discountPercent = (1 - config.costMult) * 100;
+  const cost =
+    discountPercent > 0
+      ? t(locale, "prestige.kickstart.discount", {
+          value: formatPercent(locale, discountPercent),
+        })
+      : "";
+
+  return t(locale, "prestige.kickstart.summary", {
+    level: config.level,
+    mult: formatMultiplier(locale, config.bpsMult),
+    duration: formatDuration(config.durationMs),
+    cost,
+  });
 }
 
 export function formatActiveKickstartSummary(
   locale: LocaleKey,
   preview: PrestigePreview,
 ): string {
-  if (!preview.activeKickstart) {
-    return t(locale, "prestige.kickstartActive.empty");
+  if (preview.activeKickstartLevel <= 0 || preview.activeKickstartRemainingMs <= 0) {
+    return t(locale, "prestige.kickstart.inactive");
   }
 
-  return preview.activeKickstart
-    .map((entry) =>
-      t(locale, `prestige.kickstart.${entry.id}`, {
-        value: entry.value,
-      }),
-    )
-    .join(", ");
+  const discountPercent = (1 - preview.activeKickstartCostMult) * 100;
+  const cost =
+    discountPercent > 0
+      ? t(locale, "prestige.kickstart.discount", {
+          value: formatPercent(locale, discountPercent),
+        })
+      : "";
+
+  return t(locale, "prestige.kickstart.activeSummary", {
+    level: preview.activeKickstartLevel,
+    mult: formatMultiplier(locale, preview.activeKickstartBpsMult),
+    remaining: formatDuration(preview.activeKickstartRemainingMs),
+    cost,
+  });
 }
 
 export function formatMilestoneProgressText(
