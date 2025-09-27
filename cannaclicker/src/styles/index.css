@@ -20,6 +20,19 @@ body {
   background-position: center top, center, center;
 }
 
+/* Mobile hero image fallback */
+@media (max-width: 767px) {
+  body {
+    background-image:
+      url("../public/img/bg-plants-1280.png"),
+      radial-gradient(circle at top, rgba(74, 222, 128, 0.08), transparent 55%),
+      var(--bg-noise);
+    background-size: cover, 160% 160%, 512px;
+    background-repeat: no-repeat, no-repeat, repeat;
+    background-position: center, center top, center;
+  }
+}
+
 @media (min-width: 768px) {
   body {
     background-image:
@@ -77,8 +90,8 @@ button {
 
 .click-button {
   @apply relative grid place-items-center rounded-2xl border border-white/10 bg-neutral-900/60 overflow-hidden ring-1 ring-white/5 transition;
-  min-height: clamp(18rem, 32vw, 24rem);
-  padding: clamp(1.5rem, 4vw, 3rem);
+  min-height: clamp(12rem, 24vw, 18rem);
+  padding: clamp(1rem, 2.5vw, 2rem);
   cursor: pointer;
   isolation: isolate;
   box-shadow: 0 30px 60px rgba(22, 163, 74, 0.25);
@@ -105,8 +118,8 @@ button {
 
 .click-icon {
   @apply transition-transform;
-  width: clamp(12rem, 26vw, 19rem);
-  height: clamp(12rem, 26vw, 19rem);
+  width: clamp(8rem, 20vw, 15rem);
+  height: clamp(8rem, 20vw, 15rem);
   background-color: transparent;
   background-position: center;
   background-repeat: no-repeat;
@@ -123,7 +136,7 @@ button {
 .click-label {
   @apply absolute left-1/2 -translate-x-1/2 text-sm uppercase tracking-[0.45em] text-white/90;
   bottom: clamp(1.75rem, 5vw, 2.75rem);
-  letter-spacing: 0.45em;
+  letter-spacing: 0.2em;
 }
 .stats-list {
   display: grid;
@@ -203,7 +216,7 @@ button {
 
 .info-ribbon__list .stat-item {
   @apply px-3 py-2;
-  flex: 1 1 13rem;
+  flex: 1 1 10rem;
   border-radius: 1.05rem;
   background: linear-gradient(150deg, rgba(15, 23, 42, 0.92), rgba(8, 14, 27, 0.88));
   border-color: rgba(148, 163, 184, 0.2);
@@ -1241,3 +1254,82 @@ button {
   @apply block text-neutral-200;
 }
 
+
+.toast-message {
+  @apply block text-neutral-200;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 767px) {
+  /* Click button mobile optimizations */
+  .click-button {
+    min-height: clamp(12rem, 28vh, 16rem);
+    padding: clamp(1rem, 3vw, 1.5rem);
+  }
+
+  .click-icon {
+    width: clamp(8rem, 22vw, 12rem);
+    height: clamp(8rem, 22vw, 12rem);
+  }
+
+  .click-label {
+    letter-spacing: 0.2em;
+    bottom: clamp(1rem, 4vw, 1.5rem);
+  }
+
+  /* Header mobile optimizations */
+  .app-header__title {
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    padding-inline: clamp(0.5rem, 2vw, 1rem);
+  }
+
+  /* Stats ribbon mobile optimizations */
+  .info-ribbon__list .stat-item {
+    flex: 1 1 10rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  /* Tab strip mobile optimizations */
+  .tab-button {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+  }
+
+  /* Filter pills mobile optimizations */
+  .filter-pill {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* HUD positioning for mobile */
+  .hud-notice {
+    top: max(1rem, env(safe-area-inset-top, 0px) + 1rem);
+    padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+  }
+}
+
+/* Touch-friendly enhancements */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger touch targets on touch devices */
+  .tab-button,
+  .filter-pill,
+  .ability-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Touch feedback */
+  .click-button:active {
+    transform: scale(0.95);
+    transition: transform 100ms ease;
+  }
+
+  .tab-button:active,
+  .filter-pill:active,
+  .ability-btn:active {
+    transform: scale(0.95);
+    transition: transform 100ms ease;
+  }
+}
