@@ -12,6 +12,8 @@ export interface SettingsState {
   uiTheme: UiTheme;
   plantSkin: PlantSkin;
   sfxVolume: number;
+  musicEnabled: boolean;
+  musicVolume: number;
 }
 
 export function createDefaultSettings(): SettingsState {
@@ -21,6 +23,8 @@ export function createDefaultSettings(): SettingsState {
     uiTheme: 'botanical',
     plantSkin: 'classic',
     sfxVolume: 0.8,
+    musicEnabled: true,
+    musicVolume: 0.45,
   };
 }
 

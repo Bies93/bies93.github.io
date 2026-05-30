@@ -14,7 +14,7 @@ public/img/events
 public/img/ui
 public/img/plant
 public/img/backgrounds
-public/sounds
+src/*.mp3 / src/*.opus
 ```
 
 ## Manifest
@@ -28,6 +28,7 @@ public/sounds
 - UI-Icons inklusive Ressourcen, Controls und Achievement-Badges
 - 11 Pflanzenstadien
 - Desktop/Mobile/Texture-Backgrounds
+- Hintergrundmusik über Vite-Asset-URLs
 
 ## Generierung
 

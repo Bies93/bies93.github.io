@@ -60,6 +60,12 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'settings.sound.muted': 'Sound ist stummgeschaltet. Visuelles Feedback bleibt aktiv.',
     'settings.sfxVolume.title': 'SFX-Lautstärke',
     'settings.sfxVolume.description': 'Kurze Feedback-Sounds laufen bei {value}%.',
+    'settings.music.title': 'Hintergrundmusik',
+    'settings.music.description':
+      'Psy-Dub-Reggae-Loop startet browserkonform ab der ersten Interaktion.',
+    'settings.music.muted': 'Musik pausiert, solange Sound stummgeschaltet ist.',
+    'settings.musicVolume.title': 'Musiklautstärke',
+    'settings.musicVolume.description': 'Loop läuft bei {value}%.',
     'settings.motion.title': 'Animationen',
     'settings.motion.description.full':
       'Volle Feedback-Animationen mit Partikeln und kurzen Transitions.',
@@ -436,6 +442,12 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'settings.sound.muted': 'Sound is muted. Visual feedback remains active.',
     'settings.sfxVolume.title': 'SFX Volume',
     'settings.sfxVolume.description': 'Short feedback sounds play at {value}%.',
+    'settings.music.title': 'Background Music',
+    'settings.music.description':
+      'Psy-dub reggae loop starts after the first browser-approved interaction.',
+    'settings.music.muted': 'Music pauses while sound is muted.',
+    'settings.musicVolume.title': 'Music Volume',
+    'settings.musicVolume.description': 'Loop plays at {value}%.',
     'settings.motion.title': 'Animations',
     'settings.motion.description.full':
       'Full feedback animations with particles and short transitions.',

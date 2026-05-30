@@ -135,6 +135,31 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
     'aria-label',
     t(state.locale, 'settings.sfxVolume.title'),
   );
+  refs.sidePanel.settings.musicTitle.textContent = t(state.locale, 'settings.music.title');
+  refs.sidePanel.settings.musicDescription.textContent = state.muted
+    ? t(state.locale, 'settings.music.muted')
+    : t(state.locale, 'settings.music.description');
+  refs.sidePanel.settings.musicToggle.checked = state.settings.musicEnabled;
+  refs.sidePanel.settings.musicToggle.setAttribute(
+    'aria-label',
+    t(state.locale, 'settings.music.title'),
+  );
+  const musicPercent = Math.round(state.settings.musicVolume * 100);
+  refs.sidePanel.settings.musicVolumeTitle.textContent = t(
+    state.locale,
+    'settings.musicVolume.title',
+  );
+  refs.sidePanel.settings.musicVolumeDescription.textContent = t(
+    state.locale,
+    'settings.musicVolume.description',
+    { value: musicPercent },
+  );
+  refs.sidePanel.settings.musicVolumeInput.value = String(musicPercent);
+  refs.sidePanel.settings.musicVolumeInput.disabled = !state.settings.musicEnabled;
+  refs.sidePanel.settings.musicVolumeInput.setAttribute(
+    'aria-label',
+    t(state.locale, 'settings.musicVolume.title'),
+  );
   refs.sidePanel.settings.motionTitle.textContent = t(state.locale, 'settings.motion.title');
   refs.sidePanel.settings.motionDescription.textContent = t(
     state.locale,

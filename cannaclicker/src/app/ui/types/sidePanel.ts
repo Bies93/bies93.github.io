@@ -116,6 +116,12 @@ export interface SidePanelRefs {
     sfxVolumeTitle: HTMLElement;
     sfxVolumeDescription: HTMLElement;
     sfxVolumeInput: HTMLInputElement;
+    musicTitle: HTMLElement;
+    musicDescription: HTMLElement;
+    musicToggle: HTMLInputElement;
+    musicVolumeTitle: HTMLElement;
+    musicVolumeDescription: HTMLElement;
+    musicVolumeInput: HTMLInputElement;
     motionTitle: HTMLElement;
     motionDescription: HTMLElement;
     motionSelect: HTMLSelectElement;

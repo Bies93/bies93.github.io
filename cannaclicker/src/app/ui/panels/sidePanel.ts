@@ -149,6 +149,27 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   sfxVolumeSetting.action.appendChild(sfxVolumeInput);
   settingsView.appendChild(sfxVolumeSetting.row);
 
+  const musicSetting = createSettingRow('music');
+  const musicToggle = document.createElement('input');
+  musicToggle.type = 'checkbox';
+  musicToggle.className = 'settings-toggle';
+  musicToggle.dataset.role = 'settings-music-toggle';
+  musicToggle.dataset.kind = 'settings';
+  musicSetting.action.appendChild(musicToggle);
+  settingsView.appendChild(musicSetting.row);
+
+  const musicVolumeSetting = createSettingRow('musicVolume');
+  const musicVolumeInput = document.createElement('input');
+  musicVolumeInput.type = 'range';
+  musicVolumeInput.min = '0';
+  musicVolumeInput.max = '100';
+  musicVolumeInput.step = '5';
+  musicVolumeInput.className = 'settings-range';
+  musicVolumeInput.dataset.role = 'settings-music-volume';
+  musicVolumeInput.dataset.kind = 'settings';
+  musicVolumeSetting.action.appendChild(musicVolumeInput);
+  settingsView.appendChild(musicVolumeSetting.row);
+
   const motionSetting = createSettingRow('motion');
   const motionSelect = document.createElement('select');
   motionSelect.className = 'settings-select';
@@ -266,6 +287,12 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
       sfxVolumeTitle: sfxVolumeSetting.title,
       sfxVolumeDescription: sfxVolumeSetting.description,
       sfxVolumeInput,
+      musicTitle: musicSetting.title,
+      musicDescription: musicSetting.description,
+      musicToggle,
+      musicVolumeTitle: musicVolumeSetting.title,
+      musicVolumeDescription: musicVolumeSetting.description,
+      musicVolumeInput,
       motionTitle: motionSetting.title,
       motionDescription: motionSetting.description,
       motionSelect,

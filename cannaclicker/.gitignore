@@ -31,6 +31,9 @@ AGENTS.md
 .codex/
 .roo/
 
+# Local high-resolution audio master. Runtime uses Opus + MP3.
+src/cannaclicker_psy_dub_reggae_loop_92bpm.wav
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

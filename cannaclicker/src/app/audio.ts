@@ -1,4 +1,6 @@
 import { persistAudioPreference } from './save';
+import musicMp3Url from '../cannaclicker_psy_dub_reggae_loop_92bpm.mp3?url';
+import musicOpusUrl from '../cannaclicker_psy_dub_reggae_loop_92bpm.opus?url';
 
 type OscillatorKind = 'sine' | 'square' | 'sawtooth' | 'triangle';
 type EventSoundKind = 'reward' | 'seed' | 'buff' | 'rare';
@@ -29,17 +31,75 @@ export interface AudioManager {
   toggleMute(): boolean;
   setMuted(muted: boolean): void;
   setVolume(volume: number): void;
+  setMusicEnabled(enabled: boolean): void;
+  setMusicVolume(volume: number): void;
   isMuted(): boolean;
 }
 
 const MASTER_GAIN = 0.16;
+const MUSIC_GAIN = 0.42;
 const CLICK_RATE_LIMIT_MS = 34;
+const MUSIC_SOURCES = [
+  { url: musicOpusUrl, type: 'audio/ogg; codecs=opus' },
+  { url: musicMp3Url, type: 'audio/mpeg' },
+] as const;
 
-export function createAudioManager(initialMuted: boolean, initialVolume = 0.8): AudioManager {
+export function createAudioManager(
+  initialMuted: boolean,
+  initialVolume = 0.8,
+  musicOptions: { musicEnabled?: boolean; musicVolume?: number } = {},
+): AudioManager {
   let muted = initialMuted;
   let sfxVolume = Math.max(0, Math.min(1, initialVolume));
+  let musicEnabled = musicOptions.musicEnabled ?? true;
+  let musicVolume = Math.max(0, Math.min(1, musicOptions.musicVolume ?? 0.45));
   let context: AudioContext | null = null;
+  let music: HTMLAudioElement | null = null;
   let lastClickAt = 0;
+
+  function selectMusicSource(): string {
+    if (typeof document === 'undefined') {
+      return musicMp3Url;
+    }
+
+    const probe = document.createElement('audio');
+    const supported = MUSIC_SOURCES.find((source) => probe.canPlayType(source.type) !== '');
+    return supported?.url ?? musicMp3Url;
+  }
+
+  function getMusicElement(): HTMLAudioElement | null {
+    if (typeof Audio === 'undefined') {
+      return null;
+    }
+
+    if (!music) {
+      music = new Audio(selectMusicSource());
+      music.loop = true;
+      music.preload = 'none';
+      music.volume = Math.max(0, Math.min(1, musicVolume * MUSIC_GAIN));
+    }
+
+    return music;
+  }
+
+  function syncMusic(): void {
+    if (muted || !musicEnabled || musicVolume <= 0) {
+      music?.pause();
+      return;
+    }
+
+    const player = getMusicElement();
+    if (!player) {
+      return;
+    }
+
+    player.volume = Math.max(0, Math.min(1, musicVolume * MUSIC_GAIN));
+    if (player.paused) {
+      void player.play().catch(() => {
+        // Browsers require a user gesture before background music may start.
+      });
+    }
+  }
 
   function getContext(): AudioContext | null {
     if (muted || typeof window === 'undefined') {
@@ -59,6 +119,7 @@ export function createAudioManager(initialMuted: boolean, initialVolume = 0.8): 
   }
 
   function play(tones: readonly Tone[]): void {
+    syncMusic();
     const ctx = getContext();
     if (!ctx) {
       return;
@@ -213,14 +274,24 @@ export function createAudioManager(initialMuted: boolean, initialVolume = 0.8): 
     toggleMute() {
       muted = !muted;
       persistAudioPreference(muted);
+      syncMusic();
       return muted;
     },
     setMuted(next) {
       muted = next;
       persistAudioPreference(muted);
+      syncMusic();
     },
     setVolume(next) {
       sfxVolume = Math.max(0, Math.min(1, next));
+    },
+    setMusicEnabled(next) {
+      musicEnabled = next;
+      syncMusic();
+    },
+    setMusicVolume(next) {
+      musicVolume = Math.max(0, Math.min(1, next));
+      syncMusic();
     },
     isMuted() {
       return muted;

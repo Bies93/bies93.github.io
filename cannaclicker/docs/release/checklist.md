@@ -17,14 +17,15 @@ Stand: Sprint 12.
 - [x] Icons sind SVG-basiert und transparent.
 - [x] Event-, Item-, Research-, UI- und Ability-Pfade sind manifestiert.
 - [x] Keine WAV-SFX mehr im Release-Assetpfad.
-- [x] Audio wird prozedural erzeugt und blockiert den Start nicht.
+- [x] SFX werden prozedural erzeugt und blockieren den Start nicht.
+- [x] Hintergrundmusik nutzt Opus + MP3-Fallback; WAV bleibt aus dem Runtime-Pfad.
 
 ## Gameplay
 
 - [x] Core Clicker startet ohne externes Setup.
 - [x] Shop, Upgrades, Events, Seeds, Prestige, Research, Achievements und Offline-Gain sind aktiv.
-- [x] Goals fuehren den Early Game Flow.
-- [x] Prestige-Modal erklaert Reset und Belohnung.
+- [x] Goals führen den Early Game Flow.
+- [x] Prestige-Modal erklärt Reset und Belohnung.
 - [x] Export, Import und Reset sind erreichbar.
 
 ## UI/UX
@@ -36,7 +37,8 @@ Stand: Sprint 12.
 - [x] UI-Theme-Setting vorhanden.
 - [x] Plant-Skin-Setting vorhanden.
 - [x] Sound-Toggle vorhanden.
-- [x] SFX-Lautstaerke vorhanden.
+- [x] SFX-Lautstärke vorhanden.
+- [x] Musik-Toggle und Musiklautstärke vorhanden.
 - [x] Release Notes und Credits im Settings-Panel vorhanden.
 - [x] Offline-Gain-Hinweis optional abschaltbar.
 
@@ -49,5 +51,5 @@ Stand: Sprint 12.
 - [x] Browser-Smoke: WebKit via Playwright als Safari-nahe Engine.
 - [x] Production-Preview-Smoke am Artefakt-Root `http://127.0.0.1:4173/`.
 - [ ] iOS Safari auf echtem Gerät: in Ubuntu nicht direkt testbar.
-- [x] GitHub Pages Deployment-Pfad geprueft: Workflow deployt `cannaclicker/dist` als Pages-Artefakt-Root.
-- [x] Release-Smoke mit leerem LocalStorage durchgefuehrt.
+- [x] GitHub Pages Deployment-Pfad geprüft: Workflow deployt `cannaclicker/dist` als Pages-Artefakt-Root.
+- [x] Release-Smoke mit leerem LocalStorage durchgeführt.

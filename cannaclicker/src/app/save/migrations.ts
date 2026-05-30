@@ -198,6 +198,9 @@ export function normaliseSettings(settings?: Partial<SettingsState>): SettingsSt
         ? settings.plantSkin
         : defaults.plantSkin,
     sfxVolume: normaliseVolume(settings.sfxVolume, defaults.sfxVolume),
+    musicEnabled:
+      typeof settings.musicEnabled === 'boolean' ? settings.musicEnabled : defaults.musicEnabled,
+    musicVolume: normaliseVolume(settings.musicVolume, defaults.musicVolume),
   } satisfies SettingsState;
 }
 

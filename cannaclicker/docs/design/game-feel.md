@@ -17,13 +17,15 @@ CannaClicker soll sofort reagieren, aber nicht hektisch wirken. Feedback ist kur
 | Milestone       | staerkerer Card-Pop, Toast, Partikel           | hoeherer Kauf-Akkord       | nur bei echter Schwelle                                                 |
 | Unlock          | Toast mit Handlungshinweis                     | Unlock-Chime               | Snapshot verhindert Wiederholungen                                      |
 | Event Spawn     | Pop-in, Pfadbewegung, Restzeit-Balken          | Event-Kategorie-Sound      | ein bis zwei aktive Events je nach Progress                             |
-| Event Collect   | Reward-Floating, Kategorie-Partikel, Toast     | Collect/Buff/Seed/Rare Cue | seltene Events etwas staerker                                           |
+| Event Collect   | Reward-Floating, Kategorie-Partikel, Toast     | Collect/Buff/Seed/Rare Cue | seltene Events etwas stärker                                            |
 | Achievement     | Badge-Karte, Toast, Batch bei Mehrfach-Unlocks | Achievement Cue            | mehrere Unlocks werden gruppiert                                        |
 | Prestige        | kurzer Screen-Wash, Seed-FX, neuer Run         | Prestige-Akkord            | keine lange unskippbare Sequenz                                         |
 
 ## Sound Design
 
-Sounds werden prozedural über WebAudio erzeugt. Dadurch gibt es keine blockierenden Audiofiles und keine großen Assets.
+Kurze Feedback-Sounds werden prozedural über WebAudio erzeugt. Dadurch gibt es keine blockierenden SFX-Dateien und keine großen Effekt-Assets.
+
+Die Hintergrundmusik ist ein geloopter Psy-Dub-Reggae-Track. Im Runtime-Pfad wird Opus bevorzugt und MP3 als Safari-/Universal-Fallback genutzt. Die WAV-Datei bleibt bewusst außerhalb der Player-Quellen, weil sie für GitHub Pages und mobile Starts zu schwer ist.
 
 Sound-Cues:
 
@@ -40,7 +42,7 @@ Sound-Cues:
 - UI open/switch.
 - Settings toggle.
 
-Die Master-Lautstaerke ist bewusst niedrig. Der Sound-Schalter bleibt global und wird wie bisher separat gespeichert.
+Die Master-Lautstärke ist bewusst niedrig. Der Sound-Schalter bleibt global und wird wie bisher separat gespeichert. SFX- und Musiklautstärke sind separat regelbar; Musik startet browserkonform erst nach einer Nutzerinteraktion.
 
 ## Motion Settings
 
