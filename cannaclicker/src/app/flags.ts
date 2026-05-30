@@ -1,5 +1,5 @@
 export const flags = {
   prestige: false,
   analytics: false,
-  devtools: true,
+  devtools: false,
 } as const;

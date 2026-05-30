@@ -24,6 +24,7 @@ import {
   normaliseMilestoneFlags,
   normalisePreferences,
   normaliseAutomation,
+  normaliseMeta,
   upgradePersistedState,
 } from './save/migrations';
 import {
@@ -36,20 +37,13 @@ import {
 } from './save/storage';
 import type { PersistedStateV7 } from './save/types';
 import { RESEARCH, type ResearchId } from '../data/research';
-import { SEED_SYNERGY_IDS, type SeedSynergyId } from './seeds';
-import { createDefaultEventStats } from './events';
 
 export type { PersistedStateV7 } from './save/types';
 
 const RESEARCH_ID_SET = new Set<string>(RESEARCH.map((entry) => entry.id));
-const SEED_SYNERGY_ID_SET = new Set<string>(SEED_SYNERGY_IDS);
 
 function isResearchId(value: unknown): value is ResearchId {
   return typeof value === 'string' && RESEARCH_ID_SET.has(value);
-}
-
-function isSeedSynergyId(value: unknown): value is SeedSynergyId {
-  return typeof value === 'string' && SEED_SYNERGY_ID_SET.has(value);
 }
 
 export function migrate(): void {
@@ -93,42 +87,8 @@ export function initState(saved: PersistedStateV7 | null): GameState {
     ? [...new Set(saved.researchOwned.filter(isResearchId))]
     : [];
 
-  const metaLastSeen = Number.isFinite(saved.meta?.lastSeenAt)
-    ? Math.floor(saved.meta!.lastSeenAt)
-    : saved.lastSeenAt ?? saved.time ?? now;
-  const safeLastSeen = metaLastSeen > 0 ? metaLastSeen : now;
-  const metaBps = Number.isFinite(saved.meta?.lastBpsAtSave) && saved.meta!.lastBpsAtSave >= 0
-    ? saved.meta!.lastBpsAtSave
-    : 0;
-  const seedHistory = Array.isArray(saved.meta?.seedHistory) ? [...saved.meta.seedHistory] : [];
-  const seedSynergyClaims: Partial<Record<SeedSynergyId, boolean>> = {};
-  if (saved.meta?.seedSynergyClaims) {
-    for (const [key, value] of Object.entries(saved.meta.seedSynergyClaims)) {
-      if (typeof value === 'boolean' && isSeedSynergyId(key)) {
-        seedSynergyClaims[key] = value;
-      }
-    }
-  }
-  const lastInteraction = Number.isFinite(saved.meta?.lastInteractionAt)
-    ? Math.max(0, Math.floor(saved.meta!.lastInteractionAt!))
-    : safeLastSeen;
-  const idleMs = Number.isFinite(saved.meta?.seedPassiveIdleMs)
-    ? Math.max(0, Math.floor(saved.meta!.seedPassiveIdleMs!))
-    : 0;
-  const rollsDone = Number.isFinite(saved.meta?.seedPassiveRollsDone)
-    ? Math.max(0, Math.floor(saved.meta!.seedPassiveRollsDone!))
-    : 0;
-
-  const initialMeta: MetaState = {
-    lastSeenAt: safeLastSeen,
-    lastBpsAtSave: metaBps,
-    seedHistory,
-    seedSynergyClaims,
-    lastInteractionAt: lastInteraction,
-    seedPassiveIdleMs: idleMs,
-    seedPassiveRollsDone: rollsDone,
-    eventStats: saved.meta?.eventStats ?? createDefaultEventStats(safeLastSeen),
-  } satisfies MetaState;
+  const initialMeta: MetaState = normaliseMeta(saved.meta, saved.lastSeenAt ?? saved.time, now);
+  const safeLastSeen = initialMeta.lastSeenAt;
 
   const state = createDefaultState({
     v: SAVE_VERSION,

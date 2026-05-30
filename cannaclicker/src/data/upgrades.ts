@@ -1,29 +1,29 @@
-import { asset } from "../app/assets";
-import type { LocaleKey } from "../app/i18n";
-import { items, itemById } from "./items";
-import type { ItemId } from "./items";
+import { asset } from '../app/assets';
+import type { LocaleKey } from '../app/i18n';
+import { items, itemById } from './items';
+import type { ItemId } from './items';
 
-export type UpgradeCategory = "building" | "synergy" | "utility";
+export type UpgradeCategory = 'building' | 'synergy' | 'utility';
 
 export type UpgradeEffect =
-  | { type: "globalMultiplier"; value: number }
-  | { type: "clickMultiplier"; value: number }
-  | { type: "buildingMultiplier"; targets: readonly ItemId[]; value: number }
-  | { type: "buildingCostMultiplier"; targets: readonly ItemId[]; value: number }
-  | { type: "autoClick"; value: number };
+  | { type: 'globalMultiplier'; value: number }
+  | { type: 'clickMultiplier'; value: number }
+  | { type: 'buildingMultiplier'; targets: readonly ItemId[]; value: number }
+  | { type: 'buildingCostMultiplier'; targets: readonly ItemId[]; value: number }
+  | { type: 'autoClick'; value: number };
 
 type BuildingUpgradeStage = 1 | 2 | 3 | 4;
 type TrimmerUpgradeStage = 1 | 2 | 3 | 4 | 5 | 6;
 
-type BuildingUpgradeId = `${ItemId}_boost_${BuildingUpgradeStage}` | "grow_light_lenses";
+type BuildingUpgradeId = `${ItemId}_boost_${BuildingUpgradeStage}` | 'grow_light_lenses';
 
 export type UpgradeId =
   | BuildingUpgradeId
   | `trimmer_auto_${TrimmerUpgradeStage}`
-  | "rich_soil"
-  | "precision_trim"
-  | "synergy_closed_loop"
-  | "synergy_precision_irrigation";
+  | 'rich_soil'
+  | 'precision_trim'
+  | 'synergy_closed_loop'
+  | 'synergy_precision_irrigation';
 
 export interface UpgradeRequirement {
   totalBuds?: number;
@@ -48,36 +48,43 @@ const BUILDING_THRESHOLDS = [10, 25, 50, 100] as const;
 const BUILDING_COST_FACTORS = [8, 25, 80, 250] as const;
 
 const BUILDING_ICON_OVERRIDES: Partial<Record<ItemId, string>> = {
-  seedling: asset("icons/upgrades/upgrade-seedling.png"),
-  planter: asset("icons/upgrades/upgrade-planter.png"),
-  grow_tent: asset("icons/upgrades/upgrade-tent.png"),
-  grow_light: asset("icons/upgrades/upgrade-light.png"),
-  cultivator: asset("icons/upgrades/upgrade-cultivator.png"),
+  seedling: asset('icons/upgrades/upgrade-seedling.png'),
+  planter: asset('icons/upgrades/upgrade-planter.png'),
+  grow_tent: asset('icons/upgrades/upgrade-tent.png'),
+  grow_light: asset('icons/upgrades/upgrade-light.png'),
+  cultivator: asset('icons/upgrades/upgrade-cultivator.png'),
 };
 
 const BUILDING_STAGE_ID_OVERRIDES: Partial<Record<ItemId, readonly (UpgradeId | undefined)[]>> = {
-  grow_light: ["grow_light_lenses"],
+  grow_light: ['grow_light_lenses'],
 };
 
-const BUILDING_STAGE_TITLE_OVERRIDES: Partial<Record<ItemId, Record<number, Record<LocaleKey, string>>>> = {
+const BUILDING_STAGE_TITLE_OVERRIDES: Partial<
+  Record<ItemId, Record<number, Record<LocaleKey, string>>>
+> = {
   grow_light: {
     1: {
-      de: "Prismatische Linsen",
-      en: "Prismatic Lenses",
+      de: 'Prismatische Linsen',
+      en: 'Prismatic Lenses',
     },
   },
 };
 
-const BUILDING_STAGE_DESCRIPTION_OVERRIDES: Partial<Record<ItemId, Record<number, Record<LocaleKey, string>>>> = {
+const BUILDING_STAGE_DESCRIPTION_OVERRIDES: Partial<
+  Record<ItemId, Record<number, Record<LocaleKey, string>>>
+> = {
   grow_light: {
     1: {
-      de: "LED-Lichter produzieren 2× Buds.",
-      en: "Grow lights produce 2× buds.",
+      de: 'LED-Lichter produzieren 2× Buds.',
+      en: 'Grow lights produce 2× buds.',
     },
   },
 };
 
-function formatBoostName(base: Record<LocaleKey, string>, stage: number): Record<LocaleKey, string> {
+function formatBoostName(
+  base: Record<LocaleKey, string>,
+  stage: number,
+): Record<LocaleKey, string> {
   const suffix = stage.toString();
   return {
     de: `${base.de} Boost ${suffix}`,
@@ -152,13 +159,13 @@ function createBuildingUpgrades(): UpgradeDefinition[] {
 
       entries.push({
         id,
-        category: "building",
+        category: 'building',
         targetIds: [item.id],
         name,
         description,
         cost,
         icon,
-        effects: [{ type: "buildingMultiplier", targets: [item.id], value: 2 }],
+        effects: [{ type: 'buildingMultiplier', targets: [item.id], value: 2 }],
         requirement,
         order: item.tier * 10 + (index + 1),
       });
@@ -174,29 +181,29 @@ function getBaseCost(itemId: ItemId): number {
 }
 
 function createSynergyUpgrades(): UpgradeDefinition[] {
-  const co2Base = getBaseCost("co2_tank");
-  const climateBase = getBaseCost("climate_controller");
-  const hydroBase = getBaseCost("hydroponic_rack");
+  const co2Base = getBaseCost('co2_tank');
+  const climateBase = getBaseCost('climate_controller');
+  const hydroBase = getBaseCost('hydroponic_rack');
 
   return [
     {
-      id: "synergy_closed_loop",
-      category: "synergy",
-      targetIds: ["grow_tent", "grow_light", "co2_tank"] as const,
+      id: 'synergy_closed_loop',
+      category: 'synergy',
+      targetIds: ['grow_tent', 'grow_light', 'co2_tank'] as const,
       name: {
-        de: "Geschlossener Kreislauf",
-        en: "Closed Loop Cycle",
+        de: 'Geschlossener Kreislauf',
+        en: 'Closed Loop Cycle',
       },
       description: {
-        de: "+20 % Produktion für Grow-Zelte, LED-Lichter und CO₂-Tanks.",
-        en: "+20% production for grow tents, lights, and CO₂ tanks.",
+        de: '+20 % Produktion für Grow-Zelte, LED-Lichter und CO₂-Tanks.',
+        en: '+20% production for grow tents, lights, and CO₂ tanks.',
       },
       cost: Math.round(co2Base * 120),
-      icon: asset("icons/upgrades/upgrade-global-bps.png"),
+      icon: asset('icons/upgrades/upgrade-global-bps.png'),
       effects: [
         {
-          type: "buildingMultiplier",
-          targets: ["grow_tent", "grow_light", "co2_tank"] as const,
+          type: 'buildingMultiplier',
+          targets: ['grow_tent', 'grow_light', 'co2_tank'] as const,
           value: 1.2,
         },
       ],
@@ -207,23 +214,23 @@ function createSynergyUpgrades(): UpgradeDefinition[] {
       order: 6000,
     },
     {
-      id: "synergy_precision_irrigation",
-      category: "synergy",
-      targetIds: ["climate_controller", "hydroponic_rack", "irrigation_system"] as const,
+      id: 'synergy_precision_irrigation',
+      category: 'synergy',
+      targetIds: ['climate_controller', 'hydroponic_rack', 'irrigation_system'] as const,
       name: {
-        de: "Feintuning",
-        en: "Fine Tuning",
+        de: 'Feintuning',
+        en: 'Fine Tuning',
       },
       description: {
-        de: "Kosten -5 % für Klima-Controller, Hydroponik-Racks und Bewässerungssysteme.",
-        en: "Costs -5% for climate controllers, hydro racks, and irrigation systems.",
+        de: 'Kosten -5 % für Klima-Controller, Hydroponik-Racks und Bewässerungssysteme.',
+        en: 'Costs -5% for climate controllers, hydro racks, and irrigation systems.',
       },
       cost: Math.round(Math.max(climateBase, hydroBase) * 95),
-      icon: asset("icons/upgrades/upgrade-planter.png"),
+      icon: asset('icons/upgrades/upgrade-planter.png'),
       effects: [
         {
-          type: "buildingCostMultiplier",
-          targets: ["climate_controller", "hydroponic_rack", "irrigation_system"] as const,
+          type: 'buildingCostMultiplier',
+          targets: ['climate_controller', 'hydroponic_rack', 'irrigation_system'] as const,
           value: 0.95,
         },
       ],
@@ -240,36 +247,37 @@ const TRIMMER_THRESHOLDS = [25, 50, 75, 100, 150, 200] as const;
 const TRIMMER_COST_FACTORS = [12, 18, 26, 36, 48, 64] as const;
 
 function createTrimmerUpgrades(): UpgradeDefinition[] {
-  const baseCost = getBaseCost("trimming_robot");
+  const baseCost = getBaseCost('trimming_robot');
   const entries: UpgradeDefinition[] = [];
 
   TRIMMER_THRESHOLDS.forEach((threshold, index) => {
-    const stage = index + 1;
-    const id = `trimmer_auto_${stage}` as UpgradeId;
+    const stage = (index + 1) as TrimmerUpgradeStage;
+    const id: UpgradeId = `trimmer_auto_${stage}`;
     const name: Record<LocaleKey, string> = {
       de: `Trimm-Automation ${stage}`,
       en: `Trimmer Automation ${stage}`,
     };
     const description: Record<LocaleKey, string> = {
-      de: "+0,5 automatische Klicks pro Sekunde.",
-      en: "+0.5 automatic clicks per second.",
+      de: '+0,5 automatische Klicks pro Sekunde.',
+      en: '+0.5 automatic clicks per second.',
     };
     const requirement: UpgradeRequirement = {
       itemsOwned: { trimming_robot: threshold },
     };
     if (index > 0) {
-      requirement.upgradesOwned = [`trimmer_auto_${stage - 1}`];
+      const previousStage = (stage - 1) as TrimmerUpgradeStage;
+      requirement.upgradesOwned = [`trimmer_auto_${previousStage}`];
     }
 
     entries.push({
       id,
-      category: "utility",
-      targetIds: ["trimming_robot"],
+      category: 'utility',
+      targetIds: ['trimming_robot'],
       name,
       description,
       cost: Math.round(baseCost * TRIMMER_COST_FACTORS[index]),
-      icon: asset("icons/upgrades/upgrade-cultivator.png"),
-      effects: [{ type: "autoClick", value: 0.5 }],
+      icon: asset('icons/upgrades/upgrade-cultivator.png'),
+      effects: [{ type: 'autoClick', value: 0.5 }],
       requirement,
       order: 8000 + stage,
     });
@@ -280,38 +288,38 @@ function createTrimmerUpgrades(): UpgradeDefinition[] {
 
 const legacyUpgrades: UpgradeDefinition[] = [
   {
-    id: "rich_soil",
-    category: "utility",
+    id: 'rich_soil',
+    category: 'utility',
     name: {
-      de: "Reiche Erde",
-      en: "Rich Soil",
+      de: 'Reiche Erde',
+      en: 'Rich Soil',
     },
     description: {
-      de: "Globale Produktion +25 %.",
-      en: "Global production +25%.",
+      de: 'Globale Produktion +25 %.',
+      en: 'Global production +25%.',
     },
     cost: 2_500,
-    icon: asset("icons/upgrades/upgrade-global-bps.png"),
-    effects: [{ type: "globalMultiplier", value: 1.25 }],
+    icon: asset('icons/upgrades/upgrade-global-bps.png'),
+    effects: [{ type: 'globalMultiplier', value: 1.25 }],
     requirement: {
       totalBuds: 2_000,
     },
     order: 100,
   },
   {
-    id: "precision_trim",
-    category: "utility",
+    id: 'precision_trim',
+    category: 'utility',
     name: {
-      de: "Präziser Trim",
-      en: "Precision Trim",
+      de: 'Präziser Trim',
+      en: 'Precision Trim',
     },
     description: {
-      de: "Buds pro Klick verdoppelt.",
-      en: "Doubles buds per click.",
+      de: 'Buds pro Klick verdoppelt.',
+      en: 'Doubles buds per click.',
     },
     cost: 15_000,
-    icon: asset("icons/upgrades/upgrade-click-x2.png"),
-    effects: [{ type: "clickMultiplier", value: 2 }],
+    icon: asset('icons/upgrades/upgrade-click-x2.png'),
+    effects: [{ type: 'clickMultiplier', value: 2 }],
     requirement: {
       totalBuds: 10_000,
     },

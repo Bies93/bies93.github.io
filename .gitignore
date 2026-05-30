@@ -10,7 +10,26 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+coverage
+playwright-report
+test-results
 *.local
+
+# Environment and secret files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cert
+
+# Local agent/workspace metadata
+AGENTS.md
+.codex/
+.roo/
 
 # Editor directories and files
 .vscode/*
@@ -22,11 +41,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Environment files
-setup.env.bat
-setup_env.bat
-.roo/rules-architect/AGENTS.md
-.roo/rules-ask/AGENTS.md
-.roo/rules-debug/AGENTS.md
-.roo/rules-code/AGENTS.md

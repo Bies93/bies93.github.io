@@ -11,7 +11,7 @@ export interface AbilityProgress {
 
 const abilityById = new Map<AbilityId, Ability>(ABILITIES.map((ability) => [ability.id, ability]));
 
-export function listAbilities(): Ability[] {
+export function listAbilities(): readonly Ability[] {
   return ABILITIES;
 }
 
@@ -143,7 +143,7 @@ export function formatAbilityTooltip(state: GameState, id: AbilityId, locale: Lo
   return base;
 }
 
-export function getAbilityLabel(state: GameState, id: AbilityId, locale: LocaleKey): string {
+export function getAbilityLabel(id: AbilityId, locale: LocaleKey): string {
   const ability = abilityById.get(id);
   if (!ability) {
     return "";

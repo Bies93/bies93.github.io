@@ -206,7 +206,7 @@ export function evaluateAchievements(state: GameState): void {
 
     const ownsItems = !achievement.requirement.itemsOwned
       || Object.entries(achievement.requirement.itemsOwned).every(([id, amount]) => {
-        return (state.items[id] ?? 0) >= amount;
+        return (state.items[id] ?? 0) >= (amount ?? 0);
       });
 
     const meetsTotal = !achievement.requirement.totalBuds
@@ -292,5 +292,4 @@ function collectAchievementMultiplier(state: GameState): Decimal {
     return acc.mul(achievement.rewardMultiplier);
   }, new Decimal(1));
 }
-
 

@@ -39,11 +39,11 @@ export function pow(base: Decimal, factor: number): Decimal {
 }
 
 export function mul(...values: (Decimal | number)[]): Decimal {
-  return values.reduce((acc, curr) => acc.mul(toDecimal(curr)), new Decimal(1));
+  return values.reduce<Decimal>((acc, curr) => acc.mul(toDecimal(curr)), new Decimal(1));
 }
 
 export function sum(...values: (Decimal | number)[]): Decimal {
-  return values.reduce((acc, curr) => acc.add(toDecimal(curr)), new Decimal(0));
+  return values.reduce<Decimal>((acc, curr) => acc.add(toDecimal(curr)), new Decimal(0));
 }
 
 export function paybackSeconds(cost: Decimal, gainPerSecond: Decimal): number | null {

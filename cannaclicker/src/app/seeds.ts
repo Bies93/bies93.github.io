@@ -172,6 +172,7 @@ export function maybeRollClickSeed(
 }
 
 export function processSeedSystems(state: GameState, deltaSeconds: number, now = Date.now()): void {
+  void deltaSeconds;
   const rate = updateSeedRate(state, now);
   const cap = state.temp.seedRateCap;
   const config = state.temp.seedPassiveConfig;
@@ -252,7 +253,7 @@ export function checkSeedSynergies(state: GameState, now = Date.now()): boolean 
 function synergySatisfied(state: GameState, synergy: SeedSynergyDefinition): boolean {
   if (synergy.requirements.items) {
     for (const [itemId, required] of Object.entries(synergy.requirements.items)) {
-      if ((state.items[itemId] ?? 0) < required) {
+      if ((state.items[itemId] ?? 0) < (required ?? 0)) {
         return false;
       }
     }

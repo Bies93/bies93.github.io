@@ -34,7 +34,7 @@ const SIDE_PANEL_TAB_KEYS: Record<SidePanelTab, string> = {
 };
 
 export function updateStrings(state: GameState, refs: UIRefs): void {
-  refs.headerTitle.textContent = "CannaBies";
+  refs.headerTitle.textContent = t(state.locale, "app.title");
   refs.clickButton.setAttribute("aria-label", t(state.locale, "actions.click"));
   refs.clickLabel.textContent = t(state.locale, "actions.click");
 
@@ -73,7 +73,7 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
 
   refs.abilityTitle.textContent = t(state.locale, "abilities.title");
   refs.abilityList.forEach((abilityRefs, abilityId) => {
-    const labelText = getAbilityLabel(state, abilityId, state.locale);
+    const labelText = getAbilityLabel(abilityId, state.locale);
     abilityRefs.label.textContent = labelText;
     abilityRefs.container.title = formatAbilityTooltip(state, abilityId, state.locale);
     abilityRefs.container.setAttribute("aria-label", labelText);

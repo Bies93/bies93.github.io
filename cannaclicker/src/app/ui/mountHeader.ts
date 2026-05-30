@@ -25,7 +25,7 @@ export function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): H
 
   const headerTitle = document.createElement("h1");
   headerTitle.className = "app-header__title";
-  headerTitle.textContent = "CannaBies";
+  headerTitle.textContent = "CannaClicker";
 
   const actionWrap = document.createElement("div");
   actionWrap.className =

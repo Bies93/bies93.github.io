@@ -162,7 +162,7 @@ export function canUnlockItem(state: GameState, definition: ItemDefinition): boo
 
   if (definition.unlock.itemsOwned) {
     return Object.entries(definition.unlock.itemsOwned).every(([itemId, amount]) => {
-      return (state.items[itemId] ?? 0) >= amount;
+      return (state.items[itemId] ?? 0) >= (amount ?? 0);
     });
   }
 
@@ -247,4 +247,3 @@ export function formatRoi(locale: LocaleKey, value: number | null): string {
   const rounded = Math.max(1, Math.round(value));
   return t(locale, 'shop.roiValue', { seconds: rounded });
 }
-

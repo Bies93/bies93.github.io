@@ -38,6 +38,7 @@ export const defaultSchedulerBindings: SchedulerBindings = {
     element.remove();
   },
   showEventFeedback(context, state, id, result, refreshed, origin) {
+    void context;
     if (id === "golden_bud" && result.budGain) {
       const formatted = formatDecimal(result.budGain);
       spawnFloatingValue(origin, `+${formatted}`);

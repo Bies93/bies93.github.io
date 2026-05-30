@@ -1,26 +1,26 @@
-import Decimal from "break_infinity.js";
-import { DEFAULT_LOCALE, type LocaleKey } from "./i18n";
-import { createDefaultSettings, type SettingsState } from "./settings";
-import { OFFLINE_CAP_MS } from "./balance";
-import type { MilestoneProgressSnapshot } from "./milestones";
-import type { AbilityId } from "../data/abilities";
-import type { AchievementId } from "../data/achievements";
-import type { ItemId } from "../data/items";
-import type { MilestoneId } from "../data/milestones";
-import type { ResearchId } from "../data/research";
-import type { UpgradeId } from "../data/upgrades";
-import type { SeedSynergyId } from "./seeds";
+import Decimal from 'break_infinity.js';
+import { DEFAULT_LOCALE, type LocaleKey } from './i18n';
+import { createDefaultSettings, type SettingsState } from './settings';
+import { OFFLINE_CAP_MS } from './balance';
+import type { MilestoneProgressSnapshot } from './milestones';
+import type { AbilityId } from '../data/abilities';
+import type { AchievementId } from '../data/achievements';
+import type { ItemId } from '../data/items';
+import type { MilestoneId } from '../data/milestones';
+import type { ResearchId } from '../data/research';
+import type { UpgradeId } from '../data/upgrades';
+import type { SeedSynergyId } from './seeds';
 import {
   createDefaultEventState,
   createDefaultEventStats,
   type EventRuntimeState,
   type EventStats,
-} from "./events";
-export type { AbilityId } from "../data/abilities";
+} from './events';
+export type { AbilityId } from '../data/abilities';
 
 export const SAVE_VERSION = 7 as const;
 
-export type SeedGainSource = "event" | "click" | "synergy" | "passive";
+export type SeedGainSource = 'event' | 'click' | 'synergy' | 'passive';
 
 export interface SeedGainEntry {
   time: number;
@@ -35,8 +35,8 @@ export interface SeedPassiveConfig {
 }
 
 export type SeedNotification =
-  | { type: "synergy"; id: SeedSynergyId; seeds: number }
-  | { type: "passive"; seeds: number };
+  | { type: 'synergy'; id: SeedSynergyId; seeds: number }
+  | { type: 'passive'; seeds: number };
 
 export type DecimalLike = Decimal | number | string | null | undefined;
 
@@ -67,6 +67,8 @@ export interface KickstartState {
 export interface TempState {
   bpsMult: Decimal;
   bpcMult: Decimal;
+  researchBpsMult: Decimal;
+  researchBpcMult: Decimal;
   totalBpsMult: Decimal;
   totalBpcMult: Decimal;
   costMultiplier: Decimal;
@@ -107,14 +109,14 @@ export interface TempState {
   seedNotifications: SeedNotification[];
   seedRatePerHour: number;
   seedRateCap: number;
+  needsRecalc: boolean;
 }
 
-export type ShopSortMode = "price" | "bps" | "roi";
+export type ShopSortMode = 'price' | 'bps' | 'roi';
 
 export interface PreferencesState {
   shopSortMode: ShopSortMode;
 }
-
 
 export interface MetaState {
   lastSeenAt: number;
@@ -127,12 +129,13 @@ export interface MetaState {
   eventStats: EventStats;
 }
 
-
 export function createDefaultPreferences(): PreferencesState {
-  return { shopSortMode: "price" } satisfies PreferencesState;
+  return { shopSortMode: 'price' } satisfies PreferencesState;
 }
 
-export function createDefaultAutomation(): {} {
+export type AutomationState = Record<string, never>;
+
+export function createDefaultAutomation(): AutomationState {
   return {};
 }
 
@@ -151,7 +154,7 @@ export interface SaveV5 {
   time: number;
   lastSeenAt: number;
   preferences: PreferencesState;
-  automation: {};
+  automation: AutomationState;
   settings: SettingsState;
   meta: MetaState;
 }
@@ -166,7 +169,7 @@ export interface GameState extends SaveV5 {
 
 export function createDefaultState(partial: Partial<GameState> = {}): GameState {
   const now = Date.now();
-  const lastTick = typeof performance !== "undefined" ? performance.now() : now;
+  const lastTick = typeof performance !== 'undefined' ? performance.now() : now;
   const defaultAbilities: AbilityState = {
     overdrive: { active: false, endsAt: 0, readyAt: now, multiplier: 1 },
     burst: { active: false, endsAt: 0, readyAt: now, multiplier: 1 },
@@ -175,13 +178,16 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
   const defaultPreferences = createDefaultPreferences();
   const defaultAutomation = createDefaultAutomation();
   const defaultSettings = createDefaultSettings();
-  const defaultMeta: MetaState = { lastSeenAt: now, lastBpsAtSave: 0 };
-  defaultMeta.seedHistory = [];
-  defaultMeta.seedSynergyClaims = {};
-  defaultMeta.lastInteractionAt = now;
-  defaultMeta.seedPassiveIdleMs = 0;
-  defaultMeta.seedPassiveRollsDone = 0;
-  defaultMeta.eventStats = createDefaultEventStats(now);
+  const defaultMeta: MetaState = {
+    lastSeenAt: now,
+    lastBpsAtSave: 0,
+    seedHistory: [],
+    seedSynergyClaims: {},
+    lastInteractionAt: now,
+    seedPassiveIdleMs: 0,
+    seedPassiveRollsDone: 0,
+    eventStats: createDefaultEventStats(now),
+  };
 
   return {
     v: SAVE_VERSION,
@@ -215,6 +221,8 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
     temp: {
       bpsMult: new Decimal(1),
       bpcMult: new Decimal(1),
+      researchBpsMult: new Decimal(1),
+      researchBpcMult: new Decimal(1),
       totalBpsMult: new Decimal(1),
       totalBpcMult: new Decimal(1),
       costMultiplier: new Decimal(1),
@@ -255,6 +263,7 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       seedNotifications: [],
       seedRatePerHour: 0,
       seedRateCap: 0,
+      needsRecalc: false,
     },
     events: createDefaultEventState(now),
     ...partial,
@@ -272,4 +281,3 @@ export function ensureDecimal(value: DecimalLike): Decimal {
 
   return new Decimal(value);
 }
-

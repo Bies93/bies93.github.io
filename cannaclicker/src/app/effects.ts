@@ -9,8 +9,7 @@ export function spawnFloatingValue(origin: HTMLElement, text: string, color = 'r
   particle.style.color = color;
   particle.style.textShadow = '0 0 12px rgba(74, 222, 128, 0.5)';
 
-  const host = origin instanceof HTMLElement ? origin : origin.parentElement;
-  (host ?? origin).appendChild(particle);
+  origin.appendChild(particle);
 
   const animation = particle.animate(
     [

@@ -29,10 +29,15 @@ jobs:
           cache: npm
           cache-dependency-path: cannaclicker/package-lock.json
       - run: npm ci
+      - run: npm run lint
+      - run: npm run test
+      - run: npm audit --audit-level=moderate
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: cannaclicker/dist   # muss index.html enthalten
+          path: cannaclicker/dist # muss index.html enthalten
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -42,4 +47,3 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
-

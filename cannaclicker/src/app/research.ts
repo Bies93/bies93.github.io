@@ -1,18 +1,18 @@
-import Decimal from "break_infinity.js";
+import Decimal from 'break_infinity.js';
 import {
   RESEARCH,
   researchById,
   type ResearchId,
   type ResearchNode,
   type ResearchUnlockCondition,
-} from "../data/research";
-import type { GameState } from "./state";
-import { computePrestigeMultiplier } from "./prestige";
-import { applyEffects } from "../game/effects";
-import { reapplyAbilityEffects } from "./abilities";
-import { recordInteraction } from "./seeds";
+} from '../data/research';
+import type { GameState } from './state';
+import { computePrestigeMultiplier } from './prestige';
+import { applyEffects } from '../game/effects';
+import { reapplyAbilityEffects } from './abilities';
+import { recordInteraction } from './seeds';
 
-export type ResearchFilter = "all" | "available" | "owned";
+export type ResearchFilter = 'all' | 'available' | 'owned';
 
 export interface ResearchViewModel {
   node: ResearchNode;
@@ -23,16 +23,19 @@ export interface ResearchViewModel {
 }
 
 export type ResearchLockReason =
-  | { kind: "exclusive" }
-  | { kind: "unlock_all"; conditions: ResearchUnlockCondition[] }
-  | { kind: "unlock_any"; conditions: ResearchUnlockCondition[] };
+  | { kind: 'exclusive' }
+  | { kind: 'unlock_all'; conditions: readonly ResearchUnlockCondition[] }
+  | { kind: 'unlock_any'; conditions: readonly ResearchUnlockCondition[] };
 
 export function applyResearchEffects(state: GameState): void {
   applyEffects(state, state.researchOwned);
   reapplyAbilityEffects(state);
 }
 
-export function getResearchList(state: GameState, filter: ResearchFilter = "all"): ResearchViewModel[] {
+export function getResearchList(
+  state: GameState,
+  filter: ResearchFilter = 'all',
+): ResearchViewModel[] {
   return RESEARCH.map((node) => {
     const owned = state.researchOwned.includes(node.id);
     const blocked = !owned && !requirementsMet(state, node);
@@ -46,11 +49,11 @@ export function getResearchList(state: GameState, filter: ResearchFilter = "all"
       lockReason,
     } satisfies ResearchViewModel;
   }).filter((entry) => {
-    if (filter === "available") {
+    if (filter === 'available') {
       return !entry.owned && !entry.blocked;
     }
 
-    if (filter === "owned") {
+    if (filter === 'owned') {
       return entry.owned;
     }
 
@@ -59,7 +62,7 @@ export function getResearchList(state: GameState, filter: ResearchFilter = "all"
 }
 
 export function canAfford(state: GameState, node: ResearchNode): boolean {
-  if (node.costType === "buds") {
+  if (node.costType === 'buds') {
     return state.buds.greaterThanOrEqualTo(new Decimal(node.cost));
   }
 
@@ -119,7 +122,7 @@ export function purchaseResearch(state: GameState, id: ResearchId): boolean {
     return false;
   }
 
-  if (node.costType === "buds") {
+  if (node.costType === 'buds') {
     const cost = new Decimal(node.cost);
     state.buds = state.buds.sub(cost);
   } else {
@@ -139,9 +142,9 @@ export function getResearchNode(id: ResearchId): ResearchNode | undefined {
 
 function meetsUnlockCondition(state: GameState, condition: ResearchUnlockCondition): boolean {
   switch (condition.type) {
-    case "total_buds":
+    case 'total_buds':
       return state.total.greaterThanOrEqualTo(new Decimal(condition.value));
-    case "prestige_seeds":
+    case 'prestige_seeds':
       return state.prestige.seeds >= condition.value;
     default:
       return false;
@@ -158,21 +161,21 @@ function getResearchLockReason(state: GameState, node: ResearchNode): ResearchLo
       return other?.exclusiveGroup === node.exclusiveGroup;
     });
     if (ownsOther) {
-      return { kind: "exclusive" } satisfies ResearchLockReason;
+      return { kind: 'exclusive' } satisfies ResearchLockReason;
     }
   }
 
   if (node.unlockAll && node.unlockAll.length > 0) {
     const allMet = node.unlockAll.every((condition) => meetsUnlockCondition(state, condition));
     if (!allMet) {
-      return { kind: "unlock_all", conditions: node.unlockAll } satisfies ResearchLockReason;
+      return { kind: 'unlock_all', conditions: node.unlockAll } satisfies ResearchLockReason;
     }
   }
 
   if (node.unlockAny && node.unlockAny.length > 0) {
     const anyMet = node.unlockAny.some((condition) => meetsUnlockCondition(state, condition));
     if (!anyMet) {
-      return { kind: "unlock_any", conditions: node.unlockAny } satisfies ResearchLockReason;
+      return { kind: 'unlock_any', conditions: node.unlockAny } satisfies ResearchLockReason;
     }
   }
 

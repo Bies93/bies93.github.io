@@ -1,12 +1,12 @@
-import { t } from "../../i18n";
+import { t } from '../../i18n';
 import {
   formatAbilityTooltip,
   getAbilityDefinition,
   getAbilityLabel,
   getAbilityProgress,
-} from "../../abilities";
-import type { GameState } from "../../state";
-import type { UIRefs } from "../types";
+} from '../../abilities';
+import type { GameState } from '../../state';
+import type { UIRefs } from '../types';
 
 export function updateAbilities(state: GameState, refs: UIRefs): void {
   const now = Date.now();
@@ -17,41 +17,45 @@ export function updateAbilities(state: GameState, refs: UIRefs): void {
       return;
     }
 
-    const labelText = getAbilityLabel(state, abilityId, state.locale);
+    const labelText = getAbilityLabel(abilityId, state.locale);
     abilityRefs.label.textContent = labelText;
     abilityRefs.container.title = formatAbilityTooltip(state, abilityId, state.locale);
-    abilityRefs.container.setAttribute("aria-label", labelText);
+    abilityRefs.container.setAttribute('aria-label', labelText);
 
     const progress = getAbilityProgress(state, abilityId, now);
     const button = abilityRefs.container;
     const status = abilityRefs.status;
     const progressBar = abilityRefs.progressBar;
 
-    button.classList.remove("is-active", "is-ready", "is-cooldown");
+    button.classList.remove('is-active', 'is-ready', 'is-cooldown');
 
     let widthPercent = 0;
 
     if (runtime.active) {
-      button.classList.add("is-active");
+      button.classList.add('is-active');
       button.disabled = true;
       const remaining = Math.max(0, progress.remaining);
-      const filled = ability.durationSec > 0 ? (ability.durationSec - remaining) / ability.durationSec : 1;
+      const filled =
+        ability.durationSec > 0 ? (ability.durationSec - remaining) / ability.durationSec : 1;
       widthPercent = Math.max(0, Math.min(1, filled)) * 100;
-      status.textContent = t(state.locale, "abilities.status.active", {
+      status.textContent = t(state.locale, 'abilities.status.active', {
         seconds: Math.ceil(remaining),
       });
     } else if (progress.readyIn <= 0) {
-      button.classList.add("is-ready");
+      button.classList.add('is-ready');
       button.disabled = false;
       widthPercent = 100;
-      status.textContent = t(state.locale, "abilities.status.ready");
+      status.textContent = t(state.locale, 'abilities.status.ready');
     } else {
-      button.classList.add("is-cooldown");
+      button.classList.add('is-cooldown');
       button.disabled = true;
       const remainingCooldown = Math.max(0, progress.readyIn);
-      const filled = ability.cooldownSec > 0 ? (ability.cooldownSec - remainingCooldown) / ability.cooldownSec : 0;
+      const filled =
+        ability.cooldownSec > 0
+          ? (ability.cooldownSec - remainingCooldown) / ability.cooldownSec
+          : 0;
       widthPercent = Math.max(0, Math.min(1, filled)) * 100;
-      status.textContent = t(state.locale, "abilities.status.cooldown", {
+      status.textContent = t(state.locale, 'abilities.status.cooldown', {
         seconds: Math.ceil(remainingCooldown),
       });
     }

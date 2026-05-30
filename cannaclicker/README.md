@@ -5,12 +5,13 @@ A cannabis-themed idle clicker built with Vite + TypeScript.
 ## Scripts
 
 ```bash
-npm install
-npm run dev
-npm run build
-npm run preview
-npm run lint
-npm run test
+npm --prefix cannaclicker install
+npm --prefix cannaclicker run dev
+npm --prefix cannaclicker run build
+npm --prefix cannaclicker run preview
+npm --prefix cannaclicker run lint
+npm --prefix cannaclicker run test
+npm --prefix cannaclicker run e2e
 ```
 
 ## Tooling
@@ -18,7 +19,7 @@ npm run test
 - Vite for bundling
 - Tailwind CSS for styling
 - ESLint + Prettier for code quality
-- Vitest, Testing Library, and Playwright (optional) for testing
+- Vitest for unit tests and Playwright for browser smoke tests
 
 ## Game Goals (MVP)
 

@@ -1,8 +1,4 @@
-import {
-  createDefaultAutomation,
-  createDefaultPreferences,
-  SAVE_VERSION,
-} from '../state';
+import { createDefaultAutomation, createDefaultPreferences, SAVE_VERSION } from '../state';
 import { createDefaultSettings, type SettingsState } from '../settings';
 import { milestones } from '../../data/milestones';
 import type { MilestoneId } from '../../data/milestones';
@@ -51,7 +47,13 @@ function isResearchId(value: unknown): value is ResearchId {
 }
 
 export function normalisePersistedState(
-  data: PersistedStateV2 | PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6 | PersistedStateV7,
+  data:
+    | PersistedStateV2
+    | PersistedStateV3
+    | PersistedStateV4
+    | PersistedStateV5
+    | PersistedStateV6
+    | PersistedStateV7,
 ): PersistedStateV7 {
   const now = Date.now();
   const prestige = data.prestige ?? {};
@@ -62,15 +64,30 @@ export function normalisePersistedState(
     abilities: Record<string, PersistedAbilityState>;
   }>;
   const preferences = normalisePreferences(
-    (data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6 | PersistedStateV7).preferences,
+    (
+      data as
+        | PersistedStateV3
+        | PersistedStateV4
+        | PersistedStateV5
+        | PersistedStateV6
+        | PersistedStateV7
+    ).preferences,
   );
   const automation = normaliseAutomation(
-    (data as PersistedStateV3 | PersistedStateV4 | PersistedStateV5 | PersistedStateV6 | PersistedStateV7).automation,
+    (
+      data as
+        | PersistedStateV3
+        | PersistedStateV4
+        | PersistedStateV5
+        | PersistedStateV6
+        | PersistedStateV7
+    ).automation,
   );
   const settings = normaliseSettings(
     (data as PersistedStateV4 | PersistedStateV5 | PersistedStateV6 | PersistedStateV7).settings,
   );
-  const legacyLastSeen = typeof legacyData.lastSeenAt === 'number' ? legacyData.lastSeenAt : undefined;
+  const legacyLastSeen =
+    typeof legacyData.lastSeenAt === 'number' ? legacyData.lastSeenAt : undefined;
   const legacyTime = typeof legacyData.time === 'number' ? legacyData.time : undefined;
   const meta = normaliseMeta(
     (data as PersistedStateV4 | PersistedStateV5 | PersistedStateV6 | PersistedStateV7).meta,
@@ -146,12 +163,14 @@ export function normaliseSettings(settings?: Partial<SettingsState>): SettingsSt
 
   return {
     showOfflineEarnings:
-      typeof settings.showOfflineEarnings === 'boolean' ? settings.showOfflineEarnings : defaults.showOfflineEarnings,
+      typeof settings.showOfflineEarnings === 'boolean'
+        ? settings.showOfflineEarnings
+        : defaults.showOfflineEarnings,
   } satisfies SettingsState;
 }
 
 export function normaliseMilestoneFlags(
-  flags?: Record<string, boolean>,
+  flags?: Partial<Record<MilestoneId, boolean>>,
 ): Partial<Record<MilestoneId, boolean>> {
   const result: Partial<Record<MilestoneId, boolean>> = {};
   if (!flags) {
@@ -272,7 +291,9 @@ export function normaliseMeta(
   fallbackLastSeen: number | undefined,
   now: number,
 ): RestoredMetaState {
-  const lastSeen = Number.isFinite(meta?.lastSeenAt) ? Number(meta!.lastSeenAt) : fallbackLastSeen ?? now;
+  const lastSeen = Number.isFinite(meta?.lastSeenAt)
+    ? Number(meta!.lastSeenAt)
+    : (fallbackLastSeen ?? now);
   const safeLastSeen = lastSeen > 0 ? Math.floor(lastSeen) : now;
   const lastBps = Number.isFinite(meta?.lastBpsAtSave) ? Number(meta!.lastBpsAtSave) : 0;
 
@@ -285,7 +306,10 @@ export function normaliseMeta(
       if (time <= 0 || amount <= 0) {
         return null;
       }
-      const safeSource = source === 'event' || source === 'click' || source === 'synergy' || source === 'passive' ? source : 'event';
+      const safeSource =
+        source === 'event' || source === 'click' || source === 'synergy' || source === 'passive'
+          ? source
+          : 'event';
       return { time, amount, source: safeSource } satisfies RestoredSeedGainEntry;
     })
     .filter((entry): entry is RestoredSeedGainEntry => !!entry);
@@ -334,15 +358,9 @@ export function normalisePreferences(preferences?: Partial<PreferencesState>): P
 }
 
 export function normaliseAutomation(automation?: Partial<AutomationState>): AutomationState {
+  void automation;
   const defaults = createDefaultAutomation();
   return defaults;
-}
-
-function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
-  if (typeof value !== 'number' || Number.isNaN(value)) {
-    return fallback;
-  }
-  return Math.min(max, Math.max(min, Math.round(value)));
 }
 
 export function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV7 {
@@ -366,12 +384,9 @@ export function upgradeFromLegacy(data: PersistedStateV1Legacy): PersistedStateV
       kickstart: null,
     },
     abilities: normalisePersistedAbilities(),
-    time: data.time ?? now,
     lastSeenAt: data.time ?? now,
     locale: data.locale,
     muted: data.muted,
-    preferences: createDefaultPreferences(),
-    automation: createDefaultAutomation(),
   } satisfies PersistedStateV2);
 }
 

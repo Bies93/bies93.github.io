@@ -11,11 +11,11 @@ import type {
 } from '../state';
 import type { EventId } from '../events';
 import type { SeedSynergyId } from '../seeds';
-import type { AchievementId } from '../data/achievements';
-import type { ItemId } from '../data/items';
-import type { MilestoneId } from '../data/milestones';
-import type { ResearchId } from '../data/research';
-import type { UpgradeId } from '../data/upgrades';
+import type { AchievementId } from '../../data/achievements';
+import type { ItemId } from '../../data/items';
+import type { MilestoneId } from '../../data/milestones';
+import type { ResearchId } from '../../data/research';
+import type { UpgradeId } from '../../data/upgrades';
 import type { LocaleKey } from '../i18n';
 import type { SettingsState } from '../settings';
 

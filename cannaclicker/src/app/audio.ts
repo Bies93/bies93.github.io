@@ -1,4 +1,5 @@
 import { Howl, Howler } from 'howler';
+import { asset } from './assets';
 import { persistAudioPreference } from './save';
 
 export interface AudioManager {
@@ -14,12 +15,12 @@ export function createAudioManager(initialMuted: boolean): AudioManager {
   Howler.mute(muted);
 
   const click = new Howl({
-    src: ['/sounds/click.wav'],
+    src: [asset('sounds/click.wav')],
     volume: 0.45,
   });
 
   const purchase = new Howl({
-    src: ['/sounds/purchase.wav'],
+    src: [asset('sounds/purchase.wav')],
     volume: 0.5,
   });
 

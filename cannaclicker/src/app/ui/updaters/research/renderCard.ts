@@ -1,11 +1,11 @@
-import { t, type LocaleKey } from "../../../i18n";
-import { formatDecimal } from "../../../math";
-import type { GameState } from "../../../state";
-import type { ResearchViewModel } from "../../../research";
-import type { ResearchCardRefs } from "../../types";
-import type { ResearchEffect } from "../../../../data/research";
-import { formatResearchEffect, formatResearchLockReason } from "./text";
-import { getResearchNode } from "../../../research";
+import { t, type LocaleKey } from '../../../i18n';
+import { formatDecimal } from '../../../math';
+import type { GameState } from '../../../state';
+import type { ResearchViewModel } from '../../../research';
+import type { ResearchCardRefs } from '../../types';
+import type { ResearchEffect } from '../../../../data/research';
+import { formatResearchEffect, formatResearchLockReason } from './text';
+import { getResearchNode } from '../../../research';
 
 export function renderResearchCard(
   card: ResearchCardRefs,
@@ -14,8 +14,8 @@ export function renderResearchCard(
 ): void {
   const { node } = entry;
 
-  card.container.classList.toggle("is-owned", entry.owned);
-  card.container.classList.toggle("is-locked", entry.blocked);
+  card.container.classList.toggle('is-owned', entry.owned);
+  card.container.classList.toggle('is-locked', entry.blocked);
 
   if (card.icon && node.icon) {
     card.icon.src = node.icon;
@@ -34,21 +34,21 @@ export function renderResearchCard(
 
 function renderEffectChips(
   card: ResearchCardRefs,
-  effects: ResearchEffect[],
+  effects: readonly ResearchEffect[],
   locale: LocaleKey,
 ): void {
   if (effects.length === 0) {
-    card.effects.innerHTML = "";
-    card.effects.classList.add("hidden");
+    card.effects.innerHTML = '';
+    card.effects.classList.add('hidden');
     return;
   }
 
-  card.effects.classList.remove("hidden");
-  card.effects.innerHTML = "";
+  card.effects.classList.remove('hidden');
+  card.effects.innerHTML = '';
   effects.forEach((effect) => {
-    const chip = document.createElement("li");
+    const chip = document.createElement('li');
     chip.className =
-      "inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200";
+      'inline-flex items-center rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-200';
     chip.textContent = formatResearchEffect(locale, effect);
     card.effects.appendChild(chip);
   });
@@ -62,37 +62,37 @@ function renderRequirements(
   const { node } = entry;
 
   if (!node.requires || node.requires.length === 0) {
-    card.requires.textContent = "";
-    card.requires.classList.add("hidden");
+    card.requires.textContent = '';
+    card.requires.classList.add('hidden');
     return;
   }
 
   const names = node.requires
     .map((requirementId) => getResearchNode(requirementId)?.name[locale] ?? requirementId)
-    .join(", ");
-  card.requires.textContent = t(locale, "research.requires", { list: names });
-  card.requires.classList.remove("hidden");
+    .join(', ');
+  card.requires.textContent = t(locale, 'research.requires', { list: names });
+  card.requires.classList.remove('hidden');
 }
 
 function renderLockState(card: ResearchCardRefs, entry: ResearchViewModel, state: GameState): void {
   if (entry.owned || !entry.lockReason) {
-    card.lock.textContent = "";
-    card.lock.classList.add("hidden");
+    card.lock.textContent = '';
+    card.lock.classList.add('hidden');
     return;
   }
 
   card.lock.textContent = formatResearchLockReason(state, entry.lockReason);
-  card.lock.classList.remove("hidden");
+  card.lock.classList.remove('hidden');
 }
 
 function renderCost(
   card: ResearchCardRefs,
-  costType: "buds" | "seeds",
+  costType: 'buds' | 'seeds',
   cost: number,
   locale: LocaleKey,
 ): void {
-  const costLabelKey = costType === "buds" ? "research.cost.buds" : "research.cost.seeds";
-  const costValue = costType === "buds" ? formatDecimal(cost) : cost.toString();
+  const costLabelKey = costType === 'buds' ? 'research.cost.buds' : 'research.cost.seeds';
+  const costValue = costType === 'buds' ? formatDecimal(cost) : cost.toString();
   card.cost.textContent = `${t(locale, costLabelKey)}: ${costValue}`;
 }
 
@@ -102,15 +102,15 @@ function renderActionButton(
   locale: LocaleKey,
 ): void {
   if (entry.owned) {
-    card.button.textContent = t(locale, "research.button.owned");
+    card.button.textContent = t(locale, 'research.button.owned');
     card.button.disabled = true;
   } else if (entry.blocked) {
-    card.button.textContent = t(locale, "research.button.locked");
+    card.button.textContent = t(locale, 'research.button.locked');
     card.button.disabled = true;
   } else {
-    card.button.textContent = t(locale, "research.button.buy");
+    card.button.textContent = t(locale, 'research.button.buy');
     card.button.disabled = !entry.affordable;
   }
 
-  card.button.setAttribute("aria-disabled", card.button.disabled ? "true" : "false");
+  card.button.setAttribute('aria-disabled', card.button.disabled ? 'true' : 'false');
 }

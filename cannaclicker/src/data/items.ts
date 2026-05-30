@@ -1,4 +1,4 @@
-import { asset } from "../app/assets";
+import { asset } from '../app/assets';
 
 const ITEM_DATA = [
   {
@@ -266,16 +266,31 @@ const ITEM_DATA = [
 
 type RawItemDefinition = (typeof ITEM_DATA)[number];
 
-export type ItemId = RawItemDefinition["id"];
+export type ItemId = RawItemDefinition['id'];
 
 export interface UnlockCondition {
   totalBuds?: number;
   itemsOwned?: Partial<Record<ItemId, number>>;
 }
 
-export type ItemDefinition = RawItemDefinition & { unlock?: UnlockCondition };
+export interface ItemDefinition {
+  id: ItemId;
+  name: Record<'de' | 'en', string>;
+  description: Record<'de' | 'en', string>;
+  tier: number;
+  baseCost: number;
+  costFactor: number;
+  bps: number;
+  icon: string;
+  unlock?: UnlockCondition;
+  tierSize?: number;
+  tierBonusMult?: number;
+  softcapTier?: number;
+  softcapMult?: number;
+  softcapCopies?: number;
+  softcapPenalty?: number;
+}
 
 export const items: readonly ItemDefinition[] = ITEM_DATA;
 
 export const itemById = new Map<ItemId, ItemDefinition>(items.map((item) => [item.id, item]));
-

@@ -1,8 +1,11 @@
-﻿import { defineConfig } from "vite";
+﻿import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: "./",
+  base: './',
   build: {
     sourcemap: true,
+  },
+  test: {
+    exclude: ['e2e/**', 'dist/**', 'node_modules/**'],
   },
 });
