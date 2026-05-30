@@ -76,7 +76,7 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
     context.setResearchState(result.activeFilter, result.researchFilterManuallySelected);
 
     updatePrestigePanel(state, refs);
-    updateAchievements(state, refs);
+    updateAchievements(state, refs, (options: ToastOptions) => showToast(options));
     updatePrestigeModal(refs, state);
     updateOfflineToast(state, (options: ToastOptions) => showToast(options));
   };

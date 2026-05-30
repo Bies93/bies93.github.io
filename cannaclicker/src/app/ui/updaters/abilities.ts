@@ -4,6 +4,7 @@ import {
   getAbilityDefinition,
   getAbilityLabel,
   getAbilityProgress,
+  isAbilityUnlocked,
 } from '../../abilities';
 import type { GameState } from '../../state';
 import type { UIRefs } from '../types';
@@ -27,11 +28,15 @@ export function updateAbilities(state: GameState, refs: UIRefs): void {
     const status = abilityRefs.status;
     const progressBar = abilityRefs.progressBar;
 
-    button.classList.remove('is-active', 'is-ready', 'is-cooldown');
+    button.classList.remove('is-active', 'is-ready', 'is-cooldown', 'is-locked');
 
     let widthPercent = 0;
 
-    if (runtime.active) {
+    if (!isAbilityUnlocked(state, abilityId)) {
+      button.classList.add('is-locked');
+      button.disabled = true;
+      status.textContent = t(state.locale, 'abilities.status.locked');
+    } else if (runtime.active) {
       button.classList.add('is-active');
       button.disabled = true;
       const remaining = Math.max(0, progress.remaining);

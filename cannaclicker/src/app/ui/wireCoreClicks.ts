@@ -1,4 +1,7 @@
-import { handleManualClick } from '../game';
+import { evaluateAchievements, handleManualClick, recalcDerivedValues } from '../game';
+import { activateAbility } from '../abilities';
+import { claimGoal } from '../goals';
+import type { GoalId } from '../../data/goals';
 import { formatDecimal } from '../math';
 import { spawnFloatingValue } from '../effects';
 import { maybeRollClickSeed } from '../seeds';
@@ -38,6 +41,33 @@ export function wireCoreClicks(context: WireContext): void {
       announce(`Buds: ${formatDecimal(state.buds)}`);
     }
 
+    render(state);
+  });
+
+  refs.abilityList.forEach((abilityRefs, abilityId) => {
+    abilityRefs.container.addEventListener('click', () => {
+      if (!activateAbility(state, abilityId)) {
+        return;
+      }
+
+      audio.playPurchase();
+      recalcDerivedValues(state);
+      evaluateAchievements(state);
+      spawnFloatingValue(abilityRefs.container, i18n.t(state.locale, 'abilities.fx.activate'));
+      render(state);
+    });
+  });
+
+  refs.goalButton.addEventListener('click', () => {
+    const goalId = refs.goalPanel.dataset.goalId;
+    if (!goalId || !claimGoal(state, goalId as GoalId)) {
+      return;
+    }
+
+    audio.playPurchase();
+    recalcDerivedValues(state);
+    evaluateAchievements(state);
+    spawnFloatingValue(refs.goalPanel, i18n.t(state.locale, 'goals.fx.claim'));
     render(state);
   });
 

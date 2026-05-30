@@ -102,7 +102,13 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   nextUnlockHint.dataset.uiRole = 'next-unlock-hint';
   nextUnlockHint.dataset.testid = 'next-unlock-hint';
 
-  clickHeader.append(clickStats, nextUnlockHint);
+  const buffList = document.createElement('div');
+  buffList.className = 'buff-list';
+  buffList.dataset.uiRole = 'buff-list';
+  buffList.dataset.testid = 'buff-list';
+  buffList.setAttribute('aria-label', t(state.locale, 'ui.sections.activeBuffs'));
+
+  clickHeader.append(clickStats, nextUnlockHint, buffList);
   clickCard.appendChild(clickHeader);
 
   const clickBody = document.createElement('div');
@@ -134,6 +140,46 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
 
   clickButton.append(clickIcon, clickLabel);
   clickBody.appendChild(clickButton);
+
+  const goalPanel = document.createElement('section');
+  goalPanel.className = 'goal-panel';
+  goalPanel.dataset.uiRole = 'goal-panel';
+  goalPanel.dataset.testid = 'goal-panel';
+
+  const goalCopy = document.createElement('div');
+  goalCopy.className = 'goal-panel__copy';
+
+  const goalTitle = document.createElement('h2');
+  goalTitle.className = 'goal-panel__title';
+
+  const goalDescription = document.createElement('p');
+  goalDescription.className = 'goal-panel__description';
+
+  const goalReward = document.createElement('p');
+  goalReward.className = 'goal-panel__reward';
+
+  goalCopy.append(goalTitle, goalDescription, goalReward);
+
+  const goalProgress = document.createElement('div');
+  goalProgress.className = 'goal-panel__progress';
+  const goalProgressBar = document.createElement('div');
+  goalProgressBar.className = 'goal-panel__progress-bar';
+  goalProgress.appendChild(goalProgressBar);
+
+  const goalProgressText = document.createElement('p');
+  goalProgressText.className = 'goal-panel__progress-text';
+
+  const goalButton = document.createElement('button');
+  goalButton.type = 'button';
+  goalButton.className = 'goal-panel__button';
+  goalButton.dataset.role = 'goal-claim';
+  goalButton.dataset.kind = 'goal';
+
+  const nextGoalHint = document.createElement('p');
+  nextGoalHint.className = 'goal-panel__next';
+
+  goalPanel.append(goalCopy, goalProgress, goalProgressText, goalButton, nextGoalHint);
+  clickBody.appendChild(goalPanel);
 
   const budsStat = createStatBlock('stats.buds', clickStats, statsLabels, statsMeta);
   const bpsStat = createStatBlock('stats.bps', clickStats, statsLabels, statsMeta);
@@ -220,6 +266,15 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     clickLabel,
     clickIcon,
     nextUnlockHint,
+    buffList,
+    goalPanel,
+    goalTitle,
+    goalDescription,
+    goalReward,
+    goalProgressBar,
+    goalProgressText,
+    goalButton,
+    nextGoalHint,
     announcer,
     abilityTitle,
     abilityList: abilityRefs,

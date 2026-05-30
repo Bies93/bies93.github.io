@@ -14,6 +14,7 @@ export type {
 export type {
   ResearchCardRefs,
   AchievementCardRefs,
+  AchievementFilter,
   ShopCardRefs,
   UpgradeCardRefs,
   SidePanelRefs,

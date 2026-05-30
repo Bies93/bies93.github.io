@@ -37,6 +37,10 @@ export function createAchievementCard(definition: AchievementDefinition): Achiev
   const content = document.createElement('div');
   content.className = 'achievement-card__content';
 
+  const category = document.createElement('span');
+  category.className = 'achievement-card__category';
+  content.appendChild(category);
+
   const title = document.createElement('h3');
   title.className = 'achievement-card__title';
   content.appendChild(title);
@@ -44,6 +48,21 @@ export function createAchievementCard(definition: AchievementDefinition): Achiev
   const description = document.createElement('p');
   description.className = 'achievement-card__description';
   content.appendChild(description);
+
+  const flavor = document.createElement('p');
+  flavor.className = 'achievement-card__flavor';
+  content.appendChild(flavor);
+
+  const progress = document.createElement('div');
+  progress.className = 'achievement-card__progress';
+  const progressBar = document.createElement('div');
+  progressBar.className = 'achievement-card__progress-bar';
+  progress.appendChild(progressBar);
+  content.appendChild(progress);
+
+  const progressText = document.createElement('p');
+  progressText.className = 'achievement-card__progress-text';
+  content.appendChild(progressText);
 
   const reward = document.createElement('p');
   reward.className = 'achievement-card__reward';
@@ -59,9 +78,13 @@ export function createAchievementCard(definition: AchievementDefinition): Achiev
     container,
     iconBase: base,
     iconOverlay: overlay,
+    category,
     title,
     description,
+    flavor,
     reward,
     status,
+    progressBar,
+    progressText,
   } satisfies AchievementCardRefs;
 }

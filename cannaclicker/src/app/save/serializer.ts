@@ -9,17 +9,17 @@ import type {
   RestoredAbilityState,
 } from './types';
 import type { AbilityId } from '../state';
+import { ABILITIES } from '../../data/abilities';
 
-const ABILITY_IDS: AbilityId[] = ['overdrive', 'burst'];
+const ABILITY_IDS: AbilityId[] = ABILITIES.map((ability) => ability.id);
 
 export function restoreAbilities(
   abilities: Record<string, PersistedAbilityState> | undefined,
   now: number,
 ): RestoredAbilityState {
-  const restored: RestoredAbilityState = {
-    overdrive: { active: false, endsAt: now, readyAt: now, multiplier: 1 },
-    burst: { active: false, endsAt: now, readyAt: now, multiplier: 1 },
-  };
+  const restored = Object.fromEntries(
+    ABILITY_IDS.map((id) => [id, { active: false, endsAt: now, readyAt: now, multiplier: 1 }]),
+  ) as RestoredAbilityState;
 
   for (const id of ABILITY_IDS) {
     const legacyKey = id === 'burst' ? 'burst_click' : id;
@@ -107,6 +107,7 @@ export function createPersistedPayload(state: GameState, timestamp: number): Per
     researchOwned: state.researchOwned,
     prestige: {
       seeds: state.prestige.seeds,
+      totalSeeds: state.prestige.totalSeeds,
       mult: state.prestige.mult.toString(),
       lifetimeBuds: state.prestige.lifetimeBuds.toString(),
       lastResetAt: state.prestige.lastResetAt,
@@ -131,6 +132,19 @@ export function createPersistedPayload(state: GameState, timestamp: number): Per
       seedPassiveIdleMs: state.meta.seedPassiveIdleMs,
       seedPassiveRollsDone: state.meta.seedPassiveRollsDone,
       eventStats: state.meta.eventStats,
+      manualClicks: state.meta.manualClicks,
+      totalItemsPurchased: state.meta.totalItemsPurchased,
+      totalUpgradesPurchased: state.meta.totalUpgradesPurchased,
+      totalResearchPurchased: state.meta.totalResearchPurchased,
+      seedsSpent: state.meta.seedsSpent,
+      prestigeCount: state.meta.prestigeCount,
+      lastRunBuds: state.meta.lastRunBuds,
+      bestRunBuds: state.meta.bestRunBuds,
+      offlineBudsTotal: state.meta.offlineBudsTotal,
+      offlineReturns: state.meta.offlineReturns,
+      abilityUsesTotal: state.meta.abilityUsesTotal,
+      abilityUses: state.meta.abilityUses,
+      completedGoals: state.meta.completedGoals,
     },
   } satisfies PersistedStateV7;
 }

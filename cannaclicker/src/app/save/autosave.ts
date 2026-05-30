@@ -35,6 +35,8 @@ export function applyOfflineProgress(state: GameState, now: number): void {
     state.prestige.lifetimeBuds = lifetime.greaterThan(state.total) ? lifetime : state.total;
     state.temp.offlineBuds = offlineGain;
     state.temp.offlineDuration = cappedDelta;
+    state.meta.offlineBudsTotal += earnedNumber;
+    state.meta.offlineReturns += 1;
   } else {
     state.temp.offlineBuds = null;
     state.temp.offlineDuration = 0;

@@ -31,13 +31,16 @@ import {
 } from '../events';
 import type { EventId } from '../events';
 import { SEED_SYNERGY_IDS, type SeedSynergyId } from '../seeds';
+import { ABILITIES } from '../../data/abilities';
+import { goals, type GoalId } from '../../data/goals';
 
 const VALID_MILESTONE_IDS = new Set(milestones.map((milestone) => milestone.id));
-const ABILITY_IDS: AbilityId[] = ['overdrive', 'burst'];
+const ABILITY_IDS: AbilityId[] = ABILITIES.map((ability) => ability.id);
 const VALID_RESEARCH_IDS = new Set<string>(RESEARCH.map((entry) => entry.id));
 const VALID_SEED_SYNERGY_IDS = new Set<string>(SEED_SYNERGY_IDS);
 const VALID_EVENT_IDS: EventId[] = [...EVENT_IDS];
 const EVENT_ID_SET = new Set<EventId>(VALID_EVENT_IDS);
+const VALID_GOAL_IDS = new Set<string>(goals.map((goal) => goal.id));
 
 function isSeedSynergyId(value: unknown): value is SeedSynergyId {
   return typeof value === 'string' && VALID_SEED_SYNERGY_IDS.has(value);
@@ -49,6 +52,10 @@ function isEventId(value: unknown): value is EventId {
 
 function isResearchId(value: unknown): value is ResearchId {
   return typeof value === 'string' && VALID_RESEARCH_IDS.has(value);
+}
+
+function isGoalId(value: unknown): value is GoalId {
+  return typeof value === 'string' && VALID_GOAL_IDS.has(value);
 }
 
 export function normalisePersistedState(
@@ -119,6 +126,7 @@ export function normalisePersistedState(
     researchOwned,
     prestige: {
       seeds: prestige.seeds ?? 0,
+      totalSeeds: Math.max(prestige.totalSeeds ?? 0, prestige.seeds ?? 0),
       mult: prestige.mult ?? '1',
       lifetimeBuds: prestige.lifetimeBuds ?? data.total ?? '0',
       lastResetAt: prestige.lastResetAt ?? legacyLastSeen ?? legacyTime ?? now,
@@ -142,10 +150,9 @@ export function normalisePersistedAbilities(
   abilities?: Record<string, PersistedAbilityState>,
 ): PersistedAbilityRecord {
   const now = Date.now();
-  const normalised: PersistedAbilityRecord = {
-    overdrive: {},
-    burst: {},
-  };
+  const normalised = Object.fromEntries(
+    ABILITY_IDS.map((id) => [id, {}]),
+  ) as PersistedAbilityRecord;
 
   for (const id of ABILITY_IDS) {
     const legacyKey = id === 'burst' ? 'burst_click' : id;
@@ -340,6 +347,18 @@ export function normaliseMeta(
     ? Math.max(0, Math.floor(meta!.seedPassiveRollsDone!))
     : 0;
   const eventStats = normaliseEventStats(meta?.eventStats, safeLastSeen, now);
+  const abilityUses: Partial<Record<AbilityId, number>> = {};
+  if (meta?.abilityUses) {
+    for (const id of ABILITY_IDS) {
+      const value = meta.abilityUses[id];
+      if (Number.isFinite(value)) {
+        abilityUses[id] = Math.max(0, Math.floor(value!));
+      }
+    }
+  }
+  const completedGoals = Array.isArray(meta?.completedGoals)
+    ? [...new Set(meta.completedGoals.filter(isGoalId))]
+    : [];
 
   return {
     lastSeenAt: safeLastSeen,
@@ -350,6 +369,19 @@ export function normaliseMeta(
     seedPassiveIdleMs: idleMs,
     seedPassiveRollsDone: rollsDone,
     eventStats,
+    manualClicks: toPositiveInteger(meta?.manualClicks, 0),
+    totalItemsPurchased: toPositiveInteger(meta?.totalItemsPurchased, 0),
+    totalUpgradesPurchased: toPositiveInteger(meta?.totalUpgradesPurchased, 0),
+    totalResearchPurchased: toPositiveInteger(meta?.totalResearchPurchased, 0),
+    seedsSpent: toPositiveInteger(meta?.seedsSpent, 0),
+    prestigeCount: toPositiveInteger(meta?.prestigeCount, 0),
+    lastRunBuds: toPositiveInteger(meta?.lastRunBuds, 0),
+    bestRunBuds: toPositiveInteger(meta?.bestRunBuds, 0),
+    offlineBudsTotal: toPositiveInteger(meta?.offlineBudsTotal, 0),
+    offlineReturns: toPositiveInteger(meta?.offlineReturns, 0),
+    abilityUsesTotal: toPositiveInteger(meta?.abilityUsesTotal, 0),
+    abilityUses,
+    completedGoals,
   } satisfies MetaState;
 }
 

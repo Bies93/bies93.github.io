@@ -5,6 +5,8 @@ import type { UpgradeId } from '../../../data/upgrades';
 import type { ResearchFilter } from '../../research';
 import type { PrestigePanelRefs } from './prestige';
 
+export type AchievementFilter = 'all' | 'unlocked' | 'near' | 'hidden';
+
 export interface ResearchCardRefs {
   id: ResearchId;
   container: HTMLElement;
@@ -23,10 +25,14 @@ export interface AchievementCardRefs {
   container: HTMLElement;
   iconBase: HTMLImageElement;
   iconOverlay: HTMLImageElement;
+  category: HTMLElement;
   title: HTMLElement;
   description: HTMLElement;
+  flavor: HTMLElement;
   reward: HTMLElement;
   status: HTMLElement;
+  progressBar: HTMLElement;
+  progressText: HTMLElement;
 }
 
 export interface ShopCardRefs {
@@ -95,9 +101,28 @@ export interface SidePanelRefs {
   };
   prestige: PrestigePanelRefs;
   achievements: {
+    filters: Map<AchievementFilter, HTMLButtonElement>;
+    activeFilter: AchievementFilter;
     list: HTMLElement;
     entries: Map<AchievementId, AchievementCardRefs>;
   };
+  settings: {
+    offlineToggle: HTMLInputElement;
+    offlineTitle: HTMLElement;
+    offlineDescription: HTMLElement;
+    soundTitle: HTMLElement;
+    soundDescription: HTMLElement;
+    soundButton: HTMLButtonElement;
+    exportButton: HTMLButtonElement;
+    importButton: HTMLButtonElement;
+    resetButton: HTMLButtonElement;
+  };
 }
 
-export type SidePanelTab = 'shop' | 'upgrades' | 'research' | 'prestige' | 'achievements';
+export type SidePanelTab =
+  | 'shop'
+  | 'upgrades'
+  | 'research'
+  | 'prestige'
+  | 'achievements'
+  | 'settings';

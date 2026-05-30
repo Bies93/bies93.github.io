@@ -17,6 +17,17 @@ export function wireSidePanel(context: WireContext): void {
     });
   });
 
+  refs.sidePanel.achievements.filters.forEach((button, key) => {
+    button.addEventListener('click', () => {
+      if (refs.sidePanel.achievements.activeFilter === key) {
+        return;
+      }
+
+      refs.sidePanel.achievements.activeFilter = key;
+      render(state);
+    });
+  });
+
   refs.sidePanel.tabs.forEach((button, tab) => {
     button.addEventListener('click', () => {
       if (context.getActiveSidePanelTab() === tab) {

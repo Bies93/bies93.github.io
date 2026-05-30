@@ -21,6 +21,10 @@ export const EVENT_PRESENTATIONS: readonly EventPresentation[] = [
   { id: 'green_surge', icon: eventIcons.green_surge, labelKey: 'events.greenSurge.name' },
   { id: 'mutant_sprout', icon: eventIcons.mutant_sprout, labelKey: 'events.mutantSprout.name' },
   { id: 'supply_drop', icon: eventIcons.supply_drop, labelKey: 'events.supplyDrop.name' },
+  { id: 'flash_harvest', icon: eventIcons.flash_harvest, labelKey: 'events.flashHarvest.name' },
+  { id: 'calm_growth', icon: eventIcons.calm_growth, labelKey: 'events.calmGrowth.name' },
+  { id: 'overgrowth', icon: eventIcons.overgrowth, labelKey: 'events.overgrowth.name' },
+  { id: 'seed_bloom', icon: eventIcons.seed_bloom, labelKey: 'events.seedBloom.name' },
 ];
 
 export function getEventPresentation(id: EventId): EventPresentation {
@@ -49,6 +53,7 @@ export function createEventButton(
   button.style.top = `${path.startY}px`;
   button.style.transform = 'translate(-50%, -50%)';
   button.setAttribute('aria-label', t(state.locale, definition.labelKey));
+  button.title = t(state.locale, definition.labelKey);
 
   const iconPath = asset(definition.icon);
   const image = new Image();
@@ -60,6 +65,11 @@ export function createEventButton(
   image.className = 'event-icon__img';
 
   button.appendChild(image);
+
+  const label = document.createElement('span');
+  label.className = 'event-icon__label';
+  label.textContent = t(state.locale, definition.labelKey);
+  button.appendChild(label);
 
   button.animate(
     [

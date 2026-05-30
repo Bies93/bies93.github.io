@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Burst Click">
+  <circle cx="64" cy="64" r="56" fill="#07111f"/>
+  <path fill="#a78bfa" d="M64 9 76 43l35-1-29 21 12 34-30-21-30 21 12-34-29-21 35 1L64 9Z"/>
+  <circle cx="64" cy="64" r="24" fill="#ecfeff"/>
+  <path fill="#4c1d95" d="M59 39h10v21h18v9H69v20H59V69H41v-9h18V39Z"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Auto Burst">
+  <circle cx="64" cy="64" r="56" fill="#07111f"/>
+  <path fill="#38bdf8" d="M38 30h52a14 14 0 0 1 14 14v40a14 14 0 0 1-14 14H38a14 14 0 0 1-14-14V44a14 14 0 0 1 14-14Z"/>
+  <path fill="#05263a" d="M46 48h36a9 9 0 0 1 9 9v14a9 9 0 0 1-9 9H46a9 9 0 0 1-9-9V57a9 9 0 0 1 9-9Z"/>
+  <circle cx="52" cy="64" r="6" fill="#bbf7d0"/>
+  <circle cx="76" cy="64" r="6" fill="#bbf7d0"/>
+  <path fill="#22c55e" d="M60 18h8v15h-8zM42 101h9v15h-9zM77 101h9v15h-9z"/>
+</svg>

@@ -31,6 +31,7 @@ const SIDE_PANEL_TAB_KEYS: Record<SidePanelTab, string> = {
   research: 'panel.tabs.research',
   prestige: 'panel.tabs.prestige',
   achievements: 'panel.tabs.achievements',
+  settings: 'panel.tabs.settings',
 };
 
 export function updateStrings(state: GameState, refs: UIRefs): void {
@@ -91,7 +92,42 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
     button.setAttribute('aria-label', button.textContent ?? '');
   });
 
+  refs.sidePanel.achievements.filters.forEach((button, key) => {
+    button.textContent = t(state.locale, `achievements.filter.${key}`);
+    button.setAttribute('aria-label', button.textContent ?? '');
+  });
+
+  refs.sidePanel.settings.offlineTitle.textContent = t(state.locale, 'settings.offline.title');
+  refs.sidePanel.settings.offlineDescription.textContent = t(
+    state.locale,
+    'settings.offline.description',
+  );
+  refs.sidePanel.settings.offlineToggle.checked = state.settings.showOfflineEarnings;
+  refs.sidePanel.settings.offlineToggle.setAttribute(
+    'aria-label',
+    t(state.locale, 'settings.offline.title'),
+  );
+
+  refs.sidePanel.settings.soundTitle.textContent = t(state.locale, 'settings.sound.title');
+  refs.sidePanel.settings.soundDescription.textContent = state.muted
+    ? t(state.locale, 'settings.sound.muted')
+    : t(state.locale, 'settings.sound.enabled');
+  refs.sidePanel.settings.soundButton.textContent = state.muted
+    ? t(state.locale, 'actions.unmute')
+    : t(state.locale, 'actions.mute');
+  refs.sidePanel.settings.exportButton.textContent = t(state.locale, 'actions.export');
+  refs.sidePanel.settings.importButton.textContent = t(state.locale, 'actions.import');
+  refs.sidePanel.settings.resetButton.textContent = t(state.locale, 'actions.reset');
+
   refs.sidePanel.prestige.description.textContent = t(state.locale, 'panel.prestige.description');
+  refs.sidePanel.prestige.spendableSeedsLabel.textContent = t(
+    state.locale,
+    'panel.prestige.spendableSeeds',
+  );
+  refs.sidePanel.prestige.totalSeedsLabel.textContent = t(
+    state.locale,
+    'panel.prestige.totalSeeds',
+  );
   refs.sidePanel.prestige.permanentLabel.textContent = t(state.locale, 'panel.prestige.permanent');
   refs.sidePanel.prestige.kickstartLabel.textContent = t(
     state.locale,

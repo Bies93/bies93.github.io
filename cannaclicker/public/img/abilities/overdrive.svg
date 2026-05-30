@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Overdrive">
+  <defs>
+    <linearGradient id="g" x1="22" x2="106" y1="16" y2="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#facc15"/>
+      <stop offset=".48" stop-color="#22c55e"/>
+      <stop offset="1" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="56" fill="#07111f"/>
+  <circle cx="64" cy="64" r="50" fill="url(#g)" opacity=".22"/>
+  <path fill="url(#g)" d="M69 10 27 72h30l-7 46 51-69H68l1-39Z"/>
+  <path fill="#ecfeff" fill-opacity=".84" d="m64 36-16 25h18l-3 21 20-29H66l-2-17Z"/>
+</svg>

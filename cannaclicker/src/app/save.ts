@@ -81,7 +81,11 @@ export function initState(saved: PersistedStateV7 | null): GameState {
 
   const now = Date.now();
   const prestigeSeeds = Math.max(0, Math.floor(saved.prestige?.seeds ?? 0));
-  const prestigeMult = computePrestigeMultiplier(prestigeSeeds);
+  const totalSeeds = Math.max(
+    prestigeSeeds,
+    Math.floor(saved.prestige?.totalSeeds ?? prestigeSeeds),
+  );
+  const prestigeMult = computePrestigeMultiplier(totalSeeds);
   const prestigeLifetime = ensureDecimal(saved.prestige?.lifetimeBuds ?? saved.total ?? '0');
   const researchOwned = Array.isArray(saved.researchOwned)
     ? [...new Set(saved.researchOwned.filter(isResearchId))]
@@ -102,6 +106,7 @@ export function initState(saved: PersistedStateV7 | null): GameState {
     researchOwned,
     prestige: {
       seeds: prestigeSeeds,
+      totalSeeds,
       mult: prestigeMult,
       lifetimeBuds: prestigeLifetime,
       lastResetAt: saved.prestige?.lastResetAt ?? saved.time ?? now,
@@ -124,7 +129,7 @@ export function initState(saved: PersistedStateV7 | null): GameState {
   reapplyAbilityEffects(state);
 
   applyOfflineProgress(state, now);
-  state.prestige.mult = computePrestigeMultiplier(state.prestige.seeds);
+  state.prestige.mult = computePrestigeMultiplier(state.prestige.totalSeeds);
 
   cleanAbilityFlags(state.abilities, now);
 

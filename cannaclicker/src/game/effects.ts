@@ -20,6 +20,10 @@ export function applyEffects(state: GameState, owned: ResearchId[]): void {
   let hybridPerBuff = 0;
   let strainChoice: StrainId | null = null;
   let seedClickBonus = 0;
+  let eventRewardMult = 1;
+  let eventSpawnRateMult = 1;
+  let eventDurationMult = 1;
+  let researchCostMult = 1;
   let passiveConfig: SeedPassiveConfig | null = null;
   let passiveScore = 0;
   const buildingMultipliers = new Map<ItemId, Decimal>();
@@ -70,6 +74,18 @@ export function applyEffects(state: GameState, owned: ResearchId[]): void {
         addSeedClickBonus: (value) => {
           seedClickBonus += value;
         },
+        multiplyEventReward: (value) => {
+          eventRewardMult *= value;
+        },
+        multiplyEventSpawnRate: (value) => {
+          eventSpawnRateMult *= value;
+        },
+        multiplyEventDuration: (value) => {
+          eventDurationMult *= value;
+        },
+        multiplyResearchCost: (value) => {
+          researchCostMult *= value;
+        },
         setSeedPassive: (config) => {
           const expected =
             (config.chance * config.seeds * 3_600_000) / Math.max(1, config.intervalMs);
@@ -119,6 +135,10 @@ export function applyEffects(state: GameState, owned: ResearchId[]): void {
   state.temp.strainChoice = strainChoice;
   state.temp.researchBuildingMultipliers = researchBuildingMultipliers;
   state.temp.seedClickBonus = Math.max(0, Math.min(0.05, seedClickBonus));
+  state.temp.eventRewardMult = Math.max(1, eventRewardMult);
+  state.temp.eventSpawnRateMult = Math.max(0.5, eventSpawnRateMult);
+  state.temp.eventDurationMult = Math.max(0.5, eventDurationMult);
+  state.temp.researchCostMult = Math.max(0.75, researchCostMult);
   state.temp.seedPassiveConfig = passiveConfig;
   if (!passiveConfig) {
     state.temp.seedPassiveProgress = 0;
@@ -141,6 +161,10 @@ interface EffectContext {
   setStrain: (value: StrainId | null) => void;
   multiplyBuilding: (target: ItemId, value: number) => void;
   addSeedClickBonus: (value: number) => void;
+  multiplyEventReward: (value: number) => void;
+  multiplyEventSpawnRate: (value: number) => void;
+  multiplyEventDuration: (value: number) => void;
+  multiplyResearchCost: (value: number) => void;
   setSeedPassive: (config: SeedPassiveConfig) => void;
 }
 
@@ -231,6 +255,26 @@ function applyEffect(effect: ResearchEffect, ctx: EffectContext): void {
           });
         }
       }
+      break;
+    }
+    case 'EVENT_REWARD_MULT': {
+      const factor = Number.isFinite(value) && value > 0 ? value : 1;
+      ctx.multiplyEventReward(factor);
+      break;
+    }
+    case 'EVENT_SPAWN_RATE': {
+      const factor = Number.isFinite(value) && value > 0 ? value : 1;
+      ctx.multiplyEventSpawnRate(factor);
+      break;
+    }
+    case 'EVENT_DURATION_MULT': {
+      const factor = Number.isFinite(value) && value > 0 ? value : 1;
+      ctx.multiplyEventDuration(factor);
+      break;
+    }
+    case 'RESEARCH_COST_MULT': {
+      const factor = Number.isFinite(value) && value > 0 ? value : 1;
+      ctx.multiplyResearchCost(factor);
       break;
     }
     default:

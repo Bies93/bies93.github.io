@@ -1,11 +1,13 @@
-import { researchIcons, uiIcons, upgradeIcons } from '../../assetManifest';
+import { abilityIcons, uiIcons } from '../../assetManifest';
 import { formatAbilityTooltip, getAbilityLabel } from '../../abilities';
 import type { AbilityId, GameState } from '../../state';
 import type { ControlButtonRefs, AbilityButtonRefs } from '../types';
 
 const ABILITY_ICON_MAP: Record<AbilityId, string> = {
-  overdrive: researchIcons.overdrive,
-  burst: upgradeIcons.clickPower,
+  overdrive: abilityIcons.overdrive,
+  burst: abilityIcons.burst,
+  auto_burst: abilityIcons.auto_burst,
+  discount_window: abilityIcons.discount_window,
 };
 
 let controlIdCounter = 0;

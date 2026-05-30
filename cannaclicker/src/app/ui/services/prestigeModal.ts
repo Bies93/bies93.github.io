@@ -32,7 +32,7 @@ export function closePrestigeModal(refs: UIRefs): void {
 export function updatePrestigeModal(refs: UIRefs, state: GameState): void {
   const preview = getPrestigePreview(state);
   const modal = refs.prestigeModal;
-  const nextMultiplier = computePrestigeMultiplier(preview.seedsAfter);
+  const nextMultiplier = computePrestigeMultiplier(preview.totalSeedsAfter);
 
   modal.previewCurrentValue.textContent = formatInteger(state.locale, preview.seedsBefore);
   modal.previewAfterValue.textContent = formatInteger(state.locale, preview.seedsAfter);

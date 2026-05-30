@@ -15,6 +15,8 @@ export function createPrestigePanel(): PrestigePanelRefs {
   stats.className = 'prestige-panel__stats';
   container.appendChild(stats);
 
+  const spendableSeeds = createPrestigePanelStat(stats);
+  const totalSeeds = createPrestigePanelStat(stats);
   const permanent = createPrestigePanelStat(stats);
   const kickstart = createPrestigePanelStat(stats);
   const active = createPrestigePanelStat(stats);
@@ -45,6 +47,10 @@ export function createPrestigePanel(): PrestigePanelRefs {
   return {
     container,
     description,
+    spendableSeedsLabel: spendableSeeds.label,
+    spendableSeedsValue: spendableSeeds.value,
+    totalSeedsLabel: totalSeeds.label,
+    totalSeedsValue: totalSeeds.value,
     permanentLabel: permanent.label,
     permanentValue: permanent.value,
     kickstartLabel: kickstart.label,

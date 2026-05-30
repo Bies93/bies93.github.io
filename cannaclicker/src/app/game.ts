@@ -7,13 +7,15 @@ import { canUnlockItem, getBulkCost, getTierMultiplier, getSoftcapMultiplier } f
 import type { GameState } from './state';
 import { sum, toDecimal } from './math';
 import { applyResearchEffects } from './research';
-import { abilityMultiplier } from './abilities';
+import { abilityAutoClickRate, abilityMultiplierFor } from './abilities';
 import { requirementsSatisfied } from './upgrades';
 import { computeMilestones, resolveKickstart } from './milestones';
 import { recordInteraction, checkSeedSynergies } from './seeds';
+import { achievementRequirementMet } from './achievements';
 
 export function handleManualClick(state: GameState): Decimal {
   recordInteraction(state);
+  state.meta.manualClicks += 1;
   state.buds = state.buds.add(state.bpc);
   state.total = state.total.add(state.bpc);
   state.prestige.lifetimeBuds = state.prestige.lifetimeBuds.add(state.bpc);
@@ -82,11 +84,15 @@ export function recalcDerivedValues(state: GameState): void {
   }
   state.temp.buildingCostMultipliers = nextCostMultipliers;
   state.temp.autoClickRate += autoClickRate;
+  state.temp.autoClickRate += abilityAutoClickRate(state);
   state.temp.seedClickBonus = Math.max(
     0,
     Math.min(0.05, (state.temp.seedClickBonus ?? 0) + seedClickBonus),
   );
-  state.temp.eventRewardMult = Math.max(1, eventRewardMultiplier);
+  state.temp.eventRewardMult = Math.max(
+    1,
+    (state.temp.eventRewardMult ?? 1) * eventRewardMultiplier,
+  );
 
   const prestigeMultiplier = state.prestige.mult;
   const milestoneGlobalMult = state.temp.milestoneGlobalMult ?? new Decimal(1);
@@ -95,7 +101,12 @@ export function recalcDerivedValues(state: GameState): void {
   const kickstartGlobalCost = state.temp.kickstartCostMult ?? new Decimal(1);
   const kickstartBps = state.temp.kickstartBpsMult ?? new Decimal(1);
   const kickstartBpc = state.temp.kickstartBpcMult ?? new Decimal(1);
-  state.temp.costMultiplier = state.temp.costMultiplier.mul(kickstartGlobalCost);
+  const abilityCostMult = new Decimal(abilityMultiplierFor(state, 'cost'));
+  const eventCostMult = state.temp.eventCostMult ?? new Decimal(1);
+  state.temp.costMultiplier = state.temp.costMultiplier
+    .mul(kickstartGlobalCost)
+    .mul(abilityCostMult)
+    .mul(eventCostMult);
 
   const buildingProduction = Array.from(itemById.entries()).map(([id, definition]) => {
     const owned = state.items[id] ?? 0;
@@ -120,8 +131,8 @@ export function recalcDerivedValues(state: GameState): void {
     .mul(milestoneGlobalMult);
   const researchBpsMult = state.temp.researchBpsMult ?? new Decimal(1);
   const researchBpcMult = state.temp.researchBpcMult ?? new Decimal(1);
-  const abilityBpsMult = new Decimal(abilityMultiplier(state, 'overdrive'));
-  const abilityBpcMult = new Decimal(abilityMultiplier(state, 'burst'));
+  const abilityBpsMult = new Decimal(abilityMultiplierFor(state, 'bps'));
+  const abilityBpcMult = new Decimal(abilityMultiplierFor(state, 'bpc'));
   const eventBpsMult = state.temp.eventBpsMult ?? new Decimal(1);
   const eventBpcMult = state.temp.eventBpcMult ?? new Decimal(1);
 
@@ -166,6 +177,7 @@ export function buyItem(state: GameState, itemId: ItemId, quantity = 1): boolean
 
   state.buds = state.buds.sub(totalCost);
   state.items[itemId] = owned + quantity;
+  state.meta.totalItemsPurchased += quantity;
   checkSeedSynergies(state);
   recordInteraction(state);
   recalcDerivedValues(state);
@@ -194,6 +206,7 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): boolean {
 
   state.buds = state.buds.sub(cost);
   state.upgrades[upgradeId] = true;
+  state.meta.totalUpgradesPurchased += 1;
   recordInteraction(state);
   recalcDerivedValues(state);
   evaluateAchievements(state);
@@ -206,17 +219,7 @@ export function evaluateAchievements(state: GameState): void {
       continue;
     }
 
-    const ownsItems =
-      !achievement.requirement.itemsOwned ||
-      Object.entries(achievement.requirement.itemsOwned).every(([id, amount]) => {
-        return (state.items[id] ?? 0) >= (amount ?? 0);
-      });
-
-    const meetsTotal =
-      !achievement.requirement.totalBuds ||
-      state.total.greaterThanOrEqualTo(achievement.requirement.totalBuds);
-
-    if (ownsItems && meetsTotal) {
+    if (achievementRequirementMet(state, achievement)) {
       state.achievements[achievement.id] = true;
     }
   }

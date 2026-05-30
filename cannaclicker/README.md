@@ -28,9 +28,9 @@ No Windows setup wrapper is required.
 
 - Active clicking and passive buds per second
 - 12 item tiers with escalating costs and unlock requirements
-- Upgrades, research paths, active abilities and achievements
-- 8 random event types with instant rewards, seeds or temporary boosts
-- Prestige reset that awards seeds from run progress
+- Upgrades, 27 research nodes, 4 active abilities, 120 achievements and guided goals
+- 12 random event types with instant rewards, seeds, chains, discounts or temporary boosts
+- Prestige reset that awards spendable seeds while total seeds keep permanent power
 - Manifest-driven SVG assets for items, events, UI, research, plant stages and backgrounds
 - Autosave, manual export/import, offline progress and lightweight audio feedback
 
@@ -43,3 +43,13 @@ No Windows setup wrapper is required.
 - [Progression Model](docs/design/progression-model.md)
 - [Asset System](docs/design/assets.md)
 - [Shop Economy](docs/design/shop-economy.md)
+- [UI System](docs/design/ui-system.md)
+- [Events And Abilities](docs/design/events-abilities.md)
+- [Prestige](docs/design/prestige.md)
+- [Seeds](docs/design/seeds.md)
+- [Research](docs/design/research.md)
+- [Achievements And Goals](docs/content/achievements.md)
+- [Flavor Style](docs/content/flavor-style.md)
+- [Phase Targets](docs/balance/phase-targets.md)
+- [Economy Tables](docs/balance/economy-tables.md)
+- [Playthrough Notes](docs/balance/playthrough-notes.md)

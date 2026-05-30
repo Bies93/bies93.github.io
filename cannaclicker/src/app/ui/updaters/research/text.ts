@@ -67,6 +67,22 @@ export function formatResearchEffect(locale: LocaleKey, effect: ResearchEffect):
       }
       return '';
     }
+    case 'EVENT_REWARD_MULT': {
+      const percent = Math.round(((effect.v ?? 1) - 1) * 100);
+      return t(locale, 'research.effect.eventReward', { value: percent });
+    }
+    case 'EVENT_SPAWN_RATE': {
+      const percent = Math.round(((effect.v ?? 1) - 1) * 100);
+      return t(locale, 'research.effect.eventSpawn', { value: percent });
+    }
+    case 'EVENT_DURATION_MULT': {
+      const percent = Math.round(((effect.v ?? 1) - 1) * 100);
+      return t(locale, 'research.effect.eventDuration', { value: percent });
+    }
+    case 'RESEARCH_COST_MULT': {
+      const percent = Math.round((1 - (effect.v ?? 1)) * 100);
+      return t(locale, 'research.effect.researchCost', { value: percent });
+    }
     default:
       return '';
   }
@@ -101,7 +117,7 @@ export function describeUnlockCondition(
     case 'prestige_seeds':
       return t(locale, 'research.lock.prestigeSeeds', {
         value: condition.value,
-        current: state.prestige.seeds,
+        current: state.prestige.totalSeeds ?? state.prestige.seeds,
       });
     default:
       return '';

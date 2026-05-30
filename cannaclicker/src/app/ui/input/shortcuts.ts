@@ -78,4 +78,15 @@ function handleKeydown(event: KeyboardEvent): void {
     triggerAbility('burst');
     return;
   }
+
+  if (event.code === 'KeyR') {
+    event.preventDefault();
+    triggerAbility('auto_burst');
+    return;
+  }
+
+  if (event.code === 'KeyF') {
+    event.preventDefault();
+    triggerAbility('discount_window');
+  }
 }

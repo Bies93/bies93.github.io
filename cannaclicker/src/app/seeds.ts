@@ -115,7 +115,10 @@ export function awardSeeds(
     return 0;
   }
 
+  const previousSpendable = state.prestige.seeds;
   state.prestige.seeds += safeAmount;
+  state.prestige.totalSeeds =
+    Math.max(state.prestige.totalSeeds ?? 0, previousSpendable) + safeAmount;
   updatePrestigeMultiplier(state);
 
   const entry: SeedGainEntry = { time: now, amount: safeAmount, source };

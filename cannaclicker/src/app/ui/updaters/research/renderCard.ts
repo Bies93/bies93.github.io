@@ -5,7 +5,7 @@ import type { ResearchViewModel } from '../../../research';
 import type { ResearchCardRefs } from '../../types';
 import type { ResearchEffect } from '../../../../data/research';
 import { formatResearchEffect, formatResearchLockReason } from './text';
-import { getResearchNode } from '../../../research';
+import { getResearchCost, getResearchNode } from '../../../research';
 
 export function renderResearchCard(
   card: ResearchCardRefs,
@@ -28,7 +28,7 @@ export function renderResearchCard(
   renderEffectChips(card, node.effects, state.locale);
   renderRequirements(card, entry, state.locale);
   renderLockState(card, entry, state);
-  renderCost(card, node.costType, node.cost, state.locale);
+  renderCost(card, node.costType, getResearchCost(state, node), state.locale);
   renderActionButton(card, entry, state.locale);
 }
 

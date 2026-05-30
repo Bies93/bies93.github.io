@@ -42,6 +42,17 @@ export const eventIcons = {
   green_surge: 'img/events/green-surge.svg',
   mutant_sprout: 'img/events/mutant-sprout.svg',
   supply_drop: 'img/events/supply-drop.svg',
+  flash_harvest: 'img/events/flash-harvest.svg',
+  calm_growth: 'img/events/calm-growth.svg',
+  overgrowth: 'img/events/overgrowth.svg',
+  seed_bloom: 'img/events/seed-bloom.svg',
+} as const;
+
+export const abilityIcons = {
+  overdrive: asset('img/abilities/overdrive.svg'),
+  burst: asset('img/abilities/burst.svg'),
+  auto_burst: asset('img/abilities/auto-burst.svg'),
+  discount_window: asset('img/abilities/discount-window.svg'),
 } as const;
 
 export const uiIcons = {

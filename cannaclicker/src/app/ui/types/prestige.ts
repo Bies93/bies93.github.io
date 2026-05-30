@@ -14,6 +14,10 @@ import type { MilestoneId } from '../../../data/milestones';
 export interface PrestigePanelRefs {
   container: HTMLElement;
   description: HTMLElement;
+  spendableSeedsLabel: HTMLElement;
+  spendableSeedsValue: HTMLElement;
+  totalSeedsLabel: HTMLElement;
+  totalSeedsValue: HTMLElement;
   permanentLabel: HTMLElement;
   permanentValue: HTMLElement;
   kickstartLabel: HTMLElement;

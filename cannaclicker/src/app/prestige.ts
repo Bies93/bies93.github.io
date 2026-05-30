@@ -17,6 +17,8 @@ export interface PrestigePreview {
   seedGain: number;
   seedsBefore: number;
   seedsAfter: number;
+  totalSeedsBefore: number;
+  totalSeedsAfter: number;
   nextSeedTarget: Decimal;
   permanentGlobalPercent: number;
   permanentBpsPercent: number;
@@ -66,6 +68,8 @@ export function getPrestigePreview(state: GameState): PrestigePreview {
   const seedGain = computePrestigeSeedGain(lifetimeBuds);
   const seedsBefore = state.prestige.seeds;
   const seedsAfter = seedsBefore + seedGain;
+  const totalSeedsBefore = Math.max(state.prestige.totalSeeds ?? 0, seedsBefore);
+  const totalSeedsAfter = totalSeedsBefore + seedGain;
   const nextSeedTarget = getNextSeedTarget(seedGain);
   const permanentGlobalPercent = Math.max(0, milestoneEffects.global.minus(1).mul(100).toNumber());
   const permanentBpsPercent = Math.max(0, milestoneEffects.bps.minus(1).mul(100).toNumber());
@@ -89,6 +93,8 @@ export function getPrestigePreview(state: GameState): PrestigePreview {
     seedGain,
     seedsBefore,
     seedsAfter,
+    totalSeedsBefore,
+    totalSeedsAfter,
     nextSeedTarget,
     permanentGlobalPercent,
     permanentBpsPercent,
@@ -115,12 +121,20 @@ export function performPrestige(state: GameState): GameState {
 
   const now = Date.now();
   const seedsAfter = preview.seedsAfter;
-  const multiplier = computePrestigeMultiplier(seedsAfter);
+  const multiplier = computePrestigeMultiplier(preview.totalSeedsAfter);
   const preservedResearch = state.researchOwned.filter((researchId) => {
     const node = researchById.get(researchId);
     return !node?.resetsOnPrestige;
   });
   const preservedMilestones = { ...state.prestige.milestones };
+  const runBuds = preview.lifetimeBuds.toNumber();
+  const safeRunBuds = Number.isFinite(runBuds) ? Math.max(0, Math.floor(runBuds)) : 0;
+  const preservedMeta = {
+    ...state.meta,
+    prestigeCount: state.meta.prestigeCount + 1,
+    lastRunBuds: safeRunBuds,
+    bestRunBuds: Math.max(state.meta.bestRunBuds, safeRunBuds),
+  };
 
   const preserved: Partial<GameState> = {
     locale: state.locale,
@@ -129,8 +143,11 @@ export function performPrestige(state: GameState): GameState {
     researchOwned: preservedResearch,
     preferences: state.preferences,
     automation: state.automation,
+    settings: state.settings,
+    meta: preservedMeta,
     prestige: {
       seeds: seedsAfter,
+      totalSeeds: preview.totalSeedsAfter,
       mult: multiplier,
       lifetimeBuds: new Decimal(0),
       lastResetAt: now,
@@ -153,5 +170,6 @@ export function performPrestige(state: GameState): GameState {
 }
 
 export function updatePrestigeMultiplier(state: GameState): void {
-  state.prestige.mult = computePrestigeMultiplier(state.prestige.seeds);
+  state.prestige.totalSeeds = Math.max(state.prestige.totalSeeds ?? 0, state.prestige.seeds);
+  state.prestige.mult = computePrestigeMultiplier(state.prestige.totalSeeds);
 }

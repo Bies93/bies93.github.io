@@ -66,7 +66,7 @@ export function canAfford(state: GameState, node: ResearchNode): boolean {
     return state.buds.greaterThanOrEqualTo(new Decimal(node.cost));
   }
 
-  return state.prestige.seeds >= node.cost;
+  return state.prestige.seeds >= getResearchCost(state, node);
 }
 
 export function requirementsMet(state: GameState, node: ResearchNode): boolean {
@@ -126,11 +126,14 @@ export function purchaseResearch(state: GameState, id: ResearchId): boolean {
     const cost = new Decimal(node.cost);
     state.buds = state.buds.sub(cost);
   } else {
-    state.prestige.seeds -= node.cost;
-    state.prestige.mult = computePrestigeMultiplier(state.prestige.seeds);
+    const cost = getResearchCost(state, node);
+    state.prestige.seeds -= cost;
+    state.meta.seedsSpent += cost;
+    state.prestige.mult = computePrestigeMultiplier(state.prestige.totalSeeds);
   }
 
   state.researchOwned = [...state.researchOwned, node.id];
+  state.meta.totalResearchPurchased += 1;
   recordInteraction(state);
   applyResearchEffects(state);
   return true;
@@ -145,10 +148,21 @@ function meetsUnlockCondition(state: GameState, condition: ResearchUnlockConditi
     case 'total_buds':
       return state.total.greaterThanOrEqualTo(new Decimal(condition.value));
     case 'prestige_seeds':
-      return state.prestige.seeds >= condition.value;
+      return (state.prestige.totalSeeds ?? state.prestige.seeds) >= condition.value;
     default:
       return false;
   }
+}
+
+export function getResearchCost(state: GameState, node: ResearchNode): number {
+  if (node.costType !== 'seeds') {
+    return node.cost;
+  }
+
+  const multiplier = Number.isFinite(state.temp.researchCostMult)
+    ? Math.max(0.75, state.temp.researchCostMult)
+    : 1;
+  return Math.max(1, Math.ceil(node.cost * multiplier));
 }
 
 function getResearchLockReason(state: GameState, node: ResearchNode): ResearchLockReason | null {

@@ -19,6 +19,12 @@ export function updatePrestigePanel(state: GameState, refs: UIRefs): void {
 
   panel.description.textContent = t(state.locale, 'panel.prestige.description');
 
+  panel.spendableSeedsLabel.textContent = t(state.locale, 'panel.prestige.spendableSeeds');
+  panel.spendableSeedsValue.textContent = formatDecimal(preview.seedsBefore);
+
+  panel.totalSeedsLabel.textContent = t(state.locale, 'panel.prestige.totalSeeds');
+  panel.totalSeedsValue.textContent = formatDecimal(preview.totalSeedsBefore);
+
   panel.permanentLabel.textContent = t(state.locale, 'panel.prestige.permanent');
   panel.permanentValue.textContent = formatPermanentBonusSummary(state.locale, preview);
 

@@ -15,6 +15,10 @@ const EVENT_TRANSLATION_KEYS: Record<EventId, string> = {
   green_surge: 'greenSurge',
   mutant_sprout: 'mutantSprout',
   supply_drop: 'supplyDrop',
+  flash_harvest: 'flashHarvest',
+  calm_growth: 'calmGrowth',
+  overgrowth: 'overgrowth',
+  seed_bloom: 'seedBloom',
 };
 
 function getEventTranslationKey(id: EventId): string {

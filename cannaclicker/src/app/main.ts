@@ -4,7 +4,7 @@ import { migrate, load, initState, save } from './save';
 import { startLoop } from './loop';
 import { startUI } from './ui';
 import { flags } from './flags';
-import type { GameState } from './state';
+import { installBalanceDevtools } from './devtools';
 
 trackFocusVisible({
   root: document,
@@ -33,7 +33,7 @@ startLoop(
 );
 
 if (flags.devtools) {
-  (window as Window & { __state?: GameState }).__state = state;
+  installBalanceDevtools(state, ui.render);
 }
 
 window.addEventListener('beforeunload', () => save(state));

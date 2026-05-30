@@ -3,12 +3,13 @@ import { DEFAULT_LOCALE, type LocaleKey } from './i18n';
 import { createDefaultSettings, type SettingsState } from './settings';
 import { OFFLINE_CAP_MS } from './balance';
 import type { MilestoneProgressSnapshot } from './milestones';
-import type { AbilityId } from '../data/abilities';
+import { ABILITIES, type AbilityId } from '../data/abilities';
 import type { AchievementId } from '../data/achievements';
 import type { ItemId } from '../data/items';
 import type { MilestoneId } from '../data/milestones';
 import type { ResearchId } from '../data/research';
 import type { UpgradeId } from '../data/upgrades';
+import type { GoalId } from '../data/goals';
 import type { SeedSynergyId } from './seeds';
 import {
   createDefaultEventState,
@@ -51,6 +52,7 @@ export type AbilityState = Record<AbilityId, AbilityRuntimeState>;
 
 export interface PrestigeState {
   seeds: number;
+  totalSeeds: number;
   mult: Decimal;
   lifetimeBuds: Decimal;
   lastResetAt: number;
@@ -82,9 +84,13 @@ export interface TempState {
   buildingBaseMultipliers: Partial<Record<ItemId, Decimal>>;
   buildingTierMultipliers: Partial<Record<ItemId, Decimal>>;
   researchBuildingMultipliers: Partial<Record<ItemId, Decimal>>;
+  researchCostMult: number;
   eventBpsMult: Decimal;
   eventBpcMult: Decimal;
+  eventCostMult: Decimal;
   eventRewardMult: number;
+  eventSpawnRateMult: number;
+  eventDurationMult: number;
   eventBoostEndsAt: number;
   activeEventBoost: string | null;
   hybridBuffPerBuff: number;
@@ -128,6 +134,19 @@ export interface MetaState {
   seedPassiveIdleMs: number;
   seedPassiveRollsDone: number;
   eventStats: EventStats;
+  manualClicks: number;
+  totalItemsPurchased: number;
+  totalUpgradesPurchased: number;
+  totalResearchPurchased: number;
+  seedsSpent: number;
+  prestigeCount: number;
+  lastRunBuds: number;
+  bestRunBuds: number;
+  offlineBudsTotal: number;
+  offlineReturns: number;
+  abilityUsesTotal: number;
+  abilityUses: Partial<Record<AbilityId, number>>;
+  completedGoals: GoalId[];
 }
 
 export function createDefaultPreferences(): PreferencesState {
@@ -171,10 +190,12 @@ export interface GameState extends SaveV5 {
 export function createDefaultState(partial: Partial<GameState> = {}): GameState {
   const now = Date.now();
   const lastTick = typeof performance !== 'undefined' ? performance.now() : now;
-  const defaultAbilities: AbilityState = {
-    overdrive: { active: false, endsAt: 0, readyAt: now, multiplier: 1 },
-    burst: { active: false, endsAt: 0, readyAt: now, multiplier: 1 },
-  } satisfies AbilityState;
+  const defaultAbilities = Object.fromEntries(
+    ABILITIES.map((ability) => [
+      ability.id,
+      { active: false, endsAt: 0, readyAt: now, multiplier: 1 },
+    ]),
+  ) as AbilityState;
 
   const defaultPreferences = createDefaultPreferences();
   const defaultAutomation = createDefaultAutomation();
@@ -188,6 +209,19 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
     seedPassiveIdleMs: 0,
     seedPassiveRollsDone: 0,
     eventStats: createDefaultEventStats(now),
+    manualClicks: 0,
+    totalItemsPurchased: 0,
+    totalUpgradesPurchased: 0,
+    totalResearchPurchased: 0,
+    seedsSpent: 0,
+    prestigeCount: 0,
+    lastRunBuds: 0,
+    bestRunBuds: 0,
+    offlineBudsTotal: 0,
+    offlineReturns: 0,
+    abilityUsesTotal: 0,
+    abilityUses: {},
+    completedGoals: [],
   };
 
   return {
@@ -202,6 +236,7 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
     researchOwned: [],
     prestige: {
       seeds: 0,
+      totalSeeds: 0,
       mult: new Decimal(1),
       lifetimeBuds: new Decimal(0),
       lastResetAt: now,
@@ -237,9 +272,13 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       buildingBaseMultipliers: {},
       buildingTierMultipliers: {},
       researchBuildingMultipliers: {},
+      researchCostMult: 1,
       eventBpsMult: new Decimal(1),
       eventBpcMult: new Decimal(1),
+      eventCostMult: new Decimal(1),
       eventRewardMult: 1,
+      eventSpawnRateMult: 1,
+      eventDurationMult: 1,
       eventBoostEndsAt: 0,
       activeEventBoost: null,
       hybridBuffPerBuff: 0,

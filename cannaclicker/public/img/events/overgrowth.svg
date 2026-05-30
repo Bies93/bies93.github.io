@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Overgrowth">
+  <circle cx="64" cy="64" r="56" fill="#08111f"/>
+  <path fill="#14532d" d="M20 103c19-45 52-68 99-70-18 45-52 68-99 70Z"/>
+  <path fill="#22c55e" d="M12 74c31-25 64-31 100-17-30 27-64 32-100 17Z"/>
+  <path fill="#bbf7d0" d="M52 22c23 22 32 48 26 80-24-22-33-49-26-80Z"/>
+</svg>

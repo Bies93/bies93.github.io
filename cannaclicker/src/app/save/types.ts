@@ -18,6 +18,7 @@ import type { ResearchId } from '../../data/research';
 import type { UpgradeId } from '../../data/upgrades';
 import type { LocaleKey } from '../i18n';
 import type { SettingsState } from '../settings';
+import type { GoalId } from '../../data/goals';
 
 export interface PersistedAbilityState {
   active?: boolean;
@@ -32,6 +33,7 @@ export interface PersistedKickstartState {
 
 export interface PersistedPrestigeState {
   seeds?: number;
+  totalSeeds?: number;
   mult?: string;
   lifetimeBuds?: string;
   lastResetAt?: number;
@@ -55,6 +57,19 @@ export interface PersistedMetaState {
   seedPassiveIdleMs?: number;
   seedPassiveRollsDone?: number;
   eventStats?: PersistedEventStats;
+  manualClicks?: number;
+  totalItemsPurchased?: number;
+  totalUpgradesPurchased?: number;
+  totalResearchPurchased?: number;
+  seedsSpent?: number;
+  prestigeCount?: number;
+  lastRunBuds?: number;
+  bestRunBuds?: number;
+  offlineBudsTotal?: number;
+  offlineReturns?: number;
+  abilityUsesTotal?: number;
+  abilityUses?: Partial<Record<AbilityId, number>>;
+  completedGoals?: GoalId[];
 }
 
 export interface PersistedEventStatsPerEvent {
