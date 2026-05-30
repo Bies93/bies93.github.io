@@ -1,4 +1,4 @@
-import type { AbilityId } from "../../../data/abilities";
+import type { AbilityId } from '../../../data/abilities';
 
 export interface AbilityButtonRefs {
   container: HTMLButtonElement;

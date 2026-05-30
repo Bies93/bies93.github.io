@@ -1,33 +1,33 @@
-import Decimal from "break_infinity.js";
+import Decimal from 'break_infinity.js';
 import {
   upgradeById,
   upgrades,
   type UpgradeDefinition,
   type UpgradeId,
   type UpgradeRequirement,
-} from "../data/upgrades";
-import { itemById } from "../data/items";
-import type { ItemId } from "../data/items";
-import { formatDecimal } from "./math";
-import type { GameState } from "./state";
-import type { LocaleKey } from "./i18n";
+} from '../data/upgrades';
+import { itemById } from '../data/items';
+import type { ItemId } from '../data/items';
+import { formatDecimal } from './math';
+import type { GameState } from './state';
+import type { LocaleKey } from './i18n';
 
 export type UpgradeRequirementDetail =
   | {
-      kind: "itemsOwned";
+      kind: 'itemsOwned';
       id: ItemId;
       required: number;
       current: number;
       remaining: number;
     }
   | {
-      kind: "totalBuds";
+      kind: 'totalBuds';
       required: number;
       current: number;
       remaining: number;
     }
   | {
-      kind: "upgradesOwned";
+      kind: 'upgradesOwned';
       id: UpgradeId;
       owned: boolean;
     };
@@ -91,7 +91,7 @@ function describeRequirement(
       const current = state.items[itemId] ?? 0;
       const remaining = Math.max(0, required - current);
       details.push({
-        kind: "itemsOwned",
+        kind: 'itemsOwned',
         id: itemId,
         required,
         current,
@@ -105,7 +105,7 @@ function describeRequirement(
     const current = Math.max(0, state.total.toNumber());
     const remaining = Math.max(0, required - current);
     details.push({
-      kind: "totalBuds",
+      kind: 'totalBuds',
       required,
       current,
       remaining,
@@ -115,7 +115,7 @@ function describeRequirement(
   if (requirement.upgradesOwned) {
     for (const upgradeId of requirement.upgradesOwned) {
       details.push({
-        kind: "upgradesOwned",
+        kind: 'upgradesOwned',
         id: upgradeId,
         owned: Boolean(state.upgrades[upgradeId]),
       });
@@ -128,11 +128,11 @@ function describeRequirement(
 function requirementMet(details: UpgradeRequirementDetail[]): boolean {
   return details.every((detail) => {
     switch (detail.kind) {
-      case "itemsOwned":
+      case 'itemsOwned':
         return detail.current >= detail.required;
-      case "totalBuds":
+      case 'totalBuds':
         return detail.current >= detail.required;
-      case "upgradesOwned":
+      case 'upgradesOwned':
         return detail.owned;
       default:
         return true;
@@ -142,8 +142,8 @@ function requirementMet(details: UpgradeRequirementDetail[]): boolean {
 
 function resolvePrimaryLock(details: UpgradeRequirementDetail[]): UpgradeRequirementDetail | null {
   const unmetItems = details
-    .filter((detail): detail is Extract<UpgradeRequirementDetail, { kind: "itemsOwned" }> => {
-      return detail.kind === "itemsOwned" && detail.current < detail.required;
+    .filter((detail): detail is Extract<UpgradeRequirementDetail, { kind: 'itemsOwned' }> => {
+      return detail.kind === 'itemsOwned' && detail.current < detail.required;
     })
     .sort((a, b) => a.remaining - b.remaining);
 
@@ -151,27 +151,29 @@ function resolvePrimaryLock(details: UpgradeRequirementDetail[]): UpgradeRequire
     return unmetItems[0];
   }
 
-  const missingUpgrade = details.find((detail) => detail.kind === "upgradesOwned" && !detail.owned);
+  const missingUpgrade = details.find((detail) => detail.kind === 'upgradesOwned' && !detail.owned);
   if (missingUpgrade) {
     return missingUpgrade;
   }
 
-  const unmetTotal = details.find((detail) => detail.kind === "totalBuds" && detail.current < detail.required);
+  const unmetTotal = details.find(
+    (detail) => detail.kind === 'totalBuds' && detail.current < detail.required,
+  );
   return unmetTotal ?? null;
 }
 
 export function getRequirementLabel(detail: UpgradeRequirementDetail, locale: LocaleKey): string {
   switch (detail.kind) {
-    case "itemsOwned": {
+    case 'itemsOwned': {
       const item = itemById.get(detail.id);
       const name = item ? item.name[locale] : detail.id;
       return `${Math.max(0, detail.remaining)} × ${name}`;
     }
-    case "totalBuds":
+    case 'totalBuds':
       return formatDecimal(new Decimal(detail.remaining));
-    case "upgradesOwned":
+    case 'upgradesOwned':
       return detail.id;
     default:
-      return "";
+      return '';
   }
 }

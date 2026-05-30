@@ -1,4 +1,6 @@
-import { asset } from '../app/assets';
+import { itemIcons } from '../app/assetManifest';
+
+const STANDARD_MILESTONES = [10, 25, 50, 100, 150, 200, 300, 500] as const;
 
 const ITEM_DATA = [
   {
@@ -11,13 +13,23 @@ const ITEM_DATA = [
       de: 'Dein erster Keimling steckt voller Potenziale.',
       en: 'Your first sprout brimming with promise.',
     },
+    role: {
+      de: 'Frühe Masse · Klick- und Seed-Synergien',
+      en: 'Early mass · click and seed synergies',
+    },
+    synergyHooks: {
+      de: 'Skaliert später mit Seed-Sortierung, Klickwert und Basis-Multiplikatoren.',
+      en: 'Later scales with seed sorting, click value, and base multipliers.',
+    },
     tier: 1,
-    baseCost: 25,
-    costFactor: 1.18,
-    bps: 0.1,
-    icon: asset('icons/items/item-seedling.png'),
+    baseCost: 12,
+    costFactor: 1.13,
+    bps: 0.12,
+    icon: itemIcons.seedling,
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.18,
     softcapTier: 8,
-    softcapMult: 1.1,
+    softcapMult: 1.08,
   },
   {
     id: 'planter',
@@ -29,16 +41,26 @@ const ITEM_DATA = [
       de: 'Mehr Erde, mehr Wurzeln, mehr Wachstum.',
       en: 'More soil, roots, and growth.',
     },
-    tier: 2,
-    baseCost: 250,
-    costFactor: 1.194,
-    bps: 1,
-    icon: asset('icons/items/item-planter.png'),
-    unlock: {
-      totalBuds: 50,
+    role: {
+      de: 'Stabiler Early-BPS-Anker',
+      en: 'Stable early BPS anchor',
     },
+    synergyHooks: {
+      de: 'Profitiert von Erde-, Bewässerungs- und Early-Global-Upgrades.',
+      en: 'Benefits from soil, irrigation, and early global upgrades.',
+    },
+    tier: 2,
+    baseCost: 65,
+    costFactor: 1.15,
+    bps: 0.6,
+    icon: itemIcons.planter,
+    unlock: {
+      totalBuds: 40,
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.17,
     softcapTier: 8,
-    softcapMult: 1.1,
+    softcapMult: 1.08,
   },
   {
     id: 'grow_tent',
@@ -50,16 +72,26 @@ const ITEM_DATA = [
       de: 'Kontrollierte Umgebung für stabile Erträge.',
       en: 'Controlled environment for steady yields.',
     },
-    tier: 3,
-    baseCost: 2_000,
-    costFactor: 1.207,
-    bps: 8,
-    icon: asset('icons/items/item-grow-tent.png'),
-    unlock: {
-      totalBuds: 500,
+    role: {
+      de: 'Erster echter Produktionssprung',
+      en: 'First real production jump',
     },
+    synergyHooks: {
+      de: 'Kernstück für Indoor-, Licht- und CO₂-Synergien.',
+      en: 'Core piece for indoor, light, and CO₂ synergies.',
+    },
+    tier: 3,
+    baseCost: 420,
+    costFactor: 1.17,
+    bps: 3.8,
+    icon: itemIcons.grow_tent,
+    unlock: {
+      totalBuds: 250,
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.16,
     softcapTier: 8,
-    softcapMult: 1.1,
+    softcapMult: 1.08,
   },
   {
     id: 'grow_light',
@@ -71,16 +103,26 @@ const ITEM_DATA = [
       de: 'Vollspektrum-Licht boostet das Wachstum massiv.',
       en: 'Full spectrum light massively boosts growth.',
     },
-    tier: 4,
-    baseCost: 11_750,
-    costFactor: 1.221,
-    bps: 47,
-    icon: asset('icons/items/item-grow-light.png'),
-    unlock: {
-      itemsOwned: { grow_tent: 5 },
+    role: {
+      de: 'Indoor-Verstärker',
+      en: 'Indoor amplifier',
     },
+    synergyHooks: {
+      de: 'Verstärkt Zelte, CO₂ und spätere Buff-Strategien.',
+      en: 'Amplifies tents, CO₂, and later buff strategies.',
+    },
+    tier: 4,
+    baseCost: 1_500,
+    costFactor: 1.18,
+    bps: 11,
+    icon: itemIcons.grow_light,
+    unlock: {
+      itemsOwned: { grow_tent: 2 },
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.16,
     softcapTier: 8,
-    softcapMult: 1.1,
+    softcapMult: 1.08,
   },
   {
     id: 'cultivator',
@@ -92,16 +134,26 @@ const ITEM_DATA = [
       de: 'Ein Profi kümmert sich um jede Pflanze.',
       en: 'A professional takes care of each plant.',
     },
-    tier: 5,
-    baseCost: 65_000,
-    costFactor: 1.235,
-    bps: 260,
-    icon: asset('icons/items/item-cultivator.png'),
-    unlock: {
-      totalBuds: 75_000,
+    role: {
+      de: 'Skaliert mit Breite und Gesamtanzahl',
+      en: 'Scales with breadth and total ownership',
     },
+    synergyHooks: {
+      de: 'Wird durch Multi-Item-Meilensteine und Globalboni reaktiviert.',
+      en: 'Reactivated by multi-item milestones and global bonuses.',
+    },
+    tier: 5,
+    baseCost: 6_000,
+    costFactor: 1.2,
+    bps: 48,
+    icon: itemIcons.cultivator,
+    unlock: {
+      totalBuds: 4_500,
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.15,
     softcapTier: 8,
-    softcapMult: 1.1,
+    softcapMult: 1.08,
   },
   {
     id: 'irrigation_system',
@@ -113,16 +165,26 @@ const ITEM_DATA = [
       de: 'Automatisch gießen, niemals vergessen.',
       en: 'Automatic watering, never forget again.',
     },
-    tier: 6,
-    baseCost: 325_000,
-    costFactor: 1.248,
-    bps: 1_300,
-    icon: asset('img/bewasesserung_shop.png'),
-    unlock: {
-      totalBuds: 500_000,
+    role: {
+      de: 'Infrastruktur und Kostenkontrolle',
+      en: 'Infrastructure and cost control',
     },
+    synergyHooks: {
+      de: 'Öffnet Kostenreduktion für Planter, Hydro und Klima-Systeme.',
+      en: 'Opens cost reduction for planters, hydro, and climate systems.',
+    },
+    tier: 6,
+    baseCost: 28_000,
+    costFactor: 1.215,
+    bps: 240,
+    icon: itemIcons.irrigation_system,
+    unlock: {
+      totalBuds: 20_000,
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.15,
     softcapTier: 8,
-    softcapMult: 1.1,
+    softcapMult: 1.08,
   },
   {
     id: 'co2_tank',
@@ -134,17 +196,27 @@ const ITEM_DATA = [
       de: 'Mehr CO₂, mehr Fotosynthese.',
       en: 'More CO₂, more photosynthesis.',
     },
-    tier: 7,
-    baseCost: 1_625_000,
-    costFactor: 1.262,
-    bps: 6_500,
-    icon: asset('img/co2tank_shop.png'),
-    unlock: {
-      totalBuds: 3_000_000,
+    role: {
+      de: 'Buff- und Event-Verstärker',
+      en: 'Buff and event amplifier',
     },
+    synergyHooks: {
+      de: 'Verbindet Zelte, Licht und Event-Rewards.',
+      en: 'Connects tents, lights, and event rewards.',
+    },
+    tier: 7,
+    baseCost: 120_000,
+    costFactor: 1.235,
+    bps: 1_100,
+    icon: itemIcons.co2_tank,
+    unlock: {
+      totalBuds: 90_000,
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.14,
     softcapTier: 8,
-    softcapMult: 1.1,
-    softcapCopies: 25,
+    softcapMult: 1.07,
+    softcapCopies: 150,
     softcapPenalty: 0.92,
   },
   {
@@ -157,17 +229,27 @@ const ITEM_DATA = [
       de: 'Temp und Luftfeuchte auf Punkt.',
       en: 'Temperature and humidity dialed in.',
     },
-    tier: 8,
-    baseCost: 7_000_000,
-    costFactor: 1.275,
-    bps: 28_000,
-    icon: asset('img/KlimaController_shop.png'),
-    unlock: {
-      totalBuds: 12_000_000,
+    role: {
+      de: 'Stabilisiert Buffs und Events',
+      en: 'Stabilises buffs and events',
     },
+    synergyHooks: {
+      de: 'Verbessert CO₂-, Hydro- und Event-Setups.',
+      en: 'Improves CO₂, hydro, and event setups.',
+    },
+    tier: 8,
+    baseCost: 520_000,
+    costFactor: 1.25,
+    bps: 5_200,
+    icon: itemIcons.climate_controller,
+    unlock: {
+      totalBuds: 400_000,
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.14,
     softcapTier: 9,
-    softcapMult: 1.12,
-    softcapCopies: 25,
+    softcapMult: 1.07,
+    softcapCopies: 150,
     softcapPenalty: 0.92,
   },
   {
@@ -180,17 +262,27 @@ const ITEM_DATA = [
       de: 'Wurzeln lieben es.',
       en: 'Roots love it.',
     },
-    tier: 9,
-    baseCost: 37_500_000,
-    costFactor: 1.289,
-    bps: 150_000,
-    icon: asset('img/hydroponik_shop.png'),
-    unlock: {
-      totalBuds: 60_000_000,
+    role: {
+      de: 'Hohe Produktion mit starken Schwellen',
+      en: 'High production with strong thresholds',
     },
+    synergyHooks: {
+      de: 'Skaliert mit Bewässerung, Klima und 100+-Meilensteinen.',
+      en: 'Scales with irrigation, climate, and 100+ milestones.',
+    },
+    tier: 9,
+    baseCost: 2_500_000,
+    costFactor: 1.265,
+    bps: 28_000,
+    icon: itemIcons.hydroponic_rack,
+    unlock: {
+      totalBuds: 2_000_000,
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.14,
     softcapTier: 9,
-    softcapMult: 1.12,
-    softcapCopies: 25,
+    softcapMult: 1.07,
+    softcapCopies: 150,
     softcapPenalty: 0.92,
   },
   {
@@ -203,17 +295,27 @@ const ITEM_DATA = [
       de: 'Strains tunen.',
       en: 'Tune your strains.',
     },
-    tier: 10,
-    baseCost: 200_000_000,
-    costFactor: 1.303,
-    bps: 800_000,
-    icon: asset('img/genetik_shop.png'),
-    unlock: {
-      totalBuds: 300_000_000,
+    role: {
+      de: 'Research- und Seed-Synergien',
+      en: 'Research and seed synergies',
     },
+    synergyHooks: {
+      de: 'Bereitet Seed-, Strain- und Prestige-Forschung vor.',
+      en: 'Prepares seed, strain, and prestige research.',
+    },
+    tier: 10,
+    baseCost: 12_000_000,
+    costFactor: 1.28,
+    bps: 160_000,
+    icon: itemIcons.genetics_lab,
+    unlock: {
+      totalBuds: 9_000_000,
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.13,
     softcapTier: 10,
-    softcapMult: 1.13,
-    softcapCopies: 25,
+    softcapMult: 1.06,
+    softcapCopies: 150,
     softcapPenalty: 0.92,
   },
   {
@@ -226,17 +328,27 @@ const ITEM_DATA = [
       de: 'Schneidet Tag und Nacht.',
       en: 'Trims day and night.',
     },
-    tier: 11,
-    baseCost: 1_000_000_000,
-    costFactor: 1.316,
-    bps: 4_000_000,
-    icon: asset('img/roboter_shop.png'),
-    unlock: {
-      totalBuds: 1_500_000_000,
+    role: {
+      de: 'Automation und Auto-Click',
+      en: 'Automation and auto-click',
     },
+    synergyHooks: {
+      de: 'Macht Klick-Multiplikatoren und Idle-Komfort langfristig relevant.',
+      en: 'Keeps click multipliers and idle comfort relevant long-term.',
+    },
+    tier: 11,
+    baseCost: 70_000_000,
+    costFactor: 1.295,
+    bps: 1_000_000,
+    icon: itemIcons.trimming_robot,
+    unlock: {
+      totalBuds: 55_000_000,
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.13,
     softcapTier: 10,
-    softcapMult: 1.13,
-    softcapCopies: 25,
+    softcapMult: 1.06,
+    softcapCopies: 150,
     softcapPenalty: 0.92,
   },
   {
@@ -249,17 +361,27 @@ const ITEM_DATA = [
       de: 'Mikroklima, Makro-Output.',
       en: 'Microclimate, macro output.',
     },
-    tier: 12,
-    baseCost: 6_000_000_000,
-    costFactor: 1.33,
-    bps: 24_000_000,
-    icon: asset('img/gewaechshaus_shop.png'),
-    unlock: {
-      totalBuds: 8_000_000_000,
+    role: {
+      de: 'Late-Game-Kompaktmultiplikator',
+      en: 'Late-game compact multiplier',
     },
+    synergyHooks: {
+      de: 'Bündelt Klima, Genetik und Automation in starke Endgame-Boni.',
+      en: 'Bundles climate, genetics, and automation into strong endgame bonuses.',
+    },
+    tier: 12,
+    baseCost: 450_000_000,
+    costFactor: 1.31,
+    bps: 7_500_000,
+    icon: itemIcons.micro_greenhouse,
+    unlock: {
+      totalBuds: 350_000_000,
+    },
+    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneBonusMult: 1.13,
     softcapTier: 10,
-    softcapMult: 1.13,
-    softcapCopies: 25,
+    softcapMult: 1.06,
+    softcapCopies: 150,
     softcapPenalty: 0.92,
   },
 ];
@@ -277,6 +399,8 @@ export interface ItemDefinition {
   id: ItemId;
   name: Record<'de' | 'en', string>;
   description: Record<'de' | 'en', string>;
+  role: Record<'de' | 'en', string>;
+  synergyHooks: Record<'de' | 'en', string>;
   tier: number;
   baseCost: number;
   costFactor: number;
@@ -285,6 +409,8 @@ export interface ItemDefinition {
   unlock?: UnlockCondition;
   tierSize?: number;
   tierBonusMult?: number;
+  milestoneThresholds?: readonly number[];
+  milestoneBonusMult?: number;
   softcapTier?: number;
   softcapMult?: number;
   softcapCopies?: number;

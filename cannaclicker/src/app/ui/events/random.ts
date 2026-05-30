@@ -1,9 +1,10 @@
-import { asset } from "../../assets";
-import { createItemSrcset } from "../components/media";
-import { t } from "../../i18n";
-import type { EventId } from "../../events";
-import type { GameState } from "../../state";
-import type { UIRefs } from "../types";
+import { asset } from '../../assets';
+import { eventIcons } from '../../assetManifest';
+import { createItemSrcset } from '../components/media';
+import { t } from '../../i18n';
+import type { EventId } from '../../events';
+import type { GameState } from '../../state';
+import type { UIRefs } from '../types';
 
 export interface EventPresentation {
   id: EventId;
@@ -12,9 +13,14 @@ export interface EventPresentation {
 }
 
 export const EVENT_PRESENTATIONS: readonly EventPresentation[] = [
-  { id: "golden_bud", icon: "icons/events/golden_bud.png", labelKey: "events.goldenBud.name" },
-  { id: "seed_pack", icon: "icons/events/seed_pack.png", labelKey: "events.seedPack.name" },
-  { id: "lucky_joint", icon: "icons/events/lucky_joint.png", labelKey: "events.luckyJoint.name" },
+  { id: 'golden_bud', icon: eventIcons.golden_bud, labelKey: 'events.goldenBud.name' },
+  { id: 'seed_pack', icon: eventIcons.seed_pack, labelKey: 'events.seedPack.name' },
+  { id: 'lucky_joint', icon: eventIcons.lucky_joint, labelKey: 'events.luckyJoint.name' },
+  { id: 'fertile_rain', icon: eventIcons.fertile_rain, labelKey: 'events.fertileRain.name' },
+  { id: 'market_rush', icon: eventIcons.market_rush, labelKey: 'events.marketRush.name' },
+  { id: 'green_surge', icon: eventIcons.green_surge, labelKey: 'events.greenSurge.name' },
+  { id: 'mutant_sprout', icon: eventIcons.mutant_sprout, labelKey: 'events.mutantSprout.name' },
+  { id: 'supply_drop', icon: eventIcons.supply_drop, labelKey: 'events.supplyDrop.name' },
 ];
 
 export function getEventPresentation(id: EventId): EventPresentation {
@@ -34,45 +40,48 @@ export function createEventButton(
   const rect = layer.getBoundingClientRect();
   const path = computeEventPath(rect, lifetime);
 
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "event-icon";
-  button.dataset.uiRole = "random-event";
-  button.dataset.testid = "random-event";
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'event-icon';
+  button.dataset.uiRole = 'random-event';
+  button.dataset.testid = 'random-event';
   button.style.left = `${path.startX}px`;
   button.style.top = `${path.startY}px`;
-  button.style.transform = "translate(-50%, -50%)";
-  button.setAttribute("aria-label", t(state.locale, definition.labelKey));
+  button.style.transform = 'translate(-50%, -50%)';
+  button.setAttribute('aria-label', t(state.locale, definition.labelKey));
 
   const iconPath = asset(definition.icon);
   const image = new Image();
   image.src = iconPath;
   image.srcset = createItemSrcset(iconPath);
-  image.alt = "";
-  image.decoding = "async";
+  image.alt = '';
+  image.decoding = 'async';
   image.draggable = false;
-  image.className = "event-icon__img";
+  image.className = 'event-icon__img';
 
   button.appendChild(image);
 
   button.animate(
     [
-      { transform: "translate(-50%, -50%)" },
+      { transform: 'translate(-50%, -50%)' },
       {
         transform: `translate(calc(-50% + ${path.dx}px), calc(-50% + ${path.dy}px))`,
       },
     ],
     {
       duration: lifetime,
-      easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-      fill: "forwards",
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+      fill: 'forwards',
     },
   );
 
   return button;
 }
 
-export function computeEventPath(rect: DOMRect, lifetime: number): {
+export function computeEventPath(
+  rect: DOMRect,
+  lifetime: number,
+): {
   startX: number;
   startY: number;
   dx: number;

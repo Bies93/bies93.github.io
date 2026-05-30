@@ -1,11 +1,11 @@
-import { withBase } from '../../paths';
+import { researchIcons, uiIcons, upgradeIcons } from '../../assetManifest';
 import { formatAbilityTooltip, getAbilityLabel } from '../../abilities';
 import type { AbilityId, GameState } from '../../state';
 import type { ControlButtonRefs, AbilityButtonRefs } from '../types';
 
 const ABILITY_ICON_MAP: Record<AbilityId, string> = {
-  overdrive: 'icons/abilities/ability-overdrive.png',
-  burst: 'icons/abilities/ability-burst.png',
+  overdrive: researchIcons.overdrive,
+  burst: upgradeIcons.clickPower,
 };
 
 let controlIdCounter = 0;
@@ -90,7 +90,7 @@ export function createAbilityButton(id: AbilityId, state: GameState): AbilityBut
   icon.loading = 'lazy';
   icon.alt = '';
   icon.setAttribute('aria-hidden', 'true');
-  icon.src = withBase(ABILITY_ICON_MAP[id] ?? 'icons/ui/icon-leaf-click.png');
+  icon.src = ABILITY_ICON_MAP[id] ?? uiIcons.leaf;
   iconWrap.appendChild(icon);
 
   const meta = document.createElement('div');

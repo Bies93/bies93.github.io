@@ -1,58 +1,57 @@
-import { t } from "../../i18n";
-import { formatDecimal } from "../../math";
-import type { GameState } from "../../state";
-import { getPrestigePreview } from "../../prestige";
-import { milestones } from "../../../data/milestones";
-import type { MilestoneId } from "../../../data/milestones";
-import type { MilestoneProgressSnapshot } from "../../milestones";
-import type { UIRefs, MilestoneCardRefs } from "../types";
+import { t } from '../../i18n';
+import { formatDecimal } from '../../math';
+import type { GameState } from '../../state';
+import { getPrestigePreview } from '../../prestige';
+import { milestones } from '../../../data/milestones';
+import type { MilestoneId } from '../../../data/milestones';
+import type { MilestoneProgressSnapshot } from '../../milestones';
+import type { UIRefs, MilestoneCardRefs } from '../types';
 import {
   formatActiveKickstartSummary,
   formatMilestoneProgressText,
   formatNextKickstartSummary,
   formatPermanentBonusSummary,
-} from "../utils/format";
+} from '../utils/format';
 
 export function updatePrestigePanel(state: GameState, refs: UIRefs): void {
   const preview = getPrestigePreview(state);
   const panel = refs.sidePanel.prestige;
 
-  panel.description.textContent = t(state.locale, "panel.prestige.description");
+  panel.description.textContent = t(state.locale, 'panel.prestige.description');
 
-  panel.permanentLabel.textContent = t(state.locale, "panel.prestige.permanent");
+  panel.permanentLabel.textContent = t(state.locale, 'panel.prestige.permanent');
   panel.permanentValue.textContent = formatPermanentBonusSummary(state.locale, preview);
 
-  panel.kickstartLabel.textContent = t(state.locale, "panel.prestige.kickstartNext");
+  panel.kickstartLabel.textContent = t(state.locale, 'panel.prestige.kickstartNext');
   panel.kickstartValue.textContent = formatNextKickstartSummary(state.locale, preview);
 
-  panel.activeKickstartLabel.textContent = t(state.locale, "panel.prestige.kickstartActive");
+  panel.activeKickstartLabel.textContent = t(state.locale, 'panel.prestige.kickstartActive');
   panel.activeKickstartValue.textContent = formatActiveKickstartSummary(state.locale, preview);
 
   updateMilestoneCards(state, panel.milestones);
 
   const requirementText = preview.requirementMet
-    ? t(state.locale, "panel.prestige.ready")
-    : t(state.locale, "panel.prestige.progress", {
+    ? t(state.locale, 'panel.prestige.readySeeds', {
+        seeds: preview.seedGain,
+      })
+    : t(state.locale, 'panel.prestige.progress', {
         current: formatDecimal(preview.lifetimeBuds),
         target: formatDecimal(preview.requirementTarget),
       });
 
   panel.requirement.textContent = requirementText;
-  panel.container.classList.toggle("is-ready", preview.requirementMet);
-  panel.container.classList.toggle("is-locked", !preview.requirementMet);
+  panel.container.classList.toggle('is-ready', preview.requirementMet);
+  panel.container.classList.toggle('is-locked', !preview.requirementMet);
 
   panel.actionButton.disabled = !preview.requirementMet;
-  panel.actionButton.setAttribute("aria-disabled", preview.requirementMet ? "false" : "true");
+  panel.actionButton.setAttribute('aria-disabled', preview.requirementMet ? 'false' : 'true');
   panel.actionButton.setAttribute(
-    "title",
-    preview.requirementMet ? t(state.locale, "actions.prestige") : requirementText,
+    'title',
+    preview.requirementMet ? t(state.locale, 'actions.prestige') : requirementText,
   );
 }
 
-function updateMilestoneCards(
-  state: GameState,
-  cards: Map<MilestoneId, MilestoneCardRefs>,
-): void {
+function updateMilestoneCards(state: GameState, cards: Map<MilestoneId, MilestoneCardRefs>): void {
   const locale = state.locale;
   const progressList = state.temp.milestoneProgress ?? [];
   const progressMap = new Map<MilestoneId, MilestoneProgressSnapshot>(
@@ -72,15 +71,15 @@ function updateMilestoneCards(
     card.title.textContent = `${definition.order}. ${definition.name[locale]}`;
     card.reward.textContent = definition.rewardSummary[locale];
     card.description.textContent = definition.description[locale];
-    card.container.classList.toggle("is-active", achieved);
-    card.badge.textContent = t(locale, "milestones.active");
-    card.badge.classList.toggle("hidden", !achieved);
-    card.badge.classList.toggle("is-active", achieved);
+    card.container.classList.toggle('is-active', achieved);
+    card.badge.textContent = t(locale, 'milestones.active');
+    card.badge.classList.toggle('hidden', !achieved);
+    card.badge.classList.toggle('is-active', achieved);
     card.progressFill.style.width = `${Math.round(progressValue * 100)}%`;
     if (snapshot) {
       card.progressLabel.textContent = formatMilestoneProgressText(state, snapshot.detail);
     } else {
-      card.progressLabel.textContent = "";
+      card.progressLabel.textContent = '';
     }
   });
 }

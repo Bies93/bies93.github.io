@@ -1,6 +1,6 @@
-import { ABILITIES, type Ability, type AbilityId } from "../data/abilities";
-import type { GameState } from "./state";
-import { t, type LocaleKey } from "./i18n";
+import { ABILITIES, type Ability, type AbilityId } from '../data/abilities';
+import type { GameState } from './state';
+import { t, type LocaleKey } from './i18n';
 
 export interface AbilityProgress {
   active: boolean;
@@ -20,7 +20,7 @@ export function getAbilityDefinition(id: AbilityId): Ability | undefined {
 }
 
 function computeAbilityStrength(state: GameState, ability: Ability): number {
-  if (ability.id === "overdrive") {
+  if (ability.id === 'overdrive') {
     return ability.baseMultiplier * (1 + state.temp.abilityPowerBonus);
   }
 
@@ -100,7 +100,11 @@ export function updateAbilityTimers(state: GameState, now = Date.now()): boolean
   return changed;
 }
 
-export function getAbilityProgress(state: GameState, id: AbilityId, now = Date.now()): AbilityProgress {
+export function getAbilityProgress(
+  state: GameState,
+  id: AbilityId,
+  now = Date.now(),
+): AbilityProgress {
   const runtime = getRuntime(state, id);
   const ability = abilityById.get(id);
   if (!runtime || !ability) {
@@ -121,21 +125,24 @@ export function getAbilityProgress(state: GameState, id: AbilityId, now = Date.n
 export function formatAbilityTooltip(state: GameState, id: AbilityId, locale: LocaleKey): string {
   const ability = abilityById.get(id);
   if (!ability) {
-    return "";
+    return '';
   }
 
   const strength = computeAbilityStrength(state, ability);
   const durationMult = Number.isFinite(state.temp.abilityDurationMult)
     ? Math.max(0, state.temp.abilityDurationMult)
     : 1;
-  const effectiveDuration = Math.max(1, Math.round(ability.durationSec * (durationMult > 0 ? durationMult : 1)));
+  const effectiveDuration = Math.max(
+    1,
+    Math.round(ability.durationSec * (durationMult > 0 ? durationMult : 1)),
+  );
   const base = t(locale, ability.descriptionKey, {
     multiplier: strength.toFixed(2),
     duration: effectiveDuration,
     cooldown: ability.cooldownSec,
   });
 
-  if (ability.id === "overdrive" && state.temp.abilityPowerBonus > 0) {
+  if (ability.id === 'overdrive' && state.temp.abilityPowerBonus > 0) {
     const bonusPercent = Math.round(state.temp.abilityPowerBonus * 100);
     return `${base} (+${bonusPercent}%)`;
   }
@@ -146,7 +153,7 @@ export function formatAbilityTooltip(state: GameState, id: AbilityId, locale: Lo
 export function getAbilityLabel(id: AbilityId, locale: LocaleKey): string {
   const ability = abilityById.get(id);
   if (!ability) {
-    return "";
+    return '';
   }
 
   return t(locale, ability.nameKey);

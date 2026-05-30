@@ -1,13 +1,13 @@
-const stripLeading = (path: string): string => path.replace(/^\.?\/+/, "");
+const stripLeading = (path: string): string => path.replace(/^\.?\/+/, '');
 
 const ensureDirectoryHref = (raw: string): string => {
   const url = new URL(raw);
-  url.search = "";
-  url.hash = "";
+  url.search = '';
+  url.hash = '';
 
   if (/\.[^/]+$/.test(url.pathname)) {
-    url.pathname = url.pathname.replace(/[^/]*$/, "");
-  } else if (!url.pathname.endsWith("/")) {
+    url.pathname = url.pathname.replace(/[^/]*$/, '');
+  } else if (!url.pathname.endsWith('/')) {
     url.pathname = `${url.pathname}/`;
   }
 
@@ -15,11 +15,11 @@ const ensureDirectoryHref = (raw: string): string => {
 };
 
 const resolveBaseUrl = (): string | null => {
-  if (typeof document !== "undefined" && document.baseURI) {
+  if (typeof document !== 'undefined' && document.baseURI) {
     return ensureDirectoryHref(document.baseURI);
   }
 
-  if (typeof window !== "undefined" && window.location?.href) {
+  if (typeof window !== 'undefined' && window.location?.href) {
     return ensureDirectoryHref(window.location.href);
   }
 
@@ -35,6 +35,6 @@ export const withBase = (path: string): string => {
     return new URL(normalized, baseUrl).pathname;
   }
 
-  const fallback = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+  const fallback = import.meta.env.BASE_URL.replace(/\/?$/, '/');
   return `${fallback}${normalized}`;
 };

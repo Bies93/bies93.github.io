@@ -1,14 +1,23 @@
-import Decimal from "break_infinity.js";
-import { PRESTIGE_M, PRESTIGE_MIN_REQUIREMENT } from "./balance";
-import { createDefaultState, type GameState } from "./state";
-import { applyResearchEffects } from "./research";
-import { researchById } from "../data/research";
-import { activateKickstart, computeMilestones, getKickstartConfig, resolveKickstart } from "./milestones";
+import Decimal from 'break_infinity.js';
+import { PRESTIGE_M, PRESTIGE_MIN_REQUIREMENT } from './balance';
+import { createDefaultState, type GameState } from './state';
+import { applyResearchEffects } from './research';
+import { researchById } from '../data/research';
+import {
+  activateKickstart,
+  computeMilestones,
+  getKickstartConfig,
+  resolveKickstart,
+} from './milestones';
 
 export interface PrestigePreview {
   requirementMet: boolean;
   requirementTarget: Decimal;
   lifetimeBuds: Decimal;
+  seedGain: number;
+  seedsBefore: number;
+  seedsAfter: number;
+  nextSeedTarget: Decimal;
   permanentGlobalPercent: number;
   permanentBpsPercent: number;
   permanentBpcPercent: number;
@@ -30,12 +39,34 @@ export function computePrestigeMultiplier(seeds: number): Decimal {
   return new Decimal(1 + PRESTIGE_M * safeSeeds);
 }
 
+export function computePrestigeSeedGain(lifetimeBuds: Decimal): number {
+  if (lifetimeBuds.lessThan(PRESTIGE_MIN_REQUIREMENT)) {
+    return 0;
+  }
+
+  const ratio = lifetimeBuds.div(PRESTIGE_MIN_REQUIREMENT).toNumber();
+  if (!Number.isFinite(ratio)) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+
+  return Math.max(1, Math.floor(Math.sqrt(Math.max(0, ratio))));
+}
+
+function getNextSeedTarget(seedGain: number): Decimal {
+  const nextGain = Math.max(1, seedGain + 1);
+  return new Decimal(PRESTIGE_MIN_REQUIREMENT).mul(nextGain * nextGain);
+}
+
 export function getPrestigePreview(state: GameState): PrestigePreview {
   const milestoneResult = computeMilestones(state);
   const milestoneEffects = milestoneResult.effects;
   const requirementTarget = new Decimal(PRESTIGE_MIN_REQUIREMENT);
   const lifetimeBuds = state.prestige.lifetimeBuds;
   const requirementMet = state.prestige.lifetimeBuds.greaterThanOrEqualTo(PRESTIGE_MIN_REQUIREMENT);
+  const seedGain = computePrestigeSeedGain(lifetimeBuds);
+  const seedsBefore = state.prestige.seeds;
+  const seedsAfter = seedsBefore + seedGain;
+  const nextSeedTarget = getNextSeedTarget(seedGain);
   const permanentGlobalPercent = Math.max(0, milestoneEffects.global.minus(1).mul(100).toNumber());
   const permanentBpsPercent = Math.max(0, milestoneEffects.bps.minus(1).mul(100).toNumber());
   const permanentBpcPercent = Math.max(0, milestoneEffects.bpc.minus(1).mul(100).toNumber());
@@ -55,6 +86,10 @@ export function getPrestigePreview(state: GameState): PrestigePreview {
     requirementMet,
     requirementTarget,
     lifetimeBuds,
+    seedGain,
+    seedsBefore,
+    seedsAfter,
+    nextSeedTarget,
     permanentGlobalPercent,
     permanentBpsPercent,
     permanentBpcPercent,
@@ -79,7 +114,7 @@ export function performPrestige(state: GameState): GameState {
   }
 
   const now = Date.now();
-  const seedsAfter = state.prestige.seeds;
+  const seedsAfter = preview.seedsAfter;
   const multiplier = computePrestigeMultiplier(seedsAfter);
   const preservedResearch = state.researchOwned.filter((researchId) => {
     const node = researchById.get(researchId);
@@ -97,7 +132,7 @@ export function performPrestige(state: GameState): GameState {
     prestige: {
       seeds: seedsAfter,
       mult: multiplier,
-      lifetimeBuds: state.prestige.lifetimeBuds,
+      lifetimeBuds: new Decimal(0),
       lastResetAt: now,
       version: 1,
       milestones: preservedMilestones,
@@ -120,5 +155,3 @@ export function performPrestige(state: GameState): GameState {
 export function updatePrestigeMultiplier(state: GameState): void {
   state.prestige.mult = computePrestigeMultiplier(state.prestige.seeds);
 }
-
-

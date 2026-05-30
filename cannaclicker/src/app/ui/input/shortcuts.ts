@@ -14,7 +14,11 @@ interface ShortcutContext {
 
 let context: ShortcutContext | null = null;
 
-export function attachGlobalShortcuts(ui: { refs: UIRefs; render(state: GameState): void }, state: GameState, audio: AudioManager): void {
+export function attachGlobalShortcuts(
+  ui: { refs: UIRefs; render(state: GameState): void },
+  state: GameState,
+  audio: AudioManager,
+): void {
   context = { refs: ui.refs, render: ui.render, state, audio };
   window.addEventListener('keydown', handleKeydown, { passive: false });
 }

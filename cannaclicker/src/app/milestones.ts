@@ -1,39 +1,39 @@
-import Decimal from "break_infinity.js";
+import Decimal from 'break_infinity.js';
 import {
   milestones,
   type MilestoneDefinition,
   type MilestoneId,
   type MilestoneRequirement,
-} from "../data/milestones";
-import { items } from "../data/items";
-import type { GameState, KickstartState } from "./state";
-import { canUnlockItem } from "./shop";
+} from '../data/milestones';
+import { items } from '../data/items';
+import type { GameState, KickstartState } from './state';
+import { canUnlockItem } from './shop';
 
 export interface MilestoneProgressDetailBase {
-  type: MilestoneRequirement["type"];
+  type: MilestoneRequirement['type'];
 }
 
 export interface UniqueBuildingsDetail extends MilestoneProgressDetailBase {
-  type: "unique_buildings";
+  type: 'unique_buildings';
   owned: number;
   target: number;
 }
 
 export interface BuildingsAtLeastDetail extends MilestoneProgressDetailBase {
-  type: "buildings_at_least";
+  type: 'buildings_at_least';
   satisfied: number;
   target: number;
   amount: number;
 }
 
 export interface AnyBuildingAtLeastDetail extends MilestoneProgressDetailBase {
-  type: "any_building_at_least";
+  type: 'any_building_at_least';
   best: number;
   target: number;
 }
 
 export interface UnlockedAndAnyDetail extends MilestoneProgressDetailBase {
-  type: "unlocked_and_any_at_least";
+  type: 'unlocked_and_any_at_least';
   unlocked: number;
   total: number;
   best: number;
@@ -128,15 +128,15 @@ export function computeMilestones(state: GameState): MilestoneComputationResult 
       for (const bonus of definition.bonuses) {
         const factor = 1 + Math.max(0, bonus.value);
         switch (bonus.type) {
-          case "global": {
+          case 'global': {
             global = global.mul(factor);
             break;
           }
-          case "bps": {
+          case 'bps': {
             bps = bps.mul(factor);
             break;
           }
-          case "bpc": {
+          case 'bpc': {
             bpc = bpc.mul(factor);
             break;
           }
@@ -226,23 +226,23 @@ function evaluateRequirement(
   requirement: MilestoneRequirement,
 ): { detail: MilestoneProgressDetail; progress: number; completed: boolean } {
   switch (requirement.type) {
-    case "unique_buildings": {
+    case 'unique_buildings': {
       const owned = countOwnedTypes(state);
       const target = Math.max(1, requirement.count);
       const progress = owned / target;
       return {
-        detail: { type: "unique_buildings", owned, target },
+        detail: { type: 'unique_buildings', owned, target },
         progress,
         completed: owned >= target,
       };
     }
-    case "buildings_at_least": {
+    case 'buildings_at_least': {
       const satisfied = countTypesAtLeast(state, requirement.amount);
       const target = Math.max(1, requirement.count);
       const progress = satisfied / target;
       return {
         detail: {
-          type: "buildings_at_least",
+          type: 'buildings_at_least',
           satisfied,
           target,
           amount: requirement.amount,
@@ -251,17 +251,17 @@ function evaluateRequirement(
         completed: satisfied >= target,
       };
     }
-    case "any_building_at_least": {
+    case 'any_building_at_least': {
       const best = highestOwned(state);
       const target = Math.max(1, requirement.amount);
       const progress = best / target;
       return {
-        detail: { type: "any_building_at_least", best, target },
+        detail: { type: 'any_building_at_least', best, target },
         progress,
         completed: best >= target,
       };
     }
-    case "unlocked_and_any_at_least": {
+    case 'unlocked_and_any_at_least': {
       const unlocked = countUnlocked(state);
       const total = items.length;
       const best = highestOwned(state);
@@ -269,7 +269,7 @@ function evaluateRequirement(
       const progress = Math.min(unlocked / Math.max(1, total), best / target);
       return {
         detail: {
-          type: "unlocked_and_any_at_least",
+          type: 'unlocked_and_any_at_least',
           unlocked,
           total,
           best,
@@ -281,7 +281,7 @@ function evaluateRequirement(
     }
     default: {
       return {
-        detail: { type: "unique_buildings", owned: 0, target: 1 },
+        detail: { type: 'unique_buildings', owned: 0, target: 1 },
         progress: 0,
         completed: false,
       };
@@ -291,13 +291,13 @@ function evaluateRequirement(
 
 function markDetailAsComplete(detail: MilestoneProgressDetail): MilestoneProgressDetail {
   switch (detail.type) {
-    case "unique_buildings":
+    case 'unique_buildings':
       return { ...detail, owned: detail.target } satisfies UniqueBuildingsDetail;
-    case "buildings_at_least":
+    case 'buildings_at_least':
       return { ...detail, satisfied: detail.target } satisfies BuildingsAtLeastDetail;
-    case "any_building_at_least":
+    case 'any_building_at_least':
       return { ...detail, best: detail.target } satisfies AnyBuildingAtLeastDetail;
-    case "unlocked_and_any_at_least":
+    case 'unlocked_and_any_at_least':
       return {
         ...detail,
         unlocked: detail.total,

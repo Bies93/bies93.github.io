@@ -1,10 +1,14 @@
-export function spawnFloatingValue(origin: HTMLElement, text: string, color = 'rgb(74 222 128)'): void {
+export function spawnFloatingValue(
+  origin: HTMLElement,
+  text: string,
+  color = 'rgb(74 222 128)',
+): void {
   const particle = document.createElement('span');
   particle.textContent = text;
   particle.className = 'pointer-events-none select-none text-sm font-semibold';
   particle.style.position = 'absolute';
-  particle.style.left = '50%';
-  particle.style.top = '50%';
+  particle.style.left = `${46 + Math.random() * 8}%`;
+  particle.style.top = `${44 + Math.random() * 8}%`;
   particle.style.transform = 'translate(-50%, -50%)';
   particle.style.color = color;
   particle.style.textShadow = '0 0 12px rgba(74, 222, 128, 0.5)';

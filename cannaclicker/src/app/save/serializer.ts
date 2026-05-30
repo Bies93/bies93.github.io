@@ -12,7 +12,10 @@ import type { AbilityId } from '../state';
 
 const ABILITY_IDS: AbilityId[] = ['overdrive', 'burst'];
 
-export function restoreAbilities(abilities: Record<string, PersistedAbilityState> | undefined, now: number): RestoredAbilityState {
+export function restoreAbilities(
+  abilities: Record<string, PersistedAbilityState> | undefined,
+  now: number,
+): RestoredAbilityState {
   const restored: RestoredAbilityState = {
     overdrive: { active: false, endsAt: now, readyAt: now, multiplier: 1 },
     burst: { active: false, endsAt: now, readyAt: now, multiplier: 1 },
@@ -40,7 +43,9 @@ export function restoreAbilities(abilities: Record<string, PersistedAbilityState
   return restored;
 }
 
-export function restoreKickstart(kickstart: PersistedKickstartState | null | undefined): KickstartState | null {
+export function restoreKickstart(
+  kickstart: PersistedKickstartState | null | undefined,
+): KickstartState | null {
   if (!kickstart) {
     return null;
   }

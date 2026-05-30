@@ -1,11 +1,11 @@
-import type { GameState } from "../../../state";
-import { getUpgradeEntries, type UpgradeEntry as UpgradeViewEntry } from "../../../upgrades";
-import type { UpgradeId } from "../../../../data/upgrades";
-import type { UIRefs, UpgradeCardRefs } from "../../types";
-import { createUpgradeCard } from "./makeCard";
-import { renderUpgradeCard } from "./renderCard";
-import { wireUpgradeCard } from "./wireCard";
-import type { UpgradeUpdateOptions } from "./index";
+import type { GameState } from '../../../state';
+import { getUpgradeEntries, type UpgradeEntry as UpgradeViewEntry } from '../../../upgrades';
+import type { UpgradeId } from '../../../../data/upgrades';
+import type { UIRefs, UpgradeCardRefs } from '../../types';
+import { createUpgradeCard } from './makeCard';
+import { renderUpgradeCard } from './renderCard';
+import { wireUpgradeCard } from './wireCard';
+import type { UpgradeUpdateOptions } from './index';
 
 export function renderUpgradeList(
   state: GameState,

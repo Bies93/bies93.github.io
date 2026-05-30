@@ -5,4 +5,3 @@ export interface SettingsState {
 export function createDefaultSettings(): SettingsState {
   return { showOfflineEarnings: true };
 }
-

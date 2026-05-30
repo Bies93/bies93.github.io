@@ -13,7 +13,9 @@ export function prepareStateForPersist(state: GameState, timestamp: number): voi
 
 export function applyOfflineProgress(state: GameState, now: number): void {
   const rawDelta = now - state.meta.lastSeenAt;
-  const offlineCap = Number.isFinite(state.temp.offlineCapMs) ? Math.max(0, state.temp.offlineCapMs) : OFFLINE_CAP_MS;
+  const offlineCap = Number.isFinite(state.temp.offlineCapMs)
+    ? Math.max(0, state.temp.offlineCapMs)
+    : OFFLINE_CAP_MS;
   const cappedDelta = Math.max(0, Math.min(rawDelta, offlineCap));
   const fallbackBps = state.bps.toNumber();
   const baseBps = Number.isFinite(state.meta.lastBpsAtSave)

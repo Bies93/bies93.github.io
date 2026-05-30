@@ -1,15 +1,31 @@
-import Decimal from "break_infinity.js";
-import type { GameState } from "./state";
-import { awardSeeds, getSeedCap } from "./seeds";
+import Decimal from 'break_infinity.js';
+import type { GameState } from './state';
+import { awardSeeds, getSeedCap } from './seeds';
 
-export type EventId = "golden_bud" | "seed_pack" | "lucky_joint";
+export type EventId =
+  | 'golden_bud'
+  | 'seed_pack'
+  | 'lucky_joint'
+  | 'fertile_rain'
+  | 'market_rush'
+  | 'green_surge'
+  | 'mutant_sprout'
+  | 'supply_drop';
 
 const GOLDEN_BUD_SECONDS = 15;
 const LUCKY_JOINT_MULTIPLIER = 2;
 export const LUCKY_JOINT_DURATION_MS = 15_000;
+const FERTILE_RAIN_SECONDS = 10;
+const MARKET_RUSH_MULTIPLIER = 1.6;
+const MARKET_RUSH_DURATION_MS = 20_000;
+const GREEN_SURGE_MULTIPLIER = 2.5;
+const GREEN_SURGE_DURATION_MS = 10_000;
+const MUTANT_SPROUT_SECONDS = 24;
+const SUPPLY_DROP_SECONDS = 12;
 
 const EVENT_SPAWN_MIN_MS = 10_000;
 const EVENT_SPAWN_MAX_MS = 20_000;
+const FIRST_EVENT_MIN_MS = 75_000;
 const EVENT_VISIBLE_MIN_MS = 7_000;
 const EVENT_VISIBLE_MAX_MS = 12_000;
 const EVENT_QUEUE_TARGET_SIZE = 3;
@@ -18,12 +34,26 @@ const EVENT_COOLDOWN_BUFFER_MS = 5_000;
 const EVENT_PITY_THRESHOLD_MS = 45_000;
 const MAX_ACTIVE_EVENTS = 1;
 
-const EVENT_IDS: EventId[] = ["golden_bud", "seed_pack", "lucky_joint"];
+export const EVENT_IDS: EventId[] = [
+  'golden_bud',
+  'seed_pack',
+  'lucky_joint',
+  'fertile_rain',
+  'market_rush',
+  'green_surge',
+  'mutant_sprout',
+  'supply_drop',
+];
 
 export const DEFAULT_EVENT_WEIGHTS: Record<EventId, number> = {
   golden_bud: 1,
-  seed_pack: 0.6,
-  lucky_joint: 1,
+  seed_pack: 0.55,
+  lucky_joint: 0.75,
+  fertile_rain: 0.75,
+  market_rush: 0.55,
+  green_surge: 0.45,
+  mutant_sprout: 0.25,
+  supply_drop: 0.5,
 };
 
 interface SeedDropConfig {
@@ -41,6 +71,14 @@ const EVENT_SEED_DROPS: Record<EventId, SeedDropConfig> = {
       { amount: 5, weight: 3 },
     ],
   },
+  fertile_rain: {
+    chance: 0.08,
+    weights: [
+      { amount: 1, weight: 70 },
+      { amount: 2, weight: 22 },
+      { amount: 3, weight: 8 },
+    ],
+  },
   lucky_joint: {
     chance: 0.04,
     weights: [
@@ -48,6 +86,40 @@ const EVENT_SEED_DROPS: Record<EventId, SeedDropConfig> = {
       { amount: 2, weight: 25 },
       { amount: 3, weight: 12 },
       { amount: 5, weight: 3 },
+    ],
+  },
+  market_rush: {
+    chance: 0.03,
+    weights: [
+      { amount: 1, weight: 78 },
+      { amount: 2, weight: 18 },
+      { amount: 3, weight: 4 },
+    ],
+  },
+  green_surge: {
+    chance: 0.05,
+    weights: [
+      { amount: 1, weight: 72 },
+      { amount: 2, weight: 22 },
+      { amount: 3, weight: 6 },
+    ],
+  },
+  mutant_sprout: {
+    chance: 1,
+    weights: [
+      { amount: 1, weight: 42 },
+      { amount: 2, weight: 32 },
+      { amount: 3, weight: 18 },
+      { amount: 5, weight: 8 },
+    ],
+  },
+  supply_drop: {
+    chance: 0.85,
+    weights: [
+      { amount: 1, weight: 48 },
+      { amount: 2, weight: 30 },
+      { amount: 3, weight: 16 },
+      { amount: 4, weight: 6 },
     ],
   },
   seed_pack: {
@@ -76,7 +148,7 @@ export interface ActiveEventEntry extends EventQueueEntry {
   lifetimeMs: number;
 }
 
-export type EventHistoryOutcome = "clicked" | "expired" | "cancelled";
+export type EventHistoryOutcome = 'clicked' | 'expired' | 'cancelled';
 
 interface EventRewardSummary {
   budGain?: string;
@@ -201,9 +273,14 @@ export function createDefaultEventStats(now = Date.now()): EventStats {
   } satisfies EventStats;
 }
 
-function pickEventIdFromWeights(weights: Record<EventId, number>, ids: EventId[] = EVENT_IDS): EventId {
+function pickEventIdFromWeights(
+  weights: Record<EventId, number>,
+  ids: EventId[] = EVENT_IDS,
+): EventId {
   const safeIds = ids.length > 0 ? ids : EVENT_IDS;
-  const weightValues = safeIds.map((id) => Math.max(0, weights[id] ?? DEFAULT_EVENT_WEIGHTS[id] ?? 0));
+  const weightValues = safeIds.map((id) =>
+    Math.max(0, weights[id] ?? DEFAULT_EVENT_WEIGHTS[id] ?? 0),
+  );
   const total = weightValues.reduce((sum, weight) => sum + weight, 0);
   if (total <= 0) {
     return safeIds[Math.floor(Math.random() * safeIds.length)];
@@ -275,7 +352,9 @@ export function advanceEventPipeline(
 ): void {
   const stats = state.meta.eventStats;
   if (state.events.active.length === 0) {
-    stats.pityTimerMs = clampTimer(stats.pityTimerMs + Math.max(0, Math.round(deltaSeconds * 1000)));
+    stats.pityTimerMs = clampTimer(
+      stats.pityTimerMs + Math.max(0, Math.round(deltaSeconds * 1000)),
+    );
   }
   expireEvents(state, now);
   spawnDueEvents(state, now);
@@ -299,6 +378,9 @@ function expireEvents(state: GameState, now: number): void {
 
 function spawnDueEvents(state: GameState, now: number): void {
   if (state.events.active.length >= MAX_ACTIVE_EVENTS) {
+    return;
+  }
+  if (!isEarlyEventGateOpen(state, now)) {
     return;
   }
   state.events.queue.sort(compareQueueEntries);
@@ -325,6 +407,16 @@ function spawnDueEvents(state: GameState, now: number): void {
   }
 }
 
+function isEarlyEventGateOpen(state: GameState, now: number): boolean {
+  const ownsAnyItem = Object.values(state.items).some((amount) => (amount ?? 0) > 0);
+  if (ownsAnyItem || state.total.greaterThanOrEqualTo(60)) {
+    return true;
+  }
+
+  const runStartedAt = state.prestige.lastResetAt || state.time || now;
+  return now - runStartedAt >= FIRST_EVENT_MIN_MS;
+}
+
 function ensureQueueCapacity(state: GameState, now: number): void {
   const queue = state.events.queue;
   const stats = state.meta.eventStats;
@@ -332,7 +424,9 @@ function ensureQueueCapacity(state: GameState, now: number): void {
     const hasPendingPity = queue.some((entry) => entry.pity);
     const pityReady = !hasPendingPity && stats.pityTimerMs >= EVENT_PITY_THRESHOLD_MS;
     const immediate = pityReady || queue.length === 0;
-    const delay = immediate ? randomBetween(1_500, 3_500) : randomBetween(EVENT_SPAWN_MIN_MS, EVENT_SPAWN_MAX_MS);
+    const delay = immediate
+      ? randomBetween(1_500, 3_500)
+      : randomBetween(EVENT_SPAWN_MIN_MS, EVENT_SPAWN_MAX_MS);
     const scheduledAt = now + Math.round(delay);
     const id = pickWeightedEventId(state, scheduledAt);
     enqueueEvent(state, id, {
@@ -386,7 +480,7 @@ function recordExpiry(state: GameState, event: ActiveEventEntry, now: number): v
     spawnedAt: event.spawnedAt,
     resolvedAt: now,
     pity: event.pity,
-    outcome: "expired",
+    outcome: 'expired',
   });
   const stats = state.meta.eventStats;
   stats.totalExpired += 1;
@@ -431,13 +525,13 @@ function summariseReward(result: EventClickResult): EventRewardSummary | undefin
   if (result.budGain) {
     summary.budGain = result.budGain.toString();
   }
-  if (typeof result.seedGain === "number") {
+  if (typeof result.seedGain === 'number') {
     summary.seedGain = result.seedGain;
   }
-  if (typeof result.multiplier === "number") {
+  if (typeof result.multiplier === 'number') {
     summary.multiplier = result.multiplier;
   }
-  if (typeof result.durationMs === "number") {
+  if (typeof result.durationMs === 'number') {
     summary.durationMs = result.durationMs;
   }
   return Object.keys(summary).length > 0 ? summary : undefined;
@@ -456,7 +550,7 @@ function recordClick(
     spawnedAt: event.spawnedAt,
     resolvedAt: now,
     pity: event.pity,
-    outcome: "clicked",
+    outcome: 'clicked',
     reward: summariseReward(result),
   });
   const stats = state.meta.eventStats;
@@ -504,39 +598,20 @@ export function applyEventReward(
   now = Date.now(),
 ): EventClickResult {
   switch (id) {
-    case "golden_bud": {
-      const seconds = GOLDEN_BUD_SECONDS;
-      let gain = state.bps.mul(seconds);
-
-      if (!gain.greaterThan(0)) {
-        const fallback = state.bpc.mul(seconds);
-        gain = fallback.greaterThan(0) ? fallback : new Decimal(seconds);
-      }
-
-      state.buds = state.buds.add(gain);
-      state.total = state.total.add(gain);
-      state.prestige.lifetimeBuds = state.prestige.lifetimeBuds.add(gain);
-
-      const seedDrop = rollEventSeeds(state, id);
-      let requiresRecalc = false;
-      if (seedDrop > 0) {
-        awardSeeds(state, seedDrop, "event", now);
-        requiresRecalc = true;
-      }
+    case 'golden_bud': {
+      const gain = grantScaledBudReward(state, GOLDEN_BUD_SECONDS);
+      const seedDrop = grantEventSeeds(state, id, now);
 
       return {
         id,
         budGain: gain,
         seedGain: seedDrop || undefined,
-        requiresRecalc,
+        requiresRecalc: seedDrop > 0,
       } satisfies EventClickResult;
     }
 
-    case "seed_pack": {
-      const seeds = rollEventSeeds(state, id);
-      if (seeds > 0) {
-        awardSeeds(state, seeds, "event", now);
-      }
+    case 'seed_pack': {
+      const seeds = grantEventSeeds(state, id, now);
 
       return {
         id,
@@ -545,17 +620,10 @@ export function applyEventReward(
       } satisfies EventClickResult;
     }
 
-    case "lucky_joint": {
+    case 'lucky_joint': {
       const durationMs = LUCKY_JOINT_DURATION_MS;
-      state.temp.activeEventBoost = id;
-      state.temp.eventBoostEndsAt = now + durationMs;
-      state.temp.eventBpsMult = new Decimal(LUCKY_JOINT_MULTIPLIER);
-      state.temp.eventBpcMult = new Decimal(LUCKY_JOINT_MULTIPLIER);
-
-      const seedDrop = rollEventSeeds(state, id);
-      if (seedDrop > 0) {
-        awardSeeds(state, seedDrop, "event", now);
-      }
+      applyEventBoost(state, id, LUCKY_JOINT_MULTIPLIER, durationMs, now);
+      const seedDrop = grantEventSeeds(state, id, now);
 
       return {
         id,
@@ -566,9 +634,109 @@ export function applyEventReward(
       } satisfies EventClickResult;
     }
 
+    case 'fertile_rain': {
+      const gain = grantScaledBudReward(state, FERTILE_RAIN_SECONDS);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        seedGain: seedDrop || undefined,
+        requiresRecalc: seedDrop > 0,
+      } satisfies EventClickResult;
+    }
+
+    case 'market_rush': {
+      const durationMs = MARKET_RUSH_DURATION_MS;
+      applyEventBoost(state, id, MARKET_RUSH_MULTIPLIER, durationMs, now);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        multiplier: MARKET_RUSH_MULTIPLIER,
+        durationMs,
+        seedGain: seedDrop || undefined,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'green_surge': {
+      const durationMs = GREEN_SURGE_DURATION_MS;
+      applyEventBoost(state, id, GREEN_SURGE_MULTIPLIER, durationMs, now);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        multiplier: GREEN_SURGE_MULTIPLIER,
+        durationMs,
+        seedGain: seedDrop || undefined,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'mutant_sprout': {
+      const gain = grantScaledBudReward(state, MUTANT_SPROUT_SECONDS);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        seedGain: seedDrop || undefined,
+        requiresRecalc: seedDrop > 0,
+      } satisfies EventClickResult;
+    }
+
+    case 'supply_drop': {
+      const gain = grantScaledBudReward(state, SUPPLY_DROP_SECONDS);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        seedGain: seedDrop || undefined,
+        requiresRecalc: seedDrop > 0,
+      } satisfies EventClickResult;
+    }
+
     default:
       return { id, requiresRecalc: false } satisfies EventClickResult;
   }
+}
+
+function grantScaledBudReward(state: GameState, seconds: number): Decimal {
+  const eventRewardMult = Math.max(1, state.temp.eventRewardMult ?? 1);
+  let gain = state.bps.mul(seconds).mul(eventRewardMult);
+
+  if (!gain.greaterThan(0)) {
+    const fallback = state.bpc.mul(Math.max(4, Math.ceil(seconds * 0.45))).mul(eventRewardMult);
+    gain = fallback.greaterThan(0) ? fallback : new Decimal(Math.max(4, Math.ceil(seconds * 0.45)));
+  }
+
+  state.buds = state.buds.add(gain);
+  state.total = state.total.add(gain);
+  state.prestige.lifetimeBuds = state.prestige.lifetimeBuds.add(gain);
+  return gain;
+}
+
+function grantEventSeeds(state: GameState, id: EventId, now: number): number {
+  const seeds = rollEventSeeds(state, id);
+  if (seeds > 0) {
+    awardSeeds(state, seeds, 'event', now);
+  }
+  return seeds;
+}
+
+function applyEventBoost(
+  state: GameState,
+  id: EventId,
+  multiplier: number,
+  durationMs: number,
+  now: number,
+): void {
+  state.temp.activeEventBoost = id;
+  state.temp.eventBoostEndsAt = now + durationMs;
+  state.temp.eventBpsMult = new Decimal(multiplier);
+  state.temp.eventBpcMult = new Decimal(multiplier);
 }
 
 export function clearExpiredEventBoost(state: GameState, now = Date.now()): boolean {

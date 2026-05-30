@@ -1,12 +1,8 @@
-import { getPrestigePreview, performPrestige } from '../../prestige';
+import { computePrestigeMultiplier, getPrestigePreview, performPrestige } from '../../prestige';
 import { t } from '../../i18n';
 import { formatDecimal } from '../../math';
 import type { GameState } from '../../state';
-import {
-  formatActiveKickstartSummary,
-  formatNextKickstartSummary,
-  formatPermanentBonusSummary,
-} from '../utils/format';
+import { formatInteger } from '../utils/format';
 import type { UIRefs } from '../types';
 
 let prestigeOpen = false;
@@ -36,13 +32,17 @@ export function closePrestigeModal(refs: UIRefs): void {
 export function updatePrestigeModal(refs: UIRefs, state: GameState): void {
   const preview = getPrestigePreview(state);
   const modal = refs.prestigeModal;
+  const nextMultiplier = computePrestigeMultiplier(preview.seedsAfter);
 
-  modal.previewCurrentValue.textContent = formatPermanentBonusSummary(state.locale, preview);
-  modal.previewAfterValue.textContent = formatNextKickstartSummary(state.locale, preview);
-  modal.previewGainValue.textContent = formatActiveKickstartSummary(state.locale, preview);
+  modal.previewCurrentValue.textContent = formatInteger(state.locale, preview.seedsBefore);
+  modal.previewAfterValue.textContent = formatInteger(state.locale, preview.seedsAfter);
+  modal.previewGainValue.textContent = `+${formatInteger(state.locale, preview.seedGain)}`;
   modal.previewBonusValue.textContent = t(state.locale, 'prestige.modal.requirementProgressValue', {
     current: formatDecimal(preview.lifetimeBuds),
-    target: formatDecimal(preview.requirementTarget),
+    target: formatDecimal(preview.nextSeedTarget),
+  });
+  modal.warning.textContent = t(state.locale, 'prestige.modal.globalBonusValue', {
+    multiplier: nextMultiplier.toFixed(2),
   });
 
   modal.checkbox.checked = prestigeAcknowledged;

@@ -3,7 +3,7 @@ import { itemById } from '../data/items';
 import type { ItemId } from '../data/items';
 import { achievements } from '../data/achievements';
 import { upgradeById, upgrades, type UpgradeId } from '../data/upgrades';
-import { getItemCost, getTierMultiplier, getSoftcapMultiplier } from './shop';
+import { canUnlockItem, getBulkCost, getTierMultiplier, getSoftcapMultiplier } from './shop';
 import type { GameState } from './state';
 import { sum, toDecimal } from './math';
 import { applyResearchEffects } from './research';
@@ -49,6 +49,8 @@ export function recalcDerivedValues(state: GameState): void {
     buildingCostMultipliers,
     clickMultiplier,
     autoClickRate,
+    seedClickBonus,
+    eventRewardMultiplier,
   } = collectUpgradeEffects(state);
   const researchBuildingMultipliers = state.temp.researchBuildingMultipliers ?? {};
   for (const [buildingId, multiplier] of Object.entries(researchBuildingMultipliers)) {
@@ -80,6 +82,11 @@ export function recalcDerivedValues(state: GameState): void {
   }
   state.temp.buildingCostMultipliers = nextCostMultipliers;
   state.temp.autoClickRate += autoClickRate;
+  state.temp.seedClickBonus = Math.max(
+    0,
+    Math.min(0.05, (state.temp.seedClickBonus ?? 0) + seedClickBonus),
+  );
+  state.temp.eventRewardMult = Math.max(1, eventRewardMultiplier);
 
   const prestigeMultiplier = state.prestige.mult;
   const milestoneGlobalMult = state.temp.milestoneGlobalMult ?? new Decimal(1);
@@ -107,7 +114,10 @@ export function recalcDerivedValues(state: GameState): void {
   });
 
   const achievementMultiplier = collectAchievementMultiplier(state);
-  const baseMultiplier = globalMultiplier.mul(achievementMultiplier).mul(prestigeMultiplier).mul(milestoneGlobalMult);
+  const baseMultiplier = globalMultiplier
+    .mul(achievementMultiplier)
+    .mul(prestigeMultiplier)
+    .mul(milestoneGlobalMult);
   const researchBpsMult = state.temp.researchBpsMult ?? new Decimal(1);
   const researchBpcMult = state.temp.researchBpcMult ?? new Decimal(1);
   const abilityBpsMult = new Decimal(abilityMultiplier(state, 'overdrive'));
@@ -135,25 +145,20 @@ export function recalcDerivedValues(state: GameState): void {
   state.temp.totalBpcMult = totalBpcMultiplier;
 }
 
-export function buyItem(
-  state: GameState,
-  itemId: ItemId,
-  quantity = 1,
-): boolean {
+export function buyItem(state: GameState, itemId: ItemId, quantity = 1): boolean {
   const definition = itemById.get(itemId);
   if (!definition) {
     return false;
   }
 
+  if (!canUnlockItem(state, definition)) {
+    return false;
+  }
+
   const owned = state.items[itemId] ?? 0;
-  let totalCost = new Decimal(0);
   const buildingCostMult = state.temp.buildingCostMultipliers?.[itemId] ?? new Decimal(1);
   const totalCostMult = state.temp.costMultiplier.mul(buildingCostMult);
-
-  for (let i = 0; i < quantity; i += 1) {
-    const price = getItemCost(definition, owned + i, totalCostMult);
-    totalCost = totalCost.add(price);
-  }
+  const totalCost = getBulkCost(definition, owned, quantity, totalCostMult);
 
   if (state.buds.lessThan(totalCost)) {
     return false;
@@ -168,10 +173,7 @@ export function buyItem(
   return true;
 }
 
-export function buyUpgrade(
-  state: GameState,
-  upgradeId: UpgradeId,
-): boolean {
+export function buyUpgrade(state: GameState, upgradeId: UpgradeId): boolean {
   if (state.upgrades[upgradeId]) {
     return false;
   }
@@ -204,13 +206,15 @@ export function evaluateAchievements(state: GameState): void {
       continue;
     }
 
-    const ownsItems = !achievement.requirement.itemsOwned
-      || Object.entries(achievement.requirement.itemsOwned).every(([id, amount]) => {
+    const ownsItems =
+      !achievement.requirement.itemsOwned ||
+      Object.entries(achievement.requirement.itemsOwned).every(([id, amount]) => {
         return (state.items[id] ?? 0) >= (amount ?? 0);
       });
 
-    const meetsTotal = !achievement.requirement.totalBuds
-      || state.total.greaterThanOrEqualTo(achievement.requirement.totalBuds);
+    const meetsTotal =
+      !achievement.requirement.totalBuds ||
+      state.total.greaterThanOrEqualTo(achievement.requirement.totalBuds);
 
     if (ownsItems && meetsTotal) {
       state.achievements[achievement.id] = true;
@@ -226,12 +230,16 @@ function collectUpgradeEffects(state: GameState): {
   buildingCostMultipliers: Map<ItemId, Decimal>;
   clickMultiplier: Decimal;
   autoClickRate: number;
+  seedClickBonus: number;
+  eventRewardMultiplier: number;
 } {
   const buildingMultipliers = new Map<ItemId, Decimal>();
   const buildingCostMultipliers = new Map<ItemId, Decimal>();
   let globalMultiplier = new Decimal(1);
   let clickMultiplier = new Decimal(1);
   let autoClickRate = 0;
+  let seedClickBonus = 0;
+  let eventRewardMultiplier = 1;
 
   for (const upgrade of upgrades) {
     if (!state.upgrades[upgrade.id]) {
@@ -270,13 +278,29 @@ function collectUpgradeEffects(state: GameState): {
           autoClickRate += effect.value;
           break;
         }
+        case 'seedClickBonus': {
+          seedClickBonus += effect.value;
+          break;
+        }
+        case 'eventRewardMultiplier': {
+          eventRewardMultiplier *= effect.value;
+          break;
+        }
         default:
           break;
       }
     }
   }
 
-  return { globalMultiplier, buildingMultipliers, buildingCostMultipliers, clickMultiplier, autoClickRate };
+  return {
+    globalMultiplier,
+    buildingMultipliers,
+    buildingCostMultipliers,
+    clickMultiplier,
+    autoClickRate,
+    seedClickBonus,
+    eventRewardMultiplier,
+  };
 }
 
 function collectAchievementMultiplier(state: GameState): Decimal {
@@ -292,4 +316,3 @@ function collectAchievementMultiplier(state: GameState): Decimal {
     return acc.mul(achievement.rewardMultiplier);
   }, new Decimal(1));
 }
-

@@ -1,7 +1,7 @@
-import { resolveEventClick, type EventId } from "../../../events";
-import type { GameState } from "../../../state";
-import { getEventPresentation } from "../random";
-import type { SchedulerBindings, SchedulerContext } from "./types";
+import { resolveEventClick, type EventId } from '../../../events';
+import type { GameState } from '../../../state';
+import { getEventPresentation } from '../random';
+import type { SchedulerBindings, SchedulerContext } from './types';
 
 export function createScheduler(
   context: SchedulerContext,
@@ -28,9 +28,15 @@ export function createScheduler(
 
       const definition = getEventPresentation(entry.id);
       const remainingLifetime = Math.max(0, entry.expiresAt - now);
-      const button = bindings.mountEvent(context, state, definition, remainingLifetime, (element) => {
-        handleEventClick(state, entry.id, entry.token, element);
-      });
+      const button = bindings.mountEvent(
+        context,
+        state,
+        definition,
+        remainingLifetime,
+        (element) => {
+          handleEventClick(state, entry.id, entry.token, element);
+        },
+      );
 
       if (button) {
         rendered.set(entry.token, button);
@@ -45,8 +51,7 @@ export function createScheduler(
     element: HTMLButtonElement,
   ): void {
     const now = Date.now();
-    const hadActiveBoost =
-      state.temp.activeEventBoost === "lucky_joint" && state.temp.eventBoostEndsAt > now;
+    const hadActiveBoost = state.temp.activeEventBoost === id && state.temp.eventBoostEndsAt > now;
 
     const resolution = resolveEventClick(state, token, now);
     if (!resolution) {

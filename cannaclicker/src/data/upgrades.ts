@@ -1,18 +1,30 @@
-import { asset } from '../app/assets';
+import { itemIcons, upgradeIcons } from '../app/assetManifest';
 import type { LocaleKey } from '../app/i18n';
 import { items, itemById } from './items';
 import type { ItemId } from './items';
 
-export type UpgradeCategory = 'building' | 'synergy' | 'utility';
+export type UpgradeCategory =
+  | 'building'
+  | 'item'
+  | 'click'
+  | 'global'
+  | 'synergy'
+  | 'event'
+  | 'seed'
+  | 'automation'
+  | 'prestige'
+  | 'utility';
 
 export type UpgradeEffect =
   | { type: 'globalMultiplier'; value: number }
   | { type: 'clickMultiplier'; value: number }
   | { type: 'buildingMultiplier'; targets: readonly ItemId[]; value: number }
   | { type: 'buildingCostMultiplier'; targets: readonly ItemId[]; value: number }
-  | { type: 'autoClick'; value: number };
+  | { type: 'autoClick'; value: number }
+  | { type: 'seedClickBonus'; value: number }
+  | { type: 'eventRewardMultiplier'; value: number };
 
-type BuildingUpgradeStage = 1 | 2 | 3 | 4;
+type BuildingUpgradeStage = 1 | 2 | 3;
 type TrimmerUpgradeStage = 1 | 2 | 3 | 4 | 5 | 6;
 
 type BuildingUpgradeId = `${ItemId}_boost_${BuildingUpgradeStage}` | 'grow_light_lenses';
@@ -20,10 +32,19 @@ type BuildingUpgradeId = `${ItemId}_boost_${BuildingUpgradeStage}` | 'grow_light
 export type UpgradeId =
   | BuildingUpgradeId
   | `trimmer_auto_${TrimmerUpgradeStage}`
+  | 'starter_auto'
   | 'rich_soil'
   | 'precision_trim'
+  | 'tap_training'
+  | 'canopy_math'
+  | 'event_spotters'
+  | 'seed_sorting'
+  | 'prestige_journal'
   | 'synergy_closed_loop'
-  | 'synergy_precision_irrigation';
+  | 'synergy_precision_irrigation'
+  | 'synergy_root_network'
+  | 'synergy_lab_pipeline'
+  | 'synergy_micro_cycle';
 
 export interface UpgradeRequirement {
   totalBuds?: number;
@@ -44,15 +65,16 @@ export interface UpgradeDefinition {
   order: number;
 }
 
-const BUILDING_THRESHOLDS = [10, 25, 50, 100] as const;
-const BUILDING_COST_FACTORS = [8, 25, 80, 250] as const;
+const BUILDING_THRESHOLDS = [10, 50, 150] as const;
+const BUILDING_COST_FACTORS = [7, 46, 320] as const;
+const BUILDING_MULTIPLIERS = [1.75, 2.1, 2.65] as const;
 
 const BUILDING_ICON_OVERRIDES: Partial<Record<ItemId, string>> = {
-  seedling: asset('icons/upgrades/upgrade-seedling.png'),
-  planter: asset('icons/upgrades/upgrade-planter.png'),
-  grow_tent: asset('icons/upgrades/upgrade-tent.png'),
-  grow_light: asset('icons/upgrades/upgrade-light.png'),
-  cultivator: asset('icons/upgrades/upgrade-cultivator.png'),
+  seedling: itemIcons.seedling,
+  planter: itemIcons.planter,
+  grow_tent: itemIcons.grow_tent,
+  grow_light: itemIcons.grow_light,
+  cultivator: itemIcons.cultivator,
 };
 
 const BUILDING_STAGE_ID_OVERRIDES: Partial<Record<ItemId, readonly (UpgradeId | undefined)[]>> = {
@@ -75,8 +97,8 @@ const BUILDING_STAGE_DESCRIPTION_OVERRIDES: Partial<
 > = {
   grow_light: {
     1: {
-      de: 'LED-Lichter produzieren 2× Buds.',
-      en: 'Grow lights produce 2× buds.',
+      de: 'LED-Lichter produzieren deutlich mehr Buds und starten die Indoor-Synergie.',
+      en: 'Grow lights produce clearly more buds and start the indoor synergy.',
     },
   },
 };
@@ -159,13 +181,15 @@ function createBuildingUpgrades(): UpgradeDefinition[] {
 
       entries.push({
         id,
-        category: 'building',
+        category: 'item',
         targetIds: [item.id],
         name,
         description,
         cost,
         icon,
-        effects: [{ type: 'buildingMultiplier', targets: [item.id], value: 2 }],
+        effects: [
+          { type: 'buildingMultiplier', targets: [item.id], value: BUILDING_MULTIPLIERS[index] },
+        ],
         requirement,
         order: item.tier * 10 + (index + 1),
       });
@@ -184,6 +208,8 @@ function createSynergyUpgrades(): UpgradeDefinition[] {
   const co2Base = getBaseCost('co2_tank');
   const climateBase = getBaseCost('climate_controller');
   const hydroBase = getBaseCost('hydroponic_rack');
+  const geneticsBase = getBaseCost('genetics_lab');
+  const microBase = getBaseCost('micro_greenhouse');
 
   return [
     {
@@ -199,7 +225,7 @@ function createSynergyUpgrades(): UpgradeDefinition[] {
         en: '+20% production for grow tents, lights, and CO₂ tanks.',
       },
       cost: Math.round(co2Base * 120),
-      icon: asset('icons/upgrades/upgrade-global-bps.png'),
+      icon: upgradeIcons.globalBps,
       effects: [
         {
           type: 'buildingMultiplier',
@@ -214,6 +240,33 @@ function createSynergyUpgrades(): UpgradeDefinition[] {
       order: 6000,
     },
     {
+      id: 'synergy_root_network',
+      category: 'synergy',
+      targetIds: ['seedling', 'planter', 'irrigation_system'] as const,
+      name: {
+        de: 'Wurzelnetz',
+        en: 'Root Network',
+      },
+      description: {
+        de: 'Keimlinge, Töpfe und Bewässerungssysteme produzieren +35 %.',
+        en: 'Seedlings, planters, and irrigation systems produce +35%.',
+      },
+      cost: Math.round(hydroBase * 18),
+      icon: upgradeIcons.buildingBoost,
+      effects: [
+        {
+          type: 'buildingMultiplier',
+          targets: ['seedling', 'planter', 'irrigation_system'] as const,
+          value: 1.35,
+        },
+      ],
+      requirement: {
+        itemsOwned: { seedling: 100, planter: 75, irrigation_system: 25 },
+        totalBuds: 8_000_000,
+      },
+      order: 6050,
+    },
+    {
       id: 'synergy_precision_irrigation',
       category: 'synergy',
       targetIds: ['climate_controller', 'hydroponic_rack', 'irrigation_system'] as const,
@@ -226,7 +279,7 @@ function createSynergyUpgrades(): UpgradeDefinition[] {
         en: 'Costs -5% for climate controllers, hydro racks, and irrigation systems.',
       },
       cost: Math.round(Math.max(climateBase, hydroBase) * 95),
-      icon: asset('icons/upgrades/upgrade-planter.png'),
+      icon: upgradeIcons.costEfficiency,
       effects: [
         {
           type: 'buildingCostMultiplier',
@@ -239,6 +292,60 @@ function createSynergyUpgrades(): UpgradeDefinition[] {
         totalBuds: 500_000_000,
       },
       order: 6100,
+    },
+    {
+      id: 'synergy_lab_pipeline',
+      category: 'synergy',
+      targetIds: ['genetics_lab', 'trimming_robot', 'hydroponic_rack'] as const,
+      name: {
+        de: 'Labor-Pipeline',
+        en: 'Lab Pipeline',
+      },
+      description: {
+        de: 'Genetik-Labore, Hydroponik-Racks und Trimm-Roboter produzieren +30 %.',
+        en: 'Genetics labs, hydro racks, and trimming robots produce +30%.',
+      },
+      cost: Math.round(geneticsBase * 42),
+      icon: upgradeIcons.globalBps,
+      effects: [
+        {
+          type: 'buildingMultiplier',
+          targets: ['genetics_lab', 'trimming_robot', 'hydroponic_rack'] as const,
+          value: 1.3,
+        },
+      ],
+      requirement: {
+        itemsOwned: { genetics_lab: 25, trimming_robot: 15, hydroponic_rack: 50 },
+        totalBuds: 750_000_000,
+      },
+      order: 6200,
+    },
+    {
+      id: 'synergy_micro_cycle',
+      category: 'prestige',
+      targetIds: ['micro_greenhouse', 'climate_controller', 'genetics_lab'] as const,
+      name: {
+        de: 'Mikro-Zyklus',
+        en: 'Micro Cycle',
+      },
+      description: {
+        de: 'Mikro-Gewächshäuser und ihre Support-Systeme produzieren +40 %. Vorbereitung für spätere Prestige-Loops.',
+        en: 'Micro greenhouses and their support systems produce +40%. Preparation for later prestige loops.',
+      },
+      cost: Math.round(microBase * 38),
+      icon: upgradeIcons.costEfficiency,
+      effects: [
+        {
+          type: 'buildingMultiplier',
+          targets: ['micro_greenhouse', 'climate_controller', 'genetics_lab'] as const,
+          value: 1.4,
+        },
+      ],
+      requirement: {
+        itemsOwned: { micro_greenhouse: 10, climate_controller: 60, genetics_lab: 40 },
+        totalBuds: 8_000_000_000,
+      },
+      order: 6300,
     },
   ];
 }
@@ -271,12 +378,12 @@ function createTrimmerUpgrades(): UpgradeDefinition[] {
 
     entries.push({
       id,
-      category: 'utility',
+      category: 'automation',
       targetIds: ['trimming_robot'],
       name,
       description,
       cost: Math.round(baseCost * TRIMMER_COST_FACTORS[index]),
-      icon: asset('icons/upgrades/upgrade-cultivator.png'),
+      icon: upgradeIcons.automation,
       effects: [{ type: 'autoClick', value: 0.5 }],
       requirement,
       order: 8000 + stage,
@@ -288,8 +395,27 @@ function createTrimmerUpgrades(): UpgradeDefinition[] {
 
 const legacyUpgrades: UpgradeDefinition[] = [
   {
+    id: 'starter_auto',
+    category: 'automation',
+    name: {
+      de: 'Auto-Nudge',
+      en: 'Auto Nudge',
+    },
+    description: {
+      de: '+0,35 automatische Klicks pro Sekunde. Der erste kleine Leerlauf-Schub.',
+      en: '+0.35 automatic clicks per second. Your first small idle push.',
+    },
+    cost: 420,
+    icon: upgradeIcons.automation,
+    effects: [{ type: 'autoClick', value: 0.35 }],
+    requirement: {
+      totalBuds: 260,
+    },
+    order: 80,
+  },
+  {
     id: 'rich_soil',
-    category: 'utility',
+    category: 'global',
     name: {
       de: 'Reiche Erde',
       en: 'Rich Soil',
@@ -298,17 +424,17 @@ const legacyUpgrades: UpgradeDefinition[] = [
       de: 'Globale Produktion +25 %.',
       en: 'Global production +25%.',
     },
-    cost: 2_500,
-    icon: asset('icons/upgrades/upgrade-global-bps.png'),
+    cost: 820,
+    icon: upgradeIcons.globalBps,
     effects: [{ type: 'globalMultiplier', value: 1.25 }],
     requirement: {
-      totalBuds: 2_000,
+      totalBuds: 620,
     },
     order: 100,
   },
   {
     id: 'precision_trim',
-    category: 'utility',
+    category: 'click',
     name: {
       de: 'Präziser Trim',
       en: 'Precision Trim',
@@ -317,13 +443,109 @@ const legacyUpgrades: UpgradeDefinition[] = [
       de: 'Buds pro Klick verdoppelt.',
       en: 'Doubles buds per click.',
     },
-    cost: 15_000,
-    icon: asset('icons/upgrades/upgrade-click-x2.png'),
+    cost: 170,
+    icon: upgradeIcons.clickPower,
     effects: [{ type: 'clickMultiplier', value: 2 }],
+    requirement: {
+      totalBuds: 125,
+    },
+    order: 70,
+  },
+  {
+    id: 'tap_training',
+    category: 'click',
+    name: {
+      de: 'Tap-Training',
+      en: 'Tap Training',
+    },
+    description: {
+      de: 'Buds pro Klick +75 %. Aktives Spielen bleibt im Early Game relevant.',
+      en: 'Buds per click +75%. Keeps active play relevant in the early game.',
+    },
+    cost: 1_900,
+    icon: upgradeIcons.clickPower,
+    effects: [{ type: 'clickMultiplier', value: 1.75 }],
+    requirement: {
+      totalBuds: 1_500,
+      upgradesOwned: ['precision_trim'],
+    },
+    order: 120,
+  },
+  {
+    id: 'canopy_math',
+    category: 'global',
+    name: {
+      de: 'Canopy-Mathe',
+      en: 'Canopy Math',
+    },
+    description: {
+      de: 'Globale Produktion +20 %. Ein sauberer Sprung nach dem ersten Shop-Aufbau.',
+      en: 'Global production +20%. A clean jump after the first shop setup.',
+    },
+    cost: 5_500,
+    icon: upgradeIcons.globalBps,
+    effects: [{ type: 'globalMultiplier', value: 1.2 }],
+    requirement: {
+      totalBuds: 4_000,
+    },
+    order: 130,
+  },
+  {
+    id: 'event_spotters',
+    category: 'event',
+    name: {
+      de: 'Event-Spotter',
+      en: 'Event Spotters',
+    },
+    description: {
+      de: 'Sofort-Bud-Events zahlen +25 %. Stark, aber erst nach der ersten Strategiephase.',
+      en: 'Instant bud events pay +25%. Strong, but only after the first strategy phase.',
+    },
+    cost: 13_000,
+    icon: upgradeIcons.globalBps,
+    effects: [{ type: 'eventRewardMultiplier', value: 1.25 }],
     requirement: {
       totalBuds: 10_000,
     },
-    order: 110,
+    order: 140,
+  },
+  {
+    id: 'seed_sorting',
+    category: 'seed',
+    name: {
+      de: 'Seed-Sortierung',
+      en: 'Seed Sorting',
+    },
+    description: {
+      de: '+1 Prozentpunkt Seed-Chance beim aktiven Klicken.',
+      en: '+1 percentage point seed chance while actively clicking.',
+    },
+    cost: 36_000,
+    icon: upgradeIcons.costEfficiency,
+    effects: [{ type: 'seedClickBonus', value: 0.01 }],
+    requirement: {
+      totalBuds: 28_000,
+    },
+    order: 150,
+  },
+  {
+    id: 'prestige_journal',
+    category: 'prestige',
+    name: {
+      de: 'Prestige-Journal',
+      en: 'Prestige Journal',
+    },
+    description: {
+      de: 'Globale Produktion +10 %. Macht den ersten Prestige-Run planbarer.',
+      en: 'Global production +10%. Makes the first prestige run easier to plan.',
+    },
+    cost: 520_000,
+    icon: upgradeIcons.costEfficiency,
+    effects: [{ type: 'globalMultiplier', value: 1.1 }],
+    requirement: {
+      totalBuds: 420_000,
+    },
+    order: 160,
   },
 ];
 

@@ -1,15 +1,15 @@
-import type { AudioManager } from "../audio";
-import type { LocaleKey } from "../i18n";
-import { t as defaultTranslate } from "../i18n";
-import type { GameState } from "../state";
-import type { ResearchFilter } from "../research";
-import type { SidePanelTab, UIRefs } from "./types";
-import { showToast, announce } from "./services/toast";
-import { createEventScheduler } from "./events/scheduler";
-import { attachGlobalShortcuts } from "./input/shortcuts";
-import { mountUI } from "./mount";
-import { createRenderer } from "./render";
-import { wireUI } from "./wire";
+import type { AudioManager } from '../audio';
+import type { LocaleKey } from '../i18n';
+import { t as defaultTranslate } from '../i18n';
+import type { GameState } from '../state';
+import type { ResearchFilter } from '../research';
+import type { SidePanelTab, UIRefs } from './types';
+import { showToast, announce } from './services/toast';
+import { createEventScheduler } from './events/scheduler';
+import { attachGlobalShortcuts } from './input/shortcuts';
+import { mountUI } from './mount';
+import { createRenderer } from './render';
+import { wireUI } from './wire';
 
 export interface InitI18nApi {
   t(locale: LocaleKey, key: string, params?: Record<string, string | number>): string;
@@ -29,9 +29,9 @@ export function initUI(
   audio: AudioManager,
   i18n: InitI18nApi = { t: defaultTranslate },
 ): UIInitResult {
-  let activeResearchFilter: ResearchFilter = "all";
+  let activeResearchFilter: ResearchFilter = 'all';
   let researchFilterManuallySelected = false;
-  let activeSidePanelTab: SidePanelTab = "shop";
+  let activeSidePanelTab: SidePanelTab = 'shop';
 
   const refs = mountUI(initialState);
 
@@ -43,7 +43,10 @@ export function initUI(
     audio,
     i18n,
     showToast: (options) => showToast(options),
-    getResearchState: () => ({ filter: activeResearchFilter, manual: researchFilterManuallySelected }),
+    getResearchState: () => ({
+      filter: activeResearchFilter,
+      manual: researchFilterManuallySelected,
+    }),
     setResearchState(filter, manual) {
       activeResearchFilter = filter;
       researchFilterManuallySelected = manual;

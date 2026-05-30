@@ -1,7 +1,7 @@
-import type { EventClickResult, EventId } from "../../../events";
-import type { GameState } from "../../../state";
-import type { UIRefs } from "../../types";
-import type { EventPresentation } from "../random";
+import type { EventClickResult, EventId } from '../../../events';
+import type { GameState } from '../../../state';
+import type { UIRefs } from '../../types';
+import type { EventPresentation } from '../random';
 
 export interface SchedulerContext {
   refs: UIRefs;

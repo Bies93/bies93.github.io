@@ -18,8 +18,8 @@ describe('core game mechanics', () => {
 
   it('buys a first building and recalculates passive production', () => {
     const state = createDefaultState();
-    state.buds = new Decimal(25);
-    state.total = new Decimal(25);
+    state.buds = new Decimal(12);
+    state.total = new Decimal(12);
 
     expect(buyItem(state, 'seedling')).toBe(true);
 
@@ -30,8 +30,8 @@ describe('core game mechanics', () => {
 
   it('purchases research and applies its production multiplier', () => {
     const state = createDefaultState();
-    state.buds = new Decimal(1_500);
-    state.total = new Decimal(1_500);
+    state.buds = new Decimal(12_000);
+    state.total = new Decimal(12_000);
 
     expect(purchaseResearch(state, 'r_eff_foundation')).toBe(true);
 

@@ -1,15 +1,15 @@
-import { buyUpgrade } from "../../../game";
-import type { GameState } from "../../../state";
-import type { UpgradeEntry as UpgradeViewEntry } from "../../../upgrades";
-import type { UpgradeCardRefs } from "../../types";
-import type { UpgradeUpdateOptions } from "./index";
+import { buyUpgrade } from '../../../game';
+import type { GameState } from '../../../state';
+import type { UpgradeEntry as UpgradeViewEntry } from '../../../upgrades';
+import type { UpgradeCardRefs } from '../../types';
+import type { UpgradeUpdateOptions } from './index';
 
 const wiredCards = new WeakSet<UpgradeCardRefs>();
 
 export function wireUpgradeCard(
   state: GameState,
   card: UpgradeCardRefs,
-  definition: UpgradeViewEntry["definition"],
+  definition: UpgradeViewEntry['definition'],
   options: UpgradeUpdateOptions,
 ): void {
   if (wiredCards.has(card)) {
@@ -18,7 +18,7 @@ export function wireUpgradeCard(
 
   wiredCards.add(card);
 
-  card.buyButton.addEventListener("click", () => {
+  card.buyButton.addEventListener('click', () => {
     if (buyUpgrade(state, definition.id)) {
       celebrateUpgrade(card.container);
       options.onPurchase(definition, card.container);
@@ -27,8 +27,8 @@ export function wireUpgradeCard(
 }
 
 function celebrateUpgrade(container: HTMLElement): void {
-  container.classList.add("is-celebrating");
+  container.classList.add('is-celebrating');
   window.setTimeout(() => {
-    container.classList.remove("is-celebrating");
+    container.classList.remove('is-celebrating');
   }, 900);
 }

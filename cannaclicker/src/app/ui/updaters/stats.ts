@@ -1,4 +1,4 @@
-import type { LocaleKey } from "../../i18n";
+import type { LocaleKey } from '../../i18n';
 
 export function formatSeedRate(locale: LocaleKey, rate: number): string {
   const safe = Number.isFinite(rate) ? rate : 0;

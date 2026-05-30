@@ -23,7 +23,12 @@ import type {
   RestoredSeedGainEntry,
 } from './types';
 import type { AbilityId, AutomationState, MetaState, PreferencesState } from '../state';
-import { createDefaultEventStats, type EventStats, type EventStatsPerEvent } from '../events';
+import {
+  EVENT_IDS,
+  createDefaultEventStats,
+  type EventStats,
+  type EventStatsPerEvent,
+} from '../events';
 import type { EventId } from '../events';
 import { SEED_SYNERGY_IDS, type SeedSynergyId } from '../seeds';
 
@@ -31,7 +36,7 @@ const VALID_MILESTONE_IDS = new Set(milestones.map((milestone) => milestone.id))
 const ABILITY_IDS: AbilityId[] = ['overdrive', 'burst'];
 const VALID_RESEARCH_IDS = new Set<string>(RESEARCH.map((entry) => entry.id));
 const VALID_SEED_SYNERGY_IDS = new Set<string>(SEED_SYNERGY_IDS);
-const VALID_EVENT_IDS: EventId[] = ['golden_bud', 'seed_pack', 'lucky_joint'];
+const VALID_EVENT_IDS: EventId[] = [...EVENT_IDS];
 const EVENT_ID_SET = new Set<EventId>(VALID_EVENT_IDS);
 
 function isSeedSynergyId(value: unknown): value is SeedSynergyId {

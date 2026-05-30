@@ -15,7 +15,10 @@ export function writeRawSave(raw: string): void {
   window.localStorage.setItem(SAVE_KEY, raw);
 }
 
-export function writePersistedState(state: PersistedStateV7, serialiser: (state: PersistedStateV7) => string): void {
+export function writePersistedState(
+  state: PersistedStateV7,
+  serialiser: (state: PersistedStateV7) => string,
+): void {
   const payload = serialiser(state);
   writeRawSave(payload);
 }

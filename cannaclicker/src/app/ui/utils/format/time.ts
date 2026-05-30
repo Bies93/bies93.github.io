@@ -13,5 +13,5 @@ export function formatDuration(durationMs: number): string {
   }
   parts.push(`${seconds}s`);
 
-  return parts.join(" ");
+  return parts.join(' ');
 }

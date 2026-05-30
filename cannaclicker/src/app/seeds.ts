@@ -1,10 +1,5 @@
 import { updatePrestigeMultiplier } from './prestige';
-import type {
-  GameState,
-  SeedGainEntry,
-  SeedGainSource,
-  SeedNotification,
-} from './state';
+import type { GameState, SeedGainEntry, SeedGainSource, SeedNotification } from './state';
 import type { ItemId } from '../data/items';
 import type { ResearchId } from '../data/research';
 import type { UpgradeId } from '../data/upgrades';

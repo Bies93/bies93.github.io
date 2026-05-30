@@ -1,17 +1,20 @@
-import Decimal from "break_infinity.js";
+import Decimal from 'break_infinity.js';
 
 export interface FormatOptions {
   precision?: number;
 }
 
-const SUFFIXES = ["K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "De"];
+const SUFFIXES = ['K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'De'];
 
-export function formatDecimal(value: Decimal | number | string, options: FormatOptions = {}): string {
+export function formatDecimal(
+  value: Decimal | number | string,
+  options: FormatOptions = {},
+): string {
   const { precision = 2 } = options;
   const decimal = toDecimal(value);
 
   if (!Number.isFinite(decimal.mantissa) || !Number.isFinite(decimal.exponent)) {
-    return "0";
+    return '0';
   }
 
   if (decimal.lessThan(1000)) {

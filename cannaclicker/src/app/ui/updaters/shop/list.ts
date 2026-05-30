@@ -1,17 +1,13 @@
-import type { GameState } from "../../../state";
-import { getShopEntries, type ShopEntry } from "../../../shop";
-import type { ItemId } from "../../../../data/items";
-import type { ShopCardRefs, UIRefs } from "../../types";
-import { renderShopCard } from "./renderCard";
-import { createShopCard } from "./makeCard";
-import { wireShopCard } from "./wireCard";
-import type { ShopUpdateOptions } from "./index";
+import type { GameState } from '../../../state';
+import { getShopEntries, type ShopEntry } from '../../../shop';
+import type { ItemId } from '../../../../data/items';
+import type { ShopCardRefs, UIRefs } from '../../types';
+import { renderShopCard } from './renderCard';
+import { createShopCard } from './makeCard';
+import { wireShopCard } from './wireCard';
+import type { ShopUpdateOptions } from './index';
 
-export function renderShopList(
-  state: GameState,
-  refs: UIRefs,
-  options: ShopUpdateOptions,
-): void {
+export function renderShopList(state: GameState, refs: UIRefs, options: ShopUpdateOptions): void {
   const entries = sortShopEntries(getShopEntries(state));
   const list = refs.sidePanel.shop.list;
 

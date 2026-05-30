@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "assets:generate": "node scripts/generate-assets.mjs",
     "typecheck": "tsc --noEmit",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview --port 4173",

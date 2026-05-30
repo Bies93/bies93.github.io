@@ -1,11 +1,11 @@
-import { asset } from "../app/assets";
+import { uiIcons } from '../app/assetManifest';
 
-import type { ItemId } from "./items";
+import type { ItemId } from './items';
 
 const ACHIEVEMENT_DATA = [
   {
     id: 'seedling_10',
-    overlayIcon: asset('achievements/badge-overlay-leaf.png'),
+    overlayIcon: uiIcons.achievementLeaf,
     name: {
       de: 'Keimstarter',
       en: 'Seed Starter',
@@ -21,7 +21,7 @@ const ACHIEVEMENT_DATA = [
   },
   {
     id: 'planter_25',
-    overlayIcon: asset('achievements/badge-overlay-pot.png'),
+    overlayIcon: uiIcons.achievementPot,
     name: {
       de: 'Topfmeister',
       en: 'Pot Master',
@@ -37,7 +37,7 @@ const ACHIEVEMENT_DATA = [
   },
   {
     id: 'harvest_1m',
-    overlayIcon: asset('achievements/badge-overlay-light.png'),
+    overlayIcon: uiIcons.achievementLight,
     name: {
       de: 'Ernteprofi',
       en: 'Harvest Hero',
@@ -55,7 +55,7 @@ const ACHIEVEMENT_DATA = [
 
 type RawAchievementDefinition = (typeof ACHIEVEMENT_DATA)[number];
 
-export type AchievementId = RawAchievementDefinition["id"];
+export type AchievementId = RawAchievementDefinition['id'];
 
 export interface AchievementRequirement {
   totalBuds?: number;
@@ -71,5 +71,3 @@ export const achievements: readonly AchievementDefinition[] = ACHIEVEMENT_DATA;
 export const achievementById = new Map<AchievementId, AchievementDefinition>(
   achievements.map((entry) => [entry.id, entry]),
 );
-
-

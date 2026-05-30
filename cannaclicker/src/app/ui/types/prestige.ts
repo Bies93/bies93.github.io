@@ -9,7 +9,7 @@ export interface MilestoneCardRefs {
   progressLabel: HTMLElement;
 }
 
-import type { MilestoneId } from "../../../data/milestones";
+import type { MilestoneId } from '../../../data/milestones';
 
 export interface PrestigePanelRefs {
   container: HTMLElement;

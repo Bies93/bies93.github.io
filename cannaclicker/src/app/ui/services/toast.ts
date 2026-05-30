@@ -19,7 +19,9 @@ let toastContainer: HTMLElement | null = null;
 let announcer: HTMLElement | null = null;
 let lastAnnounced = new Decimal(0);
 
-export const showToast: ShowToast = ((options: ToastOptions & { container?: HTMLElement | null }) => {
+export const showToast: ShowToast = ((
+  options: ToastOptions & { container?: HTMLElement | null },
+) => {
   if (options.container) {
     toastContainer = options.container;
   }

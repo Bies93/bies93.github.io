@@ -1,16 +1,16 @@
-export type HudNoticeTone = "info" | "warning";
+export type HudNoticeTone = 'info' | 'warning';
 
 export interface HudNoticeOptions {
   id?: string;
   tone?: HudNoticeTone;
 }
 
-const DEFAULT_ID = "default";
+const DEFAULT_ID = 'default';
 const BASE_CLASS =
-  "pointer-events-auto w-full max-w-xl rounded-2xl border px-4 py-3 text-sm shadow-lg shadow-black/40 backdrop-blur";
+  'pointer-events-auto w-full max-w-xl rounded-2xl border px-4 py-3 text-sm shadow-lg shadow-black/40 backdrop-blur';
 
 function resolveToneClasses(tone: HudNoticeTone): string {
-  if (tone === "warning") {
+  if (tone === 'warning') {
     return `${BASE_CLASS} border-amber-400/60 bg-amber-500/15 text-amber-100`;
   }
 
@@ -26,27 +26,27 @@ export function showHudNotice(
     return;
   }
 
-  const { id = DEFAULT_ID, tone = "warning" } = options;
+  const { id = DEFAULT_ID, tone = 'warning' } = options;
   const messageSelector = `[data-hud-message="${id}"]`;
   let element = target.querySelector<HTMLDivElement>(messageSelector);
 
   if (!element) {
-    element = document.createElement("div");
+    element = document.createElement('div');
     element.dataset.hudMessage = id;
-    element.dataset.uiRole = "hud-message";
+    element.dataset.uiRole = 'hud-message';
     element.dataset.testid = `hud-message-${id}`;
     element.className = resolveToneClasses(tone);
-    element.setAttribute("role", tone === "warning" ? "alert" : "status");
-    element.setAttribute("aria-live", tone === "warning" ? "assertive" : "polite");
+    element.setAttribute('role', tone === 'warning' ? 'alert' : 'status');
+    element.setAttribute('aria-live', tone === 'warning' ? 'assertive' : 'polite');
     target.appendChild(element);
   }
 
   element.textContent = message;
   element.className = resolveToneClasses(tone);
-  element.setAttribute("role", tone === "warning" ? "alert" : "status");
-  element.setAttribute("aria-live", tone === "warning" ? "assertive" : "polite");
+  element.setAttribute('role', tone === 'warning' ? 'alert' : 'status');
+  element.setAttribute('aria-live', tone === 'warning' ? 'assertive' : 'polite');
 
-  target.dataset.uiState = "visible";
+  target.dataset.uiState = 'visible';
 }
 
 export function clearHudNotice(
@@ -64,7 +64,7 @@ export function clearHudNotice(
 
   element.remove();
 
-  if (!target.querySelector("[data-hud-message]")) {
-    target.dataset.uiState = "hidden";
+  if (!target.querySelector('[data-hud-message]')) {
+    target.dataset.uiState = 'hidden';
   }
 }

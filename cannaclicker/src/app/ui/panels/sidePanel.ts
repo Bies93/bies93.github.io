@@ -1,11 +1,11 @@
-import { achievements } from "../../../data/achievements";
-import type { AchievementId } from "../../../data/achievements";
-import type { ItemId } from "../../../data/items";
-import type { ResearchId } from "../../../data/research";
-import type { UpgradeId } from "../../../data/upgrades";
-import type { ResearchFilter } from "../../research";
-import { createAchievementCard } from "../components/achievementCard";
-import { createPrestigePanel } from "../components/prestigePanel";
+import { achievements } from '../../../data/achievements';
+import type { AchievementId } from '../../../data/achievements';
+import type { ItemId } from '../../../data/items';
+import type { ResearchId } from '../../../data/research';
+import type { UpgradeId } from '../../../data/upgrades';
+import type { ResearchFilter } from '../../research';
+import { createAchievementCard } from '../components/achievementCard';
+import { createPrestigePanel } from '../components/prestigePanel';
 import type {
   AchievementCardRefs,
   ResearchCardRefs,
@@ -13,84 +13,84 @@ import type {
   SidePanelRefs,
   SidePanelTab,
   UpgradeCardRefs,
-} from "../types";
+} from '../types';
 
-export function createSidePanel(
-  activeSidePanelTab: SidePanelTab,
-): SidePanelRefs {
-  const section = document.createElement("section");
-  section.className = "card fade-in space-y-5";
+export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs {
+  const section = document.createElement('section');
+  section.className = 'card fade-in space-y-5';
 
-  const tabList = document.createElement("div");
-  tabList.className = "tab-strip";
-  tabList.setAttribute("role", "tablist");
+  const tabList = document.createElement('div');
+  tabList.className = 'tab-strip';
+  tabList.setAttribute('role', 'tablist');
   section.appendChild(tabList);
 
   const tabs = new Map<SidePanelTab, HTMLButtonElement>();
-  (['shop', 'upgrades', 'research', 'prestige', 'achievements'] as SidePanelTab[]).forEach((tab) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.dataset.id = tab;
-    button.dataset.role = "side-panel-tab";
-    button.dataset.kind = "side-panel";
-    button.className = "tab-button";
-    button.setAttribute("aria-pressed", "false");
-    button.setAttribute("role", "tab");
-    tabList.appendChild(button);
-    tabs.set(tab, button);
-  });
+  (['shop', 'upgrades', 'research', 'prestige', 'achievements'] as SidePanelTab[]).forEach(
+    (tab) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.id = tab;
+      button.dataset.role = 'side-panel-tab';
+      button.dataset.kind = 'side-panel';
+      button.className = 'tab-button';
+      button.setAttribute('aria-pressed', 'false');
+      button.setAttribute('role', 'tab');
+      tabList.appendChild(button);
+      tabs.set(tab, button);
+    },
+  );
 
-  const viewsContainer = document.createElement("div");
-  viewsContainer.className = "space-y-5";
+  const viewsContainer = document.createElement('div');
+  viewsContainer.className = 'space-y-5';
   section.appendChild(viewsContainer);
 
-  const shopView = document.createElement("div");
-  shopView.className = "space-y-4";
-  const shopList = document.createElement("div");
-  shopList.className = "grid gap-3";
+  const shopView = document.createElement('div');
+  shopView.className = 'space-y-4';
+  const shopList = document.createElement('div');
+  shopList.className = 'grid gap-3';
   shopView.appendChild(shopList);
   viewsContainer.appendChild(shopView);
 
-  const upgradesView = document.createElement("div");
-  upgradesView.className = "space-y-4";
-  const upgradeList = document.createElement("div");
-  upgradeList.className = "grid gap-3";
+  const upgradesView = document.createElement('div');
+  upgradesView.className = 'space-y-4';
+  const upgradeList = document.createElement('div');
+  upgradeList.className = 'grid gap-3';
   upgradesView.appendChild(upgradeList);
   viewsContainer.appendChild(upgradesView);
 
-  const researchView = document.createElement("div");
-  researchView.className = "space-y-4";
-  const researchControls = document.createElement("div");
-  researchControls.className = "research-controls";
-  const filterWrap = document.createElement("div");
-  filterWrap.className = "research-filters";
+  const researchView = document.createElement('div');
+  researchView.className = 'space-y-4';
+  const researchControls = document.createElement('div');
+  researchControls.className = 'research-controls';
+  const filterWrap = document.createElement('div');
+  filterWrap.className = 'research-filters';
   const researchFilters = new Map<ResearchFilter, HTMLButtonElement>();
   (['all', 'available', 'owned'] as ResearchFilter[]).forEach((key) => {
-    const button = document.createElement("button");
-    button.type = "button";
+    const button = document.createElement('button');
+    button.type = 'button';
     button.dataset.id = key;
-    button.dataset.role = "research-filter";
-    button.dataset.kind = "research";
-    button.className = "filter-pill";
+    button.dataset.role = 'research-filter';
+    button.dataset.kind = 'research';
+    button.className = 'filter-pill';
     filterWrap.appendChild(button);
     researchFilters.set(key, button);
   });
   researchControls.appendChild(filterWrap);
   researchView.appendChild(researchControls);
-  const researchList = document.createElement("div");
-  researchList.className = "grid gap-3";
+  const researchList = document.createElement('div');
+  researchList.className = 'grid gap-3';
   researchView.appendChild(researchList);
-  const researchEmpty = document.createElement("p");
-  researchEmpty.className = "research-empty text-sm text-neutral-400";
+  const researchEmpty = document.createElement('p');
+  researchEmpty.className = 'research-empty text-sm text-neutral-400';
   viewsContainer.appendChild(researchView);
 
   const prestigePanel = createPrestigePanel();
   viewsContainer.appendChild(prestigePanel.container);
 
-  const achievementsView = document.createElement("div");
-  achievementsView.className = "space-y-4";
-  const achievementsList = document.createElement("div");
-  achievementsList.className = "grid gap-3";
+  const achievementsView = document.createElement('div');
+  achievementsView.className = 'space-y-4';
+  const achievementsList = document.createElement('div');
+  achievementsList.className = 'grid gap-3';
   achievementsView.appendChild(achievementsList);
   viewsContainer.appendChild(achievementsView);
 
@@ -111,10 +111,10 @@ export function createSidePanel(
 
   Object.entries(views).forEach(([tab, view]) => {
     if (tab === activeSidePanelTab) {
-      view.setAttribute("aria-hidden", "false");
+      view.setAttribute('aria-hidden', 'false');
     } else {
-      view.classList.add("hidden");
-      view.setAttribute("aria-hidden", "true");
+      view.classList.add('hidden');
+      view.setAttribute('aria-hidden', 'true');
     }
   });
 

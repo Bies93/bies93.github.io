@@ -1,9 +1,9 @@
-import type { AchievementId } from "../../../data/achievements";
-import type { ItemId } from "../../../data/items";
-import type { ResearchId } from "../../../data/research";
-import type { UpgradeId } from "../../../data/upgrades";
-import type { ResearchFilter } from "../../research";
-import type { PrestigePanelRefs } from "./prestige";
+import type { AchievementId } from '../../../data/achievements';
+import type { ItemId } from '../../../data/items';
+import type { ResearchId } from '../../../data/research';
+import type { UpgradeId } from '../../../data/upgrades';
+import type { ResearchFilter } from '../../research';
+import type { PrestigePanelRefs } from './prestige';
 
 export interface ResearchCardRefs {
   id: ResearchId;
@@ -34,17 +34,28 @@ export interface ShopCardRefs {
   icon: HTMLImageElement;
   name: HTMLElement;
   description: HTMLElement;
+  role: HTMLElement;
   roiBadge: HTMLElement;
   roiValue: HTMLElement;
   stageLabel: HTMLElement;
   stageProgressBar: HTMLElement;
   stageProgressText: HTMLElement;
   softcapBadge: HTMLElement;
+  unlockHint: HTMLElement;
   costLabel: HTMLElement;
   cost: HTMLElement;
   ownedLabel: HTMLElement;
   owned: HTMLElement;
+  currentProductionLabel: HTMLElement;
+  currentProduction: HTMLElement;
+  nextProductionLabel: HTMLElement;
+  nextProduction: HTMLElement;
+  shareLabel: HTMLElement;
+  share: HTMLElement;
+  delta: HTMLElement;
   buyButton: HTMLButtonElement;
+  buyTenButton: HTMLButtonElement;
+  buyTwentyFiveButton: HTMLButtonElement;
   maxButton: HTMLButtonElement;
 }
 
@@ -89,4 +100,4 @@ export interface SidePanelRefs {
   };
 }
 
-export type SidePanelTab = "shop" | "upgrades" | "research" | "prestige" | "achievements";
+export type SidePanelTab = 'shop' | 'upgrades' | 'research' | 'prestige' | 'achievements';

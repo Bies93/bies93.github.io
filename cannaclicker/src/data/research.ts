@@ -1,4 +1,4 @@
-import { asset } from '../app/assets';
+import { researchIcons } from '../app/assetManifest';
 import type { ItemId } from './items';
 
 export type ResearchCostType = 'buds' | 'seeds';
@@ -70,9 +70,9 @@ const EFFICIENCY_RESEARCH = [
       en: 'Permanently boosts global production by 20%. Reliable AFK backbone.',
     },
     costType: 'buds',
-    cost: 1_500,
+    cost: 12_000,
     effects: [{ id: 'BPS_MULT', v: 1.2 }],
-    icon: asset('icons/research/research-growth.png'),
+    icon: researchIcons.growth,
   },
   {
     id: 'r_eff_flow',
@@ -87,10 +87,10 @@ const EFFICIENCY_RESEARCH = [
       en: 'Production lines +12%. Stacks multiplicatively.',
     },
     costType: 'buds',
-    cost: 12_000,
+    cost: 45_000,
     requires: ['r_eff_foundation'],
     effects: [{ id: 'BPS_MULT', v: 1.12 }],
-    icon: asset('icons/research/research-click.png'),
+    icon: researchIcons.growth,
   },
   {
     id: 'r_eff_synergy',
@@ -115,7 +115,7 @@ const EFFICIENCY_RESEARCH = [
         labelKey: 'research.effect.hydroIrrigation',
       },
     ],
-    icon: asset('icons/research/research-costcut.png'),
+    icon: researchIcons.costcut,
   },
   {
     id: 'r_eff_recirc',
@@ -133,7 +133,7 @@ const EFFICIENCY_RESEARCH = [
     cost: 420_000,
     requires: ['r_eff_synergy'],
     effects: [{ id: 'BPS_MULT', v: 1.18 }],
-    icon: asset('icons/research/research-click.png'),
+    icon: researchIcons.growth,
   },
   {
     id: 'r_eff_genetics',
@@ -151,7 +151,7 @@ const EFFICIENCY_RESEARCH = [
     cost: 8,
     requires: ['r_eff_recirc'],
     effects: [{ id: 'BPS_MULT', v: 1.35 }],
-    icon: asset('icons/research/research-overdrive-plus.png'),
+    icon: researchIcons.overdrive,
   },
   {
     id: 'r_eff_seed_focus',
@@ -169,7 +169,7 @@ const EFFICIENCY_RESEARCH = [
     cost: 3,
     requires: ['r_eff_genetics'],
     effects: [{ id: 'SEED_CLICK_BONUS', v: 0.02 }],
-    icon: asset('icons/research/research-click.png'),
+    icon: researchIcons.seeds,
   },
 ] as const satisfies readonly ResearchNodeSpec[];
 
@@ -189,7 +189,7 @@ const CONTROL_RESEARCH = [
     costType: 'buds',
     cost: 9_000,
     effects: [{ id: 'COST_REDUCE_ALL', v: 0.95 }],
-    icon: asset('icons/research/research-costcut.png'),
+    icon: researchIcons.costcut,
   },
   {
     id: 'r_ctrl_routines',
@@ -207,7 +207,7 @@ const CONTROL_RESEARCH = [
     cost: 70_000,
     requires: ['r_ctrl_tuning'],
     effects: [{ id: 'CLICK_AUTOMATION', v: 2 }],
-    icon: asset('icons/research/research-click.png'),
+    icon: researchIcons.automation,
   },
   {
     id: 'r_ctrl_time1',
@@ -225,7 +225,7 @@ const CONTROL_RESEARCH = [
     cost: 180_000,
     requires: ['r_ctrl_routines'],
     effects: [{ id: 'OFFLINE_CAP_HOURS_ADD', v: 4 }],
-    icon: asset('icons/research/research-growth.png'),
+    icon: researchIcons.offline,
   },
   {
     id: 'r_ctrl_time2',
@@ -243,7 +243,7 @@ const CONTROL_RESEARCH = [
     cost: 3,
     requires: ['r_ctrl_time1'],
     effects: [{ id: 'OFFLINE_CAP_HOURS_ADD', v: 8 }],
-    icon: asset('icons/research/research-growth.png'),
+    icon: researchIcons.offline,
   },
   {
     id: 'r_ctrl_energy',
@@ -261,7 +261,7 @@ const CONTROL_RESEARCH = [
     cost: 4,
     requires: ['r_ctrl_time1'],
     effects: [{ id: 'ABILITY_DURATION_MULT', v: 1.25 }],
-    icon: asset('icons/research/research-overdrive-plus.png'),
+    icon: researchIcons.overdrive,
   },
   {
     id: 'r_ctrl_seed_drive',
@@ -279,7 +279,7 @@ const CONTROL_RESEARCH = [
     cost: 4,
     requires: ['r_ctrl_energy'],
     effects: [{ id: 'SEED_CLICK_BONUS', v: 0.03 }],
-    icon: asset('icons/research/research-click.png'),
+    icon: researchIcons.seeds,
   },
   {
     id: 'r_ctrl_lab_auto1',
@@ -302,7 +302,7 @@ const CONTROL_RESEARCH = [
         seedPassive: { intervalMinutes: 5, chance: 0.25, seeds: 1 },
       },
     ],
-    icon: asset('icons/research/research-growth.png'),
+    icon: researchIcons.seeds,
   },
   {
     id: 'r_ctrl_lab_auto2',
@@ -325,7 +325,7 @@ const CONTROL_RESEARCH = [
         seedPassive: { intervalMinutes: 4, chance: 0.45, seeds: 1 },
       },
     ],
-    icon: asset('icons/research/research-overdrive-plus.png'),
+    icon: researchIcons.seeds,
   },
 ] as const satisfies readonly ResearchNodeSpec[];
 
@@ -349,7 +349,7 @@ const STRAIN_RESEARCH = [
       { type: 'prestige_seeds', value: 1 },
     ],
     effects: [],
-    icon: asset('icons/research/research-click.png'),
+    icon: researchIcons.strain,
   },
   {
     id: 'r_strain_indica',
@@ -374,7 +374,7 @@ const STRAIN_RESEARCH = [
       { id: 'BPC_MULT', v: 0.85 },
       { id: 'STRAIN_CHOICE', strain: 'indica', labelKey: 'research.effect.strain.indica' },
     ],
-    icon: asset('icons/research/research-growth.png'),
+    icon: researchIcons.strain,
   },
   {
     id: 'r_strain_sativa',
@@ -399,7 +399,7 @@ const STRAIN_RESEARCH = [
       { id: 'BPS_MULT', v: 0.9 },
       { id: 'STRAIN_CHOICE', strain: 'sativa', labelKey: 'research.effect.strain.sativa' },
     ],
-    icon: asset('icons/research/research-click.png'),
+    icon: researchIcons.strain,
   },
   {
     id: 'r_strain_hybrid',
@@ -425,7 +425,7 @@ const STRAIN_RESEARCH = [
       { id: 'HYBRID_BUFF_PER_ACTIVE', v: 0.01, labelKey: 'research.effect.hybridBuff' },
       { id: 'STRAIN_CHOICE', strain: 'hybrid', labelKey: 'research.effect.strain.hybrid' },
     ],
-    icon: asset('icons/research/research-overdrive-plus.png'),
+    icon: researchIcons.strain,
   },
 ] as const satisfies readonly ResearchNodeSpec[];
 

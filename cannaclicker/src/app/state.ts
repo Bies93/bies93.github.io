@@ -84,6 +84,7 @@ export interface TempState {
   researchBuildingMultipliers: Partial<Record<ItemId, Decimal>>;
   eventBpsMult: Decimal;
   eventBpcMult: Decimal;
+  eventRewardMult: number;
   eventBoostEndsAt: number;
   activeEventBoost: string | null;
   hybridBuffPerBuff: number;
@@ -238,6 +239,7 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       researchBuildingMultipliers: {},
       eventBpsMult: new Decimal(1),
       eventBpcMult: new Decimal(1),
+      eventRewardMult: 1,
       eventBoostEndsAt: 0,
       activeEventBoost: null,
       hybridBuffPerBuff: 0,

@@ -1,16 +1,12 @@
-import { t } from "../../../i18n";
-import type { GameState } from "../../../state";
-import {
-  getResearchList,
-  type ResearchFilter,
-  type ResearchViewModel,
-} from "../../../research";
-import type { ResearchId } from "../../../../data/research";
-import type { UIRefs } from "../../types";
-import type { ResearchCardRefs } from "../../types";
-import { renderResearchCard } from "./renderCard";
-import { createResearchCard } from "./makeCard";
-import { wireResearchCard } from "./wireCard";
+import { t } from '../../../i18n';
+import type { GameState } from '../../../state';
+import { getResearchList, type ResearchFilter, type ResearchViewModel } from '../../../research';
+import type { ResearchId } from '../../../../data/research';
+import type { UIRefs } from '../../types';
+import type { ResearchCardRefs } from '../../types';
+import { renderResearchCard } from './renderCard';
+import { createResearchCard } from './makeCard';
+import { wireResearchCard } from './wireCard';
 
 export function renderResearchList(
   state: GameState,
@@ -23,7 +19,7 @@ export function renderResearchList(
   const list = researchRefs.list;
   const data = entries ?? getResearchList(state, activeFilter);
 
-  researchRefs.emptyState.textContent = t(state.locale, "research.empty");
+  researchRefs.emptyState.textContent = t(state.locale, 'research.empty');
 
   if (data.length === 0) {
     ensureEmptyState(list, researchRefs.emptyState);

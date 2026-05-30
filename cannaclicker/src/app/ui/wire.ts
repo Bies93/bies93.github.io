@@ -1,11 +1,11 @@
-import type { AudioManager } from "../audio";
-import type { GameState } from "../state";
-import type { ResearchFilter } from "../research";
-import type { InitI18nApi } from "./bootstrap";
-import type { SidePanelTab, UIRefs } from "./types";
-import { wireCoreClicks } from "./wireCoreClicks";
-import { wirePersistence } from "./wirePersistence";
-import { wireSidePanel } from "./wireSidePanel";
+import type { AudioManager } from '../audio';
+import type { GameState } from '../state';
+import type { ResearchFilter } from '../research';
+import type { InitI18nApi } from './bootstrap';
+import type { SidePanelTab, UIRefs } from './types';
+import { wireCoreClicks } from './wireCoreClicks';
+import { wirePersistence } from './wirePersistence';
+import { wireSidePanel } from './wireSidePanel';
 
 export interface WireContext {
   refs: UIRefs;

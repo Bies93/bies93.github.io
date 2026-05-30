@@ -1,8 +1,13 @@
-import Decimal from "break_infinity.js";
-import { OFFLINE_CAP_MS } from "../app/balance";
-import type { GameState, SeedPassiveConfig } from "../app/state";
-import { researchById, type ResearchEffect, type StrainId, type ResearchId } from "../data/research";
-import type { ItemId } from "../data/items";
+import Decimal from 'break_infinity.js';
+import { OFFLINE_CAP_MS } from '../app/balance';
+import type { GameState, SeedPassiveConfig } from '../app/state';
+import {
+  researchById,
+  type ResearchEffect,
+  type StrainId,
+  type ResearchId,
+} from '../data/research';
+import type { ItemId } from '../data/items';
 
 export function applyEffects(state: GameState, owned: ResearchId[]): void {
   let bpsMult = new Decimal(1);
@@ -66,7 +71,8 @@ export function applyEffects(state: GameState, owned: ResearchId[]): void {
           seedClickBonus += value;
         },
         setSeedPassive: (config) => {
-          const expected = (config.chance * config.seeds * 3_600_000) / Math.max(1, config.intervalMs);
+          const expected =
+            (config.chance * config.seeds * 3_600_000) / Math.max(1, config.intervalMs);
           if (!passiveConfig || expected > passiveScore) {
             passiveConfig = config;
             passiveScore = expected;
@@ -141,72 +147,72 @@ interface EffectContext {
 function applyEffect(effect: ResearchEffect, ctx: EffectContext): void {
   const value = effect.v ?? 0;
   switch (effect.id) {
-    case "BPC_MULT": {
+    case 'BPC_MULT': {
       const factor = Number.isFinite(value) && value > 0 ? value : 1;
       ctx.setBpc(ctx.bpcMultRef().mul(factor));
       break;
     }
-    case "BPS_MULT": {
+    case 'BPS_MULT': {
       const factor = Number.isFinite(value) && value > 0 ? value : 1;
       ctx.setBps(ctx.bpsMultRef().mul(factor));
       break;
     }
-    case "COST_REDUCE_ALL": {
+    case 'COST_REDUCE_ALL': {
       const factor = Number.isFinite(value) && value > 0 ? value : 1;
       ctx.setCost(ctx.getCost().mul(factor));
       break;
     }
-    case "CLICK_AUTOMATION": {
+    case 'CLICK_AUTOMATION': {
       const amount = Number.isFinite(value) ? value : 0;
       ctx.addAutoClicks(amount);
       break;
     }
-    case "ABILITY_OVERDRIVE_PLUS": {
+    case 'ABILITY_OVERDRIVE_PLUS': {
       const bonus = Number.isFinite(value) ? value : 0;
       ctx.addAbilityBonus(bonus);
       break;
     }
-    case "BUILDING_MULT": {
+    case 'BUILDING_MULT': {
       if (!effect.targets || !Number.isFinite(value) || value <= 0) {
         break;
       }
       const factor = value;
       for (const target of effect.targets) {
-        if (typeof target === "string" && target.length > 0) {
+        if (typeof target === 'string' && target.length > 0) {
           ctx.multiplyBuilding(target, factor);
         }
       }
       break;
     }
-    case "OFFLINE_CAP_HOURS_ADD": {
+    case 'OFFLINE_CAP_HOURS_ADD': {
       if (Number.isFinite(value) && value > 0) {
         ctx.addOfflineHours(value);
       }
       break;
     }
-    case "ABILITY_DURATION_MULT": {
+    case 'ABILITY_DURATION_MULT': {
       const factor = Number.isFinite(value) && value > 0 ? value : 1;
       ctx.multiplyAbilityDuration(factor);
       break;
     }
-    case "HYBRID_BUFF_PER_ACTIVE": {
+    case 'HYBRID_BUFF_PER_ACTIVE': {
       if (Number.isFinite(value) && value > 0) {
         ctx.addHybridPerBuff(value);
       }
       break;
     }
-    case "STRAIN_CHOICE": {
+    case 'STRAIN_CHOICE': {
       ctx.setStrain(effect.strain ?? null);
       break;
     }
-    case "SEED_CLICK_BONUS": {
+    case 'SEED_CLICK_BONUS': {
       const bonus = Number.isFinite(value) ? value : 0;
       if (bonus > 0) {
         ctx.addSeedClickBonus(bonus);
       }
       break;
     }
-    case "SEED_PASSIVE": {
+    case 'SEED_PASSIVE': {
       if (effect.seedPassive) {
         const minutes = Number.isFinite(effect.seedPassive.intervalMinutes)
           ? Math.max(0.1, effect.seedPassive.intervalMinutes)
