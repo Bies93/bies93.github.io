@@ -291,9 +291,13 @@ function countActiveBuffs(state: GameState): number {
     }
   }
 
-  if (state.temp.activeEventBoost) {
-    count += 1;
-  }
+  const now = Date.now();
+  const eventBoosts = Array.isArray(state.temp.eventBoosts)
+    ? state.temp.eventBoosts.filter((boost) => boost.endsAt > now).length
+    : state.temp.activeEventBoost
+      ? 1
+      : 0;
+  count += eventBoosts;
 
   return count;
 }

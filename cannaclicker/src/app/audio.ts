@@ -28,14 +28,16 @@ export interface AudioManager {
   playSettings(): void;
   toggleMute(): boolean;
   setMuted(muted: boolean): void;
+  setVolume(volume: number): void;
   isMuted(): boolean;
 }
 
 const MASTER_GAIN = 0.16;
 const CLICK_RATE_LIMIT_MS = 34;
 
-export function createAudioManager(initialMuted: boolean): AudioManager {
+export function createAudioManager(initialMuted: boolean, initialVolume = 0.8): AudioManager {
   let muted = initialMuted;
+  let sfxVolume = Math.max(0, Math.min(1, initialVolume));
   let context: AudioContext | null = null;
   let lastClickAt = 0;
 
@@ -69,7 +71,7 @@ export function createAudioManager(initialMuted: boolean): AudioManager {
       const at = start + (tone.at ?? 0);
       const duration = Math.max(0.02, tone.duration);
       const endAt = at + duration;
-      const volume = Math.max(0, Math.min(1, tone.volume)) * MASTER_GAIN;
+      const volume = Math.max(0, Math.min(1, tone.volume)) * MASTER_GAIN * sfxVolume;
 
       oscillator.type = tone.type ?? 'sine';
       oscillator.frequency.setValueAtTime(tone.frequency, at);
@@ -216,6 +218,9 @@ export function createAudioManager(initialMuted: boolean): AudioManager {
     setMuted(next) {
       muted = next;
       persistAudioPreference(muted);
+    },
+    setVolume(next) {
+      sfxVolume = Math.max(0, Math.min(1, next));
     },
     isMuted() {
       return muted;

@@ -1,5 +1,12 @@
 import { createDefaultAutomation, createDefaultPreferences, SAVE_VERSION } from '../state';
-import { createDefaultSettings, type SettingsState } from '../settings';
+import {
+  createDefaultSettings,
+  isMotionIntensity,
+  isPlantSkin,
+  isUiTheme,
+  normaliseVolume,
+  type SettingsState,
+} from '../settings';
 import { milestones } from '../../data/milestones';
 import type { MilestoneId } from '../../data/milestones';
 import { RESEARCH, type ResearchId } from '../../data/research';
@@ -179,9 +186,18 @@ export function normaliseSettings(settings?: Partial<SettingsState>): SettingsSt
         ? settings.showOfflineEarnings
         : defaults.showOfflineEarnings,
     motionIntensity:
-      settings.motionIntensity === 'reduced' || settings.motionIntensity === 'minimal'
+      typeof settings.motionIntensity === 'string' && isMotionIntensity(settings.motionIntensity)
         ? settings.motionIntensity
         : defaults.motionIntensity,
+    uiTheme:
+      typeof settings.uiTheme === 'string' && isUiTheme(settings.uiTheme)
+        ? settings.uiTheme
+        : defaults.uiTheme,
+    plantSkin:
+      typeof settings.plantSkin === 'string' && isPlantSkin(settings.plantSkin)
+        ? settings.plantSkin
+        : defaults.plantSkin,
+    sfxVolume: normaliseVolume(settings.sfxVolume, defaults.sfxVolume),
   } satisfies SettingsState;
 }
 

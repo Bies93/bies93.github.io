@@ -105,6 +105,16 @@ const budThresholds: ThresholdSpec[] = [
   },
   {
     value: 1_000_000,
+    name: { de: 'Millionenmarke', en: 'Million Mark' },
+    flavor: {
+      de: 'Der erste große Run nimmt Form an.',
+      en: 'The first big run takes shape.',
+    },
+    rarity: 'rare',
+    rewardMultiplier: 1.005,
+  },
+  {
+    value: 3_000_000,
     name: { de: 'Prestige-Schwelle', en: 'Prestige Threshold' },
     flavor: {
       de: 'Der erste echte Neustart ruft leise.',
@@ -351,7 +361,7 @@ const manualAchievements: AchievementDefinition[] = [
     { de: 'Buds im Vorrat', en: 'buds held' },
     'currentBuds',
     uiIcons.total,
-    [250, 2_500, 25_000, 250_000],
+    [2_500, 25_000, 250_000],
     220,
   ),
   ...createSimpleThresholdAchievements(

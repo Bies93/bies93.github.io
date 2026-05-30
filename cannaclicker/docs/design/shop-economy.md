@@ -4,7 +4,7 @@ Stand: Sprint 4.
 
 ## Designziel
 
-Der Shop ist das Kernsystem von CannaClicker. Items sind nicht nur groessere Zahlen, sondern Rollen in einer Progressionsleiter. Milestones halten alte Items relevant; Upgrades und Synergien erzeugen Build-Identitaet.
+Der Shop ist das Kernsystem von CannaClicker. Items sind nicht nur größere Zahlen, sondern Rollen in einer Progressionsleiter. Milestones halten alte Items relevant; Upgrades und Synergien erzeugen Build-Identität.
 
 ## Item-Tabelle
 
@@ -28,13 +28,13 @@ Der Shop ist das Kernsystem von CannaClicker. Items sind nicht nur groessere Zah
 Alle Items nutzen die Schwellen:
 `10, 25, 50, 100, 150, 200, 300, 500`.
 
-Milestones wirken direkt ueber Item-Produktion und werden in der Shop-Karte als Fortschritt zur naechsten Schwelle angezeigt. Die Karte zeigt aktuelle Produktion, Produktion nach Kauf, Anteil an Gesamt-BPS und ROI.
+Milestones wirken direkt über Item-Produktion und werden in der Shop-Karte als Fortschritt zur nächsten Schwelle angezeigt. Die Karte zeigt aktuelle Produktion, Produktion nach Kauf, Anteil an Gesamt-BPS und ROI.
 
 ## Upgrade-Tabelle
 
 | id                           | displayName       | category   |                cost | requirement                             | effect                            | intended timing            |
 | ---------------------------- | ----------------- | ---------- | ------------------: | --------------------------------------- | --------------------------------- | -------------------------- |
-| precision_trim               | Precision Trim    | Click      |                 170 | 125 total buds                          | BPC x2                            | Minute 5-8                 |
+| precision_trim               | Precision Trim    | Click      |                 420 | 260 total buds                          | BPC x2                            | Minute 5-8                 |
 | starter_auto                 | Auto Nudge        | Automation |                 420 | 260 total buds                          | +0.35 auto-click/s                | Minute 8-12                |
 | rich_soil                    | Rich Soil         | Global     |                 820 | 620 total buds                          | Global x1.25                      | Minute 10-15               |
 | tap_training                 | Tap Training      | Click      |               1,900 | 1,500 total buds + Precision Trim       | BPC x1.75                         | Minute 15-25               |
@@ -65,6 +65,6 @@ Jede Karte zeigt:
 
 ## Balance-Risiken
 
-- Die Item-Boost-Upgrades duerfen nicht alle gleichzeitig erschwinglich wirken.
+- Die Item-Boost-Upgrades dürfen nicht alle gleichzeitig erschwinglich wirken.
 - x25 kann im Early Game lange deaktiviert sein; das ist beabsichtigt.
-- Synergie-Upgrades muessen im 60-Minuten-Playthrough beobachtet werden, damit keine Einzelstrategie dominiert.
+- Synergie-Upgrades müssen im 60-Minuten-Playthrough beobachtet werden, damit keine Einzelstrategie dominiert.

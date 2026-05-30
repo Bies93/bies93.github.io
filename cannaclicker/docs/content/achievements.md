@@ -4,7 +4,7 @@ Stand: Sprint 8.
 
 ## Ziel
 
-Achievements und Goals geben dem Spieler immer ein nahes Ziel, markieren groessere Fortschritte und belohnen mehrere Spielstile. Sie sind datengetrieben in `src/data/achievements.ts` und `src/data/goals.ts` definiert.
+Achievements und Goals geben dem Spieler immer ein nahes Ziel, markieren größere Fortschritte und belohnen mehrere Spielstile. Sie sind datengetrieben in `src/data/achievements.ts` und `src/data/goals.ts` definiert.
 
 ## Achievement-Set
 
@@ -12,9 +12,9 @@ Release-MVP: 120 Achievements.
 
 | Kategorie | Anzahl | Rolle                                                             |
 | --------- | -----: | ----------------------------------------------------------------- |
-| Harvest   |     10 | Lifetime-Buds und grosse Progressionsmarker.                      |
+| Harvest   |     10 | Lifetime-Buds und große Progressionsmarker.                      |
 | Economy   |      9 | Current Buds und BPS-Ziele.                                       |
-| Clicking  |     10 | BPC und manuelle Klicks, besonders fuer Early Game.               |
+| Clicking  |     10 | BPC und manuelle Klicks, besonders für Early Game.               |
 | Items     |     42 | Gesamtbesitz, alle 12 Items bei 10/50/150 und kompletter Katalog. |
 | Upgrades  |      4 | Upgrade-Anzahl als Build-Fortschritt.                             |
 | Research  |      4 | Research-Pfade sichtbar machen.                                   |
@@ -29,15 +29,15 @@ Release-MVP: 120 Achievements.
 
 - Normale Achievements sind primaer sichtbare Progression.
 - Major Achievements geben sehr kleine globale Multiplikatoren zwischen `x1.002` und `x1.015`.
-- Item-, Event- und Hidden-Achievements koennen kleine Multiplikatoren geben, dominieren aber nicht die Economy.
-- Hidden Achievements sind Flavor- und Prestige-Momente, keine Pflicht fuer Early-Progress.
+- Item-, Event- und Hidden-Achievements können kleine Multiplikatoren geben, dominieren aber nicht die Economy.
+- Hidden Achievements sind Flavor- und Prestige-Momente, keine Pflicht für Early-Progress.
 
 ## UI-Regeln
 
 Achievement-UI bietet:
 
 - Filter: All, Unlocked, Near Completion, Hidden.
-- Progress Bars fuer alle nicht erledigten sichtbaren Achievements.
+- Progress Bars für alle nicht erledigten sichtbaren Achievements.
 - Kategorie, Flavor-Text und Rarity-Zustand pro Karte.
 - Locked Hidden Achievements bleiben im normalen All-Feed verdeckt.
 - Near Completion zeigt Achievements ab ca. 70 Prozent Fortschritt.
@@ -45,7 +45,7 @@ Achievement-UI bietet:
 
 ## Goals
 
-Das Goal-System fuehrt durch den fruehen und mittleren Fortschritt. Goals sind claimbar, geben kleine Bud-/Seed-Rewards oder reine Hinweise und sind bewusst nicht als Questlog mit vielen parallelen Aufgaben gebaut.
+Das Goal-System fuehrt durch den frühen und mittleren Fortschritt. Goals sind claimbar, geben kleine Bud-/Seed-Rewards oder reine Hinweise und sind bewusst nicht als Questlog mit vielen parallelen Aufgaben gebaut.
 
 | Order | Goal                    | Requirement         | Reward        |
 | ----: | ----------------------- | ------------------- | ------------- |
@@ -58,13 +58,13 @@ Das Goal-System fuehrt durch den fruehen und mittleren Fortschritt. Goals sind c
 |    70 | Finde Seeds             | 1 Seed verdient     | +1 Seed       |
 |    80 | Erforsche eine Richtung | 1 Research-Knoten   | +1,500 Buds   |
 |    90 | Hydro freilegen         | 2 Mio Lifetime-Buds | +25,000 Buds  |
-|   100 | Prestige vorbereiten    | 1 Mio Lifetime-Buds | Hinweis       |
+|   100 | Prestige vorbereiten    | 3 Mio Lifetime-Buds | Hinweis       |
 |   110 | Zweiter Lauf            | 1 Prestige          | +2 Seeds      |
 |   120 | Build formen            | 12 Research-Knoten  | +100,000 Buds |
 
 ## Progression-Momente
 
-Diese Momente sollen kurz, sichtbar und nicht ueberladen sein:
+Diese Momente sollen kurz, sichtbar und nicht überladen sein:
 
 - Erstes Item: Goal-Claim plus Shop-Karten-Feedback.
 - Erstes Upgrade: Upgrade-Karte und Achievement-Toast.
@@ -80,4 +80,4 @@ Diese Momente sollen kurz, sichtbar und nicht ueberladen sein:
 - Keine realweltlichen Anleitungen oder Produktionsdetails.
 - Keine Textwaende im Hauptscreen.
 - Keine Platzhaltertexte wie TODO, Test oder Lorem ipsum.
-- Neue Achievements muessen eine Kategorie, Requirement, Flavor und eindeutige ID haben.
+- Neue Achievements müssen eine Kategorie, Requirement, Flavor und eindeutige ID haben.

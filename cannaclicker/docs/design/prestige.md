@@ -17,9 +17,9 @@ Prestige ist ein bewusster Soft-Reset:
 
 | Wert           | Definition                                                              |
 | -------------- | ----------------------------------------------------------------------- |
-| Mindestwert    | `1,000,000` Lifetime-Buds im aktuellen Run                              |
-| Seed-Gain      | `floor(sqrt(lifetimeRunBuds / 1,000,000))`, mindestens 1 ab Mindestwert |
-| Naechster Seed | `(aktuellerGain + 1)^2 * 1,000,000` Lifetime-Buds                       |
+| Mindestwert    | `3,000,000` Lifetime-Buds im aktuellen Run                              |
+| Seed-Gain      | `floor(sqrt(lifetimeRunBuds / 3,000,000))`, mindestens 1 ab Mindestwert |
+| Naechster Seed | `(aktuellerGain + 1)^2 * 3,000,000` Lifetime-Buds                       |
 | Multiplikator  | `1 + totalSeedsEarned * 0.05`                                           |
 
 Zielzeit:
@@ -37,9 +37,9 @@ Der Prestige-Screen zeigt:
 - aktuellen Run-Fortschritt gegen Mindestwert,
 - moeglichen Seed-Gain,
 - Seeds vor/nach Prestige,
-- naechste Seed-Schwelle,
+- nächste Seed-Schwelle,
 - Multiplikator nach Prestige,
 - permanente Milestone-/Kickstart-Boni,
 - klare Checkbox vor Ausloesung.
 
-Sehr fruehes Prestige bleibt blockiert, bis mindestens ein Seed gewonnen wird.
+Sehr frühes Prestige bleibt blockiert, bis mindestens ein Seed gewonnen wird.

@@ -1,6 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Overgrowth">
-  <circle cx="64" cy="64" r="56" fill="#08111f"/>
-  <path fill="#14532d" d="M20 103c19-45 52-68 99-70-18 45-52 68-99 70Z"/>
-  <path fill="#22c55e" d="M12 74c31-25 64-31 100-17-30 27-64 32-100 17Z"/>
-  <path fill="#bbf7d0" d="M52 22c23 22 32 48 26 80-24-22-33-49-26-80Z"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="CannaClicker event overgrowth">
+  <defs>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".28"/>
+    </filter>
+    <linearGradient id="leafGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#caff58"/>
+      <stop offset=".48" stop-color="#19c96f"/>
+      <stop offset="1" stop-color="#0c7f46"/>
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff0a8"/>
+      <stop offset=".55" stop-color="#ffd15a"/>
+      <stop offset="1" stop-color="#ff9f43"/>
+    </linearGradient>
+    <linearGradient id="glassGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#e8fff8" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#76ffd0" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#71c7ff" stop-opacity=".48"/>
+    </linearGradient>
+  </defs>
+  <g filter="url(#softShadow)">
+      <path d="M64 8 108 32v48l-44 40-44-40V32Z" fill="#10251a" stroke="#ffd15a" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M64 15 100 35v40l-36 33-36-33V35Z" fill="#0b1c13" opacity=".94"/>
+      <path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(42 77) rotate(-60) scale(0.9)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="1.4444444444444444" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(55 64) rotate(-30) scale(0.82)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="1.5853658536585367" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(73 61) rotate(30) scale(0.82)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="1.5853658536585367" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(88 77) rotate(60) scale(0.9)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="1.4444444444444444" opacity=".96"/><path d="M64 93V35" stroke="#19c96f" stroke-width="8" stroke-linecap="round"/><path d="M39 91c17 10 33 10 50 0" stroke="#caff58" stroke-width="5" stroke-linecap="round"/>
+      <path d="M35 96c16 11 42 11 58 0" fill="none" stroke="#ffd15a" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+    </g>
 </svg>

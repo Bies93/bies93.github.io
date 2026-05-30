@@ -6,8 +6,8 @@ Stand: Sprint 12.
 
 - [x] Node.js `>=20` in `package.json`.
 - [x] GitHub-Pages-kompatibler relativer Vite-Base-Path `./`.
-- [x] Production-Sourcemaps fuer RC deaktiviert.
-- [x] Cache-Busting ueber Vite-Dateihashes.
+- [x] Production-Sourcemaps für RC deaktiviert.
+- [x] Cache-Busting über Vite-Dateihashes.
 - [x] Titel und Meta Description gesetzt.
 - [x] Version sichtbar in Settings.
 
@@ -33,7 +33,11 @@ Stand: Sprint 12.
 - [x] 320px, 390px, 768px und 1440px Smoke-Ziele definiert.
 - [x] Keine sichtbaren Devtools bei `flags.devtools = false`.
 - [x] Motion-Intensity-Setting vorhanden.
+- [x] UI-Theme-Setting vorhanden.
+- [x] Plant-Skin-Setting vorhanden.
 - [x] Sound-Toggle vorhanden.
+- [x] SFX-Lautstaerke vorhanden.
+- [x] Release Notes und Credits im Settings-Panel vorhanden.
 - [x] Offline-Gain-Hinweis optional abschaltbar.
 
 ## Abnahme
@@ -41,7 +45,9 @@ Stand: Sprint 12.
 - [x] Finaler Build nach letztem Commit.
 - [x] Browser-Smoke: Chromium Desktop.
 - [x] Browser-Smoke: Mobile Viewports `320px`, `390px`, `768px`, `1440px`.
+- [x] Browser-Smoke: Firefox via Playwright.
+- [x] Browser-Smoke: WebKit via Playwright als Safari-nahe Engine.
 - [x] Production-Preview-Smoke am Artefakt-Root `http://127.0.0.1:4173/`.
-- [ ] Firefox lokal: Playwright-Firefox nicht installiert; System-Firefox als Snap war nicht stabil steuerbar.
+- [ ] iOS Safari auf echtem Gerät: in Ubuntu nicht direkt testbar.
 - [x] GitHub Pages Deployment-Pfad geprueft: Workflow deployt `cannaclicker/dist` als Pages-Artefakt-Root.
 - [x] Release-Smoke mit leerem LocalStorage durchgefuehrt.

@@ -3,8 +3,9 @@ import { formatDecimal } from '../../math';
 import type { GameState } from '../../state';
 import { computePrestigeMultiplier, getPrestigePreview } from '../../prestige';
 import { getAbilityLabel, listAbilities } from '../../abilities';
-import { getEventBoostRemaining } from '../../events';
+import { getActiveEventBoosts } from '../../events';
 import { getGoalView } from '../../goals';
+import { getStrategySnapshot } from '../../strategy';
 import { canUnlockItem } from '../../shop';
 import type { UIRefs } from '../types';
 import { formatInteger } from '../utils/format';
@@ -71,8 +72,22 @@ export function updateStats(state: GameState, refs: UIRefs): void {
   refs.nextUnlockHint.textContent = getNextUnlockHint(state);
   updateBuffList(state, refs);
   updateGoalPanel(state, refs);
+  updateStrategyPanel(state, refs);
 
   updatePlantStage(state, refs);
+}
+
+function updateStrategyPanel(state: GameState, refs: UIRefs): void {
+  const snapshot = getStrategySnapshot(state);
+  refs.strategyPanel.dataset.tone = snapshot.tone;
+  refs.strategyKicker.textContent = t(state.locale, 'strategy.kicker');
+  refs.strategyTitle.textContent = t(state.locale, snapshot.titleKey);
+  refs.strategyBody.textContent = t(state.locale, snapshot.bodyKey);
+  refs.strategyDetail.textContent = t(
+    state.locale,
+    snapshot.detailKey,
+    snapshot.detailParams ?? {},
+  );
 }
 
 function updateGoalPanel(state: GameState, refs: UIRefs): void {
@@ -128,11 +143,11 @@ function updateBuffList(state: GameState, refs: UIRefs): void {
     });
   }
 
-  if (state.temp.activeEventBoost && state.temp.eventBoostEndsAt > now) {
+  for (const boost of getActiveEventBoosts(state, now)) {
     buffs.push({
-      label: getEventLabel(state.temp.activeEventBoost, state.locale),
-      value: `${getEventBoostRemaining(state, now)}s`,
-      tone: 'event',
+      label: getEventLabel(boost.id, state.locale),
+      value: `${boost.remainingSeconds}s · ${formatEventBoostMultiplier(boost.multiplier, boost.target)}`,
+      tone: boost.target === 'cost' ? 'cost' : 'event',
     });
   }
 
@@ -182,6 +197,14 @@ function getEventLabel(id: string, locale: GameState['locale']): string {
   };
 
   return t(locale, keys[id] ?? 'events.goldenBud.name');
+}
+
+function formatEventBoostMultiplier(multiplier: number, target: string): string {
+  if (target === 'cost' && multiplier < 1) {
+    return `-${Math.round((1 - multiplier) * 100)}%`;
+  }
+
+  return `×${multiplier.toFixed(multiplier >= 2 ? 1 : 2)}`;
 }
 
 function getNextUnlockHint(state: GameState): string {

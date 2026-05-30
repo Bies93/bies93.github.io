@@ -443,11 +443,11 @@ const legacyUpgrades: UpgradeDefinition[] = [
       de: 'Buds pro Klick verdoppelt.',
       en: 'Doubles buds per click.',
     },
-    cost: 170,
+    cost: 420,
     icon: upgradeIcons.clickPower,
     effects: [{ type: 'clickMultiplier', value: 2 }],
     requirement: {
-      totalBuds: 125,
+      totalBuds: 260,
     },
     order: 70,
   },

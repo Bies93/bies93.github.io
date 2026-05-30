@@ -1,9 +1,19 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(__dirname, '../public/img');
+const obsoleteAssets = [
+  'fx',
+  'ui/achievement-pot.svg',
+  'ui/buy.svg',
+  'ui/close.svg',
+  'ui/info.svg',
+  'ui/locked.svg',
+  'ui/settings.svg',
+  'ui/stats.svg',
+];
 
 const palette = {
   ink: '#07130d',
@@ -27,6 +37,12 @@ function writeAsset(file, content) {
   const target = path.join(outDir, file);
   ensure(target);
   writeFileSync(target, content.trimStart());
+}
+
+function removeObsoleteAssets() {
+  for (const assetPath of obsoleteAssets) {
+    rmSync(path.join(outDir, assetPath), { force: true, recursive: true });
+  }
 }
 
 function svg(viewBox, body, label = 'CannaClicker asset') {
@@ -137,6 +153,10 @@ const eventGlyphs = {
   'green-surge': `<path d="M64 30 86 71H70l10 27-38-44h17Z" fill="${palette.lime}" stroke="${palette.cream}" stroke-width="4" stroke-linejoin="round"/><circle cx="64" cy="64" r="38" fill="none" stroke="${palette.green}" stroke-width="5" opacity=".55"/>`,
   'mutant-sprout': `${leaf(49, 65, 0.67, -55, palette.red)}${leaf(64, 56, 0.72, 0, palette.violet)}${leaf(79, 65, 0.67, 55, palette.blue)}<path d="M64 88V46" stroke="${palette.lime}" stroke-width="6" stroke-linecap="round"/>`,
   'supply-drop': `<path d="M39 54h50v38H39Z" fill="${palette.panel}" stroke="${palette.cream}" stroke-width="4"/><path d="M43 54 64 39l21 15M64 39v53M39 69h50" stroke="${palette.gold}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
+  'flash-harvest': `<path d="M37 86c14-35 29-48 52-54-5 25-19 43-41 52 15 1 29-3 40-13-10 18-27 26-51 15Z" fill="url(#goldGradient)" stroke="${palette.cream}" stroke-width="4"/><path d="M58 34 49 58h16l-12 34 31-45H67l10-13Z" fill="${palette.lime}" stroke="${palette.cream}" stroke-width="3" stroke-linejoin="round"/>`,
+  'calm-growth': `${leaf(50, 73, 0.65, -42)}${leaf(78, 73, 0.65, 42)}<path d="M64 88V42" stroke="${palette.mint}" stroke-width="6" stroke-linecap="round"/><circle cx="64" cy="60" r="31" fill="none" stroke="${palette.blue}" stroke-width="5" stroke-dasharray="5 9" opacity=".85"/>`,
+  overgrowth: `${leaf(42, 77, 0.9, -60)}${leaf(55, 64, 0.82, -30)}${leaf(73, 61, 0.82, 30)}${leaf(88, 77, 0.9, 60)}<path d="M64 93V35" stroke="${palette.green}" stroke-width="8" stroke-linecap="round"/><path d="M39 91c17 10 33 10 50 0" stroke="${palette.lime}" stroke-width="5" stroke-linecap="round"/>`,
+  'seed-bloom': `<ellipse cx="51" cy="69" rx="12" ry="20" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="4" transform="rotate(-24 51 69)"/><ellipse cx="77" cy="70" rx="12" ry="20" fill="${palette.lime}" stroke="${palette.cream}" stroke-width="4" transform="rotate(24 77 70)"/><circle cx="64" cy="52" r="15" fill="url(#goldGradient)" stroke="${palette.cream}" stroke-width="4"/><path d="M64 92V61" stroke="${palette.mint}" stroke-width="6" stroke-linecap="round"/>`,
 };
 
 for (const [id, glyph] of Object.entries(eventGlyphs)) {
@@ -150,23 +170,15 @@ const uiGlyphs = {
   export: '<path d="M32 8v31"/><path d="m20 21 12-13 12 13"/><path d="M14 38v15h36V38"/>',
   import: '<path d="M32 8v31"/><path d="m20 27 12 12 12-12"/><path d="M14 38v15h36V38"/>',
   reset: '<path d="M49 21a21 21 0 1 0 4 20"/><path d="M49 11v14H35"/>',
-  settings:
-    '<circle cx="32" cy="32" r="8"/><path d="M32 6v9M32 49v9M6 32h9M49 32h9M14 14l6 6M44 44l6 6M50 14l-6 6M20 44l-6 6"/>',
   seeds:
     '<path d="M25 12c16 5 23 19 17 35-17-4-25-18-17-35Z"/><path d="M38 20c-10 11-15 20-17 32"/>',
   prestige: '<path d="M32 8 39 24h17L42 34l5 17-15-10-15 10 5-17L8 24h17Z"/>',
   research: '<path d="M24 10h16v15l13 25H11l13-25Z"/><path d="M21 38h22M24 10h16"/>',
   upgrade: '<path d="M32 52V12"/><path d="m17 27 15-15 15 15"/><path d="M15 52h34"/>',
   shop: '<path d="M12 25h40l-4 27H16Z"/><path d="M19 25c0-10 26-10 26 0"/>',
-  stats: '<path d="M16 50V31M32 50V14M48 50V24"/>',
   'sound-on':
     '<path d="M10 38h10l15 12V14L20 26H10Z"/><path d="M43 24c5 5 5 11 0 16M50 17c9 9 9 21 0 30"/>',
   'sound-off': '<path d="M10 38h10l15 12V14L20 26H10Z"/><path d="M44 24 56 36M56 24 44 36"/>',
-  info: '<circle cx="32" cy="32" r="24"/><path d="M32 29v17M32 18h.01"/>',
-  close: '<path d="M18 18 46 46M46 18 18 46"/>',
-  buy: '<path d="M12 20h9l5 28h24"/><path d="M25 28h28l-6 14H28"/><circle cx="29" cy="54" r="3"/><circle cx="48" cy="54" r="3"/>',
-  locked:
-    '<rect x="16" y="28" width="32" height="24" rx="5"/><path d="M23 28v-7c0-12 18-12 18 0v7"/>',
   auto: '<path d="M16 32a16 16 0 0 1 27-11"/><path d="M45 13v13H32"/><path d="M48 32a16 16 0 0 1-27 11"/><path d="M19 51V38h13"/>',
   warning: '<path d="M32 10 57 53H7Z"/><path d="M32 25v12M32 46h.01"/>',
   leaf: `${leaf(32, 38, 0.82, -28)}`,
@@ -188,7 +200,6 @@ const achievementGlyphs = {
   'achievement-ribbon': '<path d="M19 13h26v21c0 13-13 20-13 20S19 47 19 34Z"/>',
   'achievement-leaf': `${leaf(32, 36, 0.72, -18)}`,
   'achievement-light': '<path d="M20 18h24l-5 14H25Z"/><path d="M25 43h14M22 53h20"/>',
-  'achievement-pot': '<path d="M18 27h28l-4 23H22Z"/><path d="M25 25c4-10 10-10 14 0"/>',
 };
 
 for (const [id, glyph] of Object.entries(achievementGlyphs)) {
@@ -196,29 +207,34 @@ for (const [id, glyph] of Object.entries(achievementGlyphs)) {
 }
 
 function plantStage(stage) {
-  const height = 74 + stage * 22;
-  const leafCount = Math.min(10, Math.max(2, stage + 1));
+  const height = 96 + stage * 24;
+  const leafCount = Math.min(14, Math.max(4, stage + 3));
   const flowers = stage > 7 ? stage - 7 : 0;
   let leaves = '';
   for (let i = 0; i < leafCount; i += 1) {
-    const y = 380 - i * (height / (leafCount + 2));
-    const x = 256 + (i % 2 === 0 ? -18 - stage * 2 : 18 + stage * 2);
-    const rot = i % 2 === 0 ? -42 : 42;
-    const scale = 1.2 + Math.min(stage, 8) * 0.1;
+    const y = 392 - i * (height / (leafCount + 1));
+    const spread = 24 + Math.min(stage, 10) * 3 + (i % 3) * 4;
+    const x = 256 + (i % 2 === 0 ? -spread : spread);
+    const rot = i % 2 === 0 ? -48 - stage : 48 + stage;
+    const scale = 1.3 + Math.min(stage, 10) * 0.09 + (i > leafCount - 4 ? 0.15 : 0);
     leaves += leaf(x, y, scale, rot);
   }
   let bloom = '';
   for (let i = 0; i < flowers; i += 1) {
-    const x = 232 + i * 24;
-    bloom += `<circle cx="${x}" cy="${255 - i * 12}" r="${7 + stage}" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="3"/>`;
+    const x = 222 + i * 24;
+    const y = 250 - i * 13;
+    bloom += `<circle cx="${x}" cy="${y}" r="${8 + stage}" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="3"/><circle cx="${x + 14}" cy="${y + 10}" r="${5 + stage * 0.55}" fill="${palette.lime}" stroke="${palette.cream}" stroke-width="2"/>`;
   }
   return svg(
     '0 0 512 512',
-    `<ellipse cx="256" cy="430" rx="115" ry="25" fill="#06140d" opacity=".35"/>
-    <path d="M256 421V${420 - height}" stroke="${palette.green}" stroke-width="${10 + stage}" stroke-linecap="round"/>
+    `<circle cx="256" cy="${420 - height + 28}" r="${72 + stage * 8}" fill="${palette.green}" opacity=".08"/>
+    <ellipse cx="256" cy="430" rx="126" ry="28" fill="#06140d" opacity=".38"/>
+    <path d="M205 405h102l-17 39h-68Z" fill="${palette.panel}" stroke="${palette.gold}" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M256 420V${420 - height}" stroke="${palette.green}" stroke-width="${13 + stage}" stroke-linecap="round"/>
     ${leaves}
     ${bloom}
-    <path d="M205 428h102" stroke="${palette.gold}" stroke-width="9" stroke-linecap="round" opacity=".55"/>`,
+    <path d="M200 427h112" stroke="${palette.gold}" stroke-width="11" stroke-linecap="round" opacity=".7"/>
+    <path d="M214 407c26 11 58 11 84 0" stroke="${palette.mint}" stroke-width="4" stroke-linecap="round" opacity=".5"/>`,
     `CannaClicker plant stage ${stage}`,
   );
 }
@@ -284,13 +300,5 @@ writeAsset(
   ),
 );
 
-writeAsset(
-  'fx/spark.svg',
-  svg(
-    '0 0 128 128',
-    `<path d="M64 14 73 54l39 10-39 10-9 40-9-40-39-10 39-10Z" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="4"/>`,
-    'CannaClicker spark',
-  ),
-);
-
+removeObsoleteAssets();
 console.log('Generated CannaClicker SVG assets in public/img.');

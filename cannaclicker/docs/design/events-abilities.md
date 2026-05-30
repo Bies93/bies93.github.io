@@ -6,18 +6,18 @@ Stand: Sprint 6
 
 | Regel           | Wert                                                                          |
 | --------------- | ----------------------------------------------------------------------------- |
-| Erste Events    | Gate bis erstes Item, 60 Gesamtbuds oder 75 Sekunden Runzeit.                 |
+| Erste Events    | Gate bis erstes Item, 120 Gesamtbuds oder 90 Sekunden Runzeit.                |
 | Aktive Events   | 1 im Early Game, 2 ab 2.5 Mio Gesamtbuds oder `Event-Scouts`.                 |
 | Spawn-Intervall | Basis 14-26 Sekunden nach Gate, skaliert mit Event-Research.                  |
 | Pity            | Basis 55 Sekunden ohne aktives Event, skaliert mit Event-Research.            |
 | Sichtbarkeit    | 7-12 Sekunden, skaliert mit Event-Dauer-Research.                             |
-| Stack-Regel     | Ein temporaerer Event-Buff aktiv; neuer Buff ersetzt den alten klar sichtbar. |
+| Stack-Regel     | Unterschiedliche Event-Buffs stacken mit eigenen Timern; gleiche Buffs refreshen. |
 
 ## Event-Tabelle
 
 | id              | Kategorie          | Gewicht | Min Stage                    |    Dauer | Reward / Effekt                            | Asset               |
 | --------------- | ------------------ | ------: | ---------------------------- | -------: | ------------------------------------------ | ------------------- |
-| `golden_bud`    | Instant Reward     |    1.00 | Gate offen                   |    7-12s | 15s Produktion oder BPC-Fallback           | `golden-bud.svg`    |
+| `golden_bud`    | Instant Reward     |    1.00 | Gate offen                   |    7-12s | 12s Produktion oder BPC-Fallback           | `golden-bud.svg`    |
 | `seed_pack`     | Meta Reward        |    0.55 | Gate offen                   |    7-12s | 1-5 Seeds, Seed-Cap respektiert            | `seed-pack.svg`     |
 | `lucky_joint`   | Temporary Buff     |    0.75 | Gate offen                   |      15s | BPS/BPC x2                                 | `lucky-joint.svg`   |
 | `fertile_rain`  | Instant + Buff     |    0.75 | Gate offen                   | 12s Buff | 10s Produktion + BPS x1.25                 | `fertile-rain.svg`  |

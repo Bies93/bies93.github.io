@@ -181,6 +181,26 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   goalPanel.append(goalCopy, goalProgress, goalProgressText, goalButton, nextGoalHint);
   clickBody.appendChild(goalPanel);
 
+  const strategyPanel = document.createElement('section');
+  strategyPanel.className = 'strategy-panel';
+  strategyPanel.dataset.uiRole = 'strategy-panel';
+  strategyPanel.dataset.testid = 'strategy-panel';
+
+  const strategyKicker = document.createElement('p');
+  strategyKicker.className = 'strategy-panel__kicker';
+
+  const strategyTitle = document.createElement('h2');
+  strategyTitle.className = 'strategy-panel__title';
+
+  const strategyBody = document.createElement('p');
+  strategyBody.className = 'strategy-panel__body';
+
+  const strategyDetail = document.createElement('p');
+  strategyDetail.className = 'strategy-panel__detail';
+
+  strategyPanel.append(strategyKicker, strategyTitle, strategyBody, strategyDetail);
+  clickBody.appendChild(strategyPanel);
+
   const budsStat = createStatBlock('stats.buds', clickStats, statsLabels, statsMeta);
   const bpsStat = createStatBlock('stats.bps', clickStats, statsLabels, statsMeta);
   const bpcStat = createStatBlock('stats.bpc', clickStats, statsLabels, statsMeta);
@@ -275,6 +295,11 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     goalProgressText,
     goalButton,
     nextGoalHint,
+    strategyPanel,
+    strategyKicker,
+    strategyTitle,
+    strategyBody,
+    strategyDetail,
     announcer,
     abilityTitle,
     abilityList: abilityRefs,

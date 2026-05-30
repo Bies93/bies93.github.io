@@ -76,7 +76,7 @@ const EFFICIENCY_RESEARCH = [
       en: 'Baseline Optimisation',
     },
     desc: {
-      de: 'Globale Produktion dauerhaft +20 %. Solide Grundlage fuer AFK-Phasen.',
+      de: 'Globale Produktion dauerhaft +20 %. Solide Grundlage für AFK-Phasen.',
       en: 'Permanently boosts global production by 20%. Reliable AFK backbone.',
     },
     costType: 'buds',
@@ -111,7 +111,7 @@ const EFFICIENCY_RESEARCH = [
       en: 'Hydro × Irrigation',
     },
     desc: {
-      de: 'Hydroponik-Racks & Bewaesserungssysteme +15 % Basisleistung.',
+      de: 'Hydroponik-Racks & Bewässerungssysteme +15 % Basisleistung.',
       en: 'Hydroponic racks & irrigation systems +15% base output.',
     },
     costType: 'buds',
@@ -132,11 +132,11 @@ const EFFICIENCY_RESEARCH = [
     path: 'efficiency',
     order: 4,
     name: {
-      de: 'Naehrstoffkreislauf',
+      de: 'Nährstoffkreislauf',
       en: 'Nutrient Recirculation',
     },
     desc: {
-      de: 'Globale Produktion +18 %. Verlaessliche Skalierung fuer grosse Setups.',
+      de: 'Globale Produktion +18 %. Verlässliche Skalierung für große Setups.',
       en: 'Global production +18%. Reliable scaling for large setups.',
     },
     costType: 'buds',
@@ -193,7 +193,7 @@ const CONTROL_RESEARCH = [
       en: 'Fine Tuning',
     },
     desc: {
-      de: 'Alle Gebaeudekosten −5 %. Wirkt auf jede Kaufstufe.',
+      de: 'Alle Gebäudekosten −5 %. Wirkt auf jede Kaufstufe.',
       en: 'All building prices −5%. Applies to every purchase.',
     },
     costType: 'buds',
@@ -246,7 +246,7 @@ const CONTROL_RESEARCH = [
       en: 'Time Management II',
     },
     desc: {
-      de: 'Offline-Cap zusaetzlich +8 Stunden. Addiert sich zu vorherigen Effekten.',
+      de: 'Offline-Cap zusätzlich +8 Stunden. Addiert sich zu vorherigen Effekten.',
       en: 'Offline cap gains another +8 hours. Adds to previous effects.',
     },
     costType: 'seeds',
@@ -264,7 +264,7 @@ const CONTROL_RESEARCH = [
       en: 'Energy Efficiency',
     },
     desc: {
-      de: 'Aktive Skills dauern +25 %. Perfekt fuer geplante Aktivphasen.',
+      de: 'Aktive Skills dauern +25 %. Perfekt für geplante Aktivphasen.',
       en: 'Active skills last 25% longer. Perfect for scheduled bursts.',
     },
     costType: 'seeds',
@@ -370,7 +370,7 @@ const STRAIN_RESEARCH = [
       en: 'Indica',
     },
     desc: {
-      de: '+25 % BPS, aber −15 % BPC. Gilt bis zum naechsten Prestige.',
+      de: '+25 % BPS, aber −15 % BPC. Gilt bis zum nächsten Prestige.',
       en: '+25% BPS, but −15% BPC. Holds until the next prestige.',
     },
     costType: 'seeds',
@@ -395,7 +395,7 @@ const STRAIN_RESEARCH = [
       en: 'Sativa',
     },
     desc: {
-      de: '+60 % BPC, aber −10 % BPS. Ideal fuer aktive Runs.',
+      de: '+60 % BPC, aber −10 % BPS. Ideal für aktive Runs.',
       en: '+60% BPC, but −10% BPS. Ideal for active runs.',
     },
     costType: 'seeds',
@@ -420,7 +420,7 @@ const STRAIN_RESEARCH = [
       en: 'Hybrid',
     },
     desc: {
-      de: '+10 % BPS und BPC, +1 % pro aktivem temporaeren Buff.',
+      de: '+10 % BPS und BPC, +1 % pro aktivem temporären Buff.',
       en: '+10% BPS and BPC, +1% per active temporary buff.',
     },
     costType: 'seeds',
@@ -449,7 +449,7 @@ const ACTIVE_RESEARCH = [
       en: 'Focused Harvest',
     },
     desc: {
-      de: 'Buds pro Klick +35 %. Macht aktive Sessions direkt staerker.',
+      de: 'Buds pro Klick +35 %. Macht aktive Sessions direkt stärker.',
       en: 'Buds per click +35%. Directly strengthens active sessions.',
     },
     costType: 'buds',
@@ -466,7 +466,7 @@ const ACTIVE_RESEARCH = [
       en: 'Skill Cells',
     },
     desc: {
-      de: 'Aktive Faehigkeiten dauern +15 % laenger.',
+      de: 'Aktive Fähigkeiten dauern +15 % länger.',
       en: 'Active abilities last 15% longer.',
     },
     costType: 'buds',
@@ -484,7 +484,7 @@ const ACTIVE_RESEARCH = [
       en: 'Peak Session',
     },
     desc: {
-      de: 'Produktionsfaehigkeiten sind +20 % staerker.',
+      de: 'Produktionsfähigkeiten sind +20 % stärker.',
       en: 'Production abilities are 20% stronger.',
     },
     costType: 'seeds',
@@ -505,7 +505,7 @@ const EVENT_RESEARCH = [
       en: 'Event Scouts',
     },
     desc: {
-      de: 'Events erscheinen ca. 15 % haeufiger. Pity bleibt aktiv.',
+      de: 'Events erscheinen ca. 15 % häufiger. Pity bleibt aktiv.',
       en: 'Events appear about 15% more often. Pity remains active.',
     },
     costType: 'buds',
@@ -522,7 +522,7 @@ const EVENT_RESEARCH = [
       en: 'Signal Care',
     },
     desc: {
-      de: 'Temporäre Event-Buffs dauern +20 % laenger.',
+      de: 'Temporäre Event-Buffs dauern +20 % länger.',
       en: 'Temporary event buffs last 20% longer.',
     },
     costType: 'buds',
@@ -561,7 +561,7 @@ const ECONOMY_RESEARCH = [
       en: 'Batch Purchase Planning',
     },
     desc: {
-      de: 'Alle Gebaeudekosten −4 %. Hilft besonders bei x10/x25-Kaeufen.',
+      de: 'Alle Gebäudekosten −4 %. Hilft besonders bei x10/x25-Käufen.',
       en: 'All building prices -4%. Especially useful for x10/x25 buys.',
     },
     costType: 'buds',
@@ -596,7 +596,7 @@ const ECONOMY_RESEARCH = [
       en: 'Restart Kit',
     },
     desc: {
-      de: 'Offline-Cap +6 Stunden und globale Produktion +12 % fuer stabilere zweite Runs.',
+      de: 'Offline-Cap +6 Stunden und globale Produktion +12 % für stabilere zweite Runs.',
       en: 'Offline cap +6 hours and global production +12% for stronger second runs.',
     },
     costType: 'seeds',

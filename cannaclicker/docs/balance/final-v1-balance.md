@@ -8,10 +8,10 @@ Stand: Sprint 11.
 | ------------------ | ----------------------------------------: | ---------------------------------------------------------------------------- |
 | Erstes Item        |                            15-60 Sekunden | Seedling kostet 12 Buds, aktives Klicken bleibt klar.                        |
 | Passive Produktion |                               1-3 Minuten | Seedlings/Planters geben sichtbaren BPS, aber keine sofortige Idle-Dominanz. |
-| Erstes Upgrade     |                               5-8 Minuten | `precision_trim` bleibt frueher BPC-Anker.                                   |
-| Erste Events       | nach Item, 60 total Buds oder 75 Sekunden | Events duerfen motivieren, aber nicht den Start ueberspringen.               |
+| Erstes Upgrade     |                               5-8 Minuten | `precision_trim` bei 260 Buds/420 Kosten bleibt früher BPC-Anker.           |
+| Erste Events       | nach Item, 120 total Buds oder 90 Sekunden | Events dürfen motivieren, aber nicht den Start überspringen.              |
 | Research sichtbar  |                             20-45 Minuten | Erste Bud-Research-Nodes sind erreichbar, Seed-Research bleibt Meta-Hook.    |
-| Prestige ready     |                             45-90 Minuten | 1M Lifetime-Buds bleibt Requirement.                                         |
+| Prestige ready     |                             45-90 Minuten | 3M Lifetime-Buds ist Requirement, damit der erste Reset nicht zu früh kommt. |
 | Zweiter Run        |                            25%+ schneller | Total Seeds und Kickstart beschleunigen moderat.                             |
 
 ## Profile-Pass
@@ -22,18 +22,19 @@ Stand: Sprint 11.
 | Neuer Spieler semi-idle | Passive Produktion wird sichtbar, aber Kaeufe bleiben Entscheidungen. | Sauber, Offline-Gain nicht dominant.        |
 | Optimierer              | Buy Max, Milestones und Eventfenster geben Hebel.                     | Sauber, Shop zeigt ROI und Delta.           |
 | Event-orientiert        | Events lohnen aktiv, brechen aber den Start nicht.                    | Sauber, Gates und Seed-Cap schuetzen Early. |
-| Prestige-orientiert     | Zu fruehes Prestige gibt wenig, spaeteres gibt mehr.                  | Sauber, Preview erklaert Reset und Gewinn.  |
+| Prestige-orientiert     | Zu frühes Prestige gibt wenig, späteres gibt mehr.                  | Sauber, Preview erklaert Reset und Gewinn.  |
 | Mobile-Spieler          | Tabs, Clicker und Shop bleiben bedienbar.                             | Browser-Smoke ab 320 px ohne Overflow.      |
 | Offline-Rueckkehr       | Offline-Gain belohnt Rueckkehr, ersetzt aktives Spiel nicht.          | Sauber, 20% und Cap bleiben V1-Wert.        |
 
 ## Economy-Entscheidungen
 
 - BPC bleibt im Early Game relevant durch `precision_trim`, `tap_training`, Burst und Event-BPC-Buffs.
-- BPS dominiert spaeter durch Items, Upgrades, Research, Prestige und Milestones.
+- BPS dominiert später durch Items, Upgrades, Research, Prestige und Milestones.
 - Spaete Items haben bessere Basis-ROI, aber hoehere Cost-Factors und klare Unlocks.
-- Alte Items bleiben ueber Item-Boosts, Milestones und Synergy-Upgrades relevant.
-- Event-Rewards bleiben in Sekunden Produktion ausgedrueckt, damit sie mit dem Run skalieren.
-- Seed-Gain ueber Events ist begrenzt und wird durch Seed-Cap abgefedert.
+- Alte Items bleiben über Item-Boosts, Milestones und Synergy-Upgrades relevant.
+- Event-Rewards bleiben in Sekunden Produktion ausgedrueckt, damit sie mit dem Run skalieren; Golden Bud nutzt 12s statt 15s.
+- Event-Buffs stacken als sichtbare Liste mit eigenen Timern, gleiche Buffs refreshen statt unklar zu duplizieren.
+- Seed-Gain über Events ist begrenzt und wird durch Seed-Cap abgefedert.
 - Offline-Gain bleibt bei 20% der BPS-Produktion mit 8h Basis-Cap.
 
 ## Content-Entscheidungen
@@ -46,7 +47,7 @@ Stand: Sprint 11.
 
 ## Tooltips und Lesbarkeit
 
-- Shop-Karten zeigen Rolle, Kosten, Besitz, aktuelle Produktion, Produktion nach Kauf, BPS-Anteil, ROI und naechsten Milestone.
+- Shop-Karten zeigen Rolle, Kosten, Besitz, aktuelle Produktion, Produktion nach Kauf, BPS-Anteil, ROI und nächsten Milestone.
 - Upgrade-Karten zeigen Kategorie, Requirement und Effekttext.
 - Research-Karten zeigen Pfad, Kosten, Lock-Grund und Effekt.
 - Prestige-Screen erklaert Reset, Gewinn, Seeds und Multiplikator.
@@ -54,6 +55,6 @@ Stand: Sprint 11.
 
 ## Release-Risiken
 
-- Exakte Midgame-Dominanz zwischen Hydroponic Rack, Genetics Lab und Trimming Robot braucht echte Langzeitlaeufe.
-- Events koennen bei sehr aktivem Spiel staerker wirken als bei Semi-Idle; das ist fuer V1 akzeptiert.
-- Achievement-Boni sind bewusst klein, damit sie die Economy nicht uebernehmen.
+- Exakte Midgame-Dominanz zwischen Hydroponic Rack, Genetics Lab und Trimming Robot braucht echte Langzeitläufe.
+- Events können bei sehr aktivem Spiel staerker wirken als bei Semi-Idle; das ist für V1 akzeptiert.
+- Achievement-Boni sind bewusst klein, damit sie die Economy nicht übernehmen.

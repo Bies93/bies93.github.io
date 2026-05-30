@@ -17,11 +17,11 @@ Research ist in sechs Cluster gegliedert:
 
 ## Knotenstand
 
-Aktuell sind 27 Research-Knoten fuer Release-nahe Progression definiert. Fruehe Knoten kosten Buds, Meta-Knoten kosten Spendable Seeds. Seed-Kosten reduzieren nicht den Prestige-Multiplikator.
+Aktuell sind 27 Research-Knoten für Release-nahe Progression definiert. Frühe Knoten kosten Buds, Meta-Knoten kosten Spendable Seeds. Seed-Kosten reduzieren nicht den Prestige-Multiplikator.
 
 ## Beispielpfade
 
-| Build            | Fruehe Prioritaeten                                          |
+| Build            | Frühe Prioritaeten                                          |
 | ---------------- | ------------------------------------------------------------ |
 | Aktive Session   | `r_active_focus`, `r_active_skill_cells`, `r_active_peak`    |
 | Idle/Automation  | `r_ctrl_routines`, `r_ctrl_time1`, `r_ctrl_lab_auto1`        |
@@ -31,5 +31,5 @@ Aktuell sind 27 Research-Knoten fuer Release-nahe Progression definiert. Fruehe 
 ## Offene Balancepunkte
 
 - Seed-Kosten nach dem dritten Prestige im echten 60-90-Minuten-Playthrough feinjustieren.
-- Research-Tree spaeter visuell als echter Graph/Cluster statt reiner Liste darstellen.
+- Research-Tree später visuell als echter Graph/Cluster statt reiner Liste darstellen.
 - Auto-buy bleibt nur vorbereitet, nicht finalisiert.

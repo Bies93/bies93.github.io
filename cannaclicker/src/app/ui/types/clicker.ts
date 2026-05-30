@@ -12,5 +12,10 @@ export interface UIClickerRefs {
   goalProgressText: HTMLElement;
   goalButton: HTMLButtonElement;
   nextGoalHint: HTMLElement;
+  strategyPanel: HTMLElement;
+  strategyKicker: HTMLElement;
+  strategyTitle: HTMLElement;
+  strategyBody: HTMLElement;
+  strategyDetail: HTMLElement;
   announcer: HTMLElement;
 }

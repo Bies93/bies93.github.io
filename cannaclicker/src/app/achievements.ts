@@ -186,7 +186,11 @@ function resolveNumericValue(state: GameState, key: NumericRequirementKey): numb
 
 function countActiveBuffs(state: GameState): number {
   const abilityBuffs = Object.values(state.abilities).filter((ability) => ability?.active).length;
-  const eventBuff = state.temp.activeEventBoost ? 1 : 0;
+  const eventBuffs = Array.isArray(state.temp.eventBoosts)
+    ? state.temp.eventBoosts.filter((boost) => boost.endsAt > Date.now()).length
+    : state.temp.activeEventBoost
+      ? 1
+      : 0;
   const kickstart = state.temp.kickstartRemainingMs > 0 ? 1 : 0;
-  return abilityBuffs + eventBuff + kickstart;
+  return abilityBuffs + eventBuffs + kickstart;
 }

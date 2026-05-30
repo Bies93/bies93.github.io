@@ -11,7 +11,7 @@ const STAT_META: Record<LocaleKey, Record<string, string>> = {
     'stats.bps': 'Produktion pro Sekunde',
     'stats.bpc': 'Ertrag pro Klick',
     'stats.total': 'Lebenszeit-Ernte',
-    'stats.seeds': 'Prestige-Waehrung',
+    'stats.seeds': 'Prestige-Währung',
     'stats.seedRate': '60-Minuten-Fenster',
     'stats.prestigeMult': 'Aktiver Bonus',
   },
@@ -37,7 +37,11 @@ const SIDE_PANEL_TAB_KEYS: Record<SidePanelTab, string> = {
 
 export function updateStrings(state: GameState, refs: UIRefs): void {
   document.body.dataset.motion = state.settings.motionIntensity;
+  document.body.dataset.theme = state.settings.uiTheme;
+  document.body.dataset.plantSkin = state.settings.plantSkin;
   refs.root.dataset.motion = state.settings.motionIntensity;
+  refs.root.dataset.theme = state.settings.uiTheme;
+  refs.root.dataset.plantSkin = state.settings.plantSkin;
 
   refs.headerTitle.textContent = t(state.locale, 'app.title');
   refs.clickButton.setAttribute('aria-label', t(state.locale, 'actions.click'));
@@ -119,6 +123,18 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
   refs.sidePanel.settings.soundButton.textContent = state.muted
     ? t(state.locale, 'actions.unmute')
     : t(state.locale, 'actions.mute');
+  const sfxPercent = Math.round(state.settings.sfxVolume * 100);
+  refs.sidePanel.settings.sfxVolumeTitle.textContent = t(state.locale, 'settings.sfxVolume.title');
+  refs.sidePanel.settings.sfxVolumeDescription.textContent = t(
+    state.locale,
+    'settings.sfxVolume.description',
+    { value: sfxPercent },
+  );
+  refs.sidePanel.settings.sfxVolumeInput.value = String(sfxPercent);
+  refs.sidePanel.settings.sfxVolumeInput.setAttribute(
+    'aria-label',
+    t(state.locale, 'settings.sfxVolume.title'),
+  );
   refs.sidePanel.settings.motionTitle.textContent = t(state.locale, 'settings.motion.title');
   refs.sidePanel.settings.motionDescription.textContent = t(
     state.locale,
@@ -132,6 +148,32 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
   Array.from(refs.sidePanel.settings.motionSelect.options).forEach((option) => {
     option.textContent = t(state.locale, `settings.motion.option.${option.value}`);
   });
+  refs.sidePanel.settings.themeTitle.textContent = t(state.locale, 'settings.theme.title');
+  refs.sidePanel.settings.themeDescription.textContent = t(
+    state.locale,
+    `settings.theme.description.${state.settings.uiTheme}`,
+  );
+  refs.sidePanel.settings.themeSelect.value = state.settings.uiTheme;
+  refs.sidePanel.settings.themeSelect.setAttribute(
+    'aria-label',
+    t(state.locale, 'settings.theme.title'),
+  );
+  Array.from(refs.sidePanel.settings.themeSelect.options).forEach((option) => {
+    option.textContent = t(state.locale, `settings.theme.option.${option.value}`);
+  });
+  refs.sidePanel.settings.plantSkinTitle.textContent = t(state.locale, 'settings.plantSkin.title');
+  refs.sidePanel.settings.plantSkinDescription.textContent = t(
+    state.locale,
+    `settings.plantSkin.description.${state.settings.plantSkin}`,
+  );
+  refs.sidePanel.settings.plantSkinSelect.value = state.settings.plantSkin;
+  refs.sidePanel.settings.plantSkinSelect.setAttribute(
+    'aria-label',
+    t(state.locale, 'settings.plantSkin.title'),
+  );
+  Array.from(refs.sidePanel.settings.plantSkinSelect.options).forEach((option) => {
+    option.textContent = t(state.locale, `settings.plantSkin.option.${option.value}`);
+  });
   refs.sidePanel.settings.versionTitle.textContent = t(state.locale, 'settings.version.title');
   refs.sidePanel.settings.versionDescription.textContent = t(
     state.locale,
@@ -139,6 +181,16 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
     {
       version: APP_VERSION,
     },
+  );
+  refs.sidePanel.settings.releaseTitle.textContent = t(state.locale, 'settings.release.title');
+  refs.sidePanel.settings.releaseDescription.textContent = t(
+    state.locale,
+    'settings.release.body',
+  );
+  refs.sidePanel.settings.creditsTitle.textContent = t(state.locale, 'settings.credits.title');
+  refs.sidePanel.settings.creditsDescription.textContent = t(
+    state.locale,
+    'settings.credits.body',
   );
   refs.sidePanel.settings.exportButton.textContent = t(state.locale, 'actions.export');
   refs.sidePanel.settings.importButton.textContent = t(state.locale, 'actions.import');

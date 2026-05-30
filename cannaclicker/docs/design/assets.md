@@ -2,7 +2,7 @@
 
 ## Ziel
 
-Alle sichtbaren Bilder laufen ueber ein klares, web-optimiertes Asset-System. Es gibt keine alten @2x-Fantasien, keine schwarzen Kachelbilder und keine schweren PNG-Icons fuer kleine UI-Elemente.
+Alle sichtbaren Bilder laufen über ein klares, web-optimiertes Asset-System. Es gibt keine alten @2x-Fantasien, keine schwarzen Kachelbilder und keine schweren PNG-Icons für kleine UI-Elemente.
 
 ## Ordnerstruktur
 
@@ -14,31 +14,32 @@ public/img/events
 public/img/ui
 public/img/plant
 public/img/backgrounds
-public/img/fx
 public/sounds
 ```
 
 ## Manifest
 
-`src/app/assetManifest.ts` ist die zentrale Zuordnung fuer:
+`src/app/assetManifest.ts` ist die zentrale Zuordnung für:
 
 - 12 Item-Icons
 - 5 Upgrade-Iconfamilien
 - 7 Research-Icons
-- 8 Event-Icons
-- UI-Icons inklusive Stats, Controls und Achievement-Badges
+- 12 Event-Icons
+- UI-Icons inklusive Ressourcen, Controls und Achievement-Badges
 - 11 Pflanzenstadien
 - Desktop/Mobile/Texture-Backgrounds
 
 ## Generierung
 
-Die aktuellen SVG-Assets werden ueber `scripts/generate-assets.mjs` erzeugt.
+Die aktuellen SVG-Assets werden über `scripts/generate-assets.mjs` erzeugt.
 
 ```bash
 npm --prefix cannaclicker run assets:generate
 ```
 
-Die SVGs sind bewusst vektorbasiert, damit 32px UI-Icons und groessere Shop-/Plant-Darstellungen ohne separate riesige PNGs funktionieren.
+Die SVGs sind bewusst vektorbasiert, damit 32px UI-Icons und größere Shop-/Plant-Darstellungen ohne separate riesige PNGs funktionieren.
+
+Der Generator entfernt bekannte nicht mehr referenzierte Altdateien (`public/img/fx`, alte UI-Controls wie `buy.svg`, `locked.svg`, `settings.svg`, `stats.svg` und `achievement-pot.svg`) automatisch. `npm run assets:generate` darf dadurch keine neuen untracked Dateien erzeugen.
 
 ## Naming
 
@@ -49,11 +50,11 @@ Die SVGs sind bewusst vektorbasiert, damit 32px UI-Icons und groessere Shop-/Pla
 
 ## srcset-Regel
 
-`createItemSrcset()` gibt aktuell nur die vorhandene URL zurueck. Damit sind alte defekte `@2x`-Ableitungen entfernt. Echte responsive Rastervarianten duerfen spaeter nur eingetragen werden, wenn die Dateien wirklich existieren.
+`createItemSrcset()` gibt aktuell nur die vorhandene URL zurück. Damit sind alte defekte `@2x`-Ableitungen entfernt. Echte responsive Rastervarianten dürfen später nur eingetragen werden, wenn die Dateien wirklich existieren.
 
 ## Cleanup-Regel
 
-Nicht referenzierte Legacy-Ordner wie `public/icons`, `public/achievements` und `public/plant-stages` duerfen nicht zurueckkehren. Neue Assets muessen ueber das Manifest referenziert werden.
+Nicht referenzierte Legacy-Ordner wie `public/icons`, `public/achievements`, `public/plant-stages` und `public/img/fx` dürfen nicht zurückkehren. Neue Assets müssen über das Manifest referenziert werden.
 
 ## Abnahme
 

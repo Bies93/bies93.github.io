@@ -23,7 +23,7 @@ CannaClicker soll sofort reagieren, aber nicht hektisch wirken. Feedback ist kur
 
 ## Sound Design
 
-Sounds werden prozedural ueber WebAudio erzeugt. Dadurch gibt es keine blockierenden Audiofiles und keine grossen Assets.
+Sounds werden prozedural über WebAudio erzeugt. Dadurch gibt es keine blockierenden Audiofiles und keine großen Assets.
 
 Sound-Cues:
 
@@ -54,8 +54,8 @@ Zusaetzlich respektieren kritische Animationen `prefers-reduced-motion`.
 
 ## Notification-Regeln
 
-- Kein blockierender Dialog fuer normale Unlocks.
-- Achievements werden bei Mehrfachausloesung zusammengefasst.
+- Kein blockierender Dialog für normale Unlocks.
+- Achievements werden bei Mehrfachauslösung zusammengefasst.
 - Unlock-Snapshots verhindern Toast-Wiederholungen.
 - Prestige bleibt ein klarer Moment, aber startet den neuen Run sofort.
 
@@ -64,5 +64,5 @@ Zusaetzlich respektieren kritische Animationen `prefers-reduced-motion`.
 - Animationen nutzen `transform` und `opacity`.
 - Floating Numbers werden pro Ursprung begrenzt und aggregiert.
 - Partikel haben ein globales Limit.
-- Events animieren ueber Transform-Pfade und haben keine Layout-Messung pro Frame.
+- Events animieren über Transform-Pfade und haben keine Layout-Messung pro Frame.
 - Audio ist non-blocking und laedt keine Dateien.

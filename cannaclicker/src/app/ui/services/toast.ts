@@ -20,6 +20,10 @@ let toastContainer: HTMLElement | null = null;
 let announcer: HTMLElement | null = null;
 let lastAnnounced = new Decimal(0);
 
+function getMaxVisibleToasts(): number {
+  return window.matchMedia('(max-width: 640px)').matches ? 3 : 4;
+}
+
 export const showToast: ShowToast = ((
   options: ToastOptions & { container?: HTMLElement | null },
 ) => {
@@ -32,6 +36,11 @@ export const showToast: ShowToast = ((
   }
 
   const duration = Math.max(0, options.durationMs ?? 5000);
+  const maxVisible = getMaxVisibleToasts();
+
+  while (toastContainer.children.length >= maxVisible) {
+    toastContainer.firstElementChild?.remove();
+  }
 
   const toast = document.createElement('div');
   toast.className = 'toast';

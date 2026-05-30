@@ -51,7 +51,9 @@ export function createScheduler(
     element: HTMLButtonElement,
   ): void {
     const now = Date.now();
-    const hadActiveBoost = state.temp.activeEventBoost === id && state.temp.eventBoostEndsAt > now;
+    const hadActiveBoost = Array.isArray(state.temp.eventBoosts)
+      ? state.temp.eventBoosts.some((boost) => boost.id === id && boost.endsAt > now)
+      : state.temp.activeEventBoost === id && state.temp.eventBoostEndsAt > now;
 
     const resolution = resolveEventClick(state, token, now);
     if (!resolution) {

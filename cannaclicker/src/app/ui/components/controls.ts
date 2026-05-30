@@ -89,7 +89,7 @@ export function createAbilityButton(id: AbilityId, state: GameState): AbilityBut
   const icon = document.createElement('img');
   icon.className = 'ability-icon-img';
   icon.decoding = 'async';
-  icon.loading = 'lazy';
+  icon.loading = 'eager';
   icon.alt = '';
   icon.setAttribute('aria-hidden', 'true');
   icon.src = ABILITY_ICON_MAP[id] ?? uiIcons.leaf;

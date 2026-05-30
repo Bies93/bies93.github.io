@@ -252,9 +252,14 @@ function createSnapshot(state: GameState): BalanceSnapshot {
   const activeAbilityCount = Object.values(state.abilities).filter(
     (ability) => ability.active,
   ).length;
+  const activeEventBoosts = Array.isArray(state.temp.eventBoosts)
+    ? state.temp.eventBoosts.filter((boost) => boost.endsAt > Date.now()).length
+    : state.temp.activeEventBoost
+      ? 1
+      : 0;
   const activeBuffs =
     activeAbilityCount +
-    (state.temp.activeEventBoost ? 1 : 0) +
+    activeEventBoosts +
     (state.temp.kickstartLevel > 0 ? 1 : 0);
 
   return {

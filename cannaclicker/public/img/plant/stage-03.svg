@@ -20,9 +20,12 @@
       <stop offset="1" stop-color="#71c7ff" stop-opacity=".48"/>
     </linearGradient>
   </defs>
-  <ellipse cx="256" cy="430" rx="115" ry="25" fill="#06140d" opacity=".35"/>
-    <path d="M256 421V280" stroke="#19c96f" stroke-width="13" stroke-linecap="round"/>
-    <path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(232 380) rotate(-42) scale(1.5)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8666666666666667" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(280 356.6666666666667) rotate(42) scale(1.5)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8666666666666667" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(232 333.3333333333333) rotate(-42) scale(1.5)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8666666666666667" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(280 310) rotate(42) scale(1.5)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8666666666666667" opacity=".96"/>
+  <circle cx="256" cy="280" r="96" fill="#19c96f" opacity=".08"/>
+    <ellipse cx="256" cy="430" rx="126" ry="28" fill="#06140d" opacity=".38"/>
+    <path d="M205 405h102l-17 39h-68Z" fill="#10251a" stroke="#ffd15a" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M256 420V252" stroke="#19c96f" stroke-width="16" stroke-linecap="round"/>
+    <path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(223 392) rotate(-51) scale(1.57)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8280254777070064" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(293 368) rotate(51) scale(1.57)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8280254777070064" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(215 344) rotate(-51) scale(1.57)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8280254777070064" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(289 320) rotate(51) scale(1.72)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7558139534883721" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(219 296) rotate(-51) scale(1.72)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7558139534883721" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(297 272) rotate(51) scale(1.72)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7558139534883721" opacity=".96"/>
     
-    <path d="M205 428h102" stroke="#ffd15a" stroke-width="9" stroke-linecap="round" opacity=".55"/>
+    <path d="M200 427h112" stroke="#ffd15a" stroke-width="11" stroke-linecap="round" opacity=".7"/>
+    <path d="M214 407c26 11 58 11 84 0" stroke="#76ffd0" stroke-width="4" stroke-linecap="round" opacity=".5"/>
 </svg>

@@ -137,6 +137,18 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   soundSetting.action.appendChild(soundButton);
   settingsView.appendChild(soundSetting.row);
 
+  const sfxVolumeSetting = createSettingRow('sfxVolume');
+  const sfxVolumeInput = document.createElement('input');
+  sfxVolumeInput.type = 'range';
+  sfxVolumeInput.min = '0';
+  sfxVolumeInput.max = '100';
+  sfxVolumeInput.step = '5';
+  sfxVolumeInput.className = 'settings-range';
+  sfxVolumeInput.dataset.role = 'settings-sfx-volume';
+  sfxVolumeInput.dataset.kind = 'settings';
+  sfxVolumeSetting.action.appendChild(sfxVolumeInput);
+  settingsView.appendChild(sfxVolumeSetting.row);
+
   const motionSetting = createSettingRow('motion');
   const motionSelect = document.createElement('select');
   motionSelect.className = 'settings-select';
@@ -150,9 +162,43 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   motionSetting.action.appendChild(motionSelect);
   settingsView.appendChild(motionSetting.row);
 
+  const themeSetting = createSettingRow('theme');
+  const themeSelect = document.createElement('select');
+  themeSelect.className = 'settings-select';
+  themeSelect.dataset.role = 'settings-theme-select';
+  themeSelect.dataset.kind = 'settings';
+  (['botanical', 'neon', 'sunset'] as const).forEach((value) => {
+    const option = document.createElement('option');
+    option.value = value;
+    themeSelect.appendChild(option);
+  });
+  themeSetting.action.appendChild(themeSelect);
+  settingsView.appendChild(themeSetting.row);
+
+  const plantSkinSetting = createSettingRow('plantSkin');
+  const plantSkinSelect = document.createElement('select');
+  plantSkinSelect.className = 'settings-select';
+  plantSkinSelect.dataset.role = 'settings-plant-skin-select';
+  plantSkinSelect.dataset.kind = 'settings';
+  (['classic', 'jade', 'gold', 'violet'] as const).forEach((value) => {
+    const option = document.createElement('option');
+    option.value = value;
+    plantSkinSelect.appendChild(option);
+  });
+  plantSkinSetting.action.appendChild(plantSkinSelect);
+  settingsView.appendChild(plantSkinSetting.row);
+
   const versionSetting = createSettingRow('version');
   versionSetting.row.classList.add('settings-row--static');
   settingsView.appendChild(versionSetting.row);
+
+  const releaseSetting = createSettingRow('release');
+  releaseSetting.row.classList.add('settings-row--static');
+  settingsView.appendChild(releaseSetting.row);
+
+  const creditsSetting = createSettingRow('credits');
+  creditsSetting.row.classList.add('settings-row--static');
+  settingsView.appendChild(creditsSetting.row);
 
   const tools = document.createElement('div');
   tools.className = 'settings-tools';
@@ -217,11 +263,24 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
       soundTitle: soundSetting.title,
       soundDescription: soundSetting.description,
       soundButton,
+      sfxVolumeTitle: sfxVolumeSetting.title,
+      sfxVolumeDescription: sfxVolumeSetting.description,
+      sfxVolumeInput,
       motionTitle: motionSetting.title,
       motionDescription: motionSetting.description,
       motionSelect,
+      themeTitle: themeSetting.title,
+      themeDescription: themeSetting.description,
+      themeSelect,
+      plantSkinTitle: plantSkinSetting.title,
+      plantSkinDescription: plantSkinSetting.description,
+      plantSkinSelect,
       versionTitle: versionSetting.title,
       versionDescription: versionSetting.description,
+      releaseTitle: releaseSetting.title,
+      releaseDescription: releaseSetting.description,
+      creditsTitle: creditsSetting.title,
+      creditsDescription: creditsSetting.description,
       exportButton,
       importButton,
       resetButton,

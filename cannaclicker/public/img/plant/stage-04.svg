@@ -20,9 +20,12 @@
       <stop offset="1" stop-color="#71c7ff" stop-opacity=".48"/>
     </linearGradient>
   </defs>
-  <ellipse cx="256" cy="430" rx="115" ry="25" fill="#06140d" opacity=".35"/>
-    <path d="M256 421V258" stroke="#19c96f" stroke-width="14" stroke-linecap="round"/>
-    <path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(230 380) rotate(-42) scale(1.6)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8125" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(282 356.85714285714283) rotate(42) scale(1.6)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8125" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(230 333.7142857142857) rotate(-42) scale(1.6)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8125" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(282 310.57142857142856) rotate(42) scale(1.6)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8125" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(230 287.42857142857144) rotate(-42) scale(1.6)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.8125" opacity=".96"/>
+  <circle cx="256" cy="256" r="104" fill="#19c96f" opacity=".08"/>
+    <ellipse cx="256" cy="430" rx="126" ry="28" fill="#06140d" opacity=".38"/>
+    <path d="M205 405h102l-17 39h-68Z" fill="#10251a" stroke="#ffd15a" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M256 420V228" stroke="#19c96f" stroke-width="17" stroke-linecap="round"/>
+    <path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(220 392) rotate(-52) scale(1.6600000000000001)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7831325301204819" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(296 368) rotate(52) scale(1.6600000000000001)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7831325301204819" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(212 344) rotate(-52) scale(1.6600000000000001)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7831325301204819" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(292 320) rotate(52) scale(1.6600000000000001)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7831325301204819" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(216 296) rotate(-52) scale(1.81)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7182320441988951" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(300 272) rotate(52) scale(1.81)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7182320441988951" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(220 248) rotate(-52) scale(1.81)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7182320441988951" opacity=".96"/>
     
-    <path d="M205 428h102" stroke="#ffd15a" stroke-width="9" stroke-linecap="round" opacity=".55"/>
+    <path d="M200 427h112" stroke="#ffd15a" stroke-width="11" stroke-linecap="round" opacity=".7"/>
+    <path d="M214 407c26 11 58 11 84 0" stroke="#76ffd0" stroke-width="4" stroke-linecap="round" opacity=".5"/>
 </svg>

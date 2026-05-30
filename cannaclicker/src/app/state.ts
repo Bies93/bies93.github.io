@@ -50,6 +50,16 @@ export interface AbilityRuntimeState {
 
 export type AbilityState = Record<AbilityId, AbilityRuntimeState>;
 
+export type EventBoostTarget = 'bps' | 'bpc' | 'both' | 'cost';
+
+export interface EventBoostState {
+  id: string;
+  target: EventBoostTarget;
+  multiplier: number;
+  startedAt: number;
+  endsAt: number;
+}
+
 export interface PrestigeState {
   seeds: number;
   totalSeeds: number;
@@ -91,6 +101,7 @@ export interface TempState {
   eventRewardMult: number;
   eventSpawnRateMult: number;
   eventDurationMult: number;
+  eventBoosts: EventBoostState[];
   eventBoostEndsAt: number;
   activeEventBoost: string | null;
   hybridBuffPerBuff: number;
@@ -279,6 +290,7 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       eventRewardMult: 1,
       eventSpawnRateMult: 1,
       eventDurationMult: 1,
+      eventBoosts: [],
       eventBoostEndsAt: 0,
       activeEventBoost: null,
       hybridBuffPerBuff: 0,

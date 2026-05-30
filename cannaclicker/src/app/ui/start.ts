@@ -12,7 +12,7 @@ export interface UITicker {
 
 /** Main entry point for bootstrapping the UI from the game loop. */
 export function startUI(state: GameState): UITicker {
-  const audio = createAudioManager(state.muted);
+  const audio = createAudioManager(state.muted, state.settings.sfxVolume);
   const runtime = initUI(state, audio, { t });
 
   const render = (current: GameState) => {

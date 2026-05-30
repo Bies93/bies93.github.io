@@ -1,5 +1,5 @@
 import Decimal from 'break_infinity.js';
-import type { GameState } from './state';
+import type { EventBoostState, EventBoostTarget, GameState } from './state';
 import { awardSeeds, getSeedCap } from './seeds';
 
 export type EventId =
@@ -16,7 +16,7 @@ export type EventId =
   | 'overgrowth'
   | 'seed_bloom';
 
-const GOLDEN_BUD_SECONDS = 15;
+const GOLDEN_BUD_SECONDS = 12;
 const LUCKY_JOINT_MULTIPLIER = 2;
 export const LUCKY_JOINT_DURATION_MS = 15_000;
 const FERTILE_RAIN_SECONDS = 10;
@@ -39,7 +39,7 @@ const SUPPLY_DROP_DURATION_MS = 16_000;
 
 const EVENT_SPAWN_MIN_MS = 14_000;
 const EVENT_SPAWN_MAX_MS = 26_000;
-const FIRST_EVENT_MIN_MS = 75_000;
+const FIRST_EVENT_MIN_MS = 90_000;
 const EVENT_VISIBLE_MIN_MS = 7_000;
 const EVENT_VISIBLE_MAX_MS = 12_000;
 const EVENT_QUEUE_TARGET_SIZE = 3;
@@ -496,7 +496,7 @@ function spawnDueEvents(state: GameState, now: number): void {
 
 function isEarlyEventGateOpen(state: GameState, now: number): boolean {
   const ownsAnyItem = Object.values(state.items).some((amount) => (amount ?? 0) > 0);
-  if (ownsAnyItem || state.total.greaterThanOrEqualTo(60)) {
+  if (ownsAnyItem || state.total.greaterThanOrEqualTo(120)) {
     return true;
   }
 
@@ -954,27 +954,38 @@ function applyEventBoost(
   multiplier: number,
   durationMs: number,
   now: number,
-  target: 'bps' | 'bpc' | 'both' | 'cost' = 'both',
+  target: EventBoostTarget = 'both',
 ): number {
-  const effectiveDuration = Math.round(durationMs * getEventDurationMult(state));
-  state.temp.activeEventBoost = id;
-  state.temp.eventBoostEndsAt = now + effectiveDuration;
-  state.temp.eventBpsMult = new Decimal(target === 'bps' || target === 'both' ? multiplier : 1);
-  state.temp.eventBpcMult = new Decimal(target === 'bpc' || target === 'both' ? multiplier : 1);
-  state.temp.eventCostMult = new Decimal(target === 'cost' ? multiplier : 1);
+  const effectiveDuration = Math.max(1_000, Math.round(durationMs * getEventDurationMult(state)));
+  const boosts = getMutableEventBoosts(state).filter((boost) => boost.endsAt > now);
+  const safeMultiplier = Number.isFinite(multiplier) ? Math.max(0.05, multiplier) : 1;
+  const nextBoost: EventBoostState = {
+    id,
+    target,
+    multiplier: safeMultiplier,
+    startedAt: now,
+    endsAt: now + effectiveDuration,
+  };
+  const existingIndex = boosts.findIndex((boost) => boost.id === id && boost.target === target);
+  if (existingIndex >= 0) {
+    boosts[existingIndex] = nextBoost;
+  } else {
+    boosts.push(nextBoost);
+  }
+
+  state.temp.eventBoosts = boosts;
+  recomputeEventBoostMultipliers(state, now);
   return effectiveDuration;
 }
 
 export function clearExpiredEventBoost(state: GameState, now = Date.now()): boolean {
-  if (state.temp.eventBoostEndsAt > 0 && now >= state.temp.eventBoostEndsAt) {
-    resetEventBoost(state);
-    return true;
-  }
-
-  return false;
+  const before = getMutableEventBoosts(state).length;
+  recomputeEventBoostMultipliers(state, now);
+  return getMutableEventBoosts(state).length !== before;
 }
 
 export function resetEventBoost(state: GameState): void {
+  state.temp.eventBoosts = [];
   state.temp.eventBoostEndsAt = 0;
   state.temp.activeEventBoost = null;
   state.temp.eventBpsMult = new Decimal(1);
@@ -983,11 +994,76 @@ export function resetEventBoost(state: GameState): void {
 }
 
 export function getEventBoostRemaining(state: GameState, now = Date.now()): number {
+  recomputeEventBoostMultipliers(state, now);
   if (state.temp.eventBoostEndsAt <= 0) {
     return 0;
   }
 
   return Math.max(0, Math.floor((state.temp.eventBoostEndsAt - now) / 1000));
+}
+
+export function getActiveEventBoosts(
+  state: GameState,
+  now = Date.now(),
+): { id: string; multiplier: number; target: EventBoostTarget; remainingSeconds: number }[] {
+  recomputeEventBoostMultipliers(state, now);
+  return getMutableEventBoosts(state).map((boost) => ({
+    id: boost.id,
+    multiplier: boost.multiplier,
+    target: boost.target,
+    remainingSeconds: Math.max(0, Math.ceil((boost.endsAt - now) / 1000)),
+  }));
+}
+
+function getMutableEventBoosts(state: GameState): EventBoostState[] {
+  if (!Array.isArray(state.temp.eventBoosts)) {
+    state.temp.eventBoosts = [];
+  }
+
+  return state.temp.eventBoosts;
+}
+
+function recomputeEventBoostMultipliers(state: GameState, now = Date.now()): void {
+  const activeBoosts = getMutableEventBoosts(state).filter(
+    (boost): boost is EventBoostState =>
+      !!boost &&
+      typeof boost.id === 'string' &&
+      typeof boost.target === 'string' &&
+      Number.isFinite(boost.multiplier) &&
+      Number.isFinite(boost.endsAt) &&
+      boost.endsAt > now,
+  );
+
+  state.temp.eventBoosts = activeBoosts;
+
+  let bpsMult = new Decimal(1);
+  let bpcMult = new Decimal(1);
+  let costMult = new Decimal(1);
+  let latestBoost: EventBoostState | null = null;
+  let latestEnd = 0;
+
+  for (const boost of activeBoosts) {
+    const multiplier = Math.max(0.05, boost.multiplier);
+    if (boost.target === 'bps' || boost.target === 'both') {
+      bpsMult = bpsMult.mul(multiplier);
+    }
+    if (boost.target === 'bpc' || boost.target === 'both') {
+      bpcMult = bpcMult.mul(multiplier);
+    }
+    if (boost.target === 'cost') {
+      costMult = costMult.mul(multiplier);
+    }
+    if (boost.endsAt >= latestEnd) {
+      latestEnd = boost.endsAt;
+      latestBoost = boost;
+    }
+  }
+
+  state.temp.eventBpsMult = bpsMult;
+  state.temp.eventBpcMult = bpcMult;
+  state.temp.eventCostMult = costMult;
+  state.temp.eventBoostEndsAt = latestEnd;
+  state.temp.activeEventBoost = latestBoost?.id ?? null;
 }
 
 function rollEventSeeds(state: GameState, id: EventId): number {
