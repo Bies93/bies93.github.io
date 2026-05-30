@@ -59,19 +59,13 @@ export const uiIcons = {
   export: asset('img/ui/export.svg'),
   import: asset('img/ui/import.svg'),
   reset: asset('img/ui/reset.svg'),
-  settings: asset('img/ui/settings.svg'),
   seeds: asset('img/ui/seeds.svg'),
   prestige: asset('img/ui/prestige.svg'),
   research: asset('img/ui/research.svg'),
   upgrade: asset('img/ui/upgrade.svg'),
   shop: asset('img/ui/shop.svg'),
-  stats: asset('img/ui/stats.svg'),
   soundOn: asset('img/ui/sound-on.svg'),
   soundOff: asset('img/ui/sound-off.svg'),
-  info: asset('img/ui/info.svg'),
-  close: asset('img/ui/close.svg'),
-  buy: asset('img/ui/buy.svg'),
-  locked: asset('img/ui/locked.svg'),
   auto: asset('img/ui/auto.svg'),
   warning: asset('img/ui/warning.svg'),
   leaf: asset('img/ui/leaf.svg'),
@@ -82,7 +76,6 @@ export const uiIcons = {
   achievementRibbon: asset('img/ui/achievement-ribbon.svg'),
   achievementLeaf: asset('img/ui/achievement-leaf.svg'),
   achievementLight: asset('img/ui/achievement-light.svg'),
-  achievementPot: asset('img/ui/achievement-pot.svg'),
 } as const;
 
 export const plantStages = [

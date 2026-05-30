@@ -1,4 +1,4 @@
-import { spawnFloatingValue } from '../../../effects';
+import { spawnFloatingValue, spawnParticleBurst } from '../../../effects';
 import { formatDecimal } from '../../../math';
 import { t } from '../../../i18n';
 import { showToast } from '../../services/toast';
@@ -47,6 +47,7 @@ export const defaultSchedulerBindings: SchedulerBindings = {
     }
 
     layer.appendChild(button);
+    context.audio.playEventSpawn(getEventSoundKind(definition.id));
     button.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -58,31 +59,44 @@ export const defaultSchedulerBindings: SchedulerBindings = {
     element.remove();
   },
   showEventFeedback(context, state, id, result, refreshed, origin) {
-    void context;
     const translationKey = getEventTranslationKey(id);
+    const soundKind = getEventSoundKind(id);
+    context.audio.playEventCollect(soundKind);
+    if (result.multiplier) {
+      context.audio.playBuffActivate();
+    }
 
     if (result.budGain) {
       const formatted = formatDecimal(result.budGain);
-      spawnFloatingValue(origin, `+${formatted}`);
+      spawnFloatingValue(origin, `+${formatted}`, soundKind === 'rare' ? 'gold' : 'bud');
+      spawnParticleBurst(
+        origin,
+        soundKind === 'rare' ? 'gold' : 'bud',
+        soundKind === 'rare' ? 12 : 7,
+      );
       showToast({
         title: t(state.locale, `events.${translationKey}.title`),
         message: t(state.locale, `events.${translationKey}.body`, { buds: formatted }),
+        tone: soundKind === 'rare' ? 'rare' : 'success',
       });
     }
 
     if (typeof result.seedGain === 'number' && result.seedGain > 0) {
       const formatted = result.seedGain.toString();
-      spawnFloatingValue(origin, `+${formatted} Seeds`, 'rgb(252 211 77)');
+      spawnFloatingValue(origin, `+${formatted} Seeds`, 'seed');
+      spawnParticleBurst(origin, 'seed', 9);
 
       showToast({
         title: t(state.locale, `events.${translationKey}.title`),
         message: t(state.locale, 'events.generic.seedBody', { seeds: formatted }),
+        tone: 'success',
       });
     }
 
     if (result.multiplier) {
       const durationSeconds = Math.round((result.durationMs ?? 0) / 1000);
-      spawnFloatingValue(origin, `×${result.multiplier.toFixed(1)}`, 'rgb(96 165 250)');
+      spawnFloatingValue(origin, `×${result.multiplier.toFixed(1)}`, 'boost');
+      spawnParticleBurst(origin, 'boost', 9);
       const bodyKey = refreshed ? 'events.generic.boostRefresh' : 'events.generic.boostBody';
       showToast({
         title: t(state.locale, `events.${translationKey}.title`),
@@ -90,7 +104,26 @@ export const defaultSchedulerBindings: SchedulerBindings = {
           multiplier: result.multiplier,
           duration: durationSeconds,
         }),
+        tone: soundKind === 'rare' ? 'rare' : 'success',
       });
     }
   },
 };
+
+function getEventSoundKind(id: EventId): 'reward' | 'seed' | 'buff' | 'rare' {
+  switch (id) {
+    case 'mutant_sprout':
+    case 'overgrowth':
+    case 'seed_bloom':
+      return 'rare';
+    case 'seed_pack':
+      return 'seed';
+    case 'lucky_joint':
+    case 'market_rush':
+    case 'green_surge':
+    case 'calm_growth':
+      return 'buff';
+    default:
+      return 'reward';
+  }
+}

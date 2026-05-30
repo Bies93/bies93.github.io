@@ -1,6 +1,6 @@
 # CannaClicker
 
-CannaClicker is a stylised botanical idle clicker built with Vite, TypeScript and Tailwind CSS. The current reboot focuses on gameplay clarity, a manifest-driven asset system, improved early progression, expanded random events and a clearer prestige loop.
+CannaClicker is a stylised botanical idle clicker built with Vite, TypeScript and Tailwind CSS. The current release candidate focuses on gameplay clarity, polished feedback, a manifest-driven asset system, improved progression, expanded random events and a clearer prestige loop.
 
 ## Requirements
 
@@ -31,6 +31,7 @@ No Windows setup wrapper is required.
 - Upgrades, 27 research nodes, 4 active abilities, 120 achievements and guided goals
 - 12 random event types with instant rewards, seeds, chains, discounts or temporary boosts
 - Prestige reset that awards spendable seeds while total seeds keep permanent power
+- Guided goals, polished feedback, procedural SFX and motion intensity settings
 - Manifest-driven SVG assets for items, events, UI, research, plant stages and backgrounds
 - Autosave, manual export/import, offline progress and lightweight audio feedback
 
@@ -44,6 +45,7 @@ No Windows setup wrapper is required.
 - [Asset System](docs/design/assets.md)
 - [Shop Economy](docs/design/shop-economy.md)
 - [UI System](docs/design/ui-system.md)
+- [Game Feel](docs/design/game-feel.md)
 - [Events And Abilities](docs/design/events-abilities.md)
 - [Prestige](docs/design/prestige.md)
 - [Seeds](docs/design/seeds.md)
@@ -52,4 +54,9 @@ No Windows setup wrapper is required.
 - [Flavor Style](docs/content/flavor-style.md)
 - [Phase Targets](docs/balance/phase-targets.md)
 - [Economy Tables](docs/balance/economy-tables.md)
+- [Final V1 Balance](docs/balance/final-v1-balance.md)
 - [Playthrough Notes](docs/balance/playthrough-notes.md)
+- [V1 Scope](docs/release/v1-scope.md)
+- [Release Checklist](docs/release/checklist.md)
+- [Known Issues](docs/release/known-issues.md)
+- [Post-Launch Roadmap](docs/release/post-launch-roadmap.md)

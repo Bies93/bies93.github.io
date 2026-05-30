@@ -2,6 +2,7 @@ import type { GameState } from '../../state';
 import { uiIcons } from '../../assetManifest';
 import { t, type LocaleKey } from '../../i18n';
 import { formatAbilityTooltip, getAbilityLabel } from '../../abilities';
+import { APP_VERSION } from '../../version';
 import type { SidePanelTab, UIRefs } from '../types';
 
 const STAT_META: Record<LocaleKey, Record<string, string>> = {
@@ -35,6 +36,9 @@ const SIDE_PANEL_TAB_KEYS: Record<SidePanelTab, string> = {
 };
 
 export function updateStrings(state: GameState, refs: UIRefs): void {
+  document.body.dataset.motion = state.settings.motionIntensity;
+  refs.root.dataset.motion = state.settings.motionIntensity;
+
   refs.headerTitle.textContent = t(state.locale, 'app.title');
   refs.clickButton.setAttribute('aria-label', t(state.locale, 'actions.click'));
   refs.clickLabel.textContent = t(state.locale, 'actions.click');
@@ -115,6 +119,27 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
   refs.sidePanel.settings.soundButton.textContent = state.muted
     ? t(state.locale, 'actions.unmute')
     : t(state.locale, 'actions.mute');
+  refs.sidePanel.settings.motionTitle.textContent = t(state.locale, 'settings.motion.title');
+  refs.sidePanel.settings.motionDescription.textContent = t(
+    state.locale,
+    `settings.motion.description.${state.settings.motionIntensity}`,
+  );
+  refs.sidePanel.settings.motionSelect.value = state.settings.motionIntensity;
+  refs.sidePanel.settings.motionSelect.setAttribute(
+    'aria-label',
+    t(state.locale, 'settings.motion.title'),
+  );
+  Array.from(refs.sidePanel.settings.motionSelect.options).forEach((option) => {
+    option.textContent = t(state.locale, `settings.motion.option.${option.value}`);
+  });
+  refs.sidePanel.settings.versionTitle.textContent = t(state.locale, 'settings.version.title');
+  refs.sidePanel.settings.versionDescription.textContent = t(
+    state.locale,
+    'settings.version.body',
+    {
+      version: APP_VERSION,
+    },
+  );
   refs.sidePanel.settings.exportButton.textContent = t(state.locale, 'actions.export');
   refs.sidePanel.settings.importButton.textContent = t(state.locale, 'actions.import');
   refs.sidePanel.settings.resetButton.textContent = t(state.locale, 'actions.reset');

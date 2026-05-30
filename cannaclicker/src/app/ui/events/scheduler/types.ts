@@ -1,10 +1,12 @@
 import type { EventClickResult, EventId } from '../../../events';
 import type { GameState } from '../../../state';
+import type { AudioManager } from '../../../audio';
 import type { UIRefs } from '../../types';
 import type { EventPresentation } from '../random';
 
 export interface SchedulerContext {
   refs: UIRefs;
+  audio: AudioManager;
   render(state: GameState): void;
   translate(key: string, params?: Record<string, string | number>): string;
 }

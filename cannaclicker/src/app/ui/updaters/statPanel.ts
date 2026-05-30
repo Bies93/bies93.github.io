@@ -146,6 +146,7 @@ function updateBuffList(state: GameState, refs: UIRefs): void {
 
   refs.buffList.innerHTML = '';
   refs.buffList.classList.toggle('is-empty', buffs.length === 0);
+  refs.root.dataset.buff = buffs.length === 0 ? 'none' : 'active';
 
   if (buffs.length === 0) {
     const empty = document.createElement('span');

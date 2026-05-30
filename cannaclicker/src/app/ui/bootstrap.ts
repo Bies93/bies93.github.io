@@ -56,6 +56,7 @@ export function initUI(
 
   const scheduler = createEventScheduler({
     refs,
+    audio,
     render,
     translate(key, params) {
       return i18n.t(initialState.locale, key, params);

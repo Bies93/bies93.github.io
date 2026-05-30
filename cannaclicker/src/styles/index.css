@@ -1877,9 +1877,18 @@ button {
   }
 
   /* HUD positioning for mobile */
-  .hud-notice {
+  [data-ui-role='hud-notice'] {
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+    left: 0;
+    right: auto;
     top: max(1rem, env(safe-area-inset-top, 0px) + 1rem);
+    width: 100vw;
+    width: 100dvw;
+    max-width: 100vw;
+    max-width: 100dvw;
     padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+    overflow-x: clip;
   }
 
   .side-panel-shell {
@@ -1887,10 +1896,17 @@ button {
   }
 
   .toast-stack {
-    right: 0;
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+    left: 0;
+    right: auto;
     bottom: max(1rem, env(safe-area-inset-bottom, 0px));
-    max-width: none;
+    width: 100vw;
+    width: 100dvw;
+    max-width: 100vw;
+    max-width: 100dvw;
     padding-inline: 0.75rem;
+    overflow-x: clip;
   }
 }
 
@@ -1915,6 +1931,266 @@ button {
   .ability-btn:active {
     transform: scale(0.95);
     transition: transform 100ms ease;
+  }
+}
+
+/* Release polish: motion, feedback, and audio-facing states */
+.floating-value {
+  position: absolute;
+  z-index: 45;
+  pointer-events: none;
+  user-select: none;
+  transform: translate(-50%, -50%);
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 14px color-mix(in srgb, currentColor 60%, transparent);
+  will-change: transform, opacity;
+}
+
+.floating-value--boost,
+.floating-value--milestone,
+.floating-value--achievement,
+.floating-value--prestige {
+  font-size: 1rem;
+}
+
+.floating-value--aggregate {
+  min-width: 4.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(8, 13, 23, 0.78);
+  padding: 0.18rem 0.5rem;
+  text-align: center;
+}
+
+.fx-particle {
+  position: absolute;
+  z-index: 38;
+  pointer-events: none;
+  border-radius: 999px;
+  background: rgb(74 222 128);
+  box-shadow: 0 0 16px currentColor;
+  color: rgb(74 222 128);
+  will-change: transform, opacity;
+}
+
+.fx-particle--boost {
+  background: rgb(96 165 250);
+  color: rgb(96 165 250);
+}
+
+.fx-particle--seed {
+  background: rgb(252 211 77);
+  color: rgb(252 211 77);
+}
+
+.fx-particle--gold,
+.fx-particle--milestone {
+  background: rgb(250 204 21);
+  color: rgb(250 204 21);
+}
+
+.fx-particle--achievement {
+  background: rgb(125 211 252);
+  color: rgb(125 211 252);
+}
+
+.fx-particle--prestige {
+  background: rgb(216 180 254);
+  color: rgb(216 180 254);
+}
+
+.click-button.is-boosted-click {
+  animation: boosted-click-pop 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow:
+    0 0 0 1px rgba(96, 165, 250, 0.35),
+    0 22px 70px rgba(96, 165, 250, 0.28);
+}
+
+.click-button.is-clicking {
+  animation: click-pop 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-buff='active'] .click-button {
+  box-shadow:
+    0 0 0 1px rgba(96, 165, 250, 0.24),
+    0 24px 72px rgba(96, 165, 250, 0.18);
+}
+
+.shop-card.is-denied,
+.upgrade-card.is-denied,
+.research-card.is-denied {
+  animation: denied-shake 340ms ease;
+}
+
+.shop-card.is-milestone-purchase {
+  animation: milestone-card-pop 880ms cubic-bezier(0.16, 1, 0.3, 1);
+  border-color: rgba(190, 242, 100, 0.7);
+}
+
+.is-value-pop {
+  animation: value-pop 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-ui-role='app-root'].is-prestiging {
+  animation: prestige-wash 920ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.event-icon {
+  overflow: hidden;
+  animation: event-arrive 360ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.event-icon[data-rarity='rare'] {
+  border-color: rgba(250, 204, 21, 0.72);
+  box-shadow:
+    0 0 0 1px rgba(250, 204, 21, 0.22),
+    0 26px 54px rgba(250, 204, 21, 0.28);
+}
+
+.event-icon__timer {
+  position: absolute;
+  inset-inline: 0.55rem;
+  bottom: 0.42rem;
+  height: 0.18rem;
+  transform-origin: left center;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(250, 204, 21, 0.95), rgba(52, 211, 153, 0.65));
+}
+
+.toast[data-tone='success'] {
+  border-color: rgba(52, 211, 153, 0.45);
+}
+
+.toast[data-tone='rare'] {
+  border-color: rgba(250, 204, 21, 0.55);
+  box-shadow: 0 24px 46px rgba(250, 204, 21, 0.14);
+}
+
+.toast[data-tone='prestige'] {
+  border-color: rgba(216, 180, 254, 0.58);
+  box-shadow: 0 24px 48px rgba(168, 85, 247, 0.18);
+}
+
+.settings-select {
+  min-height: 2.75rem;
+  min-width: 9rem;
+  border: 1px solid rgba(52, 211, 153, 0.32);
+  border-radius: var(--ui-radius-sm);
+  background: rgba(15, 23, 42, 0.92);
+  color: rgba(209, 250, 229, 0.98);
+  padding: 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.settings-row--static .settings-row__action {
+  display: none;
+}
+
+[data-motion='reduced'] .event-icon__img,
+[data-motion='minimal'] .event-icon__img {
+  animation: none;
+}
+
+@keyframes click-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(0.975, 1.025);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes boosted-click-pop {
+  0% {
+    transform: scale(1);
+  }
+  42% {
+    transform: scale(0.95, 1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes denied-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  55% {
+    transform: translateX(4px);
+  }
+  78% {
+    transform: translateX(-2px);
+  }
+}
+
+@keyframes value-pop {
+  0% {
+    transform: scale(1);
+    color: inherit;
+  }
+  40% {
+    transform: scale(1.08);
+    color: rgb(190 242 100);
+  }
+  100% {
+    transform: scale(1);
+    color: inherit;
+  }
+}
+
+@keyframes milestone-card-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.018);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes event-arrive {
+  0% {
+    opacity: 0;
+    scale: 0.72;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes prestige-wash {
+  0% {
+    filter: saturate(1) brightness(1);
+  }
+  45% {
+    filter: saturate(1.35) brightness(1.14);
+  }
+  100% {
+    filter: saturate(1) brightness(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .click-button.is-clicking,
+  .click-button.is-boosted-click,
+  .shop-card.is-milestone-purchase,
+  [data-ui-role='app-root'].is-prestiging,
+  .event-icon {
+    animation-duration: 1ms;
   }
 }
 

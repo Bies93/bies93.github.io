@@ -72,13 +72,14 @@ export function isPrestigeModalOpen(): boolean {
   return prestigeOpen;
 }
 
-export function performPrestigeAction(state: GameState, refs: UIRefs): void {
+export function performPrestigeAction(state: GameState, refs: UIRefs): boolean {
   const preview = getPrestigePreview(state);
   if (!prestigeAcknowledged || !preview.requirementMet) {
-    return;
+    return false;
   }
 
   performPrestige(state);
   state.temp.needsRecalc = true;
   closePrestigeModal(refs);
+  return true;
 }

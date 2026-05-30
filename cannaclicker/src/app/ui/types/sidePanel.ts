@@ -113,6 +113,11 @@ export interface SidePanelRefs {
     soundTitle: HTMLElement;
     soundDescription: HTMLElement;
     soundButton: HTMLButtonElement;
+    motionTitle: HTMLElement;
+    motionDescription: HTMLElement;
+    motionSelect: HTMLSelectElement;
+    versionTitle: HTMLElement;
+    versionDescription: HTMLElement;
     exportButton: HTMLButtonElement;
     importButton: HTMLButtonElement;
     resetButton: HTMLButtonElement;

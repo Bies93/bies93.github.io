@@ -3,7 +3,7 @@ import { openPrestigeModal } from './services/prestigeModal';
 import type { WireContext } from './wire';
 
 export function wireSidePanel(context: WireContext): void {
-  const { refs, state, render } = context;
+  const { refs, state, audio, render } = context;
 
   refs.sidePanel.research.filters.forEach((button, key) => {
     button.addEventListener('click', () => {
@@ -13,6 +13,7 @@ export function wireSidePanel(context: WireContext): void {
       }
 
       context.setActiveResearchFilter(next, next !== 'all');
+      audio.playUi();
       render(state);
     });
   });
@@ -24,6 +25,7 @@ export function wireSidePanel(context: WireContext): void {
       }
 
       refs.sidePanel.achievements.activeFilter = key;
+      audio.playUi();
       render(state);
     });
   });
@@ -35,11 +37,13 @@ export function wireSidePanel(context: WireContext): void {
       }
 
       context.setActiveSidePanelTab(tab);
+      audio.playUi();
       render(state);
     });
   });
 
   refs.sidePanel.prestige.actionButton.addEventListener('click', () => {
+    audio.playUi();
     openPrestigeModal(refs, state);
   });
 }

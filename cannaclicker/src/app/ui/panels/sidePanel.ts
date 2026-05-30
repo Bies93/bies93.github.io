@@ -137,6 +137,23 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   soundSetting.action.appendChild(soundButton);
   settingsView.appendChild(soundSetting.row);
 
+  const motionSetting = createSettingRow('motion');
+  const motionSelect = document.createElement('select');
+  motionSelect.className = 'settings-select';
+  motionSelect.dataset.role = 'settings-motion-select';
+  motionSelect.dataset.kind = 'settings';
+  (['full', 'reduced', 'minimal'] as const).forEach((value) => {
+    const option = document.createElement('option');
+    option.value = value;
+    motionSelect.appendChild(option);
+  });
+  motionSetting.action.appendChild(motionSelect);
+  settingsView.appendChild(motionSetting.row);
+
+  const versionSetting = createSettingRow('version');
+  versionSetting.row.classList.add('settings-row--static');
+  settingsView.appendChild(versionSetting.row);
+
   const tools = document.createElement('div');
   tools.className = 'settings-tools';
 
@@ -200,6 +217,11 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
       soundTitle: soundSetting.title,
       soundDescription: soundSetting.description,
       soundButton,
+      motionTitle: motionSetting.title,
+      motionDescription: motionSetting.description,
+      motionSelect,
+      versionTitle: versionSetting.title,
+      versionDescription: versionSetting.description,
       exportButton,
       importButton,
       resetButton,

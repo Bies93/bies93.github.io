@@ -169,8 +169,10 @@ function updatePurchaseButtons(
 
   for (const [quantity, button] of pairs) {
     const option = entry.purchaseOptions[quantity];
-    button.disabled = !option.enabled;
+    const hardDisabled = !entry.unlocked || option.quantity <= 0;
+    button.disabled = hardDisabled;
     button.setAttribute('aria-disabled', option.enabled ? 'false' : 'true');
+    button.dataset.affordable = option.enabled ? 'true' : 'false';
     button.setAttribute('title', formatPurchaseTitle(locale, option));
   }
 }

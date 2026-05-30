@@ -1,5 +1,6 @@
 import { exportSave, importSave, clearSave } from '../save';
 import { createDefaultState } from '../state';
+import type { MotionIntensity } from '../settings';
 import { recalcDerivedValues, evaluateAchievements } from '../game';
 import { updateStrings } from './updaters/strings';
 import type { WireContext } from './wire';
@@ -9,6 +10,7 @@ export function wirePersistence(context: WireContext): void {
 
   const handleMute = () => {
     state.muted = audio.toggleMute();
+    audio.playSettings();
     updateStrings(state, refs);
   };
 
@@ -66,6 +68,17 @@ export function wirePersistence(context: WireContext): void {
   refs.sidePanel.settings.resetButton.addEventListener('click', handleReset);
   refs.sidePanel.settings.offlineToggle.addEventListener('change', (event) => {
     state.settings.showOfflineEarnings = (event.target as HTMLInputElement).checked;
+    audio.playSettings();
     render(state);
   });
+  refs.sidePanel.settings.motionSelect.addEventListener('change', (event) => {
+    const value = (event.target as HTMLSelectElement).value;
+    state.settings.motionIntensity = isMotionIntensity(value) ? value : 'full';
+    audio.playSettings();
+    render(state);
+  });
+}
+
+function isMotionIntensity(value: string): value is MotionIntensity {
+  return value === 'full' || value === 'reduced' || value === 'minimal';
 }

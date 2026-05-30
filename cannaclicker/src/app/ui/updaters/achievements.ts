@@ -1,6 +1,7 @@
 import { t } from '../../i18n';
 import type { GameState } from '../../state';
 import { achievements } from '../../../data/achievements';
+import type { AchievementDefinition } from '../../../data/achievements';
 import { getAchievementProgress } from '../../achievements';
 import { formatDecimal } from '../../math';
 import type { UIRefs } from '../types';
@@ -16,6 +17,7 @@ export function updateAchievements(
 ): void {
   const { achievements: achievementRefs } = refs.sidePanel;
   const activeFilter = achievementRefs.activeFilter;
+  const newlyUnlocked: AchievementDefinition[] = [];
 
   achievementRefs.filters.forEach((button, key) => {
     const active = key === activeFilter;
@@ -77,17 +79,48 @@ export function updateAchievements(
         });
 
     if (unlocked && !seenUnlocked.has(definition.id)) {
-      if (initialised && showToast) {
-        showToast({
-          title: t(state.locale, 'achievements.toast.title'),
-          message: definition.name[state.locale],
-        });
-      }
+      newlyUnlocked.push(definition);
       seenUnlocked.add(definition.id);
     }
   });
 
+  if (initialised && showToast && newlyUnlocked.length > 0) {
+    const rarest = newlyUnlocked.reduce((current, next) =>
+      rarityRank(next.rarity) > rarityRank(current.rarity) ? next : current,
+    );
+    if (newlyUnlocked.length === 1) {
+      showToast({
+        title: t(state.locale, 'achievements.toast.title'),
+        message: rarest.name[state.locale],
+        tone: rarest.rarity === 'common' ? 'success' : 'rare',
+      });
+    } else {
+      showToast({
+        title: t(state.locale, 'achievements.toast.title'),
+        message: t(state.locale, 'achievements.toast.group', {
+          count: newlyUnlocked.length,
+          name: rarest.name[state.locale],
+        }),
+        tone: rarest.rarity === 'common' ? 'success' : 'rare',
+        durationMs: 6200,
+      });
+    }
+  }
+
   initialised = true;
+}
+
+function rarityRank(rarity: AchievementDefinition['rarity']): number {
+  switch (rarity) {
+    case 'legendary':
+      return 4;
+    case 'epic':
+      return 3;
+    case 'rare':
+      return 2;
+    default:
+      return 1;
+  }
 }
 
 function shouldShow(

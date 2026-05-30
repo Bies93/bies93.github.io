@@ -178,6 +178,10 @@ export function normaliseSettings(settings?: Partial<SettingsState>): SettingsSt
       typeof settings.showOfflineEarnings === 'boolean'
         ? settings.showOfflineEarnings
         : defaults.showOfflineEarnings,
+    motionIntensity:
+      settings.motionIntensity === 'reduced' || settings.motionIntensity === 'minimal'
+        ? settings.motionIntensity
+        : defaults.motionIntensity,
   } satisfies SettingsState;
 }
 

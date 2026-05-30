@@ -4,6 +4,7 @@ export interface ToastOptions {
   title: string;
   message: string;
   durationMs?: number;
+  tone?: 'default' | 'success' | 'rare' | 'warning' | 'prestige';
 }
 
 type ShowToast = ((options: ToastOptions) => void) & {
@@ -34,6 +35,7 @@ export const showToast: ShowToast = ((
 
   const toast = document.createElement('div');
   toast.className = 'toast';
+  toast.dataset.tone = options.tone ?? 'default';
 
   const heading = document.createElement('strong');
   heading.className = 'toast-title';

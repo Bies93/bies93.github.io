@@ -2,6 +2,8 @@ import { evaluateAchievements, recalcDerivedValues } from '../game';
 import type { AudioManager } from '../audio';
 import type { GameState } from '../state';
 import type { ResearchFilter } from '../research';
+import { getResearchList } from '../research';
+import { getUpgradeEntries } from '../upgrades';
 import type { InitI18nApi } from './bootstrap';
 import type { UIRefs, SidePanelTab } from './types';
 import { updateStrings } from './updaters/strings';
@@ -17,8 +19,10 @@ import { updateAchievements } from './updaters/achievements';
 import { updatePrestigeModal } from './services/prestigeModal';
 import { updateOfflineToast } from './updaters/offline';
 import { save } from '../save';
-import { spawnFloatingValue } from '../effects';
+import { pulseElement, spawnFloatingValue, spawnParticleBurst } from '../effects';
 import type { ToastOptions } from './services/toast';
+import { items } from '../../data/items';
+import { canUnlockItem } from '../shop';
 
 interface RendererContext {
   refs: UIRefs;
@@ -32,6 +36,9 @@ interface RendererContext {
 
 export function createRenderer(context: RendererContext): (state: GameState) => void {
   const { refs, audio, i18n, showToast } = context;
+  let unlockSnapshot: ReturnType<typeof createUnlockSnapshot> | null = null;
+  let eventSystemSeen = false;
+  let prestigeReadySeen = false;
 
   const render = (state: GameState) => {
     if (state.temp.needsRecalc) {
@@ -47,9 +54,32 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
     updateSidePanel(refs, context.getActiveSidePanelTab());
 
     updateShop(state, refs, {
-      onPurchase: () => {
-        audio.playPurchase();
+      onPurchase: (feedback) => {
+        const locale = state.locale;
+        const milestone = feedback.milestone;
+        audio.playPurchase({ milestone: Boolean(milestone) });
+        if (milestone) {
+          showToast({
+            title: i18n.t(locale, 'shop.milestone.toast.title'),
+            message: i18n.t(locale, 'shop.milestone.toast.message', {
+              item: feedback.definition.name[locale],
+              count: milestone,
+            }),
+            tone: 'success',
+            durationMs: 4200,
+          });
+          spawnParticleBurst(
+            refs.sidePanel.shop.entries.get(feedback.definition.id)?.container ?? refs.root,
+            'milestone',
+            10,
+          );
+        }
         render(state);
+      },
+      onCannotPurchase: (container) => {
+        audio.playCannotBuy();
+        pulseElement(container, 'is-denied', 340);
+        spawnFloatingValue(container, i18n.t(state.locale, 'shop.cannotBuy'), 'error');
       },
     });
 
@@ -59,16 +89,17 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
         const locale = state.locale;
         const title = i18n.t(locale, 'upgrades.toast.title');
         const message = i18n.t(locale, 'upgrades.toast.message', { name: definition.name[locale] });
-        showToast({ title, message });
+        showToast({ title, message, tone: 'success' });
         save(state);
-        spawnFloatingValue(container, i18n.t(locale, 'upgrades.fx.spark'), 'rgb(74 222 128)');
+        spawnFloatingValue(container, i18n.t(locale, 'upgrades.fx.spark'), 'achievement');
+        spawnParticleBurst(container, 'achievement', 8);
         render(state);
       },
     });
 
     const researchState = context.getResearchState();
     const result = updateResearch(state, refs, researchState.filter, researchState.manual, () => {
-      audio.playPurchase();
+      audio.playUnlock();
       recalcDerivedValues(state);
       render(state);
     });
@@ -76,10 +107,130 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
     context.setResearchState(result.activeFilter, result.researchFilterManuallySelected);
 
     updatePrestigePanel(state, refs);
-    updateAchievements(state, refs, (options: ToastOptions) => showToast(options));
+    updateAchievements(state, refs, (options: ToastOptions) => {
+      audio.playAchievement(options.tone === 'rare' ? 'rare' : 'common');
+      showToast(options);
+    });
     updatePrestigeModal(refs, state);
     updateOfflineToast(state, (options: ToastOptions) => showToast(options));
+
+    unlockSnapshot = announceUnlocks(
+      state,
+      unlockSnapshot,
+      eventSystemSeen,
+      prestigeReadySeen,
+      context,
+      (nextEventSeen, nextPrestigeSeen) => {
+        eventSystemSeen = nextEventSeen;
+        prestigeReadySeen = nextPrestigeSeen;
+      },
+    );
   };
 
   return render;
+}
+
+interface UnlockSnapshot {
+  items: Set<string>;
+  upgrades: Set<string>;
+  research: Set<string>;
+}
+
+function createUnlockSnapshot(state: GameState): UnlockSnapshot {
+  return {
+    items: new Set(items.filter((item) => canUnlockItem(state, item)).map((item) => item.id)),
+    upgrades: new Set(
+      getUpgradeEntries(state)
+        .filter((entry) => entry.unlocked && !entry.owned)
+        .map((entry) => entry.definition.id),
+    ),
+    research: new Set(getResearchList(state, 'available').map((entry) => entry.node.id)),
+  } satisfies UnlockSnapshot;
+}
+
+function announceUnlocks(
+  state: GameState,
+  previous: UnlockSnapshot | null,
+  eventSystemSeen: boolean,
+  prestigeReadySeen: boolean,
+  context: RendererContext,
+  updateFlags: (eventSeen: boolean, prestigeSeen: boolean) => void,
+): UnlockSnapshot {
+  const next = createUnlockSnapshot(state);
+  if (!previous) {
+    updateFlags(isEventSystemOpen(state), getPrestigePreviewSafe(state));
+    return next;
+  }
+
+  const locale = state.locale;
+  const unlockedItems = items.filter(
+    (item) => next.items.has(item.id) && !previous.items.has(item.id),
+  );
+  const unlockedUpgrade = getUpgradeEntries(state).find(
+    (entry) =>
+      next.upgrades.has(entry.definition.id) && !previous.upgrades.has(entry.definition.id),
+  );
+  const unlockedResearch = getResearchList(state, 'available').find(
+    (entry) => next.research.has(entry.node.id) && !previous.research.has(entry.node.id),
+  );
+  const eventOpen = isEventSystemOpen(state);
+  const prestigeReady = getPrestigePreviewSafe(state);
+
+  if (unlockedItems.length > 0) {
+    context.audio.playUnlock();
+    context.showToast({
+      title: context.i18n.t(locale, 'unlock.item.title'),
+      message: context.i18n.t(locale, 'unlock.item.message', {
+        item: unlockedItems[0].name[locale],
+      }),
+      tone: 'success',
+    });
+  } else if (unlockedUpgrade) {
+    context.audio.playUnlock();
+    context.showToast({
+      title: context.i18n.t(locale, 'unlock.upgrade.title'),
+      message: context.i18n.t(locale, 'unlock.upgrade.message', {
+        name: unlockedUpgrade.definition.name[locale],
+      }),
+      tone: 'success',
+    });
+  } else if (unlockedResearch) {
+    context.audio.playUnlock();
+    context.showToast({
+      title: context.i18n.t(locale, 'unlock.research.title'),
+      message: context.i18n.t(locale, 'unlock.research.message', {
+        name: unlockedResearch.node.name[locale],
+      }),
+      tone: 'success',
+    });
+  } else if (eventOpen && !eventSystemSeen) {
+    context.audio.playUnlock();
+    context.showToast({
+      title: context.i18n.t(locale, 'unlock.events.title'),
+      message: context.i18n.t(locale, 'unlock.events.message'),
+      tone: 'success',
+    });
+  } else if (prestigeReady && !prestigeReadySeen) {
+    context.audio.playPrestige();
+    context.showToast({
+      title: context.i18n.t(locale, 'unlock.prestige.title'),
+      message: context.i18n.t(locale, 'unlock.prestige.message'),
+      tone: 'prestige',
+      durationMs: 6500,
+    });
+  }
+
+  updateFlags(eventOpen || eventSystemSeen, prestigeReady || prestigeReadySeen);
+  return next;
+}
+
+function isEventSystemOpen(state: GameState): boolean {
+  return (
+    Object.values(state.items).some((amount) => (amount ?? 0) > 0) ||
+    state.total.greaterThanOrEqualTo(60)
+  );
+}
+
+function getPrestigePreviewSafe(state: GameState): boolean {
+  return state.prestige.lifetimeBuds.greaterThanOrEqualTo(1_000_000);
 }

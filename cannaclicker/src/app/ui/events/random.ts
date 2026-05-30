@@ -47,6 +47,8 @@ export function createEventButton(
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'event-icon';
+  button.dataset.eventId = definition.id;
+  button.dataset.rarity = isRareEvent(definition.id) ? 'rare' : 'common';
   button.dataset.uiRole = 'random-event';
   button.dataset.testid = 'random-event';
   button.style.left = `${path.startX}px`;
@@ -71,6 +73,15 @@ export function createEventButton(
   label.textContent = t(state.locale, definition.labelKey);
   button.appendChild(label);
 
+  const timer = document.createElement('span');
+  timer.className = 'event-icon__timer';
+  button.appendChild(timer);
+  timer.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], {
+    duration: lifetime,
+    easing: 'linear',
+    fill: 'forwards',
+  });
+
   button.animate(
     [
       { transform: 'translate(-50%, -50%)' },
@@ -86,6 +97,10 @@ export function createEventButton(
   );
 
   return button;
+}
+
+function isRareEvent(id: EventId): boolean {
+  return id === 'mutant_sprout' || id === 'overgrowth' || id === 'seed_bloom';
 }
 
 export function computeEventPath(
