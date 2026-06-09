@@ -63,10 +63,7 @@ export function isAbilityUnlocked(state: GameState, id: AbilityId): boolean {
     return false;
   }
 
-  if (
-    unlock.prestigeSeeds &&
-    (state.prestige.totalSeeds ?? state.prestige.seeds) < unlock.prestigeSeeds
-  ) {
+  if (unlock.prestigeSeeds && (state.prestige.totalAscensionSeeds ?? 0) < unlock.prestigeSeeds) {
     return false;
   }
 
@@ -92,9 +89,31 @@ export function activateAbility(state: GameState, id: AbilityId, now = Date.now(
   const effectiveDuration = ability.durationSec * (durationMult > 0 ? durationMult : 1);
   runtime.endsAt = now + effectiveDuration * 1000;
   runtime.readyAt = runtime.endsAt + ability.cooldownSec * 1000;
+  if (ability.appliesTo === 'cooldown') {
+    syncAbilityCooldowns(state, ability.id, runtime.multiplier, now);
+  }
   state.meta.abilityUsesTotal += 1;
   state.meta.abilityUses[id] = (state.meta.abilityUses[id] ?? 0) + 1;
   return true;
+}
+
+function syncAbilityCooldowns(
+  state: GameState,
+  sourceId: AbilityId,
+  multiplier: number,
+  now: number,
+): void {
+  const factor = Number.isFinite(multiplier) ? Math.max(0.35, Math.min(0.9, multiplier)) : 0.65;
+  for (const ability of ABILITIES) {
+    if (ability.id === sourceId) {
+      continue;
+    }
+    const other = getRuntime(state, ability.id);
+    if (!other || other.active || other.readyAt <= now) {
+      continue;
+    }
+    other.readyAt = now + (other.readyAt - now) * factor;
+  }
 }
 
 export function endAbility(state: GameState, id: AbilityId): void {

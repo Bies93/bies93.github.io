@@ -12,6 +12,7 @@ import {
 import type { ShopCardRefs } from '../../types';
 import { formatPercent } from '../../utils/format';
 import { itemById, type ItemId } from '../../../../data/items';
+import { getActiveItemSynergySummaries } from '../../../itemSynergies';
 
 export function renderShopCard(state: GameState, card: ShopCardRefs, entry: ShopEntry): void {
   const locale = state.locale;
@@ -24,7 +25,7 @@ export function renderShopCard(state: GameState, card: ShopCardRefs, entry: Shop
   updateCostAndOwned(card, entry);
   updateProductionDetails(card, entry, locale);
   updatePurchaseButtons(card, entry, locale);
-  updateUnlockHint(card, entry, locale);
+  updateUnlockHint(state, card, entry, locale);
 }
 
 function updateCoreDetails(
@@ -189,9 +190,20 @@ function formatPurchaseTitle(locale: GameState['locale'], option: PurchaseOption
   });
 }
 
-function updateUnlockHint(card: ShopCardRefs, entry: ShopEntry, locale: GameState['locale']): void {
+function updateUnlockHint(
+  state: GameState,
+  card: ShopCardRefs,
+  entry: ShopEntry,
+  locale: GameState['locale'],
+): void {
   if (entry.unlocked) {
-    card.unlockHint.textContent = entry.definition.synergyHooks[locale];
+    const activeSynergies = getActiveItemSynergySummaries(state, entry.definition.id)
+      .slice(0, 2)
+      .map((summary) => `${summary.name} +${Math.round(summary.bonus * 100)}%`);
+    card.unlockHint.textContent =
+      activeSynergies.length > 0
+        ? `${entry.definition.synergyHooks[locale]} · ${activeSynergies.join(' · ')}`
+        : entry.definition.synergyHooks[locale];
     card.unlockHint.classList.toggle('hidden', false);
     return;
   }

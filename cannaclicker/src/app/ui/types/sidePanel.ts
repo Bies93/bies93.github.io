@@ -95,12 +95,20 @@ export interface SidePanelRefs {
   research: {
     container: HTMLElement;
     filters: Map<ResearchFilter, HTMLButtonElement>;
+    pathSummary: HTMLElement;
     list: HTMLElement;
     entries: Map<ResearchId, ResearchCardRefs>;
     emptyState: HTMLElement;
   };
   prestige: PrestigePanelRefs;
   achievements: {
+    summary: HTMLElement;
+    summaryProgressBar: HTMLElement;
+    summaryProgressText: HTMLElement;
+    summaryScore: HTMLElement;
+    summaryMultiplier: HTMLElement;
+    summaryNear: HTMLElement;
+    summaryCategories: HTMLElement;
     filters: Map<AchievementFilter, HTMLButtonElement>;
     activeFilter: AchievementFilter;
     list: HTMLElement;

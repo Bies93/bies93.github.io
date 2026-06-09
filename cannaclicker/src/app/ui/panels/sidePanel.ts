@@ -4,6 +4,7 @@ import type { ItemId } from '../../../data/items';
 import type { ResearchId } from '../../../data/research';
 import type { UpgradeId } from '../../../data/upgrades';
 import type { ResearchFilter } from '../../research';
+import { PLANT_SKINS, UI_THEMES } from '../../settings';
 import { createAchievementCard } from '../components/achievementCard';
 import { createPrestigePanel } from '../components/prestigePanel';
 import type {
@@ -78,6 +79,9 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   });
   researchControls.appendChild(filterWrap);
   researchView.appendChild(researchControls);
+  const researchPathSummary = document.createElement('div');
+  researchPathSummary.className = 'research-path-summary';
+  researchView.appendChild(researchPathSummary);
   const researchList = document.createElement('div');
   researchList.className = 'grid gap-3';
   researchView.appendChild(researchList);
@@ -90,6 +94,34 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
 
   const achievementsView = document.createElement('div');
   achievementsView.className = 'space-y-4';
+  const achievementSummary = document.createElement('div');
+  achievementSummary.className = 'achievement-summary';
+  const achievementSummaryHeader = document.createElement('div');
+  achievementSummaryHeader.className = 'achievement-summary__header';
+  const achievementSummaryProgressText = document.createElement('span');
+  achievementSummaryProgressText.className = 'achievement-summary__progress-text';
+  const achievementSummaryScore = document.createElement('span');
+  achievementSummaryScore.className = 'achievement-summary__score';
+  achievementSummaryHeader.append(achievementSummaryProgressText, achievementSummaryScore);
+  const achievementSummaryProgress = document.createElement('div');
+  achievementSummaryProgress.className = 'achievement-summary__progress';
+  const achievementSummaryProgressBar = document.createElement('div');
+  achievementSummaryProgressBar.className = 'achievement-summary__progress-bar';
+  achievementSummaryProgress.appendChild(achievementSummaryProgressBar);
+  const achievementSummaryMeta = document.createElement('div');
+  achievementSummaryMeta.className = 'achievement-summary__meta';
+  const achievementSummaryMultiplier = document.createElement('span');
+  const achievementSummaryNear = document.createElement('span');
+  achievementSummaryMeta.append(achievementSummaryMultiplier, achievementSummaryNear);
+  const achievementSummaryCategories = document.createElement('div');
+  achievementSummaryCategories.className = 'achievement-summary__categories';
+  achievementSummary.append(
+    achievementSummaryHeader,
+    achievementSummaryProgress,
+    achievementSummaryMeta,
+    achievementSummaryCategories,
+  );
+  achievementsView.appendChild(achievementSummary);
   const achievementFilterWrap = document.createElement('div');
   achievementFilterWrap.className = 'achievement-filters';
   const achievementFilters = new Map<AchievementFilter, HTMLButtonElement>();
@@ -188,7 +220,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   themeSelect.className = 'settings-select';
   themeSelect.dataset.role = 'settings-theme-select';
   themeSelect.dataset.kind = 'settings';
-  (['botanical', 'neon', 'sunset'] as const).forEach((value) => {
+  UI_THEMES.forEach((value) => {
     const option = document.createElement('option');
     option.value = value;
     themeSelect.appendChild(option);
@@ -201,7 +233,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   plantSkinSelect.className = 'settings-select';
   plantSkinSelect.dataset.role = 'settings-plant-skin-select';
   plantSkinSelect.dataset.kind = 'settings';
-  (['classic', 'jade', 'gold', 'violet'] as const).forEach((value) => {
+  PLANT_SKINS.forEach((value) => {
     const option = document.createElement('option');
     option.value = value;
     plantSkinSelect.appendChild(option);
@@ -266,12 +298,20 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
     research: {
       container: researchView,
       filters: researchFilters,
+      pathSummary: researchPathSummary,
       list: researchList,
       entries: new Map<ResearchId, ResearchCardRefs>(),
       emptyState: researchEmpty,
     },
     prestige: prestigePanel,
     achievements: {
+      summary: achievementSummary,
+      summaryProgressBar: achievementSummaryProgressBar,
+      summaryProgressText: achievementSummaryProgressText,
+      summaryScore: achievementSummaryScore,
+      summaryMultiplier: achievementSummaryMultiplier,
+      summaryNear: achievementSummaryNear,
+      summaryCategories: achievementSummaryCategories,
       filters: achievementFilters,
       activeFilter: 'all',
       list: achievementsList,

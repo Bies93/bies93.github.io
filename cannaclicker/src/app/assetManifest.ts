@@ -34,18 +34,34 @@ export const researchIcons = {
 } as const;
 
 export const eventIcons = {
-  golden_bud: 'img/events/golden-bud.svg',
-  seed_pack: 'img/events/seed-pack.svg',
-  lucky_joint: 'img/events/lucky-joint.svg',
-  fertile_rain: 'img/events/fertile-rain.svg',
-  market_rush: 'img/events/market-rush.svg',
-  green_surge: 'img/events/green-surge.svg',
-  mutant_sprout: 'img/events/mutant-sprout.svg',
-  supply_drop: 'img/events/supply-drop.svg',
-  flash_harvest: 'img/events/flash-harvest.svg',
-  calm_growth: 'img/events/calm-growth.svg',
-  overgrowth: 'img/events/overgrowth.svg',
-  seed_bloom: 'img/events/seed-bloom.svg',
+  golden_bud: asset('img/events/golden-bud.svg'),
+  seed_pack: asset('img/events/seed-pack.svg'),
+  lucky_joint: asset('img/events/lucky-joint.svg'),
+  fertile_rain: asset('img/events/fertile-rain.svg'),
+  market_rush: asset('img/events/market-rush.svg'),
+  green_surge: asset('img/events/green-surge.svg'),
+  mutant_sprout: asset('img/events/mutant-sprout.svg'),
+  supply_drop: asset('img/events/supply-drop.svg'),
+  flash_harvest: asset('img/events/flash-harvest.svg'),
+  calm_growth: asset('img/events/calm-growth.svg'),
+  overgrowth: asset('img/events/overgrowth.svg'),
+  seed_bloom: asset('img/events/seed-bloom.svg'),
+  tiny_spark: asset('img/events/tiny-spark.svg'),
+  dew_drop: asset('img/events/dew-drop.svg'),
+  compost_cache: asset('img/events/compost-cache.svg'),
+  sunbeam: asset('img/events/sunbeam.svg'),
+  mega_bud: asset('img/events/mega-bud.svg'),
+  jackpot_canopy: asset('img/events/jackpot-canopy.svg'),
+  aurora_bloom: asset('img/events/aurora-bloom.svg'),
+  trail_marker: asset('img/events/trail-marker.svg'),
+  cascade_bloom: asset('img/events/cascade-bloom.svg'),
+  echo_harvest: asset('img/events/echo-harvest.svg'),
+  volatile_growth: asset('img/events/volatile-growth.svg'),
+  blackout_sale: asset('img/events/blackout-sale.svg'),
+  pest_scare: asset('img/events/pest-scare.svg'),
+  solstice_seed: asset('img/events/solstice-seed.svg'),
+  night_market: asset('img/events/night-market.svg'),
+  festival_lantern: asset('img/events/festival-lantern.svg'),
 } as const;
 
 export const abilityIcons = {
@@ -53,6 +69,10 @@ export const abilityIcons = {
   burst: asset('img/abilities/burst.svg'),
   auto_burst: asset('img/abilities/auto-burst.svg'),
   discount_window: asset('img/abilities/discount-window.svg'),
+  event_magnet: asset('img/abilities/event-magnet.svg'),
+  seed_focus: asset('img/abilities/seed-focus.svg'),
+  harvest_chain: asset('img/abilities/harvest-chain.svg'),
+  cooldown_sync: asset('img/abilities/cooldown-sync.svg'),
 } as const;
 
 export const uiIcons = {
@@ -93,6 +113,7 @@ export const plantStages = [
 ] as const;
 
 export const backgroundAssets = {
+  keyArt: asset('img/backgrounds/signature-key-art.png'),
   desktop: asset('img/backgrounds/desktop.svg'),
   mobile: asset('img/backgrounds/mobile.svg'),
   plants: asset('img/backgrounds/plants.svg'),

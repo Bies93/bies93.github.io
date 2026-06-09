@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="CannaClicker desktop background">
+  <defs>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".28"/>
+    </filter>
+    <linearGradient id="leafGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#caff58"/>
+      <stop offset=".48" stop-color="#19c96f"/>
+      <stop offset="1" stop-color="#0c7f46"/>
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff0a8"/>
+      <stop offset=".55" stop-color="#ffd15a"/>
+      <stop offset="1" stop-color="#ff9f43"/>
+    </linearGradient>
+    <linearGradient id="glassGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#e8fff8" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#76ffd0" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#71c7ff" stop-opacity=".48"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="#07100b"/>
+    <radialGradient id="desktopGlow" cx=".5" cy=".22" r=".75">
+      <stop offset="0" stop-color="#1e7f4e" stop-opacity=".55"/>
+      <stop offset=".48" stop-color="#123b2b" stop-opacity=".44"/>
+      <stop offset="1" stop-color="#07100b" stop-opacity="0"/>
+    </radialGradient>
+    <rect width="1600" height="900" fill="url(#desktopGlow)"/>
+    <path d="M0 710C210 660 320 760 500 716c197-48 295-170 531-126 167 32 251 126 569 48v262H0Z" fill="#0b2118" opacity=".72"/>
+    <path d="M0 780c300-60 415 45 680 0 330-56 470-115 920-14v134H0Z" fill="#07150f" opacity=".9"/>
+    <circle cx="1275" cy="180" r="180" fill="#caff58" opacity=".08"/>
+    <circle cx="355" cy="212" r="130" fill="#76ffd0" opacity=".07"/>
+</svg>

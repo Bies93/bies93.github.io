@@ -108,6 +108,12 @@ export function createPersistedPayload(state: GameState, timestamp: number): Per
     prestige: {
       seeds: state.prestige.seeds,
       totalSeeds: state.prestige.totalSeeds,
+      ascensionSeeds: state.prestige.ascensionSeeds,
+      totalAscensionSeeds: state.prestige.totalAscensionSeeds,
+      ascensionSpent: state.prestige.ascensionSpent,
+      ascensionOwned: state.prestige.ascensionOwned,
+      permanentSlots: state.prestige.permanentSlots,
+      permanentUpgradeIds: state.prestige.permanentUpgradeIds,
       mult: state.prestige.mult.toString(),
       lifetimeBuds: state.prestige.lifetimeBuds.toString(),
       lastResetAt: state.prestige.lastResetAt,

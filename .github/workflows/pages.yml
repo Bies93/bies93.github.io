@@ -1,9 +1,15 @@
-# .github/workflows/pages.yml
-name: Deploy to GitHub Pages
+name: CannaClicker Pages
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'cannaclicker/**'
+      - '.github/workflows/pages.yml'
+  pull_request:
+    paths:
+      - 'cannaclicker/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -12,11 +18,11 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-verify:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -25,16 +31,24 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: cannaclicker/package-lock.json
       - run: npm ci
+      - run: npm run assets:check
+      - run: npm run lint
+      - run: npm run test
       - run: npm run build
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - run: npm run e2e
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
-          path: cannaclicker/dist # muss index.html enthalten
+          path: cannaclicker/dist
+
   deploy:
-    needs: build
+    if: github.event_name != 'pull_request'
+    needs: build-and-verify
     runs-on: ubuntu-latest
     environment:
       name: github-pages

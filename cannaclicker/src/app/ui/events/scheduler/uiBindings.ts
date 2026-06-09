@@ -3,26 +3,11 @@ import { formatDecimal } from '../../../math';
 import { t } from '../../../i18n';
 import { showToast } from '../../services/toast';
 import { createEventButton } from '../random';
-import type { EventId } from '../../../events';
+import { EVENT_I18N_KEYS, getEventDefinition, type EventId } from '../../../events';
 import type { SchedulerBindings, SchedulerContext } from './types';
 
-const EVENT_TRANSLATION_KEYS: Record<EventId, string> = {
-  golden_bud: 'goldenBud',
-  seed_pack: 'seedPack',
-  lucky_joint: 'luckyJoint',
-  fertile_rain: 'fertileRain',
-  market_rush: 'marketRush',
-  green_surge: 'greenSurge',
-  mutant_sprout: 'mutantSprout',
-  supply_drop: 'supplyDrop',
-  flash_harvest: 'flashHarvest',
-  calm_growth: 'calmGrowth',
-  overgrowth: 'overgrowth',
-  seed_bloom: 'seedBloom',
-};
-
 function getEventTranslationKey(id: EventId): string {
-  return EVENT_TRANSLATION_KEYS[id];
+  return EVENT_I18N_KEYS[id];
 }
 
 function getEventLayer(context: SchedulerContext): HTMLElement | null {
@@ -95,9 +80,13 @@ export const defaultSchedulerBindings: SchedulerBindings = {
 
     if (result.multiplier) {
       const durationSeconds = Math.round((result.durationMs ?? 0) / 1000);
-      spawnFloatingValue(origin, `×${result.multiplier.toFixed(1)}`, 'boost');
+      const floating =
+        result.target === 'cost' && result.multiplier < 1
+          ? `-${Math.round((1 - result.multiplier) * 100)}%`
+          : `×${result.multiplier.toFixed(1)}`;
+      spawnFloatingValue(origin, floating, 'boost');
       spawnParticleBurst(origin, 'boost', 9);
-      const bodyKey = refreshed ? 'events.generic.boostRefresh' : 'events.generic.boostBody';
+      const bodyKey = getBoostBodyKey(result.target, refreshed, result.multiplier);
       showToast({
         title: t(state.locale, `events.${translationKey}.title`),
         message: t(state.locale, bodyKey, {
@@ -110,20 +99,45 @@ export const defaultSchedulerBindings: SchedulerBindings = {
   },
 };
 
-function getEventSoundKind(id: EventId): 'reward' | 'seed' | 'buff' | 'rare' {
-  switch (id) {
-    case 'mutant_sprout':
-    case 'overgrowth':
-    case 'seed_bloom':
-      return 'rare';
-    case 'seed_pack':
-      return 'seed';
-    case 'lucky_joint':
-    case 'market_rush':
-    case 'green_surge':
-    case 'calm_growth':
-      return 'buff';
-    default:
-      return 'reward';
+function getBoostBodyKey(
+  target: string | undefined,
+  refreshed: boolean,
+  multiplier: number,
+): string {
+  if (target === 'cost') {
+    return multiplier < 1 ? 'events.generic.costBody' : 'events.generic.costRiskBody';
   }
+  if (target === 'bpc') {
+    return refreshed ? 'events.generic.clickBoostRefresh' : 'events.generic.clickBoostBody';
+  }
+  return refreshed ? 'events.generic.boostRefresh' : 'events.generic.boostBody';
+}
+
+function getEventSoundKind(id: EventId): 'reward' | 'seed' | 'buff' | 'rare' {
+  const definition = getEventDefinition(id);
+  if (definition.rarity === 'epic' || definition.rarity === 'legendary') {
+    return 'rare';
+  }
+  if (definition.category === 'seasonal' || definition.category === 'major') {
+    return 'rare';
+  }
+  if (id === 'seed_pack' || id === 'seed_bloom' || id === 'solstice_seed') {
+    return 'seed';
+  }
+  if (definition.category === 'risk' || definition.category === 'chain') {
+    return 'buff';
+  }
+  return resultEventIsBuff(id) ? 'buff' : 'reward';
+}
+
+function resultEventIsBuff(id: EventId): boolean {
+  return (
+    id === 'lucky_joint' ||
+    id === 'market_rush' ||
+    id === 'green_surge' ||
+    id === 'calm_growth' ||
+    id === 'sunbeam' ||
+    id === 'compost_cache' ||
+    id === 'dew_drop'
+  );
 }

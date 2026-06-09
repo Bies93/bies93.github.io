@@ -1,6 +1,7 @@
 import Decimal from 'break_infinity.js';
 import type { EventBoostState, EventBoostTarget, GameState } from './state';
 import { awardSeeds, getSeedCap } from './seeds';
+import { abilityMultiplierFor } from './abilities';
 
 export type EventId =
   | 'golden_bud'
@@ -14,7 +15,39 @@ export type EventId =
   | 'flash_harvest'
   | 'calm_growth'
   | 'overgrowth'
-  | 'seed_bloom';
+  | 'seed_bloom'
+  | 'tiny_spark'
+  | 'dew_drop'
+  | 'compost_cache'
+  | 'sunbeam'
+  | 'mega_bud'
+  | 'jackpot_canopy'
+  | 'aurora_bloom'
+  | 'trail_marker'
+  | 'cascade_bloom'
+  | 'echo_harvest'
+  | 'volatile_growth'
+  | 'blackout_sale'
+  | 'pest_scare'
+  | 'solstice_seed'
+  | 'night_market'
+  | 'festival_lantern';
+
+export type EventCategory = 'minor' | 'major' | 'chain' | 'risk' | 'seasonal';
+export type EventRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
+export type EventSeason = 'evergreen' | 'sunshift' | 'nightMarket' | 'festival';
+
+export interface EventDefinition {
+  id: EventId;
+  category: EventCategory;
+  rarity: EventRarity;
+  season: EventSeason;
+  minTotalBuds?: number;
+  minPrestigeSeeds?: number;
+  risk?: boolean;
+  chainNext?: EventId;
+  chainChance?: number;
+}
 
 const GOLDEN_BUD_SECONDS = 12;
 const LUCKY_JOINT_MULTIPLIER = 2;
@@ -46,6 +79,23 @@ const EVENT_QUEUE_TARGET_SIZE = 3;
 const EVENT_HISTORY_LIMIT = 100;
 const EVENT_COOLDOWN_BUFFER_MS = 5_000;
 const EVENT_PITY_THRESHOLD_MS = 55_000;
+const EVENT_CHAIN_DELAY_MS = 850;
+
+const EVENT_CATEGORY_PITY_MS: Record<EventCategory, number> = {
+  minor: 52_000,
+  chain: 92_000,
+  risk: 124_000,
+  major: 160_000,
+  seasonal: 190_000,
+};
+
+const EVENT_CATEGORY_PRIORITY: Record<EventCategory, number> = {
+  minor: 4,
+  chain: 7,
+  risk: 8,
+  major: 9,
+  seasonal: 10,
+};
 
 export const EVENT_IDS: EventId[] = [
   'golden_bud',
@@ -60,6 +110,22 @@ export const EVENT_IDS: EventId[] = [
   'calm_growth',
   'overgrowth',
   'seed_bloom',
+  'tiny_spark',
+  'dew_drop',
+  'compost_cache',
+  'sunbeam',
+  'mega_bud',
+  'jackpot_canopy',
+  'aurora_bloom',
+  'trail_marker',
+  'cascade_bloom',
+  'echo_harvest',
+  'volatile_growth',
+  'blackout_sale',
+  'pest_scare',
+  'solstice_seed',
+  'night_market',
+  'festival_lantern',
 ];
 
 export const DEFAULT_EVENT_WEIGHTS: Record<EventId, number> = {
@@ -75,7 +141,216 @@ export const DEFAULT_EVENT_WEIGHTS: Record<EventId, number> = {
   calm_growth: 0.4,
   overgrowth: 0.18,
   seed_bloom: 0.28,
+  tiny_spark: 0.95,
+  dew_drop: 0.86,
+  compost_cache: 0.7,
+  sunbeam: 0.68,
+  mega_bud: 0.14,
+  jackpot_canopy: 0.08,
+  aurora_bloom: 0.1,
+  trail_marker: 0.32,
+  cascade_bloom: 0.2,
+  echo_harvest: 0.14,
+  volatile_growth: 0.17,
+  blackout_sale: 0.13,
+  pest_scare: 0.15,
+  solstice_seed: 0.16,
+  night_market: 0.14,
+  festival_lantern: 0.12,
 };
+
+export const EVENT_I18N_KEYS: Record<EventId, string> = {
+  golden_bud: 'goldenBud',
+  seed_pack: 'seedPack',
+  lucky_joint: 'luckyJoint',
+  fertile_rain: 'fertileRain',
+  market_rush: 'marketRush',
+  green_surge: 'greenSurge',
+  mutant_sprout: 'mutantSprout',
+  supply_drop: 'supplyDrop',
+  flash_harvest: 'flashHarvest',
+  calm_growth: 'calmGrowth',
+  overgrowth: 'overgrowth',
+  seed_bloom: 'seedBloom',
+  tiny_spark: 'tinySpark',
+  dew_drop: 'dewDrop',
+  compost_cache: 'compostCache',
+  sunbeam: 'sunbeam',
+  mega_bud: 'megaBud',
+  jackpot_canopy: 'jackpotCanopy',
+  aurora_bloom: 'auroraBloom',
+  trail_marker: 'trailMarker',
+  cascade_bloom: 'cascadeBloom',
+  echo_harvest: 'echoHarvest',
+  volatile_growth: 'volatileGrowth',
+  blackout_sale: 'blackoutSale',
+  pest_scare: 'pestScare',
+  solstice_seed: 'solsticeSeed',
+  night_market: 'nightMarket',
+  festival_lantern: 'festivalLantern',
+};
+
+export const EVENT_DEFINITIONS: Record<EventId, EventDefinition> = {
+  golden_bud: { id: 'golden_bud', category: 'minor', rarity: 'common', season: 'evergreen' },
+  seed_pack: { id: 'seed_pack', category: 'minor', rarity: 'uncommon', season: 'evergreen' },
+  lucky_joint: { id: 'lucky_joint', category: 'minor', rarity: 'uncommon', season: 'evergreen' },
+  fertile_rain: { id: 'fertile_rain', category: 'minor', rarity: 'common', season: 'evergreen' },
+  market_rush: { id: 'market_rush', category: 'minor', rarity: 'uncommon', season: 'evergreen' },
+  green_surge: { id: 'green_surge', category: 'minor', rarity: 'uncommon', season: 'evergreen' },
+  mutant_sprout: {
+    id: 'mutant_sprout',
+    category: 'major',
+    rarity: 'rare',
+    season: 'evergreen',
+    minTotalBuds: 50_000,
+    minPrestigeSeeds: 1,
+  },
+  supply_drop: { id: 'supply_drop', category: 'minor', rarity: 'uncommon', season: 'evergreen' },
+  flash_harvest: {
+    id: 'flash_harvest',
+    category: 'chain',
+    rarity: 'rare',
+    season: 'evergreen',
+    minTotalBuds: 2_500,
+    chainNext: 'golden_bud',
+    chainChance: 1,
+  },
+  calm_growth: {
+    id: 'calm_growth',
+    category: 'minor',
+    rarity: 'uncommon',
+    season: 'evergreen',
+    minTotalBuds: 2_500,
+  },
+  overgrowth: {
+    id: 'overgrowth',
+    category: 'major',
+    rarity: 'epic',
+    season: 'evergreen',
+    minTotalBuds: 250_000,
+  },
+  seed_bloom: {
+    id: 'seed_bloom',
+    category: 'major',
+    rarity: 'rare',
+    season: 'evergreen',
+    minTotalBuds: 50_000,
+    minPrestigeSeeds: 1,
+  },
+  tiny_spark: { id: 'tiny_spark', category: 'minor', rarity: 'common', season: 'evergreen' },
+  dew_drop: { id: 'dew_drop', category: 'minor', rarity: 'common', season: 'evergreen' },
+  compost_cache: {
+    id: 'compost_cache',
+    category: 'minor',
+    rarity: 'uncommon',
+    season: 'evergreen',
+    minTotalBuds: 600,
+  },
+  sunbeam: {
+    id: 'sunbeam',
+    category: 'minor',
+    rarity: 'uncommon',
+    season: 'sunshift',
+    minTotalBuds: 1_200,
+  },
+  mega_bud: {
+    id: 'mega_bud',
+    category: 'major',
+    rarity: 'rare',
+    season: 'evergreen',
+    minTotalBuds: 110_000,
+  },
+  jackpot_canopy: {
+    id: 'jackpot_canopy',
+    category: 'major',
+    rarity: 'legendary',
+    season: 'festival',
+    minTotalBuds: 1_800_000,
+    minPrestigeSeeds: 2,
+  },
+  aurora_bloom: {
+    id: 'aurora_bloom',
+    category: 'major',
+    rarity: 'epic',
+    season: 'sunshift',
+    minTotalBuds: 650_000,
+  },
+  trail_marker: {
+    id: 'trail_marker',
+    category: 'chain',
+    rarity: 'uncommon',
+    season: 'evergreen',
+    minTotalBuds: 8_000,
+    chainNext: 'cascade_bloom',
+    chainChance: 0.68,
+  },
+  cascade_bloom: {
+    id: 'cascade_bloom',
+    category: 'chain',
+    rarity: 'rare',
+    season: 'evergreen',
+    minTotalBuds: 18_000,
+    chainNext: 'echo_harvest',
+    chainChance: 0.42,
+  },
+  echo_harvest: {
+    id: 'echo_harvest',
+    category: 'chain',
+    rarity: 'epic',
+    season: 'evergreen',
+    minTotalBuds: 75_000,
+  },
+  volatile_growth: {
+    id: 'volatile_growth',
+    category: 'risk',
+    rarity: 'rare',
+    season: 'evergreen',
+    minTotalBuds: 30_000,
+    risk: true,
+  },
+  blackout_sale: {
+    id: 'blackout_sale',
+    category: 'risk',
+    rarity: 'rare',
+    season: 'nightMarket',
+    minTotalBuds: 85_000,
+    risk: true,
+  },
+  pest_scare: {
+    id: 'pest_scare',
+    category: 'risk',
+    rarity: 'uncommon',
+    season: 'evergreen',
+    minTotalBuds: 22_000,
+    risk: true,
+  },
+  solstice_seed: {
+    id: 'solstice_seed',
+    category: 'seasonal',
+    rarity: 'epic',
+    season: 'sunshift',
+    minTotalBuds: 180_000,
+  },
+  night_market: {
+    id: 'night_market',
+    category: 'seasonal',
+    rarity: 'epic',
+    season: 'nightMarket',
+    minTotalBuds: 420_000,
+  },
+  festival_lantern: {
+    id: 'festival_lantern',
+    category: 'seasonal',
+    rarity: 'legendary',
+    season: 'festival',
+    minTotalBuds: 1_200_000,
+    minPrestigeSeeds: 1,
+  },
+};
+
+export function getEventDefinition(id: EventId): EventDefinition {
+  return EVENT_DEFINITIONS[id];
+}
 
 interface SeedDropConfig {
   chance: number;
@@ -185,6 +460,131 @@ const EVENT_SEED_DROPS: Record<EventId, SeedDropConfig> = {
       { amount: 5, weight: 10 },
     ],
   },
+  tiny_spark: {
+    chance: 0.025,
+    weights: [
+      { amount: 1, weight: 92 },
+      { amount: 2, weight: 8 },
+    ],
+  },
+  dew_drop: {
+    chance: 0.05,
+    weights: [
+      { amount: 1, weight: 86 },
+      { amount: 2, weight: 14 },
+    ],
+  },
+  compost_cache: {
+    chance: 0.04,
+    weights: [
+      { amount: 1, weight: 82 },
+      { amount: 2, weight: 16 },
+      { amount: 3, weight: 2 },
+    ],
+  },
+  sunbeam: {
+    chance: 0.045,
+    weights: [
+      { amount: 1, weight: 82 },
+      { amount: 2, weight: 18 },
+    ],
+  },
+  mega_bud: {
+    chance: 0.16,
+    weights: [
+      { amount: 1, weight: 64 },
+      { amount: 2, weight: 25 },
+      { amount: 4, weight: 11 },
+    ],
+  },
+  jackpot_canopy: {
+    chance: 0.35,
+    weights: [
+      { amount: 2, weight: 48 },
+      { amount: 3, weight: 28 },
+      { amount: 5, weight: 24 },
+    ],
+  },
+  aurora_bloom: {
+    chance: 0.22,
+    weights: [
+      { amount: 1, weight: 58 },
+      { amount: 2, weight: 26 },
+      { amount: 4, weight: 16 },
+    ],
+  },
+  trail_marker: {
+    chance: 0.05,
+    weights: [
+      { amount: 1, weight: 84 },
+      { amount: 2, weight: 16 },
+    ],
+  },
+  cascade_bloom: {
+    chance: 0.09,
+    weights: [
+      { amount: 1, weight: 72 },
+      { amount: 2, weight: 22 },
+      { amount: 3, weight: 6 },
+    ],
+  },
+  echo_harvest: {
+    chance: 0.16,
+    weights: [
+      { amount: 1, weight: 60 },
+      { amount: 2, weight: 28 },
+      { amount: 4, weight: 12 },
+    ],
+  },
+  volatile_growth: {
+    chance: 0.14,
+    weights: [
+      { amount: 1, weight: 66 },
+      { amount: 2, weight: 24 },
+      { amount: 3, weight: 10 },
+    ],
+  },
+  blackout_sale: {
+    chance: 0.12,
+    weights: [
+      { amount: 1, weight: 70 },
+      { amount: 2, weight: 24 },
+      { amount: 3, weight: 6 },
+    ],
+  },
+  pest_scare: {
+    chance: 0.08,
+    weights: [
+      { amount: 1, weight: 78 },
+      { amount: 2, weight: 18 },
+      { amount: 3, weight: 4 },
+    ],
+  },
+  solstice_seed: {
+    chance: 1,
+    weights: [
+      { amount: 1, weight: 46 },
+      { amount: 2, weight: 34 },
+      { amount: 3, weight: 14 },
+      { amount: 5, weight: 6 },
+    ],
+  },
+  night_market: {
+    chance: 0.28,
+    weights: [
+      { amount: 1, weight: 58 },
+      { amount: 2, weight: 28 },
+      { amount: 4, weight: 14 },
+    ],
+  },
+  festival_lantern: {
+    chance: 0.45,
+    weights: [
+      { amount: 2, weight: 48 },
+      { amount: 3, weight: 30 },
+      { amount: 5, weight: 22 },
+    ],
+  },
 };
 
 export interface EventQueueEntry {
@@ -208,6 +608,7 @@ interface EventRewardSummary {
   seedGain?: number;
   multiplier?: number;
   durationMs?: number;
+  target?: EventBoostTarget;
 }
 
 export interface EventHistoryEntry {
@@ -237,6 +638,7 @@ export interface EventStats {
   totalExpired: number;
   pityActivations: number;
   pityTimerMs: number;
+  pityByCategory: Partial<Record<EventCategory, number>>;
   clickRate: number;
   lastSpawnAt: number;
   lastClickAt: number;
@@ -276,7 +678,9 @@ function randomBetween(min: number, max: number): number {
 
 function getEventSpawnRateMult(state: GameState): number {
   const value = state.temp.eventSpawnRateMult ?? 1;
-  return Number.isFinite(value) ? Math.max(0.5, Math.min(2.5, value)) : 1;
+  const ability = abilityMultiplierFor(state, 'event');
+  const combined = (Number.isFinite(value) ? value : 1) * (Number.isFinite(ability) ? ability : 1);
+  return Math.max(0.5, Math.min(3.5, combined));
 }
 
 function getEventDurationMult(state: GameState): number {
@@ -344,6 +748,7 @@ export function createDefaultEventStats(now = Date.now()): EventStats {
     totalExpired: 0,
     pityActivations: 0,
     pityTimerMs: 0,
+    pityByCategory: {},
     clickRate: 0,
     lastSpawnAt: now,
     lastClickAt: 0,
@@ -430,13 +835,31 @@ export function advanceEventPipeline(
 ): void {
   const stats = state.meta.eventStats;
   if (state.events.active.length === 0) {
-    stats.pityTimerMs = clampTimer(
-      stats.pityTimerMs + Math.max(0, Math.round(deltaSeconds * 1000)),
-    );
+    const elapsedMs = Math.max(0, Math.round(deltaSeconds * 1000));
+    stats.pityTimerMs = clampTimer(stats.pityTimerMs + elapsedMs);
+    tickEventPityTimers(stats, elapsedMs);
   }
   expireEvents(state, now);
   spawnDueEvents(state, now);
   ensureQueueCapacity(state, now);
+}
+
+function tickEventPityTimers(stats: EventStats, elapsedMs: number): void {
+  const timers = getMutablePityByCategory(stats);
+  for (const category of Object.keys(EVENT_CATEGORY_PITY_MS) as EventCategory[]) {
+    timers[category] = clampTimer((timers[category] ?? 0) + elapsedMs);
+  }
+}
+
+function getMutablePityByCategory(stats: EventStats): Partial<Record<EventCategory, number>> {
+  if (!stats.pityByCategory || typeof stats.pityByCategory !== 'object') {
+    stats.pityByCategory = {};
+  }
+  return stats.pityByCategory;
+}
+
+function resetPityForCategory(stats: EventStats, category: EventCategory): void {
+  getMutablePityByCategory(stats)[category] = 0;
 }
 
 function expireEvents(state: GameState, now: number): void {
@@ -510,31 +933,52 @@ function ensureQueueCapacity(state: GameState, now: number): void {
   while (queue.length < EVENT_QUEUE_TARGET_SIZE) {
     const hasPendingPity = queue.some((entry) => entry.pity);
     const pityThreshold = EVENT_PITY_THRESHOLD_MS / getEventSpawnRateMult(state);
-    const pityReady = !hasPendingPity && stats.pityTimerMs >= pityThreshold;
+    const pityCategory = !hasPendingPity ? pickPityCategory(state, pityThreshold) : null;
+    const pityReady =
+      Boolean(pityCategory) || (!hasPendingPity && stats.pityTimerMs >= pityThreshold);
     const immediate = pityReady || queue.length === 0;
     const rawDelay = immediate
       ? randomBetween(1_500, 3_500)
       : randomBetween(EVENT_SPAWN_MIN_MS, EVENT_SPAWN_MAX_MS);
     const delay = scaleSpawnDelay(state, rawDelay);
     const scheduledAt = now + Math.round(delay);
-    const id = pickWeightedEventId(state, scheduledAt);
+    const id = pityCategory
+      ? pickWeightedEventId(state, scheduledAt, pityCategory)
+      : pickWeightedEventId(state, scheduledAt);
     enqueueEvent(state, id, {
       scheduledAt,
-      priority: pityReady ? 10 : 0,
+      priority: pityCategory ? EVENT_CATEGORY_PRIORITY[pityCategory] : pityReady ? 5 : 0,
       pity: pityReady,
     });
   }
 }
 
-function pickWeightedEventId(state: GameState, scheduledAt: number): EventId {
-  const queue = state.events;
-  const eligible = EVENT_IDS.filter((id) => {
-    if ((queue.cooldowns[id] ?? 0) > scheduledAt) {
-      return false;
+function pickPityCategory(state: GameState, fallbackThreshold: number): EventCategory | null {
+  const timers = getMutablePityByCategory(state.meta.eventStats);
+  const categories = (Object.keys(EVENT_CATEGORY_PITY_MS) as EventCategory[]).sort(
+    (a, b) => EVENT_CATEGORY_PRIORITY[b] - EVENT_CATEGORY_PRIORITY[a],
+  );
+  const rate = getEventSpawnRateMult(state);
+  for (const category of categories) {
+    const threshold = Math.max(fallbackThreshold, EVENT_CATEGORY_PITY_MS[category] / rate);
+    if ((timers[category] ?? 0) < threshold) {
+      continue;
     }
+    const eligible = getEligibleEventIds(state, Date.now(), category);
+    if (eligible.length > 0) {
+      return category;
+    }
+  }
+  return null;
+}
 
-    return isEventStageEligible(state, id);
-  });
+function pickWeightedEventId(
+  state: GameState,
+  scheduledAt: number,
+  category?: EventCategory,
+): EventId {
+  const queue = state.events;
+  const eligible = getEligibleEventIds(state, scheduledAt, category);
   if (eligible.length === 0) {
     return pickEventIdFromWeights(queue.weights);
   }
@@ -543,24 +987,64 @@ function pickWeightedEventId(state: GameState, scheduledAt: number): EventId {
     if (!(id in weights)) {
       weights[id] = DEFAULT_EVENT_WEIGHTS[id];
     }
+    weights[id] = Math.max(0, weights[id] * getEventQualityWeightMultiplier(state, id));
   }
   return pickEventIdFromWeights(weights, eligible);
 }
 
-function isEventStageEligible(state: GameState, id: EventId): boolean {
-  const total = state.total;
-  switch (id) {
-    case 'mutant_sprout':
-    case 'seed_bloom':
-      return total.greaterThanOrEqualTo(50_000) || (state.prestige.totalSeeds ?? 0) > 0;
-    case 'flash_harvest':
-    case 'calm_growth':
-      return total.greaterThanOrEqualTo(2_500);
-    case 'overgrowth':
-      return total.greaterThanOrEqualTo(250_000);
-    default:
-      return true;
+function getEventQualityWeightMultiplier(state: GameState, id: EventId): number {
+  const category = EVENT_DEFINITIONS[id].category;
+  let multiplier = 1;
+  if (category === 'major' || category === 'seasonal') {
+    if (state.upgrades.event_spotters) {
+      multiplier *= 1.12;
+    }
+    if (state.researchOwned.includes('r_event_quality_control')) {
+      multiplier *= 1.16;
+    }
   }
+  if (category === 'chain') {
+    if (state.upgrades.event_magnet_array) {
+      multiplier *= 1.14;
+    }
+    if (state.researchOwned.includes('r_event_chain_study')) {
+      multiplier *= 1.18;
+    }
+  }
+  if (category === 'risk' && state.researchOwned.includes('r_event_quality_control')) {
+    multiplier *= 0.92;
+  }
+  return multiplier;
+}
+
+function getEligibleEventIds(
+  state: GameState,
+  scheduledAt: number,
+  category?: EventCategory,
+): EventId[] {
+  const queue = state.events;
+  return EVENT_IDS.filter((id) => {
+    if (category && EVENT_DEFINITIONS[id].category !== category) {
+      return false;
+    }
+    if ((queue.cooldowns[id] ?? 0) > scheduledAt) {
+      return false;
+    }
+
+    return isEventStageEligible(state, id);
+  });
+}
+
+function isEventStageEligible(state: GameState, id: EventId): boolean {
+  const definition = EVENT_DEFINITIONS[id];
+  const prestigeSeeds = state.prestige.totalSeeds ?? 0;
+  if (definition.minPrestigeSeeds && prestigeSeeds >= definition.minPrestigeSeeds) {
+    return true;
+  }
+  if (definition.minTotalBuds && !state.total.greaterThanOrEqualTo(definition.minTotalBuds)) {
+    return false;
+  }
+  return true;
 }
 
 function recordSpawn(state: GameState, event: ActiveEventEntry, now: number): void {
@@ -573,6 +1057,7 @@ function recordSpawn(state: GameState, event: ActiveEventEntry, now: number): vo
     stats.pityActivations += 1;
   }
   stats.pityTimerMs = 0;
+  resetPityForCategory(stats, EVENT_DEFINITIONS[event.id].category);
   stats.clickRate = computeClickRate(stats.totalClicks, stats.totalSpawns);
   const per = getOrCreatePerEvent(stats, event.id);
   per.spawns += 1;
@@ -645,6 +1130,9 @@ function summariseReward(result: EventClickResult): EventRewardSummary | undefin
   if (typeof result.durationMs === 'number') {
     summary.durationMs = result.durationMs;
   }
+  if (result.target) {
+    summary.target = result.target;
+  }
   return Object.keys(summary).length > 0 ? summary : undefined;
 }
 
@@ -668,6 +1156,7 @@ function recordClick(
   stats.totalClicks += 1;
   stats.lastClickAt = now;
   stats.pityTimerMs = 0;
+  resetPityForCategory(stats, EVENT_DEFINITIONS[event.id].category);
   stats.clickRate = computeClickRate(stats.totalClicks, stats.totalSpawns);
   const per = getOrCreatePerEvent(stats, event.id);
   per.clicks += 1;
@@ -700,6 +1189,9 @@ export interface EventClickResult {
   seedGain?: number;
   multiplier?: number;
   durationMs?: number;
+  target?: EventBoostTarget;
+  chainTriggered?: boolean;
+  riskOutcome?: 'win' | 'soft_fail';
   requiresRecalc: boolean;
 }
 
@@ -760,6 +1252,7 @@ export function applyEventReward(
         budGain: gain,
         multiplier: 1.25,
         durationMs,
+        target: 'bps',
         seedGain: seedDrop || undefined,
         requiresRecalc: true,
       } satisfies EventClickResult;
@@ -799,6 +1292,7 @@ export function applyEventReward(
         id,
         multiplier: GREEN_SURGE_MULTIPLIER,
         durationMs,
+        target: 'bpc',
         seedGain: seedDrop || undefined,
         requiresRecalc: true,
       } satisfies EventClickResult;
@@ -833,6 +1327,7 @@ export function applyEventReward(
         budGain: gain,
         multiplier: SUPPLY_DROP_DISCOUNT,
         durationMs,
+        target: 'cost',
         seedGain: seedDrop || undefined,
         requiresRecalc: true,
       } satisfies EventClickResult;
@@ -869,6 +1364,7 @@ export function applyEventReward(
         id,
         multiplier,
         durationMs,
+        target: 'bps',
         seedGain: seedDrop || undefined,
         requiresRecalc: true,
       } satisfies EventClickResult;
@@ -891,6 +1387,7 @@ export function applyEventReward(
         budGain: gain,
         multiplier: OVERGROWTH_MULTIPLIER,
         durationMs,
+        target: 'bps',
         seedGain: seedDrop || undefined,
         requiresRecalc: true,
       } satisfies EventClickResult;
@@ -914,7 +1411,282 @@ export function applyEventReward(
         id,
         multiplier: SEED_BLOOM_MULTIPLIER,
         durationMs,
+        target: 'bpc',
         seedGain: seedDrop,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'tiny_spark': {
+      const gain = grantScaledBudReward(state, 5);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        seedGain: seedDrop || undefined,
+        requiresRecalc: seedDrop > 0,
+      } satisfies EventClickResult;
+    }
+
+    case 'dew_drop': {
+      const gain = grantScaledBudReward(state, 7);
+      const durationMs = applyEventBoost(state, id, 1.12, 8_000, now, 'bps');
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        multiplier: 1.12,
+        durationMs,
+        target: 'bps',
+        seedGain: seedDrop || undefined,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'compost_cache': {
+      const gain = grantScaledBudReward(state, 8);
+      const durationMs = applyEventBoost(state, id, 0.92, 12_000, now, 'cost');
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        multiplier: 0.92,
+        durationMs,
+        target: 'cost',
+        seedGain: seedDrop || undefined,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'sunbeam': {
+      const durationMs = applyEventBoost(state, id, 1.45, 14_000, now, 'bpc');
+      const gain = grantScaledBudReward(state, 4);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        multiplier: 1.45,
+        durationMs,
+        target: 'bpc',
+        seedGain: seedDrop || undefined,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'mega_bud': {
+      const gain = grantScaledBudReward(state, 42);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        seedGain: seedDrop || undefined,
+        requiresRecalc: seedDrop > 0,
+      } satisfies EventClickResult;
+    }
+
+    case 'jackpot_canopy': {
+      const gain = grantScaledBudReward(state, 70);
+      let seedDrop = grantEventSeeds(state, id, now);
+      if (seedDrop <= 0) {
+        seedDrop = awardSeeds(state, 2, 'event', now);
+      }
+
+      return {
+        id,
+        budGain: gain,
+        seedGain: seedDrop,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'aurora_bloom': {
+      const gain = grantScaledBudReward(state, 18);
+      const durationMs = applyEventBoost(state, id, 2.05, 18_000, now);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        multiplier: 2.05,
+        durationMs,
+        seedGain: seedDrop || undefined,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'trail_marker': {
+      const gain = grantScaledBudReward(state, 9);
+      const chained = enqueueChainEvent(state, id, now);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        seedGain: seedDrop || undefined,
+        chainTriggered: chained,
+        requiresRecalc: seedDrop > 0,
+      } satisfies EventClickResult;
+    }
+
+    case 'cascade_bloom': {
+      const gain = grantScaledBudReward(state, 12);
+      const durationMs = applyEventBoost(state, id, 1.5, 12_000, now, 'bps');
+      const chained = enqueueChainEvent(state, id, now);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        multiplier: 1.5,
+        durationMs,
+        target: 'bps',
+        seedGain: seedDrop || undefined,
+        chainTriggered: chained,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'echo_harvest': {
+      const gain = grantScaledBudReward(state, 24);
+      let seedDrop = grantEventSeeds(state, id, now);
+      if (seedDrop <= 0 && Math.random() < 0.35) {
+        seedDrop = awardSeeds(state, 1, 'event', now);
+      }
+
+      return {
+        id,
+        budGain: gain,
+        seedGain: seedDrop || undefined,
+        requiresRecalc: seedDrop > 0,
+      } satisfies EventClickResult;
+    }
+
+    case 'volatile_growth': {
+      const win = Math.random() < getRiskWinChance(state, 0.68);
+      const gain = grantScaledBudReward(state, win ? 52 : 7);
+      const multiplier = win ? 1.75 : 0.82;
+      const durationMs = applyEventBoost(state, id, multiplier, win ? 16_000 : 10_000, now, 'bps');
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        multiplier,
+        durationMs,
+        target: 'bps',
+        seedGain: seedDrop || undefined,
+        riskOutcome: win ? 'win' : 'soft_fail',
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'blackout_sale': {
+      const win = Math.random() < getRiskWinChance(state, 0.72);
+      const multiplier = win ? 0.72 : 1.08;
+      const durationMs = applyEventBoost(state, id, multiplier, win ? 16_000 : 9_000, now, 'cost');
+      const gain = grantScaledBudReward(state, win ? 10 : 4);
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        multiplier,
+        durationMs,
+        target: 'cost',
+        seedGain: seedDrop || undefined,
+        riskOutcome: win ? 'win' : 'soft_fail',
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'pest_scare': {
+      const win = Math.random() < getRiskWinChance(state, 0.76);
+      const gain = grantScaledBudReward(state, win ? 14 : 5);
+      const durationMs = applyEventBoost(state, id, win ? 1.18 : 0.9, 11_000, now, 'bpc');
+      let seedDrop = grantEventSeeds(state, id, now);
+      if (win && seedDrop <= 0 && Math.random() < 0.22) {
+        seedDrop = awardSeeds(state, 1, 'event', now);
+      }
+
+      return {
+        id,
+        budGain: gain,
+        multiplier: win ? 1.18 : 0.9,
+        durationMs,
+        target: 'bpc',
+        seedGain: seedDrop || undefined,
+        riskOutcome: win ? 'win' : 'soft_fail',
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'solstice_seed': {
+      const gain = grantScaledBudReward(state, 12);
+      const durationMs = applyEventBoost(state, id, 1.45, 20_000, now, 'bps');
+      let seedDrop = grantEventSeeds(state, id, now);
+      if (seedDrop <= 0) {
+        seedDrop = awardSeeds(state, 1, 'event', now);
+      }
+
+      return {
+        id,
+        budGain: gain,
+        multiplier: 1.45,
+        durationMs,
+        target: 'bps',
+        seedGain: seedDrop,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'night_market': {
+      const gain = grantScaledBudReward(state, 12);
+      const durationMs = applyEventBoost(state, id, 0.76, 18_000, now, 'cost');
+      const chained = Math.random() < 0.45;
+      if (chained) {
+        enqueueEvent(state, 'supply_drop', {
+          scheduledAt: now + EVENT_CHAIN_DELAY_MS,
+          priority: EVENT_CATEGORY_PRIORITY.seasonal,
+        });
+      }
+      const seedDrop = grantEventSeeds(state, id, now);
+
+      return {
+        id,
+        budGain: gain,
+        multiplier: 0.76,
+        durationMs,
+        target: 'cost',
+        seedGain: seedDrop || undefined,
+        chainTriggered: chained,
+        requiresRecalc: true,
+      } satisfies EventClickResult;
+    }
+
+    case 'festival_lantern': {
+      const gain = grantScaledBudReward(state, 35);
+      const durationMs = applyEventBoost(state, id, 1.7, 22_000, now);
+      enqueueEvent(state, 'golden_bud', {
+        scheduledAt: now + EVENT_CHAIN_DELAY_MS,
+        priority: EVENT_CATEGORY_PRIORITY.seasonal,
+      });
+      let seedDrop = grantEventSeeds(state, id, now);
+      if (seedDrop <= 0) {
+        seedDrop = awardSeeds(state, 1, 'event', now);
+      }
+
+      return {
+        id,
+        budGain: gain,
+        multiplier: 1.7,
+        durationMs,
+        seedGain: seedDrop,
+        chainTriggered: true,
         requiresRecalc: true,
       } satisfies EventClickResult;
     }
@@ -922,6 +1694,49 @@ export function applyEventReward(
     default:
       return { id, requiresRecalc: false } satisfies EventClickResult;
   }
+}
+
+function enqueueChainEvent(state: GameState, id: EventId, now: number): boolean {
+  const definition = EVENT_DEFINITIONS[id];
+  if (!definition.chainNext) {
+    return false;
+  }
+  if (Math.random() > getChainChance(state, definition)) {
+    return false;
+  }
+  enqueueEvent(state, definition.chainNext, {
+    scheduledAt: now + EVENT_CHAIN_DELAY_MS,
+    priority: EVENT_CATEGORY_PRIORITY.chain,
+  });
+  return true;
+}
+
+function getChainChance(state: GameState, definition: EventDefinition): number {
+  let chance = definition.chainChance ?? 1;
+  if (state.upgrades.event_magnet_array) {
+    chance += 0.05;
+  }
+  if (state.researchOwned.includes('r_event_chain_study')) {
+    chance += 0.08;
+  }
+  if (state.researchOwned.includes('r_event_quality_control')) {
+    chance += 0.04;
+  }
+  return Math.max(0, Math.min(0.95, chance));
+}
+
+function getRiskWinChance(state: GameState, baseChance: number): number {
+  let chance = baseChance;
+  if (state.upgrades.event_spotters) {
+    chance += 0.03;
+  }
+  if (state.researchOwned.includes('r_event_quality_control')) {
+    chance += 0.07;
+  }
+  if (state.researchOwned.includes('r_event_chain_study')) {
+    chance += 0.03;
+  }
+  return Math.max(0.45, Math.min(0.92, chance));
 }
 
 function grantScaledBudReward(state: GameState, seconds: number): Decimal {
@@ -940,7 +1755,8 @@ function grantScaledBudReward(state: GameState, seconds: number): Decimal {
 }
 
 function grantEventSeeds(state: GameState, id: EventId, now: number): number {
-  const multiplier = Math.max(1, state.temp.eventRewardMult ?? 1);
+  const seedFocus = abilityMultiplierFor(state, 'seed');
+  const multiplier = Math.max(1, (state.temp.eventRewardMult ?? 1) * seedFocus);
   const seeds = Math.max(0, Math.floor(rollEventSeeds(state, id) * multiplier));
   if (seeds > 0) {
     awardSeeds(state, seeds, 'event', now);

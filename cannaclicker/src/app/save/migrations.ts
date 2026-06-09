@@ -36,18 +36,23 @@ import {
   type EventStats,
   type EventStatsPerEvent,
 } from '../events';
-import type { EventId } from '../events';
+import type { EventCategory, EventId } from '../events';
 import { SEED_SYNERGY_IDS, type SeedSynergyId } from '../seeds';
 import { ABILITIES } from '../../data/abilities';
 import { goals, type GoalId } from '../../data/goals';
+import { ascensionNodes, type AscensionNodeId } from '../../data/ascension';
+import { upgrades, type UpgradeId } from '../../data/upgrades';
 
 const VALID_MILESTONE_IDS = new Set(milestones.map((milestone) => milestone.id));
 const ABILITY_IDS: AbilityId[] = ABILITIES.map((ability) => ability.id);
 const VALID_RESEARCH_IDS = new Set<string>(RESEARCH.map((entry) => entry.id));
 const VALID_SEED_SYNERGY_IDS = new Set<string>(SEED_SYNERGY_IDS);
 const VALID_EVENT_IDS: EventId[] = [...EVENT_IDS];
+const EVENT_CATEGORIES: EventCategory[] = ['minor', 'chain', 'risk', 'major', 'seasonal'];
 const EVENT_ID_SET = new Set<EventId>(VALID_EVENT_IDS);
 const VALID_GOAL_IDS = new Set<string>(goals.map((goal) => goal.id));
+const VALID_ASCENSION_IDS = new Set<string>(ascensionNodes.map((node) => node.id));
+const VALID_UPGRADE_IDS = new Set<string>(upgrades.map((upgrade) => upgrade.id));
 
 function isSeedSynergyId(value: unknown): value is SeedSynergyId {
   return typeof value === 'string' && VALID_SEED_SYNERGY_IDS.has(value);
@@ -63,6 +68,14 @@ function isResearchId(value: unknown): value is ResearchId {
 
 function isGoalId(value: unknown): value is GoalId {
   return typeof value === 'string' && VALID_GOAL_IDS.has(value);
+}
+
+function isAscensionNodeId(value: unknown): value is AscensionNodeId {
+  return typeof value === 'string' && VALID_ASCENSION_IDS.has(value);
+}
+
+function isUpgradeId(value: unknown): value is UpgradeId {
+  return typeof value === 'string' && VALID_UPGRADE_IDS.has(value);
 }
 
 export function normalisePersistedState(
@@ -115,6 +128,16 @@ export function normalisePersistedState(
   );
   const milestones = normaliseMilestoneFlags(prestige.milestones);
   const kickstart = normalisePersistedKickstart(prestige.kickstart, now);
+  const ascensionOwned = Array.isArray(prestige.ascensionOwned)
+    ? [...new Set(prestige.ascensionOwned.filter(isAscensionNodeId))]
+    : [];
+  const permanentUpgradeIds = Array.isArray(prestige.permanentUpgradeIds)
+    ? [...new Set(prestige.permanentUpgradeIds.filter(isUpgradeId))]
+    : [];
+  const legacyPrestigePower =
+    (data.v ?? 0) < SAVE_VERSION && meta.prestigeCount > 0
+      ? toPositiveInteger(prestige.totalSeeds, 0)
+      : 0;
   const rawResearch = legacyData.researchOwned;
   const researchOwned = Array.isArray(rawResearch)
     ? [...new Set(rawResearch.filter(isResearchId))]
@@ -132,8 +155,22 @@ export function normalisePersistedState(
     achievements: data.achievements ?? {},
     researchOwned,
     prestige: {
-      seeds: prestige.seeds ?? 0,
-      totalSeeds: Math.max(prestige.totalSeeds ?? 0, prestige.seeds ?? 0),
+      seeds: toPositiveInteger(prestige.seeds, 0),
+      totalSeeds: Math.max(
+        toPositiveInteger(prestige.totalSeeds, 0),
+        toPositiveInteger(prestige.seeds, 0),
+      ),
+      ascensionSeeds: toPositiveInteger(prestige.ascensionSeeds, 0),
+      totalAscensionSeeds: Math.max(
+        legacyPrestigePower,
+        toPositiveInteger(prestige.totalAscensionSeeds, 0),
+        toPositiveInteger(prestige.ascensionSeeds, 0) +
+          toPositiveInteger(prestige.ascensionSpent, 0),
+      ),
+      ascensionSpent: toPositiveInteger(prestige.ascensionSpent, 0),
+      ascensionOwned,
+      permanentSlots: toPositiveInteger(prestige.permanentSlots, 0),
+      permanentUpgradeIds,
       mult: prestige.mult ?? '1',
       lifetimeBuds: prestige.lifetimeBuds ?? data.total ?? '0',
       lastResetAt: prestige.lastResetAt ?? legacyLastSeen ?? legacyTime ?? now,
@@ -292,11 +329,19 @@ function normaliseEventStats(
     totalExpired: toPositiveInteger(stats.totalExpired, defaults.totalExpired),
     pityActivations: toPositiveInteger(stats.pityActivations, defaults.pityActivations),
     pityTimerMs: toPositiveInteger(stats.pityTimerMs, defaults.pityTimerMs),
+    pityByCategory: {},
     clickRate: toRate(stats.clickRate, defaults.clickRate),
     lastSpawnAt: toTimestamp(stats.lastSpawnAt, fallbackLastSeen ?? defaults.lastSpawnAt),
     lastClickAt: toTimestamp(stats.lastClickAt, defaults.lastClickAt),
     perEvent: {},
   } satisfies EventStats;
+
+  for (const category of EVENT_CATEGORIES) {
+    safe.pityByCategory[category] = toPositiveInteger(
+      stats.pityByCategory?.[category],
+      defaults.pityByCategory[category] ?? 0,
+    );
+  }
 
   if (stats.perEvent) {
     for (const [key, value] of Object.entries(stats.perEvent)) {

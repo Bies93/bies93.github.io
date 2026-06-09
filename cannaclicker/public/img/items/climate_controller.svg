@@ -4,9 +4,29 @@
     <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
       <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".28"/>
     </filter>
+    <filter id="brushRough" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".032" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="inkBleed" x="-18%" y="-18%" width="136%" height="136%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation=".55" result="blur"/>
+      <feOffset dy=".45" result="offset"/>
+      <feMerge>
+        <feMergeNode in="offset"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values=".18"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .13"/>
+      </feComponentTransfer>
+    </filter>
     <linearGradient id="leafGradient" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="#caff58"/>
-      <stop offset=".48" stop-color="#19c96f"/>
+      <stop offset="0" stop-color="#f4ffe3"/>
+      <stop offset=".18" stop-color="#caff58"/>
+      <stop offset=".58" stop-color="#19c96f"/>
       <stop offset="1" stop-color="#0c7f46"/>
     </linearGradient>
     <linearGradient id="goldGradient" x1="0" x2="1" y1="0" y2="1">
@@ -21,9 +41,15 @@
     </linearGradient>
   </defs>
   <g filter="url(#softShadow)">
-      <path d="M64 8 108 32v48l-44 40-44-40V32Z" fill="#10251a" stroke="#19c96f" stroke-width="4" stroke-linejoin="round"/>
-      <path d="M64 15 100 35v40l-36 33-36-33V35Z" fill="#0b1c13" opacity=".94"/>
-      <rect x="38" y="36" width="52" height="50" rx="10" fill="#153a31" stroke="#76ffd0" stroke-width="4"/><circle cx="64" cy="61" r="14" fill="none" stroke="#ffd15a" stroke-width="5"/><path d="M64 61 74 53" stroke="#f7ffe8" stroke-width="5" stroke-linecap="round"/><path d="M46 48h12M70 80h10" stroke="#19c96f" stroke-width="4" stroke-linecap="round"/>
-      <path d="M35 96c16 11 42 11 58 0" fill="none" stroke="#19c96f" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+      <path d="M64 7c14 2 33 11 45 25 6 17 2 39-6 55-12 17-25 28-39 34-18-6-33-17-44-36-7-18-5-38 3-55C35 18 49 9 64 7Z" fill="#050b08" stroke="#71c7ff" stroke-width="4.6" stroke-linejoin="round" filter="url(#brushRough)"/>
+      <path d="M64 15c12 2 27 10 36 21 4 13 2 30-5 43-9 13-20 22-31 27-14-5-26-13-35-28-5-14-4-29 2-42 9-10 21-18 33-21Z" fill="#10251a" opacity=".96"/>
+      <path d="M31 37c10-11 22-17 34-18 10 2 20 7 29 14-18-3-38 2-62 16Z" fill="#71c7ff" opacity=".13"/>
+      <path d="M25 83c12 20 24 29 39 35 15-7 27-17 39-34-22 11-52 13-78-1Z" fill="#000" opacity=".2"/>
+      <g filter="url(#inkBleed)"><rect x="38" y="36" width="52" height="50" rx="10" fill="#153a31" stroke="#76ffd0" stroke-width="4"/><circle cx="64" cy="61" r="14" fill="none" stroke="#ffd15a" stroke-width="5"/><path d="M64 61 74 53" stroke="#f7ffe8" stroke-width="5" stroke-linecap="round"/><path d="M46 48h12M70 80h10" stroke="#19c96f" stroke-width="4" stroke-linecap="round"/></g>
+      <path d="M34 96c16 12 43 12 60-1" fill="none" stroke="#71c7ff" stroke-width="3.4" stroke-linecap="round" opacity=".72"/>
+      <path d="M37 30c9-7 18-11 28-12M94 42c5 11 5 23 0 36M31 76c-4-14-3-26 2-38" fill="none" stroke="#f7ffe8" stroke-width="1.6" stroke-linecap="round" opacity=".34"/>
+      <circle cx="33" cy="92" r="1.8" fill="#71c7ff" opacity=".62"/>
+      <circle cx="101" cy="37" r="1.4" fill="#f7ffe8" opacity=".45"/>
+      <circle cx="50" cy="22" r="1.1" fill="#f7ffe8" opacity=".35"/>
     </g>
 </svg>

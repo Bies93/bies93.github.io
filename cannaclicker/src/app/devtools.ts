@@ -30,6 +30,8 @@ interface BalanceSnapshot {
   bpc: string;
   seeds: number;
   totalSeeds: number;
+  ascensionSeeds: number;
+  totalAscensionSeeds: number;
   prestigeCount: number;
   itemCount: number;
   upgradeCount: number;
@@ -258,9 +260,7 @@ function createSnapshot(state: GameState): BalanceSnapshot {
       ? 1
       : 0;
   const activeBuffs =
-    activeAbilityCount +
-    activeEventBoosts +
-    (state.temp.kickstartLevel > 0 ? 1 : 0);
+    activeAbilityCount + activeEventBoosts + (state.temp.kickstartLevel > 0 ? 1 : 0);
 
   return {
     buds: state.buds.toString(),
@@ -270,6 +270,8 @@ function createSnapshot(state: GameState): BalanceSnapshot {
     bpc: state.bpc.toString(),
     seeds: state.prestige.seeds,
     totalSeeds: state.prestige.totalSeeds,
+    ascensionSeeds: state.prestige.ascensionSeeds,
+    totalAscensionSeeds: state.prestige.totalAscensionSeeds,
     prestigeCount: state.meta.prestigeCount,
     itemCount,
     upgradeCount: Object.values(state.upgrades).filter(Boolean).length,

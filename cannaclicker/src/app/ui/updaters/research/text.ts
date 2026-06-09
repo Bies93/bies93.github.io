@@ -83,6 +83,27 @@ export function formatResearchEffect(locale: LocaleKey, effect: ResearchEffect):
       const percent = Math.round((1 - (effect.v ?? 1)) * 100);
       return t(locale, 'research.effect.researchCost', { value: percent });
     }
+    case 'BPC_FROM_BPS_SECONDS': {
+      return t(locale, 'research.effect.bpcFromBps', {
+        value: (effect.v ?? 0).toFixed(3),
+      });
+    }
+    case 'CLICK_CRIT': {
+      const percent = Math.round((effect.v ?? 0) * 100);
+      return t(locale, 'research.effect.clickCrit', { value: percent });
+    }
+    case 'COMBO_POWER': {
+      const percent = Math.round((effect.v ?? 0) * 100);
+      return t(locale, 'research.effect.comboPower', { value: percent });
+    }
+    case 'AUTOMATION_BPS_SHARE': {
+      const percent = Math.round((effect.v ?? 0) * 1000) / 10;
+      return t(locale, 'research.effect.automationBpsShare', { value: percent });
+    }
+    case 'SOFTCAP_RELIEF': {
+      const percent = Math.round((effect.v ?? 0) * 100);
+      return t(locale, 'research.effect.softcapRelief', { value: percent });
+    }
     default:
       return '';
   }
@@ -117,7 +138,7 @@ export function describeUnlockCondition(
     case 'prestige_seeds':
       return t(locale, 'research.lock.prestigeSeeds', {
         value: condition.value,
-        current: state.prestige.totalSeeds ?? state.prestige.seeds,
+        current: state.prestige.totalAscensionSeeds ?? 0,
       });
     default:
       return '';

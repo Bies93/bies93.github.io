@@ -6,6 +6,7 @@ import {
   SAVE_VERSION,
 } from './state';
 import { computePrestigeMultiplier } from './prestige';
+import { applyAscensionEffects } from './ascension';
 import { applyResearchEffects } from './research';
 import { reapplyAbilityEffects } from './abilities';
 import { DEFAULT_LOCALE, resolveLocale, type LocaleKey } from './i18n';
@@ -80,12 +81,15 @@ export function initState(saved: PersistedStateV7 | null): GameState {
   }
 
   const now = Date.now();
-  const prestigeSeeds = Math.max(0, Math.floor(saved.prestige?.seeds ?? 0));
-  const totalSeeds = Math.max(
-    prestigeSeeds,
-    Math.floor(saved.prestige?.totalSeeds ?? prestigeSeeds),
+  const runSeeds = Math.max(0, Math.floor(saved.prestige?.seeds ?? 0));
+  const totalRunSeeds = Math.max(runSeeds, Math.floor(saved.prestige?.totalSeeds ?? runSeeds));
+  const ascensionSeeds = Math.max(0, Math.floor(saved.prestige?.ascensionSeeds ?? 0));
+  const ascensionSpent = Math.max(0, Math.floor(saved.prestige?.ascensionSpent ?? 0));
+  const totalAscensionSeeds = Math.max(
+    ascensionSeeds + ascensionSpent,
+    Math.floor(saved.prestige?.totalAscensionSeeds ?? ascensionSeeds),
   );
-  const prestigeMult = computePrestigeMultiplier(totalSeeds);
+  const prestigeMult = computePrestigeMultiplier(totalAscensionSeeds);
   const prestigeLifetime = ensureDecimal(saved.prestige?.lifetimeBuds ?? saved.total ?? '0');
   const researchOwned = Array.isArray(saved.researchOwned)
     ? [...new Set(saved.researchOwned.filter(isResearchId))]
@@ -105,8 +109,14 @@ export function initState(saved: PersistedStateV7 | null): GameState {
     achievements: saved.achievements ?? {},
     researchOwned,
     prestige: {
-      seeds: prestigeSeeds,
-      totalSeeds,
+      seeds: runSeeds,
+      totalSeeds: totalRunSeeds,
+      ascensionSeeds,
+      totalAscensionSeeds,
+      ascensionSpent,
+      ascensionOwned: saved.prestige?.ascensionOwned ?? [],
+      permanentSlots: saved.prestige?.permanentSlots ?? 0,
+      permanentUpgradeIds: saved.prestige?.permanentUpgradeIds ?? [],
       mult: prestigeMult,
       lifetimeBuds: prestigeLifetime,
       lastResetAt: saved.prestige?.lastResetAt ?? saved.time ?? now,
@@ -126,10 +136,11 @@ export function initState(saved: PersistedStateV7 | null): GameState {
   });
 
   applyResearchEffects(state);
+  applyAscensionEffects(state);
   reapplyAbilityEffects(state);
 
   applyOfflineProgress(state, now);
-  state.prestige.mult = computePrestigeMultiplier(state.prestige.totalSeeds);
+  state.prestige.mult = computePrestigeMultiplier(state.prestige.totalAscensionSeeds);
 
   cleanAbilityFlags(state.abilities, now);
 
@@ -161,8 +172,12 @@ export function importSave(encoded: string): GameState {
     throw new Error('Unbekannte Save-Version');
   }
 
-  writePersistedState(normalised, stringifyPersistedState);
-  return initState(normalised);
+  const nextState = initState(normalised);
+  const timestamp = Date.now();
+  prepareStateForPersist(nextState, timestamp);
+  const payload = createPersistedPayload(nextState, timestamp);
+  writePersistedState(payload, stringifyPersistedState);
+  return nextState;
 }
 
 export function clearSave(): void {

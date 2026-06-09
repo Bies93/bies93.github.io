@@ -1,7 +1,7 @@
 import { researchIcons } from '../app/assetManifest';
 import type { ItemId } from './items';
 
-export type ResearchCostType = 'buds' | 'seeds';
+export type ResearchCostType = 'buds' | 'seeds' | 'ascension';
 
 export type ResearchPath =
   | 'efficiency'
@@ -9,7 +9,10 @@ export type ResearchPath =
   | 'automation'
   | 'events'
   | 'genetics'
-  | 'economy';
+  | 'economy'
+  | 'prestige';
+
+export type ResearchClass = 'run' | 'permanent' | 'strain';
 
 export type StrainId = 'indica' | 'sativa' | 'hybrid';
 
@@ -29,7 +32,12 @@ export type EffectId =
   | 'EVENT_REWARD_MULT'
   | 'EVENT_SPAWN_RATE'
   | 'EVENT_DURATION_MULT'
-  | 'RESEARCH_COST_MULT';
+  | 'RESEARCH_COST_MULT'
+  | 'BPC_FROM_BPS_SECONDS'
+  | 'CLICK_CRIT'
+  | 'COMBO_POWER'
+  | 'AUTOMATION_BPS_SHARE'
+  | 'SOFTCAP_RELIEF';
 
 export type ResearchUnlockCondition =
   | { type: 'total_buds'; value: number }
@@ -52,6 +60,7 @@ interface ResearchNodeSpec {
   id: string;
   path: ResearchPath;
   order: number;
+  class?: ResearchClass;
   name: Record<'de' | 'en', string>;
   desc: Record<'de' | 'en', string>;
   costType: ResearchCostType;
@@ -610,6 +619,417 @@ const ECONOMY_RESEARCH = [
   },
 ] as const satisfies readonly ResearchNodeSpec[];
 
+const ADVANCED_RESEARCH = [
+  {
+    id: 'r_active_bps_tap',
+    path: 'active',
+    order: 4,
+    class: 'run',
+    name: { de: 'Flow-Taps', en: 'Flow Taps' },
+    desc: {
+      de: 'Klicks erhalten zusätzlich 0,03 Sekunden aktueller Produktion. Resetet beim Prestige.',
+      en: 'Clicks gain an extra 0.03 seconds of current production. Resets on prestige.',
+    },
+    costType: 'buds',
+    cost: 900_000,
+    requires: ['r_active_peak'],
+    resetsOnPrestige: true,
+    effects: [{ id: 'BPC_FROM_BPS_SECONDS', v: 0.03 }],
+    icon: researchIcons.overdrive,
+  },
+  {
+    id: 'r_active_combo_roots',
+    path: 'active',
+    order: 5,
+    class: 'run',
+    name: { de: 'Combo-Wurzeln', en: 'Combo Roots' },
+    desc: {
+      de: 'Click-Combos skalieren 12 % stärker. Gut für geplante Aktivfenster.',
+      en: 'Click combos scale 12% harder. Good for planned active windows.',
+    },
+    costType: 'seeds',
+    cost: 5,
+    requires: ['r_active_bps_tap'],
+    resetsOnPrestige: true,
+    effects: [{ id: 'COMBO_POWER', v: 0.12 }],
+    icon: researchIcons.overdrive,
+  },
+  {
+    id: 'r_active_crit_glands',
+    path: 'active',
+    order: 6,
+    class: 'run',
+    name: { de: 'Harzspitzen', en: 'Resin Tips' },
+    desc: {
+      de: 'Klicks haben +4 % kritische Chance. Kritische Klicks zahlen doppelt.',
+      en: 'Clicks gain +4% critical chance. Critical clicks pay double.',
+    },
+    costType: 'seeds',
+    cost: 7,
+    requires: ['r_active_combo_roots'],
+    resetsOnPrestige: true,
+    effects: [{ id: 'CLICK_CRIT', v: 0.04 }],
+    icon: researchIcons.overdrive,
+  },
+  {
+    id: 'r_active_chain_peak',
+    path: 'active',
+    order: 7,
+    class: 'run',
+    name: { de: 'Harvest Chain', en: 'Harvest Chain' },
+    desc: {
+      de: 'Klicks erhalten weitere 0,04 Sekunden Produktion und +3 % kritische Chance.',
+      en: 'Clicks gain another 0.04 seconds of production and +3% critical chance.',
+    },
+    costType: 'seeds',
+    cost: 10,
+    requires: ['r_active_crit_glands'],
+    resetsOnPrestige: true,
+    effects: [
+      { id: 'BPC_FROM_BPS_SECONDS', v: 0.04 },
+      { id: 'CLICK_CRIT', v: 0.03 },
+    ],
+    icon: researchIcons.overdrive,
+  },
+  {
+    id: 'r_auto_servo_scaling',
+    path: 'automation',
+    order: 9,
+    class: 'permanent',
+    name: { de: 'Servo-Skalierung', en: 'Servo Scaling' },
+    desc: {
+      de: 'Automation gewinnt zusätzlich 1 % BPS pro Sekunde als passiven Auto-Ertrag.',
+      en: 'Automation gains an additional 1% BPS per second as passive auto yield.',
+    },
+    costType: 'seeds',
+    cost: 8,
+    requires: ['r_ctrl_lab_auto2'],
+    effects: [{ id: 'AUTOMATION_BPS_SHARE', v: 0.01 }],
+    icon: researchIcons.automation,
+  },
+  {
+    id: 'r_auto_robot_sync',
+    path: 'automation',
+    order: 10,
+    class: 'permanent',
+    name: { de: 'Roboter-Sync', en: 'Robot Sync' },
+    desc: {
+      de: '+3 Auto-Klicks/s und weitere 1,5 % BPS-Anteil für Automation.',
+      en: '+3 auto-clicks/s and another 1.5% BPS share for automation.',
+    },
+    costType: 'seeds',
+    cost: 11,
+    requires: ['r_auto_servo_scaling'],
+    effects: [
+      { id: 'CLICK_AUTOMATION', v: 3 },
+      { id: 'AUTOMATION_BPS_SHARE', v: 0.015 },
+    ],
+    icon: researchIcons.automation,
+  },
+  {
+    id: 'r_auto_coolant_loop',
+    path: 'automation',
+    order: 11,
+    class: 'permanent',
+    name: { de: 'Kühlkreislauf', en: 'Coolant Loop' },
+    desc: {
+      de: 'Softcap-Strafen werden um 8 % abgefedert.',
+      en: 'Softcap penalties are softened by 8%.',
+    },
+    costType: 'seeds',
+    cost: 9,
+    requires: ['r_ctrl_time2'],
+    effects: [{ id: 'SOFTCAP_RELIEF', v: 0.08 }],
+    icon: researchIcons.costcut,
+  },
+  {
+    id: 'r_auto_buffered_idle',
+    path: 'automation',
+    order: 12,
+    class: 'permanent',
+    name: { de: 'Gepufferter Leerlauf', en: 'Buffered Idle' },
+    desc: {
+      de: 'Offline-Cap +10h und passive Seeds werden zuverlässiger.',
+      en: 'Offline cap +10h and passive seeds become more reliable.',
+    },
+    costType: 'seeds',
+    cost: 12,
+    requires: ['r_auto_coolant_loop'],
+    effects: [
+      { id: 'OFFLINE_CAP_HOURS_ADD', v: 10 },
+      { id: 'SEED_PASSIVE', seedPassive: { intervalMinutes: 3.5, chance: 0.55, seeds: 1 } },
+    ],
+    icon: researchIcons.offline,
+  },
+  {
+    id: 'r_event_magnetics',
+    path: 'events',
+    order: 4,
+    class: 'permanent',
+    name: { de: 'Event-Magnetik', en: 'Event Magnetics' },
+    desc: {
+      de: 'Events erscheinen weitere 12 % häufiger.',
+      en: 'Events appear another 12% more often.',
+    },
+    costType: 'seeds',
+    cost: 7,
+    requires: ['r_event_rewarding'],
+    effects: [{ id: 'EVENT_SPAWN_RATE', v: 1.12 }],
+    icon: researchIcons.growth,
+  },
+  {
+    id: 'r_event_chain_study',
+    path: 'events',
+    order: 5,
+    class: 'permanent',
+    name: { de: 'Kettenstudie', en: 'Chain Study' },
+    desc: {
+      de: 'Event-Buffs dauern +15 % länger und Rewards zahlen +12 % besser.',
+      en: 'Event buffs last 15% longer and rewards pay 12% better.',
+    },
+    costType: 'seeds',
+    cost: 9,
+    requires: ['r_event_magnetics'],
+    effects: [
+      { id: 'EVENT_DURATION_MULT', v: 1.15 },
+      { id: 'EVENT_REWARD_MULT', v: 1.12 },
+    ],
+    icon: researchIcons.growth,
+  },
+  {
+    id: 'r_event_green_windows',
+    path: 'events',
+    order: 6,
+    class: 'run',
+    name: { de: 'Grüne Fenster', en: 'Green Windows' },
+    desc: {
+      de: 'Klicks erhalten 0,025 Sekunden Produktion. Besonders stark während Event-Buffs.',
+      en: 'Clicks gain 0.025 seconds of production. Especially strong during event buffs.',
+    },
+    costType: 'buds',
+    cost: 2_200_000,
+    requires: ['r_event_signals'],
+    resetsOnPrestige: true,
+    effects: [{ id: 'BPC_FROM_BPS_SECONDS', v: 0.025 }],
+    icon: researchIcons.overdrive,
+  },
+  {
+    id: 'r_event_quality_control',
+    path: 'events',
+    order: 7,
+    class: 'permanent',
+    name: { de: 'Qualitätskontrolle', en: 'Quality Control' },
+    desc: {
+      de: 'Event-Rewards +20 %. Ein klarer Event-Build-Anker.',
+      en: 'Event rewards +20%. A clear event-build anchor.',
+    },
+    costType: 'seeds',
+    cost: 12,
+    requires: ['r_event_chain_study'],
+    effects: [{ id: 'EVENT_REWARD_MULT', v: 1.2 }],
+    icon: researchIcons.seeds,
+  },
+  {
+    id: 'r_gen_seed_bank',
+    path: 'genetics',
+    order: 5,
+    class: 'permanent',
+    name: { de: 'Seed-Bank', en: 'Seed Bank' },
+    desc: {
+      de: 'Nach 4 Minuten Idle: 60 % Chance auf 1 Seed.',
+      en: 'After 4 minutes idle: 60% chance for 1 seed.',
+    },
+    costType: 'seeds',
+    cost: 6,
+    requires: ['r_strain_lab'],
+    effects: [{ id: 'SEED_PASSIVE', seedPassive: { intervalMinutes: 4, chance: 0.6, seeds: 1 } }],
+    icon: researchIcons.seeds,
+  },
+  {
+    id: 'r_gen_click_pollen',
+    path: 'genetics',
+    order: 6,
+    class: 'permanent',
+    name: { de: 'Klick-Pollen', en: 'Click Pollen' },
+    desc: {
+      de: 'Klick-Samenchance +2,5 Prozentpunkte.',
+      en: 'Click seed chance +2.5 percentage points.',
+    },
+    costType: 'seeds',
+    cost: 8,
+    requires: ['r_gen_seed_bank'],
+    effects: [{ id: 'SEED_CLICK_BONUS', v: 0.025 }],
+    icon: researchIcons.seeds,
+  },
+  {
+    id: 'r_gen_softcap_genes',
+    path: 'genetics',
+    order: 7,
+    class: 'permanent',
+    name: { de: 'Softcap-Gene', en: 'Softcap Genes' },
+    desc: {
+      de: 'Softcap-Strafen werden um 12 % abgefedert.',
+      en: 'Softcap penalties are softened by 12%.',
+    },
+    costType: 'seeds',
+    cost: 10,
+    requires: ['r_gen_click_pollen'],
+    effects: [{ id: 'SOFTCAP_RELIEF', v: 0.12 }],
+    icon: researchIcons.strain,
+  },
+  {
+    id: 'r_gen_strain_protocol',
+    path: 'genetics',
+    order: 8,
+    class: 'strain',
+    name: { de: 'Strain-Protokoll', en: 'Strain Protocol' },
+    desc: {
+      de: 'Hybrid-Buffs zählen stärker: +1,5 % pro aktivem temporären Buff.',
+      en: 'Hybrid buffs count harder: +1.5% per active temporary buff.',
+    },
+    costType: 'seeds',
+    cost: 11,
+    requires: ['r_strain_hybrid'],
+    resetsOnPrestige: true,
+    effects: [{ id: 'HYBRID_BUFF_PER_ACTIVE', v: 0.015, labelKey: 'research.effect.hybridBuff' }],
+    icon: researchIcons.strain,
+  },
+  {
+    id: 'r_econ_softcap_permits',
+    path: 'economy',
+    order: 4,
+    class: 'permanent',
+    name: { de: 'Softcap-Lizenzen', en: 'Softcap Permits' },
+    desc: {
+      de: 'Softcap-Strafen werden um 10 % abgefedert.',
+      en: 'Softcap penalties are softened by 10%.',
+    },
+    costType: 'seeds',
+    cost: 7,
+    requires: ['r_econ_seed_grants'],
+    effects: [{ id: 'SOFTCAP_RELIEF', v: 0.1 }],
+    icon: researchIcons.costcut,
+  },
+  {
+    id: 'r_econ_bulk_routes',
+    path: 'economy',
+    order: 5,
+    class: 'permanent',
+    name: { de: 'Bulk-Routen', en: 'Bulk Routes' },
+    desc: {
+      de: 'Gebäudekosten −6 %. Macht x25/Max-Käufe planbarer.',
+      en: 'Building costs -6%. Makes x25/max buys easier to plan.',
+    },
+    costType: 'seeds',
+    cost: 8,
+    requires: ['r_econ_softcap_permits'],
+    effects: [{ id: 'COST_REDUCE_ALL', v: 0.94 }],
+    icon: researchIcons.costcut,
+  },
+  {
+    id: 'r_econ_research_endowment',
+    path: 'economy',
+    order: 6,
+    class: 'permanent',
+    name: { de: 'Laborfonds', en: 'Lab Endowment' },
+    desc: {
+      de: 'Seed-Research kostet weitere 12 % weniger.',
+      en: 'Seed research costs another 12% less.',
+    },
+    costType: 'seeds',
+    cost: 10,
+    requires: ['r_econ_bulk_routes'],
+    effects: [{ id: 'RESEARCH_COST_MULT', v: 0.88 }],
+    icon: researchIcons.costcut,
+  },
+  {
+    id: 'r_pres_ascension_notes',
+    path: 'prestige',
+    order: 1,
+    class: 'permanent',
+    name: { de: 'Ascension-Notizen', en: 'Ascension Notes' },
+    desc: {
+      de: 'Globale Produktion +15 %. Kostet echte Ascension-Seeds.',
+      en: 'Global production +15%. Costs actual ascension seeds.',
+    },
+    costType: 'ascension',
+    cost: 2,
+    unlockAny: [{ type: 'prestige_seeds', value: 1 }],
+    effects: [{ id: 'BPS_MULT', v: 1.15 }],
+    icon: researchIcons.growth,
+  },
+  {
+    id: 'r_pres_active_memory',
+    path: 'prestige',
+    order: 2,
+    class: 'permanent',
+    name: { de: 'Aktive Erinnerung', en: 'Active Memory' },
+    desc: {
+      de: 'Klicks erhalten 0,035 Sekunden Produktion in jedem Run.',
+      en: 'Clicks gain 0.035 seconds of production in every run.',
+    },
+    costType: 'ascension',
+    cost: 3,
+    requires: ['r_pres_ascension_notes'],
+    effects: [{ id: 'BPC_FROM_BPS_SECONDS', v: 0.035 }],
+    icon: researchIcons.overdrive,
+  },
+  {
+    id: 'r_pres_idle_memory',
+    path: 'prestige',
+    order: 3,
+    class: 'permanent',
+    name: { de: 'Idle-Erinnerung', en: 'Idle Memory' },
+    desc: {
+      de: 'Automation erhält 2 % BPS-Anteil und Offline-Cap +6h.',
+      en: 'Automation gains 2% BPS share and offline cap +6h.',
+    },
+    costType: 'ascension',
+    cost: 4,
+    requires: ['r_pres_ascension_notes'],
+    effects: [
+      { id: 'AUTOMATION_BPS_SHARE', v: 0.02 },
+      { id: 'OFFLINE_CAP_HOURS_ADD', v: 6 },
+    ],
+    icon: researchIcons.offline,
+  },
+  {
+    id: 'r_pres_event_memory',
+    path: 'prestige',
+    order: 4,
+    class: 'permanent',
+    name: { de: 'Event-Erinnerung', en: 'Event Memory' },
+    desc: {
+      de: 'Event-Frequenz +10 % und Event-Rewards +15 %.',
+      en: 'Event frequency +10% and event rewards +15%.',
+    },
+    costType: 'ascension',
+    cost: 4,
+    requires: ['r_pres_ascension_notes'],
+    effects: [
+      { id: 'EVENT_SPAWN_RATE', v: 1.1 },
+      { id: 'EVENT_REWARD_MULT', v: 1.15 },
+    ],
+    icon: researchIcons.seeds,
+  },
+  {
+    id: 'r_pres_softcap_charter',
+    path: 'prestige',
+    order: 5,
+    class: 'permanent',
+    name: { de: 'Softcap-Charta', en: 'Softcap Charter' },
+    desc: {
+      de: 'Softcap-Strafen werden um weitere 15 % abgefedert.',
+      en: 'Softcap penalties are softened by another 15%.',
+    },
+    costType: 'ascension',
+    cost: 6,
+    requires: ['r_pres_idle_memory', 'r_pres_event_memory'],
+    effects: [{ id: 'SOFTCAP_RELIEF', v: 0.15 }],
+    icon: researchIcons.costcut,
+  },
+] as const satisfies readonly ResearchNodeSpec[];
+
 const RESEARCH_ENTRIES = [
   ...EFFICIENCY_RESEARCH,
   ...ACTIVE_RESEARCH,
@@ -617,6 +1037,7 @@ const RESEARCH_ENTRIES = [
   ...EVENT_RESEARCH,
   ...STRAIN_RESEARCH,
   ...ECONOMY_RESEARCH,
+  ...ADVANCED_RESEARCH,
 ] as const;
 
 type RawResearchNode = (typeof RESEARCH_ENTRIES)[number];
@@ -630,11 +1051,27 @@ export interface ResearchNode extends Omit<ResearchNodeSpec, 'id' | 'requires'> 
 
 export const RESEARCH_PATHS: Record<ResearchPath, readonly ResearchNode[]> = {
   efficiency: EFFICIENCY_RESEARCH,
-  active: ACTIVE_RESEARCH,
-  automation: CONTROL_RESEARCH,
-  events: EVENT_RESEARCH,
-  genetics: STRAIN_RESEARCH,
-  economy: ECONOMY_RESEARCH,
+  active: [
+    ...ACTIVE_RESEARCH,
+    ...ADVANCED_RESEARCH.filter((node) => node.path === 'active'),
+  ] as readonly ResearchNode[],
+  automation: [
+    ...CONTROL_RESEARCH,
+    ...ADVANCED_RESEARCH.filter((node) => node.path === 'automation'),
+  ] as readonly ResearchNode[],
+  events: [
+    ...EVENT_RESEARCH,
+    ...ADVANCED_RESEARCH.filter((node) => node.path === 'events'),
+  ] as readonly ResearchNode[],
+  genetics: [
+    ...STRAIN_RESEARCH,
+    ...ADVANCED_RESEARCH.filter((node) => node.path === 'genetics'),
+  ] as readonly ResearchNode[],
+  economy: [
+    ...ECONOMY_RESEARCH,
+    ...ADVANCED_RESEARCH.filter((node) => node.path === 'economy'),
+  ] as readonly ResearchNode[],
+  prestige: ADVANCED_RESEARCH.filter((node) => node.path === 'prestige') as readonly ResearchNode[],
 };
 
 const PATH_ORDER: Record<ResearchPath, number> = {
@@ -644,6 +1081,7 @@ const PATH_ORDER: Record<ResearchPath, number> = {
   events: 3,
   genetics: 4,
   economy: 5,
+  prestige: 6,
 };
 
 export const RESEARCH: readonly ResearchNode[] = [...RESEARCH_ENTRIES].sort((a, b) => {

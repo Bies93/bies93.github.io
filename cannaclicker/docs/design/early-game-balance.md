@@ -8,24 +8,35 @@ Der erste Run soll aktiv starten, schnell passive Produktion zeigen und erst dan
 
 ## Zielverlauf
 
-| Zeit     | Spielerlebnis                                      | Systemziel                                                              |
-| -------- | -------------------------------------------------- | ----------------------------------------------------------------------- |
-| 0-15s    | Pflanze, Buds und Klickaufforderung sind sichtbar. | 1 BPC, keine Ablenkung.                                                 |
-| 15-60s   | Erstes Item wird ohne Frust gekauft.               | Keimling kostet 12 Buds.                                                |
-| 1-3min   | Passive Produktion wird sichtbar.                  | Keimlinge und Toepfe erzeugen BPS, Klicks bleiben staerker.             |
-| 3-6min   | Mehrere Early-Items werden gekauft.                | Topf bei 40 Gesamtbuds, Grow-Zelt bei 250.                              |
-| 5-8min   | Erstes Upgrade wird erreichbar.                    | Praeziser Trim ab 260 Gesamtbuds, Kosten 420.                           |
-| 8-15min  | Erster Produktionssprung.                          | Grow-Zelt, Reiche Erde und Tap-Training fuehren zu BPC/BPS-Mix.         |
-| 15-30min | Events, Upgrades und frühe Strategie sichtbar.    | Event-Gate ist offen, aber Rewards überspringen die Progression nicht. |
+| Zeit     | Spielerlebnis                                      | Systemziel                                                             |
+| -------- | -------------------------------------------------- | ---------------------------------------------------------------------- |
+| 0-15s    | Pflanze, Buds und Klickaufforderung sind sichtbar. | 1 BPC, keine Ablenkung.                                                |
+| 15-60s   | Erstes Item wird ohne Frust gekauft.               | Keimling kostet 12 Buds.                                               |
+| 1-3min   | Passive Produktion wird sichtbar.                  | Keimlinge und Toepfe erzeugen BPS, Klicks bleiben staerker.            |
+| 3-6min   | Mehrere Early-Items werden gekauft.                | Topf bei 40 Gesamtbuds, Grow-Zelt bei 250.                             |
+| 5-8min   | Erstes Upgrade wird erreichbar.                    | Praeziser Trim ab 260 Gesamtbuds, Kosten 420.                          |
+| 8-15min  | Erster Produktionssprung.                          | Grow-Zelt, Reiche Erde und Tap-Training fuehren zu BPC/BPS-Mix.        |
+| 15-30min | Events, Upgrades und frühe Strategie sichtbar.     | Event-Gate ist offen, aber Rewards überspringen die Progression nicht. |
 
 ## BPC-Kurve
 
 - Start: 1 BPC.
 - Erstes Klick-Upgrade: `precision_trim`, 2x BPC, ab 260 Gesamtbuds.
 - Zweites Klick-Upgrade: `tap_training`, 1.75x BPC, nach `precision_trim`.
-- Klicks bleiben stark, weil frühe BPS-Werte bewusst moderat sind.
-- Midgame verschiebt Fokus auf Events plus Produktion.
-- Später dominieren BPS, Research und Prestige; BPC bleibt durch Multiplikatoren, Burst und Auto-Click relevant.
+- Sprint 17: Midgame-Klicks können zusätzlich einen Anteil aktueller BPS erhalten (`clickBpsSeconds`).
+- Active-Research und `active_harvest_chain` öffnen BPC = Basis + bis zu 0.4s aktueller BPS, multipliziert mit BPC-Multiplikatoren.
+- Click-Combo startet nach 5 schnellen Klicks und wächst in kleinen Stufen; `Harvest Chain` und Active-Research verstärken die Kurve.
+- Kritische Klicks zahlen doppelt und werden erst über Research/Upgrades freigeschaltet.
+- Später dominieren BPS, Research und Prestige; BPC bleibt durch BPS-Anteil, Combo, Krit, Burst und Automation relevant.
+
+## Active-/Idle-Zielkurve
+
+| Phase         | Klickrolle                                            | Idle-/Automation-Rolle                                   |
+| ------------- | ----------------------------------------------------- | -------------------------------------------------------- |
+| 0-15min       | Primärer Fortschrittsmotor plus erste Klick-Upgrades  | erste Items zeigen passive Produktion                    |
+| 15-60min      | Klicks bleiben durch BPC-Upgrades und Events sinnvoll | Shop, Buy Max und erste Automation tragen den Run        |
+| 60-120min     | Active-Build nutzt BPS-Anteil, Combo und Krit         | Automation erhält Auto-Klicks und später BPS-Anteil      |
+| Post-Prestige | Active ist eine Strategie, nicht Pflicht              | Prestige, Research, Ascension und Offline werden stärker |
 
 ## BPS-Kurve Early
 

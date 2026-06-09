@@ -109,7 +109,6 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   buffList.setAttribute('aria-label', t(state.locale, 'ui.sections.activeBuffs'));
 
   clickHeader.append(clickStats, nextUnlockHint, buffList);
-  clickCard.appendChild(clickHeader);
 
   const clickBody = document.createElement('div');
   clickBody.className = 'click-card__body';
@@ -140,6 +139,35 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
 
   clickButton.append(clickIcon, clickLabel);
   clickBody.appendChild(clickButton);
+
+  const quickShopPanel = document.createElement('section');
+  quickShopPanel.className = 'quick-shop-panel';
+  quickShopPanel.dataset.uiRole = 'quick-shop-panel';
+  quickShopPanel.dataset.testid = 'quick-shop-panel';
+
+  const quickShopCopy = document.createElement('div');
+  quickShopCopy.className = 'quick-shop-panel__copy';
+
+  const quickShopKicker = document.createElement('p');
+  quickShopKicker.className = 'quick-shop-panel__kicker';
+
+  const quickShopName = document.createElement('h2');
+  quickShopName.className = 'quick-shop-panel__name';
+
+  const quickShopMeta = document.createElement('p');
+  quickShopMeta.className = 'quick-shop-panel__meta';
+
+  quickShopCopy.append(quickShopKicker, quickShopName, quickShopMeta);
+
+  const quickShopButton = document.createElement('button');
+  quickShopButton.type = 'button';
+  quickShopButton.className = 'quick-shop-panel__button';
+  quickShopButton.dataset.role = 'quick-shop-buy';
+  quickShopButton.dataset.kind = 'shop';
+
+  quickShopPanel.append(quickShopCopy, quickShopButton);
+  clickBody.appendChild(quickShopPanel);
+  clickBody.appendChild(clickHeader);
 
   const goalPanel = document.createElement('section');
   goalPanel.className = 'goal-panel';
@@ -179,7 +207,6 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   nextGoalHint.className = 'goal-panel__next';
 
   goalPanel.append(goalCopy, goalProgress, goalProgressText, goalButton, nextGoalHint);
-  clickBody.appendChild(goalPanel);
 
   const strategyPanel = document.createElement('section');
   strategyPanel.className = 'strategy-panel';
@@ -199,7 +226,6 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   strategyDetail.className = 'strategy-panel__detail';
 
   strategyPanel.append(strategyKicker, strategyTitle, strategyBody, strategyDetail);
-  clickBody.appendChild(strategyPanel);
 
   const budsStat = createStatBlock('stats.buds', clickStats, statsLabels, statsMeta);
   const bpsStat = createStatBlock('stats.bps', clickStats, statsLabels, statsMeta);
@@ -238,14 +264,14 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     abilityGrid.appendChild(abilityButton.container);
   }
 
-  primaryColumn.appendChild(abilitySection);
-
   const sidePanel = createSidePanel('shop');
   sidePanel.section.dataset.uiRole = 'side-panel';
   sidePanel.section.dataset.testid = 'side-panel';
   sidePanel.section.setAttribute('role', 'region');
   sidePanel.section.setAttribute('aria-label', t(state.locale, 'ui.sections.sidePanel'));
   secondaryColumn.appendChild(sidePanel.section);
+  secondaryColumn.append(goalPanel, strategyPanel);
+  secondaryColumn.appendChild(abilitySection);
 
   root.append(infoRibbon, layout);
 
@@ -285,6 +311,11 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     clickButton,
     clickLabel,
     clickIcon,
+    quickShopPanel,
+    quickShopKicker,
+    quickShopName,
+    quickShopMeta,
+    quickShopButton,
     nextUnlockHint,
     buffList,
     goalPanel,

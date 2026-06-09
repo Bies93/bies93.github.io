@@ -4,9 +4,29 @@
     <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
       <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".28"/>
     </filter>
+    <filter id="brushRough" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".032" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="inkBleed" x="-18%" y="-18%" width="136%" height="136%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation=".55" result="blur"/>
+      <feOffset dy=".45" result="offset"/>
+      <feMerge>
+        <feMergeNode in="offset"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values=".18"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .13"/>
+      </feComponentTransfer>
+    </filter>
     <linearGradient id="leafGradient" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="#caff58"/>
-      <stop offset=".48" stop-color="#19c96f"/>
+      <stop offset="0" stop-color="#f4ffe3"/>
+      <stop offset=".18" stop-color="#caff58"/>
+      <stop offset=".58" stop-color="#19c96f"/>
       <stop offset="1" stop-color="#0c7f46"/>
     </linearGradient>
     <linearGradient id="goldGradient" x1="0" x2="1" y1="0" y2="1">
@@ -23,5 +43,9 @@
   <g fill="none" stroke="#19c96f" stroke-width="5" stroke-linecap="round" opacity=".12">
       <path d="M165 900c35-200 76-332 145-455M1420 900c-22-165-77-312-168-440M760 900c-18-130-18-270 6-420"/>
       <path d="M310 505c-82-18-136-76-164-173M1248 484c95-30 154-101 177-213M766 555c-74-22-124-78-150-168"/>
+    </g>
+    <g fill="none" stroke="#caff58" stroke-width="2.8" stroke-linecap="round" opacity=".08" filter="url(#brushRough)">
+      <path d="M214 796c55-48 93-101 116-159M1337 786c-48-43-82-91-102-143M824 780c42-34 72-75 89-123"/>
+      <path d="M78 846c36-35 59-71 68-107M1499 844c-40-37-67-77-79-121"/>
     </g>
 </svg>

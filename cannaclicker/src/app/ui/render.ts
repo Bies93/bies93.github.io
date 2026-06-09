@@ -51,7 +51,7 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
     updateStats(state, refs);
     processSeedNotifications(state, refs, (options: ToastOptions) => showToast(options));
     updateAbilities(state, refs);
-    updateSidePanel(refs, context.getActiveSidePanelTab());
+    updateSidePanel(state, refs, context.getActiveSidePanelTab());
 
     updateShop(state, refs, {
       onPurchase: (feedback) => {

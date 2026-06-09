@@ -7,7 +7,7 @@ import {
   type ResearchUnlockCondition,
 } from '../data/research';
 import type { GameState } from './state';
-import { computePrestigeMultiplier } from './prestige';
+import { updatePrestigeMultiplier } from './prestige';
 import { applyEffects } from '../game/effects';
 import { reapplyAbilityEffects } from './abilities';
 import { recordInteraction } from './seeds';
@@ -48,22 +48,48 @@ export function getResearchList(
       affordable,
       lockReason,
     } satisfies ResearchViewModel;
-  }).filter((entry) => {
-    if (filter === 'available') {
-      return !entry.owned && !entry.blocked;
-    }
+  })
+    .filter((entry) => {
+      if (filter === 'available') {
+        return !entry.owned && !entry.blocked;
+      }
 
-    if (filter === 'owned') {
-      return entry.owned;
-    }
+      if (filter === 'owned') {
+        return entry.owned;
+      }
 
-    return true;
-  });
+      return true;
+    })
+    .sort(compareResearchEntries);
+}
+
+function compareResearchEntries(a: ResearchViewModel, b: ResearchViewModel): number {
+  const stateRank = (entry: ResearchViewModel): number => {
+    if (!entry.owned && !entry.blocked) {
+      return entry.affordable ? 0 : 1;
+    }
+    if (!entry.owned && entry.blocked) {
+      return 2;
+    }
+    return 3;
+  };
+  const diff = stateRank(a) - stateRank(b);
+  if (diff !== 0) {
+    return diff;
+  }
+  if (a.node.path !== b.node.path) {
+    return a.node.path.localeCompare(b.node.path);
+  }
+  return a.node.order - b.node.order;
 }
 
 export function canAfford(state: GameState, node: ResearchNode): boolean {
   if (node.costType === 'buds') {
     return state.buds.greaterThanOrEqualTo(new Decimal(node.cost));
+  }
+
+  if (node.costType === 'ascension') {
+    return (state.prestige.ascensionSeeds ?? 0) >= getResearchCost(state, node);
   }
 
   return state.prestige.seeds >= getResearchCost(state, node);
@@ -125,11 +151,15 @@ export function purchaseResearch(state: GameState, id: ResearchId): boolean {
   if (node.costType === 'buds') {
     const cost = new Decimal(node.cost);
     state.buds = state.buds.sub(cost);
+  } else if (node.costType === 'ascension') {
+    const cost = getResearchCost(state, node);
+    state.prestige.ascensionSeeds -= cost;
+    state.prestige.ascensionSpent = (state.prestige.ascensionSpent ?? 0) + cost;
+    updatePrestigeMultiplier(state);
   } else {
     const cost = getResearchCost(state, node);
     state.prestige.seeds -= cost;
     state.meta.seedsSpent += cost;
-    state.prestige.mult = computePrestigeMultiplier(state.prestige.totalSeeds);
   }
 
   state.researchOwned = [...state.researchOwned, node.id];
@@ -148,7 +178,7 @@ function meetsUnlockCondition(state: GameState, condition: ResearchUnlockConditi
     case 'total_buds':
       return state.total.greaterThanOrEqualTo(new Decimal(condition.value));
     case 'prestige_seeds':
-      return (state.prestige.totalSeeds ?? state.prestige.seeds) >= condition.value;
+      return (state.prestige.totalAscensionSeeds ?? 0) >= condition.value;
     default:
       return false;
   }

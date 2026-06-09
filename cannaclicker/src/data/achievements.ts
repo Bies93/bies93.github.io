@@ -18,6 +18,10 @@ export type AchievementCategory =
   | 'prestige'
   | 'offline'
   | 'abilities'
+  | 'builds'
+  | 'seasons'
+  | 'challenges'
+  | 'cosmetics'
   | 'hidden';
 
 export type AchievementRarity = 'common' | 'rare' | 'epic' | 'legendary';
@@ -44,6 +48,7 @@ export interface AchievementRequirement {
   abilityUse?: Partial<Record<AbilityId, number>>;
   activeBuffCount?: number;
   allItemsUnlocked?: boolean;
+  achievementScore?: number;
 }
 
 export interface AchievementDefinition {
@@ -57,6 +62,7 @@ export interface AchievementDefinition {
   flavor: Record<LocaleKey, string>;
   requirement: AchievementRequirement;
   rewardMultiplier?: number;
+  score?: number;
   order: number;
 }
 
@@ -182,6 +188,22 @@ const eventLabels: Record<EventId, Record<LocaleKey, string>> = {
   calm_growth: { de: 'Calm Growth', en: 'Calm Growth' },
   overgrowth: { de: 'Overgrowth', en: 'Overgrowth' },
   seed_bloom: { de: 'Seed Bloom', en: 'Seed Bloom' },
+  tiny_spark: { de: 'Tiny Spark', en: 'Tiny Spark' },
+  dew_drop: { de: 'Dew Drop', en: 'Dew Drop' },
+  compost_cache: { de: 'Compost Cache', en: 'Compost Cache' },
+  sunbeam: { de: 'Sunbeam', en: 'Sunbeam' },
+  mega_bud: { de: 'Mega Bud', en: 'Mega Bud' },
+  jackpot_canopy: { de: 'Jackpot Canopy', en: 'Jackpot Canopy' },
+  aurora_bloom: { de: 'Aurora Bloom', en: 'Aurora Bloom' },
+  trail_marker: { de: 'Trail Marker', en: 'Trail Marker' },
+  cascade_bloom: { de: 'Cascade Bloom', en: 'Cascade Bloom' },
+  echo_harvest: { de: 'Echo Harvest', en: 'Echo Harvest' },
+  volatile_growth: { de: 'Volatile Growth', en: 'Volatile Growth' },
+  blackout_sale: { de: 'Blackout Sale', en: 'Blackout Sale' },
+  pest_scare: { de: 'Pest Scare', en: 'Pest Scare' },
+  solstice_seed: { de: 'Solstice Seed', en: 'Solstice Seed' },
+  night_market: { de: 'Night Market', en: 'Night Market' },
+  festival_lantern: { de: 'Festival Lantern', en: 'Festival Lantern' },
 };
 
 const abilityLabels: Record<AbilityId, Record<LocaleKey, string>> = {
@@ -189,7 +211,24 @@ const abilityLabels: Record<AbilityId, Record<LocaleKey, string>> = {
   burst: { de: 'Burst Click', en: 'Burst Click' },
   auto_burst: { de: 'Auto Burst', en: 'Auto Burst' },
   discount_window: { de: 'Discount Window', en: 'Discount Window' },
+  event_magnet: { de: 'Event-Magnet', en: 'Event Magnet' },
+  seed_focus: { de: 'Seed-Fokus', en: 'Seed Focus' },
+  harvest_chain: { de: 'Erntekette', en: 'Harvest Chain' },
+  cooldown_sync: { de: 'Cooldown-Sync', en: 'Cooldown Sync' },
 };
+
+function defaultAchievementScore(rarity: AchievementRarity): number {
+  switch (rarity) {
+    case 'legendary':
+      return 80;
+    case 'epic':
+      return 35;
+    case 'rare':
+      return 15;
+    default:
+      return 5;
+  }
+}
 
 function makeAchievement(
   definition: Omit<AchievementDefinition, 'rarity' | 'overlayIcon'> & {
@@ -197,9 +236,11 @@ function makeAchievement(
     overlayIcon?: string;
   },
 ): AchievementDefinition {
+  const rarity = definition.rarity ?? 'common';
   return {
-    rarity: definition.rarity ?? 'common',
+    rarity,
     overlayIcon: definition.overlayIcon ?? uiIcons.achievementLeaf,
+    score: definition.score ?? defaultAchievementScore(rarity),
     ...definition,
   };
 }
@@ -353,6 +394,242 @@ function createAbilityAchievements(): AchievementDefinition[] {
   ];
 }
 
+function createMetaAchievements(): AchievementDefinition[] {
+  return [
+    makeAchievement({
+      id: 'build_seedling_swarm',
+      category: 'builds',
+      rarity: 'rare',
+      overlayIcon: uiIcons.shop,
+      name: { de: 'Wurzelmasse', en: 'Root Mass' },
+      description: {
+        de: 'Besitze 150 Seedlings und 50 Planter.',
+        en: 'Own 150 Seedlings and 50 Planters.',
+      },
+      flavor: {
+        de: 'Ein starker Run beginnt unten.',
+        en: 'A strong run starts at the bottom.',
+      },
+      requirement: { itemsOwned: { seedling: 150, planter: 50 } },
+      rewardMultiplier: 1.003,
+      order: 1810,
+    }),
+    makeAchievement({
+      id: 'build_indoor_core',
+      category: 'builds',
+      rarity: 'rare',
+      overlayIcon: uiIcons.shop,
+      name: { de: 'Indoor-Kern', en: 'Indoor Core' },
+      description: {
+        de: 'Besitze 75 Grow Tents und 100 Grow Lights.',
+        en: 'Own 75 Grow Tents and 100 Grow Lights.',
+      },
+      flavor: { de: 'Licht macht aus Raum Tempo.', en: 'Light turns room into tempo.' },
+      requirement: { itemsOwned: { grow_tent: 75, grow_light: 100 } },
+      rewardMultiplier: 1.003,
+      order: 1820,
+    }),
+    makeAchievement({
+      id: 'build_hydro_climate',
+      category: 'builds',
+      rarity: 'epic',
+      overlayIcon: uiIcons.shop,
+      name: { de: 'Stabile Schleife', en: 'Stable Loop' },
+      description: {
+        de: 'Besitze 50 Hydroponic Racks und 25 Climate Controller.',
+        en: 'Own 50 Hydroponic Racks and 25 Climate Controllers.',
+      },
+      flavor: { de: 'Wenn alles ruhig läuft, steigen die Zahlen.', en: 'Calm systems scale.' },
+      requirement: { itemsOwned: { hydroponic_rack: 50, climate_controller: 25 } },
+      rewardMultiplier: 1.005,
+      order: 1830,
+    }),
+    makeAchievement({
+      id: 'build_lab_robotics',
+      category: 'builds',
+      rarity: 'epic',
+      overlayIcon: uiIcons.research,
+      name: { de: 'Laborautomatik', en: 'Lab Automation' },
+      description: {
+        de: 'Besitze 25 Genetics Labs und 25 Trimming Robots.',
+        en: 'Own 25 Genetics Labs and 25 Trimming Robots.',
+      },
+      flavor: { de: 'Die späten Items sprechen miteinander.', en: 'Late items start talking.' },
+      requirement: { itemsOwned: { genetics_lab: 25, trimming_robot: 25 } },
+      rewardMultiplier: 1.005,
+      order: 1840,
+    }),
+    makeAchievement({
+      id: 'chain_apprentice',
+      category: 'events',
+      rarity: 'rare',
+      overlayIcon: uiIcons.achievementLight,
+      name: { de: 'Kettenblick', en: 'Chain Sight' },
+      description: {
+        de: 'Klicke Trail Marker und Cascade Bloom je 5-mal.',
+        en: 'Click Trail Marker and Cascade Bloom 5 times each.',
+      },
+      flavor: {
+        de: 'Nicht jedes Event endet beim ersten Klick.',
+        en: 'Not every event ends at one click.',
+      },
+      requirement: { eventTypeClicks: { trail_marker: 5, cascade_bloom: 5 } },
+      rewardMultiplier: 1.003,
+      order: 1860,
+    }),
+    makeAchievement({
+      id: 'chain_echo_master',
+      category: 'events',
+      rarity: 'epic',
+      overlayIcon: uiIcons.achievementLight,
+      name: { de: 'Echo-Lesung', en: 'Echo Reading' },
+      description: { de: 'Klicke Echo Harvest 10-mal.', en: 'Click Echo Harvest 10 times.' },
+      flavor: {
+        de: 'Die dritte Stufe fühlt sich verdient an.',
+        en: 'The third step feels earned.',
+      },
+      requirement: { eventTypeClicks: { echo_harvest: 10 } },
+      rewardMultiplier: 1.004,
+      order: 1870,
+    }),
+    makeAchievement({
+      id: 'risk_controller',
+      category: 'challenges',
+      rarity: 'rare',
+      overlayIcon: uiIcons.warning,
+      name: { de: 'Kontrolliertes Risiko', en: 'Controlled Risk' },
+      description: {
+        de: 'Klicke Volatile Growth, Blackout Sale und Pest Scare je 5-mal.',
+        en: 'Click Volatile Growth, Blackout Sale, and Pest Scare 5 times each.',
+      },
+      flavor: { de: 'Nicht sicher. Aber absichtlich.', en: 'Not safe. Intentional.' },
+      requirement: {
+        eventTypeClicks: { volatile_growth: 5, blackout_sale: 5, pest_scare: 5 },
+      },
+      rewardMultiplier: 1.003,
+      order: 1880,
+    }),
+    makeAchievement({
+      id: 'season_sampler',
+      category: 'seasons',
+      rarity: 'epic',
+      overlayIcon: uiIcons.achievementLight,
+      name: { de: 'Saison-Sampler', en: 'Season Sampler' },
+      description: {
+        de: 'Klicke Solstice Seed, Night Market und Festival Lantern je 3-mal.',
+        en: 'Click Solstice Seed, Night Market, and Festival Lantern 3 times each.',
+      },
+      flavor: {
+        de: 'Der Garten hat mehrere Stimmungen.',
+        en: 'The garden has more than one mood.',
+      },
+      requirement: {
+        eventTypeClicks: { solstice_seed: 3, night_market: 3, festival_lantern: 3 },
+      },
+      rewardMultiplier: 1.004,
+      order: 1890,
+    }),
+    makeAchievement({
+      id: 'research_architect',
+      category: 'challenges',
+      rarity: 'epic',
+      overlayIcon: uiIcons.research,
+      name: { de: 'Tree-Architekt', en: 'Tree Architect' },
+      description: { de: 'Erforsche 36 Research-Knoten.', en: 'Research 36 nodes.' },
+      flavor: {
+        de: 'Ein Build ist eine Entscheidungskette.',
+        en: 'A build is a chain of decisions.',
+      },
+      requirement: { researchCount: 36 },
+      rewardMultiplier: 1.005,
+      order: 1920,
+    }),
+    makeAchievement({
+      id: 'score_badge_100',
+      category: 'cosmetics',
+      rarity: 'rare',
+      overlayIcon: uiIcons.achievementRibbon,
+      name: { de: 'Badge-Sammlung I', en: 'Badge Collection I' },
+      description: { de: 'Erreiche 100 Achievement-Score.', en: 'Reach 100 achievement score.' },
+      flavor: { de: 'Der Rahmen zählt mit.', en: 'The frame counts too.' },
+      requirement: { achievementScore: 100 },
+      order: 1940,
+    }),
+    makeAchievement({
+      id: 'score_badge_300',
+      category: 'cosmetics',
+      rarity: 'epic',
+      overlayIcon: uiIcons.achievementRibbon,
+      name: { de: 'Badge-Sammlung II', en: 'Badge Collection II' },
+      description: { de: 'Erreiche 300 Achievement-Score.', en: 'Reach 300 achievement score.' },
+      flavor: { de: 'Jetzt ist es sichtbar Meta.', en: 'Now it is visibly meta.' },
+      requirement: { achievementScore: 300 },
+      rewardMultiplier: 1.003,
+      order: 1950,
+    }),
+    makeAchievement({
+      id: 'score_badge_700',
+      category: 'cosmetics',
+      rarity: 'legendary',
+      overlayIcon: uiIcons.achievementRibbon,
+      name: { de: 'Badge-Sammlung III', en: 'Badge Collection III' },
+      description: { de: 'Erreiche 700 Achievement-Score.', en: 'Reach 700 achievement score.' },
+      flavor: { de: 'Ein leiser, dauerhafter Glanz.', en: 'A quiet permanent glow.' },
+      requirement: { achievementScore: 700 },
+      rewardMultiplier: 1.006,
+      order: 1960,
+    }),
+    makeAchievement({
+      id: 'score_badge_1000',
+      category: 'cosmetics',
+      rarity: 'legendary',
+      overlayIcon: uiIcons.achievementRibbon,
+      name: { de: 'Badge-Sammlung IV', en: 'Badge Collection IV' },
+      description: { de: 'Erreiche 1.000 Achievement-Score.', en: 'Reach 1,000 achievement score.' },
+      flavor: { de: 'Nicht laut. Nur unverkennbar.', en: 'Not loud. Unmistakable.' },
+      requirement: { achievementScore: 1000 },
+      rewardMultiplier: 1.006,
+      order: 1970,
+    }),
+    makeAchievement({
+      id: 'research_endgame_map',
+      category: 'research',
+      rarity: 'legendary',
+      overlayIcon: uiIcons.research,
+      name: { de: 'Vollständige Karte', en: 'Complete Map' },
+      description: { de: 'Erforsche 48 Research-Knoten.', en: 'Research 48 nodes.' },
+      flavor: { de: 'Der Baum hat fast keine Schatten mehr.', en: 'The tree has almost no shadows left.' },
+      requirement: { researchCount: 48 },
+      rewardMultiplier: 1.006,
+      order: 1980,
+    }),
+    makeAchievement({
+      id: 'late_catalog_weight',
+      category: 'builds',
+      rarity: 'legendary',
+      overlayIcon: uiIcons.shop,
+      name: { de: 'Schwerer Katalog', en: 'Heavy Catalogue' },
+      description: { de: 'Besitze 1.500 Shop-Items insgesamt.', en: 'Own 1,500 total shop items.' },
+      flavor: { de: 'Breite schlägt reines Hochstapeln.', en: 'Breadth beats pure stacking.' },
+      requirement: { totalItemsOwned: 1500 },
+      rewardMultiplier: 1.006,
+      order: 1990,
+    }),
+    makeAchievement({
+      id: 'season_lantern_10',
+      category: 'seasons',
+      rarity: 'legendary',
+      overlayIcon: uiIcons.achievementLight,
+      name: { de: 'Laternenlauf', en: 'Lantern Run' },
+      description: { de: 'Klicke Festival Lantern 10-mal.', en: 'Click Festival Lantern 10 times.' },
+      flavor: { de: 'Selten genug, um hängen zu bleiben.', en: 'Rare enough to stay memorable.' },
+      requirement: { eventTypeClicks: { festival_lantern: 10 } },
+      rewardMultiplier: 1.006,
+      order: 1995,
+    }),
+  ];
+}
+
 const manualAchievements: AchievementDefinition[] = [
   ...createBudAchievements(),
   ...createSimpleThresholdAchievements(
@@ -466,6 +743,7 @@ const manualAchievements: AchievementDefinition[] = [
     1600,
   ),
   ...createAbilityAchievements(),
+  ...createMetaAchievements(),
   makeAchievement({
     id: 'all_items_visible',
     category: 'items',
@@ -575,10 +853,65 @@ const manualAchievements: AchievementDefinition[] = [
         burst: 10,
         auto_burst: 10,
         discount_window: 10,
+        event_magnet: 10,
+        seed_focus: 10,
+        harvest_chain: 10,
+        cooldown_sync: 10,
       },
     },
     rewardMultiplier: 1.006,
     order: 2040,
+  }),
+  makeAchievement({
+    id: 'hidden_peak_click',
+    category: 'hidden',
+    rarity: 'epic',
+    hidden: true,
+    overlayIcon: uiIcons.bpc,
+    name: { de: 'Schwerer Finger', en: 'Heavy Finger' },
+    description: { de: 'Erreiche 1.000 Buds pro Klick.', en: 'Reach 1,000 buds per click.' },
+    flavor: { de: 'Aktives Spiel bleibt Teil der Rechnung.', en: 'Active play remains part of the equation.' },
+    requirement: { bpc: 1000 },
+    rewardMultiplier: 1.004,
+    order: 2050,
+  }),
+  makeAchievement({
+    id: 'hidden_five_lights',
+    category: 'hidden',
+    rarity: 'legendary',
+    hidden: true,
+    overlayIcon: uiIcons.auto,
+    name: { de: 'Fünf Lichter', en: 'Five Lights' },
+    description: { de: 'Habe 5 aktive Buffs gleichzeitig.', en: 'Have 5 active buffs at once.' },
+    flavor: { de: 'Kurz vor Chaos, knapp noch lesbar.', en: 'Almost chaos, still readable.' },
+    requirement: { activeBuffCount: 5 },
+    rewardMultiplier: 1.006,
+    order: 2060,
+  }),
+  makeAchievement({
+    id: 'hidden_returning_regular',
+    category: 'hidden',
+    rarity: 'rare',
+    hidden: true,
+    overlayIcon: uiIcons.total,
+    name: { de: 'Stammgast', en: 'Regular' },
+    description: { de: 'Sammle 10 Offline-Rückkehrmomente.', en: 'Collect 10 offline return moments.' },
+    flavor: { de: 'Kurze Besuche zählen auch.', en: 'Short visits count too.' },
+    requirement: { offlineReturns: 10 },
+    order: 2070,
+  }),
+  makeAchievement({
+    id: 'hidden_prestige_pathfinder',
+    category: 'hidden',
+    rarity: 'legendary',
+    hidden: true,
+    overlayIcon: uiIcons.prestige,
+    name: { de: 'Pfadfinder', en: 'Pathfinder' },
+    description: { de: 'Führe 10 Prestiges durch.', en: 'Perform 10 prestiges.' },
+    flavor: { de: 'Jeder Neustart hat weniger Reibung.', en: 'Every reset has less friction.' },
+    requirement: { prestigeCount: 10 },
+    rewardMultiplier: 1.006,
+    order: 2080,
   }),
 ];
 

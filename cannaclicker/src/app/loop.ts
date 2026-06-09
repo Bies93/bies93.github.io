@@ -50,7 +50,10 @@ export function startLoop(
 
     if (state.temp.autoClickRate > 0) {
       const autoClicks = new Decimal(state.temp.autoClickRate * delta);
-      const autoGain = state.bpc.mul(autoClicks);
+      const automationBpsGain = state.bps
+        .mul(Math.max(0, state.temp.automationBpsShare ?? 0))
+        .mul(delta);
+      const autoGain = state.bpc.mul(autoClicks).add(automationBpsGain);
       if (autoGain.greaterThan(0)) {
         state.buds = state.buds.add(autoGain);
         state.total = state.total.add(autoGain);

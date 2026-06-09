@@ -9,7 +9,7 @@ import type {
   PreferencesState,
   SeedGainEntry,
 } from '../state';
-import type { EventId } from '../events';
+import type { EventCategory, EventId } from '../events';
 import type { SeedSynergyId } from '../seeds';
 import type { AchievementId } from '../../data/achievements';
 import type { ItemId } from '../../data/items';
@@ -19,6 +19,7 @@ import type { UpgradeId } from '../../data/upgrades';
 import type { LocaleKey } from '../i18n';
 import type { SettingsState } from '../settings';
 import type { GoalId } from '../../data/goals';
+import type { AscensionNodeId } from '../../data/ascension';
 
 export interface PersistedAbilityState {
   active?: boolean;
@@ -34,6 +35,12 @@ export interface PersistedKickstartState {
 export interface PersistedPrestigeState {
   seeds?: number;
   totalSeeds?: number;
+  ascensionSeeds?: number;
+  totalAscensionSeeds?: number;
+  ascensionSpent?: number;
+  ascensionOwned?: AscensionNodeId[];
+  permanentSlots?: number;
+  permanentUpgradeIds?: UpgradeId[];
   mult?: string;
   lifetimeBuds?: string;
   lastResetAt?: number;
@@ -88,6 +95,7 @@ export interface PersistedEventStats {
   totalExpired?: number;
   pityActivations?: number;
   pityTimerMs?: number;
+  pityByCategory?: Partial<Record<EventCategory, number>>;
   clickRate?: number;
   lastSpawnAt?: number;
   lastClickAt?: number;

@@ -3,10 +3,10 @@ import { formatDecimal } from '../../math';
 import type { GameState } from '../../state';
 import { computePrestigeMultiplier, getPrestigePreview } from '../../prestige';
 import { getAbilityLabel, listAbilities } from '../../abilities';
-import { getActiveEventBoosts } from '../../events';
+import { EVENT_I18N_KEYS, getActiveEventBoosts } from '../../events';
 import { getGoalView } from '../../goals';
 import { getStrategySnapshot } from '../../strategy';
-import { canUnlockItem } from '../../shop';
+import { canUnlockItem, getShopEntries } from '../../shop';
 import type { UIRefs } from '../types';
 import { formatInteger } from '../utils/format';
 import { formatSeedRate } from './stats';
@@ -25,7 +25,8 @@ export function updateStats(state: GameState, refs: UIRefs): void {
   refs.seedRate.textContent = seedRateValue;
   refs.prestigeMult.textContent = `${state.prestige.mult.toFixed(2)}\u00D7`;
 
-  refs.seedBadgeValue.textContent = seedText;
+  const ascensionSeedText = formatInteger(state.locale, state.prestige.ascensionSeeds ?? 0);
+  refs.seedBadgeValue.textContent = ascensionSeedText;
   const seedsMeta = refs.statsMeta.get('stats.seeds');
   if (seedsMeta) {
     seedsMeta.textContent = t(state.locale, 'stats.seeds.meta', {
@@ -70,11 +71,68 @@ export function updateStats(state: GameState, refs: UIRefs): void {
   refs.seedBadge.setAttribute('aria-label', badgeTooltip);
 
   refs.nextUnlockHint.textContent = getNextUnlockHint(state);
+  updateClickComboLabel(state, refs);
+  updateQuickShopPanel(state, refs);
   updateBuffList(state, refs);
   updateGoalPanel(state, refs);
   updateStrategyPanel(state, refs);
 
   updatePlantStage(state, refs);
+}
+
+function updateClickComboLabel(state: GameState, refs: UIRefs): void {
+  const comboActive =
+    (state.temp.clickComboExpiresAt ?? 0) > Date.now() && (state.temp.clickComboCount ?? 0) >= 5;
+  refs.clickLabel.textContent = comboActive
+    ? t(state.locale, 'click.combo', { count: state.temp.clickComboCount })
+    : t(state.locale, 'actions.click');
+}
+
+function updateQuickShopPanel(state: GameState, refs: UIRefs): void {
+  const entries = getShopEntries(state);
+  const target =
+    entries.find((entry) => entry.unlocked && entry.affordable) ??
+    entries.find((entry) => entry.unlocked) ??
+    entries.find((entry) => !entry.unlocked);
+
+  if (!target) {
+    refs.quickShopPanel.classList.add('hidden');
+    return;
+  }
+
+  refs.quickShopPanel.classList.remove('hidden');
+  refs.quickShopPanel.dataset.affordable = target.affordable && target.unlocked ? 'true' : 'false';
+  refs.quickShopPanel.dataset.locked = target.unlocked ? 'false' : 'true';
+  refs.quickShopButton.dataset.id = target.definition.id;
+  refs.quickShopKicker.textContent = t(state.locale, 'quickShop.kicker');
+  refs.quickShopName.textContent = target.definition.name[state.locale];
+
+  if (!target.unlocked) {
+    refs.quickShopMeta.textContent = getNextUnlockHint(state);
+    refs.quickShopButton.disabled = true;
+    refs.quickShopButton.textContent = t(state.locale, 'quickShop.locked');
+    return;
+  }
+
+  refs.quickShopMeta.textContent = t(state.locale, 'quickShop.meta', {
+    cost: target.formattedCost,
+    bps: formatDecimal(target.deltaBps),
+  });
+  refs.quickShopButton.disabled = !target.affordable;
+  const missingCost = target.cost.sub(state.buds);
+  refs.quickShopButton.textContent = target.affordable
+    ? t(state.locale, 'quickShop.buy')
+    : t(state.locale, 'quickShop.need', {
+        amount: formatDecimal(missingCost.greaterThan(0) ? missingCost : target.cost),
+      });
+  refs.quickShopButton.setAttribute(
+    'title',
+    t(state.locale, 'shop.buyPreview', {
+      count: 1,
+      cost: target.formattedCost,
+      bps: formatDecimal(target.deltaBps),
+    }),
+  );
 }
 
 function updateStrategyPanel(state: GameState, refs: UIRefs): void {
@@ -181,27 +239,19 @@ function updateBuffList(state: GameState, refs: UIRefs): void {
 }
 
 function getEventLabel(id: string, locale: GameState['locale']): string {
-  const keys: Record<string, string> = {
-    golden_bud: 'events.goldenBud.name',
-    seed_pack: 'events.seedPack.name',
-    lucky_joint: 'events.luckyJoint.name',
-    fertile_rain: 'events.fertileRain.name',
-    market_rush: 'events.marketRush.name',
-    green_surge: 'events.greenSurge.name',
-    mutant_sprout: 'events.mutantSprout.name',
-    supply_drop: 'events.supplyDrop.name',
-    flash_harvest: 'events.flashHarvest.name',
-    calm_growth: 'events.calmGrowth.name',
-    overgrowth: 'events.overgrowth.name',
-    seed_bloom: 'events.seedBloom.name',
-  };
-
-  return t(locale, keys[id] ?? 'events.goldenBud.name');
+  if (id === 'goal_reward') {
+    return t(locale, 'goals.boost.label');
+  }
+  const key = EVENT_I18N_KEYS[id as keyof typeof EVENT_I18N_KEYS];
+  return t(locale, key ? `events.${key}.name` : 'events.goldenBud.name');
 }
 
 function formatEventBoostMultiplier(multiplier: number, target: string): string {
   if (target === 'cost' && multiplier < 1) {
     return `-${Math.round((1 - multiplier) * 100)}%`;
+  }
+  if (target === 'cost' && multiplier > 1) {
+    return `+${Math.round((multiplier - 1) * 100)}%`;
   }
 
   return `×${multiplier.toFixed(multiplier >= 2 ? 1 : 2)}`;

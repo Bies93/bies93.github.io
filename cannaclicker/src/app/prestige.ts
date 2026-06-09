@@ -9,6 +9,7 @@ import {
   getKickstartConfig,
   resolveKickstart,
 } from './milestones';
+import { applyAscensionRunStart, getAscensionPrestigeSeedMultiplier } from './ascension';
 
 export interface PrestigePreview {
   requirementMet: boolean;
@@ -19,6 +20,8 @@ export interface PrestigePreview {
   seedsAfter: number;
   totalSeedsBefore: number;
   totalSeedsAfter: number;
+  runSeedsBefore: number;
+  runSeedsTotalBefore: number;
   nextSeedTarget: Decimal;
   permanentGlobalPercent: number;
   permanentBpsPercent: number;
@@ -65,10 +68,13 @@ export function getPrestigePreview(state: GameState): PrestigePreview {
   const requirementTarget = new Decimal(PRESTIGE_MIN_REQUIREMENT);
   const lifetimeBuds = state.prestige.lifetimeBuds;
   const requirementMet = state.prestige.lifetimeBuds.greaterThanOrEqualTo(PRESTIGE_MIN_REQUIREMENT);
-  const seedGain = computePrestigeSeedGain(lifetimeBuds);
-  const seedsBefore = state.prestige.seeds;
+  const baseSeedGain = computePrestigeSeedGain(lifetimeBuds);
+  const prestigeSeedMultiplier = getAscensionPrestigeSeedMultiplier(state);
+  const seedGain =
+    baseSeedGain <= 0 ? 0 : Math.max(1, Math.floor(baseSeedGain * prestigeSeedMultiplier));
+  const seedsBefore = state.prestige.ascensionSeeds ?? 0;
   const seedsAfter = seedsBefore + seedGain;
-  const totalSeedsBefore = Math.max(state.prestige.totalSeeds ?? 0, seedsBefore);
+  const totalSeedsBefore = Math.max(state.prestige.totalAscensionSeeds ?? 0, seedsBefore);
   const totalSeedsAfter = totalSeedsBefore + seedGain;
   const nextSeedTarget = getNextSeedTarget(seedGain);
   const permanentGlobalPercent = Math.max(0, milestoneEffects.global.minus(1).mul(100).toNumber());
@@ -95,6 +101,8 @@ export function getPrestigePreview(state: GameState): PrestigePreview {
     seedsAfter,
     totalSeedsBefore,
     totalSeedsAfter,
+    runSeedsBefore: state.prestige.seeds,
+    runSeedsTotalBefore: state.prestige.totalSeeds,
     nextSeedTarget,
     permanentGlobalPercent,
     permanentBpsPercent,
@@ -146,8 +154,14 @@ export function performPrestige(state: GameState): GameState {
     settings: state.settings,
     meta: preservedMeta,
     prestige: {
-      seeds: seedsAfter,
-      totalSeeds: preview.totalSeedsAfter,
+      seeds: state.prestige.seeds,
+      totalSeeds: state.prestige.totalSeeds,
+      ascensionSeeds: seedsAfter,
+      totalAscensionSeeds: preview.totalSeedsAfter,
+      ascensionSpent: state.prestige.ascensionSpent ?? 0,
+      ascensionOwned: state.prestige.ascensionOwned ?? [],
+      permanentSlots: state.prestige.permanentSlots ?? 0,
+      permanentUpgradeIds: state.prestige.permanentUpgradeIds ?? [],
       mult: multiplier,
       lifetimeBuds: new Decimal(0),
       lastResetAt: now,
@@ -164,12 +178,16 @@ export function performPrestige(state: GameState): GameState {
   reset.temp.offlineBuds = null;
   reset.temp.offlineDuration = 0;
   const nextState = Object.assign(state, reset);
+  applyAscensionRunStart(nextState);
   activateKickstart(nextState, preview.nextKickstartLevel, now);
   applyResearchEffects(nextState);
   return nextState;
 }
 
 export function updatePrestigeMultiplier(state: GameState): void {
-  state.prestige.totalSeeds = Math.max(state.prestige.totalSeeds ?? 0, state.prestige.seeds);
-  state.prestige.mult = computePrestigeMultiplier(state.prestige.totalSeeds);
+  state.prestige.totalAscensionSeeds = Math.max(
+    state.prestige.totalAscensionSeeds ?? 0,
+    (state.prestige.ascensionSeeds ?? 0) + (state.prestige.ascensionSpent ?? 0),
+  );
+  state.prestige.mult = computePrestigeMultiplier(state.prestige.totalAscensionSeeds);
 }

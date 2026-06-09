@@ -8,6 +8,10 @@ const ABILITY_ICON_MAP: Record<AbilityId, string> = {
   burst: abilityIcons.burst,
   auto_burst: abilityIcons.auto_burst,
   discount_window: abilityIcons.discount_window,
+  event_magnet: abilityIcons.event_magnet,
+  seed_focus: abilityIcons.seed_focus,
+  harvest_chain: abilityIcons.harvest_chain,
+  cooldown_sync: abilityIcons.cooldown_sync,
 };
 
 let controlIdCounter = 0;

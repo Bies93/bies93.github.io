@@ -9,11 +9,16 @@ export function createPrestigeModal(): PrestigeModalRefs {
   dialog.className = 'modal-card';
   dialog.setAttribute('role', 'dialog');
   dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', 'prestige-modal-title');
+  dialog.setAttribute('aria-describedby', 'prestige-modal-description');
+  dialog.tabIndex = -1;
 
   const title = document.createElement('h2');
+  title.id = 'prestige-modal-title';
   title.className = 'modal-title';
 
   const description = document.createElement('p');
+  description.id = 'prestige-modal-description';
   description.className = 'text-sm text-neutral-300';
 
   const stats = document.createElement('dl');

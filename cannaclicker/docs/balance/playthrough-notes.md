@@ -90,8 +90,8 @@ Risiko:
 ## Technischer Smoke
 
 - Browser-Smoke auf 1440x1000, 768x900, 390x844 und 320x680 ohne Konsolenfehler.
-- 6 Side-Panel-Tabs, 4 Achievement-Filter und 120 Achievement-Karten vorhanden.
-- All-Filter zeigt 115 sichtbare Achievements und versteckt 5 Hidden Achievements.
-- Hidden-Filter zeigt 5 Hidden Achievements.
+- 6 Side-Panel-Tabs, 4 Achievement-Filter und 160 Achievement-Karten vorhanden.
+- All-Filter zeigt 151 sichtbare Achievements und versteckt 9 Hidden Achievements.
+- Hidden-Filter zeigt 9 Hidden Achievements.
 - Erstes Goal ist nach 10 Klicks claimbar und springt danach auf "Build a base".
 - Keine kaputten Bilder und kein horizontaler Overflow in den geprueften Viewports.

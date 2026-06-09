@@ -1,6 +1,7 @@
 import { t } from '../../../i18n';
 import type { GameState } from '../../../state';
 import { canAfford, getResearchNode, purchaseResearch, requirementsMet } from '../../../research';
+import { openActionModal } from '../../services/modal';
 import type { ResearchCardRefs } from '../../types';
 
 const wiredCards = new WeakSet<ResearchCardRefs>();
@@ -31,10 +32,30 @@ export function wireResearchCard(
     }
 
     if (node.confirmKey) {
-      const confirmation = t(state.locale, node.confirmKey);
-      if (!window.confirm(confirmation)) {
-        return;
-      }
+      openActionModal({
+        title: node.name[state.locale] ?? node.name.en,
+        description: t(state.locale, node.confirmKey),
+        closeOnBackdrop: false,
+        actions: [
+          {
+            label: t(state.locale, 'actions.cancel'),
+            variant: 'secondary',
+            autoFocus: true,
+          },
+          {
+            label: t(state.locale, 'actions.confirm'),
+            variant: 'primary',
+            closeOnClick: true,
+            onClick: () => {
+              const purchased = purchaseResearch(state, card.id);
+              if (purchased) {
+                onPurchase();
+              }
+            },
+          },
+        ],
+      });
+      return;
     }
 
     const purchased = purchaseResearch(state, card.id);

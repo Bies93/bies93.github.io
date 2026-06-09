@@ -2,6 +2,11 @@ export interface UIClickerRefs {
   clickButton: HTMLButtonElement;
   clickLabel: HTMLSpanElement;
   clickIcon: HTMLDivElement;
+  quickShopPanel: HTMLElement;
+  quickShopKicker: HTMLElement;
+  quickShopName: HTMLElement;
+  quickShopMeta: HTMLElement;
+  quickShopButton: HTMLButtonElement;
   nextUnlockHint: HTMLElement;
   buffList: HTMLElement;
   goalPanel: HTMLElement;

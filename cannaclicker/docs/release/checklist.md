@@ -1,13 +1,13 @@
 # Release Checklist
 
-Stand: Sprint 12.
+Stand: Sprint 26 / `1.0.0-rc.1`.
 
 ## Build
 
 - [x] Node.js `>=20` in `package.json`.
 - [x] GitHub-Pages-kompatibler relativer Vite-Base-Path `./`.
 - [x] Production-Sourcemaps für RC deaktiviert.
-- [x] Cache-Busting über Vite-Dateihashes.
+- [x] Cache-Busting über Vite-Dateihashes plus `?v=1.0.0-rc.1` für `public/img`.
 - [x] Titel und Meta Description gesetzt.
 - [x] Version sichtbar in Settings.
 
@@ -16,6 +16,7 @@ Stand: Sprint 12.
 - [x] `public/img` ist deutlich unter 10 MB.
 - [x] Icons sind SVG-basiert und transparent.
 - [x] Event-, Item-, Research-, UI- und Ability-Pfade sind manifestiert.
+- [x] `npm run assets:check` prüft Manifest, Orphans, WAV-Dateien und Generator-Idempotenz.
 - [x] Keine WAV-SFX mehr im Release-Assetpfad.
 - [x] SFX werden prozedural erzeugt und blockieren den Start nicht.
 - [x] Hintergrundmusik nutzt Opus + MP3-Fallback; WAV bleibt aus dem Runtime-Pfad.
@@ -27,6 +28,7 @@ Stand: Sprint 12.
 - [x] Goals führen den Early Game Flow.
 - [x] Prestige-Modal erklärt Reset und Belohnung.
 - [x] Export, Import und Reset sind erreichbar.
+- [x] Export, Import, Reset und Research-Bestätigung nutzen eigene zugängliche Modals statt Browser-Dialogen.
 
 ## UI/UX
 
@@ -36,6 +38,7 @@ Stand: Sprint 12.
 - [x] Motion-Intensity-Setting vorhanden.
 - [x] UI-Theme-Setting vorhanden.
 - [x] Plant-Skin-Setting vorhanden.
+- [x] Fünf UI-Themes und sechs Plant-Skins vorhanden.
 - [x] Sound-Toggle vorhanden.
 - [x] SFX-Lautstärke vorhanden.
 - [x] Musik-Toggle und Musiklautstärke vorhanden.
@@ -49,7 +52,11 @@ Stand: Sprint 12.
 - [x] Browser-Smoke: Mobile Viewports `320px`, `390px`, `768px`, `1440px`.
 - [x] Browser-Smoke: Firefox via Playwright.
 - [x] Browser-Smoke: WebKit via Playwright als Safari-nahe Engine.
+- [x] Browser-Smoke: Chromium-Mobile-Viewports als Android-Chrome-Proxy.
 - [x] Production-Preview-Smoke am Artefakt-Root `http://127.0.0.1:4173/`.
 - [ ] iOS Safari auf echtem Gerät: in Ubuntu nicht direkt testbar.
+- [ ] Android Chrome auf echtem Gerät: in Ubuntu nicht direkt testbar.
 - [x] GitHub Pages Deployment-Pfad geprüft: Workflow deployt `cannaclicker/dist` als Pages-Artefakt-Root.
 - [x] Release-Smoke mit leerem LocalStorage durchgeführt.
+- [x] Defekter Import überschreibt keinen vorhandenen Save.
+- [x] Offline-Ertrag konserviert keine temporären BPS-Buffs.

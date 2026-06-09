@@ -1,6 +1,11 @@
 import { milestones } from '../../../data/milestones';
 import type { MilestoneId } from '../../../data/milestones';
-import type { MilestoneCardRefs, PrestigePanelRefs } from '../types';
+import { ascensionNodes, type AscensionNodeId } from '../../../data/ascension';
+import type {
+  AscensionNodeCardRefs,
+  MilestoneCardRefs,
+  PrestigePanelRefs,
+} from '../types/prestige';
 import { createMilestoneCard } from './milestoneCard';
 
 export function createPrestigePanel(): PrestigePanelRefs {
@@ -20,6 +25,34 @@ export function createPrestigePanel(): PrestigePanelRefs {
   const permanent = createPrestigePanelStat(stats);
   const kickstart = createPrestigePanelStat(stats);
   const active = createPrestigePanelStat(stats);
+
+  const ascensionSection = document.createElement('section');
+  ascensionSection.className = 'ascension-panel';
+  container.appendChild(ascensionSection);
+
+  const ascensionHeader = document.createElement('div');
+  ascensionHeader.className = 'ascension-panel__header';
+
+  const ascensionTitle = document.createElement('h3');
+  ascensionTitle.className = 'ascension-panel__title';
+  ascensionTitle.textContent = 'Ascension';
+
+  const ascensionSummary = document.createElement('p');
+  ascensionSummary.className = 'ascension-panel__summary';
+
+  ascensionHeader.append(ascensionTitle, ascensionSummary);
+  ascensionSection.appendChild(ascensionHeader);
+
+  const ascensionList = document.createElement('div');
+  ascensionList.className = 'ascension-list';
+  ascensionSection.appendChild(ascensionList);
+
+  const ascensionRefs = new Map<AscensionNodeId, AscensionNodeCardRefs>();
+  ascensionNodes.forEach((definition) => {
+    const card = createAscensionNodeCard(definition.id);
+    ascensionRefs.set(definition.id, card);
+    ascensionList.appendChild(card.container);
+  });
 
   const milestoneList = document.createElement('div');
   milestoneList.className = 'milestone-list';
@@ -57,11 +90,62 @@ export function createPrestigePanel(): PrestigePanelRefs {
     kickstartValue: kickstart.value,
     activeKickstartLabel: active.label,
     activeKickstartValue: active.value,
+    ascensionSummary,
+    ascensionList,
+    ascensionNodes: ascensionRefs,
     milestoneList,
     milestones: milestoneRefs,
     requirement,
     actionButton,
   } satisfies PrestigePanelRefs;
+}
+
+function createAscensionNodeCard(id: AscensionNodeId): AscensionNodeCardRefs {
+  const container = document.createElement('article');
+  container.className = 'ascension-node';
+  container.dataset.id = id;
+
+  const category = document.createElement('p');
+  category.className = 'ascension-node__category';
+
+  const title = document.createElement('h4');
+  title.className = 'ascension-node__title';
+
+  const description = document.createElement('p');
+  description.className = 'ascension-node__description';
+
+  const effect = document.createElement('p');
+  effect.className = 'ascension-node__effect';
+
+  const footer = document.createElement('div');
+  footer.className = 'ascension-node__footer';
+
+  const cost = document.createElement('p');
+  cost.className = 'ascension-node__cost';
+
+  const status = document.createElement('p');
+  status.className = 'ascension-node__status';
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'ascension-node__button';
+  button.dataset.id = id;
+  button.dataset.role = 'ascension-buy';
+  button.dataset.kind = 'prestige';
+
+  footer.append(cost, status, button);
+  container.append(category, title, description, effect, footer);
+
+  return {
+    container,
+    title,
+    category,
+    description,
+    effect,
+    cost,
+    status,
+    button,
+  } satisfies AscensionNodeCardRefs;
 }
 
 function createPrestigePanelStat(wrapper: HTMLElement): { label: HTMLElement; value: HTMLElement } {

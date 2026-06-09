@@ -13,11 +13,26 @@ export type GoalId =
   | 'reach_hydro'
   | 'prestige_ready'
   | 'second_run'
-  | 'midgame_research';
+  | 'midgame_research'
+  | 'event_chain_intro'
+  | 'active_build_goal'
+  | 'automation_goal'
+  | 'build_synergy_goal'
+  | 'risk_event_goal'
+  | 'season_goal'
+  | 'achievement_score_goal'
+  | 'prestige_loop_goal'
+  | 'late_catalog_goal';
 
 export type GoalReward =
   | { type: 'buds'; amount: number }
   | { type: 'seeds'; amount: number }
+  | {
+      type: 'boost';
+      multiplier: number;
+      durationMs: number;
+      target?: 'bps' | 'bpc' | 'both' | 'cost';
+    }
   | { type: 'none' };
 
 export interface GoalDefinition {
@@ -141,6 +156,93 @@ const GOAL_DATA = [
     requirement: { researchCount: 12 },
     reward: { type: 'buds', amount: 100_000 },
     order: 120,
+  },
+  {
+    id: 'event_chain_intro',
+    title: { de: 'Ketten lesen', en: 'Read the chain' },
+    description: { de: 'Klicke 5 Chain-Events.', en: 'Click 5 chain events.' },
+    rewardLabel: { de: 'BPS-Boost x1,35 für 45s', en: 'BPS boost x1.35 for 45s' },
+    requirement: { eventTypeClicks: { trail_marker: 2, cascade_bloom: 2, echo_harvest: 1 } },
+    reward: { type: 'boost', multiplier: 1.35, durationMs: 45_000, target: 'bps' },
+    order: 130,
+  },
+  {
+    id: 'active_build_goal',
+    title: { de: 'Aktive Linie', en: 'Active line' },
+    description: { de: 'Erreiche 500 Klicks und 100 BPC.', en: 'Reach 500 clicks and 100 BPC.' },
+    rewardLabel: { de: 'Klickboost x1,5 für 60s', en: 'Click boost x1.5 for 60s' },
+    requirement: { manualClicks: 500, bpc: 100 },
+    reward: { type: 'boost', multiplier: 1.5, durationMs: 60_000, target: 'bpc' },
+    order: 140,
+  },
+  {
+    id: 'automation_goal',
+    title: { de: 'Automation anlaufen lassen', en: 'Spin up automation' },
+    description: { de: 'Nutze aktive Fähigkeiten 25-mal.', en: 'Use active abilities 25 times.' },
+    rewardLabel: { de: '+2 Seeds', en: '+2 seeds' },
+    requirement: { abilityUses: 25 },
+    reward: { type: 'seeds', amount: 2 },
+    order: 150,
+  },
+  {
+    id: 'build_synergy_goal',
+    title: { de: 'Shop-Synergie', en: 'Shop synergy' },
+    description: {
+      de: 'Besitze 50 Grow Lights und 25 Grow Tents.',
+      en: 'Own 50 Grow Lights and 25 Grow Tents.',
+    },
+    rewardLabel: { de: '+250.000 Buds', en: '+250,000 buds' },
+    requirement: { itemsOwned: { grow_light: 50, grow_tent: 25 } },
+    reward: { type: 'buds', amount: 250_000 },
+    order: 160,
+  },
+  {
+    id: 'risk_event_goal',
+    title: { de: 'Risiko einordnen', en: 'Read the risk' },
+    description: { de: 'Klicke 10 Risk-Events.', en: 'Click 10 risk events.' },
+    rewardLabel: { de: 'Kostenfenster x0,85 für 45s', en: 'Cost window x0.85 for 45s' },
+    requirement: { eventTypeClicks: { volatile_growth: 4, blackout_sale: 3, pest_scare: 3 } },
+    reward: { type: 'boost', multiplier: 0.85, durationMs: 45_000, target: 'cost' },
+    order: 170,
+  },
+  {
+    id: 'season_goal',
+    title: { de: 'Saisonfenster', en: 'Season window' },
+    description: { de: 'Klicke 5 Seasonal-Events.', en: 'Click 5 seasonal events.' },
+    rewardLabel: { de: '+3 Seeds', en: '+3 seeds' },
+    requirement: { eventTypeClicks: { solstice_seed: 2, night_market: 2, festival_lantern: 1 } },
+    reward: { type: 'seeds', amount: 3 },
+    order: 180,
+  },
+  {
+    id: 'achievement_score_goal',
+    title: { de: 'Meta-Score starten', en: 'Start meta score' },
+    description: { de: 'Erreiche 100 Achievement-Score.', en: 'Reach 100 achievement score.' },
+    rewardLabel: { de: '+500.000 Buds', en: '+500,000 buds' },
+    requirement: { achievementScore: 100 },
+    reward: { type: 'buds', amount: 500_000 },
+    order: 190,
+  },
+  {
+    id: 'prestige_loop_goal',
+    title: { de: 'Prestige-Schleife', en: 'Prestige loop' },
+    description: { de: 'Führe 2 Prestiges durch.', en: 'Perform 2 prestiges.' },
+    rewardLabel: { de: '+5 Seeds', en: '+5 seeds' },
+    requirement: { prestigeCount: 2 },
+    reward: { type: 'seeds', amount: 5 },
+    order: 200,
+  },
+  {
+    id: 'late_catalog_goal',
+    title: { de: 'Katalog schließen', en: 'Close the catalogue' },
+    description: {
+      de: 'Schalte alle Shop-Items sichtbar frei.',
+      en: 'Make every shop item visible.',
+    },
+    rewardLabel: { de: 'Global x1,25 für 90s', en: 'Global x1.25 for 90s' },
+    requirement: { allItemsUnlocked: true },
+    reward: { type: 'boost', multiplier: 1.25, durationMs: 90_000, target: 'both' },
+    order: 210,
   },
 ] as const satisfies readonly GoalDefinition[];
 

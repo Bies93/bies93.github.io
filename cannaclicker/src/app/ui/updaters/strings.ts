@@ -11,7 +11,7 @@ const STAT_META: Record<LocaleKey, Record<string, string>> = {
     'stats.bps': 'Produktion pro Sekunde',
     'stats.bpc': 'Ertrag pro Klick',
     'stats.total': 'Lebenszeit-Ernte',
-    'stats.seeds': 'Prestige-Währung',
+    'stats.seeds': 'Research-Währung',
     'stats.seedRate': '60-Minuten-Fenster',
     'stats.prestigeMult': 'Aktiver Bonus',
   },
@@ -20,7 +20,7 @@ const STAT_META: Record<LocaleKey, Record<string, string>> = {
     'stats.bps': 'Production each second',
     'stats.bpc': 'Yield per click',
     'stats.total': 'Lifetime harvest',
-    'stats.seeds': 'Prestige currency',
+    'stats.seeds': 'Research currency',
     'stats.seedRate': '60-minute window',
     'stats.prestigeMult': 'Active boost',
   },
@@ -33,6 +33,15 @@ const SIDE_PANEL_TAB_KEYS: Record<SidePanelTab, string> = {
   prestige: 'panel.tabs.prestige',
   achievements: 'panel.tabs.achievements',
   settings: 'panel.tabs.settings',
+};
+
+const SIDE_PANEL_TAB_ICONS: Record<SidePanelTab, string> = {
+  shop: '⬡',
+  upgrades: '✦',
+  research: '⌬',
+  prestige: '◇',
+  achievements: '✓',
+  settings: '☰',
 };
 
 export function updateStrings(state: GameState, refs: UIRefs): void {
@@ -92,6 +101,7 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
     const key = SIDE_PANEL_TAB_KEYS[tab];
     const label = t(state.locale, key);
     button.textContent = label;
+    button.dataset.icon = SIDE_PANEL_TAB_ICONS[tab];
     button.setAttribute('aria-label', label);
   });
 
@@ -208,15 +218,9 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
     },
   );
   refs.sidePanel.settings.releaseTitle.textContent = t(state.locale, 'settings.release.title');
-  refs.sidePanel.settings.releaseDescription.textContent = t(
-    state.locale,
-    'settings.release.body',
-  );
+  refs.sidePanel.settings.releaseDescription.textContent = t(state.locale, 'settings.release.body');
   refs.sidePanel.settings.creditsTitle.textContent = t(state.locale, 'settings.credits.title');
-  refs.sidePanel.settings.creditsDescription.textContent = t(
-    state.locale,
-    'settings.credits.body',
-  );
+  refs.sidePanel.settings.creditsDescription.textContent = t(state.locale, 'settings.credits.body');
   refs.sidePanel.settings.exportButton.textContent = t(state.locale, 'actions.export');
   refs.sidePanel.settings.importButton.textContent = t(state.locale, 'actions.import');
   refs.sidePanel.settings.resetButton.textContent = t(state.locale, 'actions.reset');

@@ -11,20 +11,34 @@ export function readRawSave(): string | null {
   }
 }
 
-export function writeRawSave(raw: string): void {
-  window.localStorage.setItem(SAVE_KEY, raw);
+export function writeRawSave(raw: string): boolean {
+  try {
+    window.localStorage.setItem(SAVE_KEY, raw);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function writePersistedState(
   state: PersistedStateV7,
   serialiser: (state: PersistedStateV7) => string,
-): void {
-  const payload = serialiser(state);
-  writeRawSave(payload);
+): boolean {
+  try {
+    const payload = serialiser(state);
+    return writeRawSave(payload);
+  } catch {
+    return false;
+  }
 }
 
-export function clearPersistedState(): void {
-  window.localStorage.removeItem(SAVE_KEY);
+export function clearPersistedState(): boolean {
+  try {
+    window.localStorage.removeItem(SAVE_KEY);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function ensureVersionedSave(raw: string | null): void {

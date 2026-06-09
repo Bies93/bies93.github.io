@@ -1,14 +1,35 @@
 import Decimal from 'break_infinity.js';
+import { abilityMultiplierFor } from '../abilities';
 import { OFFLINE_CAP_MS, OFFLINE_GAIN_RATIO } from '../balance';
 import type { GameState } from '../state';
 
 export function prepareStateForPersist(state: GameState, timestamp: number): void {
   state.lastSeenAt = timestamp;
   state.time = timestamp;
-  const bpsNumber = state.bps.toNumber();
+  const bpsNumber = getPersistentBps(state).toNumber();
   const safeBps = Number.isFinite(bpsNumber) && bpsNumber >= 0 ? bpsNumber : 0;
   state.meta.lastSeenAt = timestamp;
   state.meta.lastBpsAtSave = safeBps;
+}
+
+function getPersistentBps(state: GameState): Decimal {
+  let persistentBps = state.bps;
+
+  const temporaryMultipliers = [
+    state.temp.eventBpsMult,
+    new Decimal(abilityMultiplierFor(state, 'bps')),
+    state.prestige.kickstart?.endsAt && state.prestige.kickstart.endsAt > Date.now()
+      ? new Decimal(state.temp.kickstartBpsMult)
+      : new Decimal(1),
+  ];
+
+  for (const multiplier of temporaryMultipliers) {
+    if (multiplier.greaterThan(0)) {
+      persistentBps = persistentBps.div(multiplier);
+    }
+  }
+
+  return persistentBps.greaterThan(0) ? persistentBps : new Decimal(0);
 }
 
 export function applyOfflineProgress(state: GameState, now: number): void {

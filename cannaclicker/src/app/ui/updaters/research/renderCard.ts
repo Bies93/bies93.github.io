@@ -28,6 +28,9 @@ export function renderResearchCard(
   renderEffectChips(card, node.effects, state.locale);
   renderRequirements(card, entry, state.locale);
   renderLockState(card, entry, state);
+  card.container.dataset.path = node.path;
+  card.container.dataset.researchClass =
+    node.class ?? (node.resetsOnPrestige ? 'run' : 'permanent');
   renderCost(card, node.costType, getResearchCost(state, node), state.locale);
   renderActionButton(card, entry, state.locale);
 }
@@ -87,11 +90,16 @@ function renderLockState(card: ResearchCardRefs, entry: ResearchViewModel, state
 
 function renderCost(
   card: ResearchCardRefs,
-  costType: 'buds' | 'seeds',
+  costType: string,
   cost: number,
   locale: LocaleKey,
 ): void {
-  const costLabelKey = costType === 'buds' ? 'research.cost.buds' : 'research.cost.seeds';
+  const costLabelKey =
+    costType === 'buds'
+      ? 'research.cost.buds'
+      : costType === 'ascension'
+        ? 'research.cost.ascension'
+        : 'research.cost.seeds';
   const costValue = costType === 'buds' ? formatDecimal(cost) : cost.toString();
   card.cost.textContent = `${t(locale, costLabelKey)}: ${costValue}`;
 }

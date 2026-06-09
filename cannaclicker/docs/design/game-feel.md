@@ -8,18 +8,19 @@ CannaClicker soll sofort reagieren, aber nicht hektisch wirken. Feedback ist kur
 
 ## Feedback-System
 
-| Aktion          | Visuell                                        | Sound                      | Performance-Regel                                                       |
-| --------------- | ---------------------------------------------- | -------------------------- | ----------------------------------------------------------------------- |
-| Klick           | Scale/Squash, Floating Number, kleine Partikel | kurzer heller Click        | Click-Sound auf 34 ms limitiert, Floating Numbers pro Ursprung begrenzt |
-| Gebuffter Klick | blaue Boost-Zahl, staerkere Partikel           | heller Double-Tick         | kein Screen-Shake                                                       |
-| Kauf            | Card-Flash, Produktionswert poppt              | kurzer Kauf-Akkord         | keine DOM-Rebuilds ausser normalem Render                               |
-| Fehlkauf        | dezenter Shake, kurzer Hinweis                 | leiser tiefer Tick         | keine nervige Fehlersalve                                               |
-| Milestone       | staerkerer Card-Pop, Toast, Partikel           | hoeherer Kauf-Akkord       | nur bei echter Schwelle                                                 |
-| Unlock          | Toast mit Handlungshinweis                     | Unlock-Chime               | Snapshot verhindert Wiederholungen                                      |
-| Event Spawn     | Pop-in, Pfadbewegung, Restzeit-Balken          | Event-Kategorie-Sound      | ein bis zwei aktive Events je nach Progress                             |
-| Event Collect   | Reward-Floating, Kategorie-Partikel, Toast     | Collect/Buff/Seed/Rare Cue | seltene Events etwas stärker                                            |
-| Achievement     | Badge-Karte, Toast, Batch bei Mehrfach-Unlocks | Achievement Cue            | mehrere Unlocks werden gruppiert                                        |
-| Prestige        | kurzer Screen-Wash, Seed-FX, neuer Run         | Prestige-Akkord            | keine lange unskippbare Sequenz                                         |
+| Aktion           | Visuell                                        | Sound                      | Performance-Regel                                                       |
+| ---------------- | ---------------------------------------------- | -------------------------- | ----------------------------------------------------------------------- |
+| Klick            | Scale/Squash, Floating Number, kleine Partikel | kurzer heller Click        | Click-Sound auf 34 ms limitiert, Floating Numbers pro Ursprung begrenzt |
+| Gebuffter Klick  | blaue Boost-Zahl, staerkere Partikel           | heller Double-Tick         | kein Screen-Shake                                                       |
+| Kritischer Klick | goldene CRIT-Zahl, staerkerer Pop              | heller Boost-Click         | nur bei freigeschalteter Krit-Chance                                    |
+| Kauf             | Card-Flash, Produktionswert poppt              | kurzer Kauf-Akkord         | keine DOM-Rebuilds ausser normalem Render                               |
+| Fehlkauf         | dezenter Shake, kurzer Hinweis                 | leiser tiefer Tick         | keine nervige Fehlersalve                                               |
+| Milestone        | staerkerer Card-Pop, Toast, Partikel           | hoeherer Kauf-Akkord       | nur bei echter Schwelle                                                 |
+| Unlock           | Toast mit Handlungshinweis                     | Unlock-Chime               | Snapshot verhindert Wiederholungen                                      |
+| Event Spawn      | Pop-in, Pfadbewegung, Restzeit-Balken          | Event-Kategorie-Sound      | ein bis zwei aktive Events je nach Progress                             |
+| Event Collect    | Reward-Floating, Kategorie-Partikel, Toast     | Collect/Buff/Seed/Rare Cue | seltene Events etwas stärker                                            |
+| Achievement      | Badge-Karte, Toast, Batch bei Mehrfach-Unlocks | Achievement Cue            | mehrere Unlocks werden gruppiert                                        |
+| Prestige         | kurzer Screen-Wash, Seed-FX, neuer Run         | Prestige-Akkord            | keine lange unskippbare Sequenz                                         |
 
 ## Sound Design
 
@@ -53,6 +54,13 @@ Settings bieten drei Motion-Stufen:
 - Minimal: Floating Numbers und Partikel weitgehend deaktiviert.
 
 Zusaetzlich respektieren kritische Animationen `prefers-reduced-motion`.
+
+## Active-Play-Polish
+
+- Click-Combo wird direkt im Klickbutton angezeigt, sobald mindestens 5 Klicks im kurzen Fenster liegen.
+- Floating Numbers zeigen bei kritischen Klicks `CRIT +Wert`.
+- `Harvest Chain` verstaerkt Combo-Stufen temporär, ohne Screen-Shake oder hektische Daueranimation.
+- Automation erzeugt weiterhin keine Floating-Number-Flut; zusätzliche BPS-Anteile laufen im Loop still mit.
 
 ## Notification-Regeln
 

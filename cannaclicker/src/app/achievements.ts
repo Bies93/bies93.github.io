@@ -1,6 +1,7 @@
 import Decimal from 'break_infinity.js';
 import {
   achievements,
+  type AchievementCategory,
   type AchievementDefinition,
   type AchievementRequirement,
 } from '../data/achievements';
@@ -30,7 +31,8 @@ type NumericRequirementKey =
   | 'offlineBuds'
   | 'offlineReturns'
   | 'abilityUses'
-  | 'activeBuffCount';
+  | 'activeBuffCount'
+  | 'achievementScore';
 
 const NUMERIC_KEYS: readonly NumericRequirementKey[] = [
   'manualClicks',
@@ -46,7 +48,25 @@ const NUMERIC_KEYS: readonly NumericRequirementKey[] = [
   'offlineReturns',
   'abilityUses',
   'activeBuffCount',
+  'achievementScore',
 ];
+
+export interface AchievementCategorySummary {
+  total: number;
+  unlocked: number;
+}
+
+export interface AchievementSummary {
+  total: number;
+  unlocked: number;
+  hiddenTotal: number;
+  hiddenUnlocked: number;
+  nearCount: number;
+  score: number;
+  maxScore: number;
+  multiplier: number;
+  categories: Partial<Record<AchievementCategory, AchievementCategorySummary>>;
+}
 
 export function getAchievementProgress(
   state: GameState,
@@ -125,6 +145,84 @@ export function getUnlockedAchievementCount(state: GameState): number {
   }, 0);
 }
 
+export function getAchievementScoreValue(definition: AchievementDefinition): number {
+  if (typeof definition.score === 'number' && Number.isFinite(definition.score)) {
+    return Math.max(0, Math.floor(definition.score));
+  }
+  switch (definition.rarity) {
+    case 'legendary':
+      return 80;
+    case 'epic':
+      return 35;
+    case 'rare':
+      return 15;
+    default:
+      return 5;
+  }
+}
+
+export function getAchievementScore(state: GameState): number {
+  return achievements.reduce((score, achievement) => {
+    return state.achievements[achievement.id]
+      ? score + getAchievementScoreValue(achievement)
+      : score;
+  }, 0);
+}
+
+export function getMaxAchievementScore(): number {
+  return achievements.reduce(
+    (score, achievement) => score + getAchievementScoreValue(achievement),
+    0,
+  );
+}
+
+export function getAchievementScoreMultiplier(state: GameState): number {
+  const score = getAchievementScore(state);
+  const bonus = Math.min(0.06, Math.floor(score / 100) * 0.0025);
+  return 1 + bonus;
+}
+
+export function getAchievementSummary(state: GameState): AchievementSummary {
+  const categories: Partial<Record<AchievementCategory, AchievementCategorySummary>> = {};
+  let unlocked = 0;
+  let hiddenTotal = 0;
+  let hiddenUnlocked = 0;
+  let nearCount = 0;
+
+  for (const achievement of achievements) {
+    const category = achievement.category;
+    const categorySummary = categories[category] ?? { total: 0, unlocked: 0 };
+    categorySummary.total += 1;
+
+    const isUnlocked = Boolean(state.achievements[achievement.id]);
+    if (isUnlocked) {
+      unlocked += 1;
+      categorySummary.unlocked += 1;
+    } else if (!achievement.hidden && getAchievementProgress(state, achievement).progress >= 0.7) {
+      nearCount += 1;
+    }
+    if (achievement.hidden) {
+      hiddenTotal += 1;
+      if (isUnlocked) {
+        hiddenUnlocked += 1;
+      }
+    }
+    categories[category] = categorySummary;
+  }
+
+  return {
+    total: achievements.length,
+    unlocked,
+    hiddenTotal,
+    hiddenUnlocked,
+    nearCount,
+    score: getAchievementScore(state),
+    maxScore: getMaxAchievementScore(),
+    multiplier: getAchievementScoreMultiplier(state),
+    categories,
+  } satisfies AchievementSummary;
+}
+
 function addDecimalCheck(
   checks: AchievementProgress[],
   current: Decimal,
@@ -179,6 +277,8 @@ function resolveNumericValue(state: GameState, key: NumericRequirementKey): numb
       return state.meta.abilityUsesTotal;
     case 'activeBuffCount':
       return countActiveBuffs(state);
+    case 'achievementScore':
+      return getAchievementScore(state);
     default:
       return 0;
   }

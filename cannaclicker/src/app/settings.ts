@@ -1,6 +1,6 @@
 export const MOTION_INTENSITIES = ['full', 'reduced', 'minimal'] as const;
-export const UI_THEMES = ['botanical', 'neon', 'sunset'] as const;
-export const PLANT_SKINS = ['classic', 'jade', 'gold', 'violet'] as const;
+export const UI_THEMES = ['botanical', 'neon', 'sunset', 'moon', 'copper'] as const;
+export const PLANT_SKINS = ['classic', 'jade', 'gold', 'violet', 'crystal', 'ember'] as const;
 
 export type MotionIntensity = (typeof MOTION_INTENSITIES)[number];
 export type UiTheme = (typeof UI_THEMES)[number];

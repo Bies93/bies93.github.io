@@ -32,7 +32,7 @@ export function mountRoot(): MountRootResult {
   root.dataset.testid = 'app-root';
   root.dataset.uiState = missing ? 'fallback' : 'ready';
 
-  const heroImageSet = `image-set(url("${backgroundAssets.desktop}") type("image/svg+xml") 1x)`;
+  const heroImageSet = `image-set(url("${backgroundAssets.keyArt}") type("image/png") 1x, url("${backgroundAssets.desktop}") type("image/svg+xml") 1x)`;
   document.documentElement.style.setProperty('--hero-image', heroImageSet);
   document.documentElement.style.setProperty(
     '--mobile-hero-image',

@@ -10,6 +10,18 @@ export interface MilestoneCardRefs {
 }
 
 import type { MilestoneId } from '../../../data/milestones';
+import type { AscensionNodeId } from '../../../data/ascension';
+
+export interface AscensionNodeCardRefs {
+  container: HTMLElement;
+  title: HTMLElement;
+  category: HTMLElement;
+  description: HTMLElement;
+  effect: HTMLElement;
+  cost: HTMLElement;
+  status: HTMLElement;
+  button: HTMLButtonElement;
+}
 
 export interface PrestigePanelRefs {
   container: HTMLElement;
@@ -24,6 +36,9 @@ export interface PrestigePanelRefs {
   kickstartValue: HTMLElement;
   activeKickstartLabel: HTMLElement;
   activeKickstartValue: HTMLElement;
+  ascensionSummary: HTMLElement;
+  ascensionList: HTMLElement;
+  ascensionNodes: Map<AscensionNodeId, AscensionNodeCardRefs>;
   milestoneList: HTMLElement;
   milestones: Map<MilestoneId, MilestoneCardRefs>;
   requirement: HTMLElement;

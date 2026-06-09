@@ -14,12 +14,17 @@ export function applyEffects(state: GameState, owned: ResearchId[]): void {
   let bpcMult = new Decimal(1);
   let costMult = new Decimal(1);
   let autoClicks = 0;
+  let automationBpsShare = 0;
   let abilityBonus = 0;
   let abilityDurationMult = 1;
   let offlineCapBonusHours = 0;
   let hybridPerBuff = 0;
   let strainChoice: StrainId | null = null;
   let seedClickBonus = 0;
+  let clickBpsSeconds = 0;
+  let clickCritChance = 0;
+  let comboPower = 0;
+  let softcapRelief = 0;
   let eventRewardMult = 1;
   let eventSpawnRateMult = 1;
   let eventDurationMult = 1;
@@ -52,6 +57,9 @@ export function applyEffects(state: GameState, owned: ResearchId[]): void {
         addAutoClicks: (value) => {
           autoClicks += value;
         },
+        addAutomationBpsShare: (value) => {
+          automationBpsShare += value;
+        },
         addAbilityBonus: (value) => {
           abilityBonus += value;
         },
@@ -73,6 +81,18 @@ export function applyEffects(state: GameState, owned: ResearchId[]): void {
         },
         addSeedClickBonus: (value) => {
           seedClickBonus += value;
+        },
+        addClickBpsSeconds: (value) => {
+          clickBpsSeconds += value;
+        },
+        addClickCritChance: (value) => {
+          clickCritChance += value;
+        },
+        addComboPower: (value) => {
+          comboPower += value;
+        },
+        addSoftcapRelief: (value) => {
+          softcapRelief += value;
         },
         multiplyEventReward: (value) => {
           eventRewardMult *= value;
@@ -127,6 +147,7 @@ export function applyEffects(state: GameState, owned: ResearchId[]): void {
   state.temp.costMultiplier = costMult;
   state.temp.buildingCostMultipliers = researchBuildingCostMultipliers;
   state.temp.autoClickRate = autoClicks;
+  state.temp.automationBpsShare = Math.max(0, Math.min(0.25, automationBpsShare));
   state.temp.abilityPowerBonus = abilityBonus;
   state.temp.abilityDurationMult = abilityDurationMult;
   state.temp.offlineCapMs = offlineCapMs;
@@ -135,6 +156,10 @@ export function applyEffects(state: GameState, owned: ResearchId[]): void {
   state.temp.strainChoice = strainChoice;
   state.temp.researchBuildingMultipliers = researchBuildingMultipliers;
   state.temp.seedClickBonus = Math.max(0, Math.min(0.05, seedClickBonus));
+  state.temp.clickBpsSeconds = Math.max(0, Math.min(0.35, clickBpsSeconds));
+  state.temp.clickCritChance = Math.max(0, Math.min(0.35, clickCritChance));
+  state.temp.clickComboMult = Math.max(1, 1 + Math.min(0.85, comboPower));
+  state.temp.softcapRelief = Math.max(0, Math.min(0.65, softcapRelief));
   state.temp.eventRewardMult = Math.max(1, eventRewardMult);
   state.temp.eventSpawnRateMult = Math.max(0.5, eventSpawnRateMult);
   state.temp.eventDurationMult = Math.max(0.5, eventDurationMult);
@@ -154,6 +179,7 @@ interface EffectContext {
   getCost: () => Decimal;
   setCost: (value: Decimal) => void;
   addAutoClicks: (value: number) => void;
+  addAutomationBpsShare: (value: number) => void;
   addAbilityBonus: (value: number) => void;
   multiplyAbilityDuration: (value: number) => void;
   addOfflineHours: (value: number) => void;
@@ -161,6 +187,10 @@ interface EffectContext {
   setStrain: (value: StrainId | null) => void;
   multiplyBuilding: (target: ItemId, value: number) => void;
   addSeedClickBonus: (value: number) => void;
+  addClickBpsSeconds: (value: number) => void;
+  addClickCritChance: (value: number) => void;
+  addComboPower: (value: number) => void;
+  addSoftcapRelief: (value: number) => void;
   multiplyEventReward: (value: number) => void;
   multiplyEventSpawnRate: (value: number) => void;
   multiplyEventDuration: (value: number) => void;
@@ -189,6 +219,12 @@ function applyEffect(effect: ResearchEffect, ctx: EffectContext): void {
     case 'CLICK_AUTOMATION': {
       const amount = Number.isFinite(value) ? value : 0;
       ctx.addAutoClicks(amount);
+      break;
+    }
+    case 'AUTOMATION_BPS_SHARE': {
+      if (Number.isFinite(value) && value > 0) {
+        ctx.addAutomationBpsShare(value);
+      }
       break;
     }
     case 'ABILITY_OVERDRIVE_PLUS': {
@@ -233,6 +269,30 @@ function applyEffect(effect: ResearchEffect, ctx: EffectContext): void {
       const bonus = Number.isFinite(value) ? value : 0;
       if (bonus > 0) {
         ctx.addSeedClickBonus(bonus);
+      }
+      break;
+    }
+    case 'BPC_FROM_BPS_SECONDS': {
+      if (Number.isFinite(value) && value > 0) {
+        ctx.addClickBpsSeconds(value);
+      }
+      break;
+    }
+    case 'CLICK_CRIT': {
+      if (Number.isFinite(value) && value > 0) {
+        ctx.addClickCritChance(value);
+      }
+      break;
+    }
+    case 'COMBO_POWER': {
+      if (Number.isFinite(value) && value > 0) {
+        ctx.addComboPower(value);
+      }
+      break;
+    }
+    case 'SOFTCAP_RELIEF': {
+      if (Number.isFinite(value) && value > 0) {
+        ctx.addSoftcapRelief(value);
       }
       break;
     }

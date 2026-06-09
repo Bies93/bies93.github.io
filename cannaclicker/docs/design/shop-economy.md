@@ -1,70 +1,82 @@
 # Shop Economy
 
-Stand: Sprint 4.
+Stand: Sprint 18.
 
 ## Designziel
 
-Der Shop ist das Kernsystem von CannaClicker. Items sind nicht nur größere Zahlen, sondern Rollen in einer Progressionsleiter. Milestones halten alte Items relevant; Upgrades und Synergien erzeugen Build-Identität.
+Der Shop ist nicht mehr nur eine Progressionsleiter aus größeren BPS-Zahlen. Jedes Item hat eine Rolle, eigene Milestone-Schwellen, spätere Synergien und mindestens einen Weg, im Midgame wieder relevant zu werden.
 
 ## Item-Tabelle
 
-| id                 | displayName        | role                            |    baseCost |   baseBps | costFactor | unlockCondition        | milestones                   | synergyHooks                                |
-| ------------------ | ------------------ | ------------------------------- | ----------: | --------: | ---------: | ---------------------- | ---------------------------- | ------------------------------------------- |
-| seedling           | Seedling           | Early mass, click/seed synergy  |          12 |      0.12 |       1.13 | Start                  | 10/25/50/100/150/200/300/500 | Seed sorting, click value, base multipliers |
-| planter            | Planter            | Stable early BPS                |          65 |       0.6 |       1.15 | 40 total buds          | 10/25/50/100/150/200/300/500 | Soil, irrigation, global upgrades           |
-| grow_tent          | Grow Tent          | First production jump           |         420 |       3.8 |       1.17 | 250 total buds         | 10/25/50/100/150/200/300/500 | Indoor, light, CO2                          |
-| grow_light         | Grow Light         | Indoor amplifier                |       1,500 |        11 |       1.18 | 2 Grow Tents           | 10/25/50/100/150/200/300/500 | Tent, CO2, buff strategy                    |
-| cultivator         | Cultivator         | Breadth scaler                  |       6,000 |        48 |       1.20 | 4,500 total buds       | 10/25/50/100/150/200/300/500 | Multi-item milestones, global bonuses       |
-| irrigation_system  | Irrigation System  | Infrastructure and cost control |      28,000 |       240 |      1.215 | 20,000 total buds      | 10/25/50/100/150/200/300/500 | Planter, hydro, climate cost hooks          |
-| co2_tank           | CO2 Tank           | Buff/event amplifier            |     120,000 |     1,100 |      1.235 | 90,000 total buds      | 10/25/50/100/150/200/300/500 | Tent, light, event rewards                  |
-| climate_controller | Climate Controller | Buff/event stabiliser           |     520,000 |     5,200 |       1.25 | 400,000 total buds     | 10/25/50/100/150/200/300/500 | CO2, hydro, events                          |
-| hydroponic_rack    | Hydroponic Rack    | High production thresholds      |   2,500,000 |    28,000 |      1.265 | 2,000,000 total buds   | 10/25/50/100/150/200/300/500 | Irrigation, climate, 100+ milestones        |
-| genetics_lab       | Genetics Lab       | Research and seed synergy       |  12,000,000 |   160,000 |       1.28 | 9,000,000 total buds   | 10/25/50/100/150/200/300/500 | Seeds, strains, prestige prep               |
-| trimming_robot     | Trimming Robot     | Automation and auto-click       |  70,000,000 | 1,000,000 |      1.295 | 55,000,000 total buds  | 10/25/50/100/150/200/300/500 | Auto-click, click multipliers               |
-| micro_greenhouse   | Micro Greenhouse   | Late compact multiplier         | 450,000,000 | 7,500,000 |       1.31 | 350,000,000 total buds | 10/25/50/100/150/200/300/500 | Climate, genetics, automation               |
+| id                 | role                            |    baseCost |   baseBps | costFactor | unlockCondition        | milestones                    | synergyHooks                    |
+| ------------------ | ------------------------------- | ----------: | --------: | ---------: | ---------------------- | ----------------------------- | ------------------------------- |
+| seedling           | Early mass, click/seed synergy  |          12 |      0.12 |      1.130 | Start                  | 10/25/50/100/200/350/600/1000 | Cultivator, Robot, Genetics     |
+| planter            | Stable early BPS                |          65 |       0.6 |      1.150 | 40 total Buds          | 10/25/50/100/150/250/400/650  | Irrigation, Seedling            |
+| grow_tent          | First production jump           |         420 |       3.8 |      1.170 | 250 total Buds         | 5/15/35/75/125/200/320/500    | Grow Light, CO2                 |
+| grow_light         | Indoor amplifier                |       1,500 |        11 |      1.180 | 2 Grow Tents           | 5/15/35/75/125/200/320/500    | Grow Tent, CO2                  |
+| cultivator         | Breadth scaler                  |       6,000 |        48 |      1.200 | 4,500 total Buds       | 10/25/50/100/150/250/400/650  | Seedling mass, Robot            |
+| irrigation_system  | Infrastructure and cost control |      28,000 |       240 |      1.215 | 20,000 total Buds      | 5/10/25/50/100/150/250/400    | Planter, Hydro, Softcap         |
+| co2_tank           | Buff/event amplifier            |     120,000 |     1,100 |      1.235 | 90,000 total Buds      | 5/10/25/50/100/150/250/400    | Indoor, Events, Climate         |
+| climate_controller | Event/offline stabiliser        |     520,000 |     5,200 |      1.250 | 400,000 total Buds     | 5/10/25/50/100/150/250/400    | CO2, Hydro, Event duration      |
+| hydroponic_rack    | Idle production core            |   2,500,000 |    28,000 |      1.265 | 2,000,000 total Buds   | 3/10/25/50/100/150/250/400    | Irrigation, Climate             |
+| genetics_lab       | Seeds, Research, Strains        |  12,000,000 |   160,000 |      1.280 | 9,000,000 total Buds   | 3/10/25/50/100/150/250/400    | Seedling, Robot, Prestige       |
+| trimming_robot     | Automation                      |  70,000,000 | 1,000,000 |      1.295 | 55,000,000 total Buds  | 3/10/25/50/100/150/250/400    | Cultivator, Micro, Auto-click   |
+| micro_greenhouse   | Late compact multiplier         | 450,000,000 | 7,500,000 |      1.310 | 350,000,000 total Buds | 1/3/10/25/50/100/150/250      | Climate, Genetics, Hydro, Robot |
 
-## Milestones
+## Synergie-Matrix
 
-Alle Items nutzen die Schwellen:
-`10, 25, 50, 100, 150, 200, 300, 500`.
+| Synergie               | Quelle             | Ziele                      | Skalierung                            |
+| ---------------------- | ------------------ | -------------------------- | ------------------------------------- |
+| Mass Care              | Seedling           | Cultivator, Trimming Robot | +2.5% je 50 Seedlings, max 12 Stacks  |
+| Root Network           | Irrigation         | Planter, Seedling          | +3.5% je 12 Irrigation, max 10 Stacks |
+| Indoor Focus           | Grow Light         | Grow Tent                  | +5% je 10 Lights, max 10 Stacks       |
+| Full Spectrum Pressure | CO2 Tank           | Grow Light, Grow Tent      | +4.5% je 8 Tanks, max 10 Stacks       |
+| Stable Atmosphere      | Climate Controller | CO2 Tank                   | +5% je 8 Controller, max 9 Stacks     |
+| Hydro Loop             | Irrigation         | Hydroponic Rack            | +4.5% je 20 Irrigation, max 10 Stacks |
+| Strain Library         | Genetics Lab       | Seedling, Planter          | +2.5% je 5 Labs, max 12 Stacks        |
+| Shift Work             | Trimming Robot     | Cultivator                 | +4% je 5 Robots, max 10 Stacks        |
+| Lab Pipeline           | Genetics Lab       | Trimming Robot             | +3.5% je 6 Labs, max 9 Stacks         |
+| Microclimate Matrix    | Micro Greenhouse   | Climate, Genetics, Hydro   | +5.5% je 3 Micro, max 10 Stacks       |
+| Hydro Balance          | Climate Controller | Hydroponic Rack            | +4% je 10 Controller, max 10 Stacks   |
+| Compact Automation     | Trimming Robot     | Micro Greenhouse           | +4.5% je 4 Robots, max 8 Stacks       |
 
-Milestones wirken direkt über Item-Produktion und werden in der Shop-Karte als Fortschritt zur nächsten Schwelle angezeigt. Die Karte zeigt aktuelle Produktion, Produktion nach Kauf, Anteil an Gesamt-BPS und ROI.
+Aktive Synergien erscheinen direkt im Shop-Hinweistext der betroffenen Karte.
 
-## Upgrade-Tabelle
+## Upgrades
 
-| id                           | displayName       | category   |                cost | requirement                             | effect                            | intended timing            |
-| ---------------------------- | ----------------- | ---------- | ------------------: | --------------------------------------- | --------------------------------- | -------------------------- |
-| precision_trim               | Precision Trim    | Click      |                 420 | 260 total buds                          | BPC x2                            | Minute 5-8                 |
-| starter_auto                 | Auto Nudge        | Automation |                 420 | 260 total buds                          | +0.35 auto-click/s                | Minute 8-12                |
-| rich_soil                    | Rich Soil         | Global     |                 820 | 620 total buds                          | Global x1.25                      | Minute 10-15               |
-| tap_training                 | Tap Training      | Click      |               1,900 | 1,500 total buds + Precision Trim       | BPC x1.75                         | Minute 15-25               |
-| canopy_math                  | Canopy Math       | Global     |               5,500 | 4,000 total buds                        | Global x1.2                       | Minute 25-40               |
-| event_spotters               | Event Spotters    | Event      |              13,000 | 10,000 total buds                       | Event instant rewards x1.25       | After early loop           |
-| seed_sorting                 | Seed Sorting      | Seed       |              36,000 | 28,000 total buds                       | +1pp click seed chance            | Early-mid bridge           |
-| prestige_journal             | Prestige Journal  | Prestige   |             520,000 | 420,000 total buds                      | Global x1.1                       | First prestige preparation |
-| \*\_boost_1                  | Item Boost 1      | Item       |         baseCost x7 | 10 owned                                | Item production x1.75             | First item commitment      |
-| \*\_boost_2                  | Item Boost 2      | Item       |        baseCost x46 | 50 owned + prior boost                  | Item production x2.1              | Mid commitment             |
-| \*\_boost_3                  | Item Boost 3      | Item       |       baseCost x320 | 150 owned + prior boost                 | Item production x2.65             | Long-run commitment        |
-| synergy_closed_loop          | Closed Loop Cycle | Synergy    |       CO2 base x120 | Tent 40, Light 40, CO2 15               | Tent/Light/CO2 x1.2               | Indoor build               |
-| synergy_root_network         | Root Network      | Synergy    |      Hydro base x18 | Seedling 100, Planter 75, Irrigation 25 | Seedling/Planter/Irrigation x1.35 | Old item reactivation      |
-| synergy_precision_irrigation | Fine Tuning       | Synergy    | high infra base x95 | Climate 20, Hydro 35, Irrigation 60     | Cost -5% for infra items          | Infrastructure build       |
-| synergy_lab_pipeline         | Lab Pipeline      | Synergy    |   Genetics base x42 | Genetics 25, Robot 15, Hydro 50         | Lab/Robot/Hydro x1.3              | Late production build      |
-| synergy_micro_cycle          | Micro Cycle       | Prestige   |      Micro base x38 | Micro 10, Climate 60, Genetics 40       | Micro/Climate/Genetics x1.4       | Prestige prep hook         |
+| Gruppe                |    Anzahl | Zweck                                                                         |
+| --------------------- | --------: | ----------------------------------------------------------------------------- |
+| Item Boosts           | 5 je Item | Commitment-Stufen bei 10/50/150/300/500 Besitz                                |
+| Trimmer Automation    |         6 | Auto-Klick-Progression und Automations-Build                                  |
+| Legacy Early Upgrades |         8 | Early BPC, Global, Event, Seed und Prestige-Brücke                            |
+| Synergy Upgrades      |         5 | stärkere Build-Identität für Root, Indoor, Lab, Micro                         |
+| Archetype Upgrades    |         5 | neue Mechaniken: BPC aus BPS, Krit, Eventrate, BPS-Automation, Softcap-Relief |
+
+Wichtige neue Upgrades:
+
+| id                   | category   | effect                                     | intended timing         |
+| -------------------- | ---------- | ------------------------------------------ | ----------------------- |
+| active_harvest_chain | click      | +0.02s BPS pro Klick, +2pp Krit            | aktiver Midgame-Build   |
+| servo_feedback       | automation | +0.75 Auto-Klick/s, +1.2% BPS-Anteil       | Robot-/Cultivator-Build |
+| event_magnet_array   | event      | Eventrate +12%, Dauer +10%, Rewards +12%   | CO2-/Climate-Build      |
+| softcap_tuning       | utility    | Softcap-Strafen -8%                        | breite Late-Run-Shops   |
+| seed_focus_lenses    | seed       | Seed-Chance +1.5pp, Seedling/Genetics +20% | Genetics-/Seed-Build    |
+
+## Softcaps
+
+Softcaps bleiben sichtbar, werden aber jetzt spielbar:
+
+- Softcap-Badges zeigen aktive Stackzahl und effektive Produktionsreduktion.
+- Research und Upgrades geben `SOFTCAP_RELIEF` bzw. `softcapRelief`.
+- Relief reduziert nicht die Stackzahl, sondern mildert die pro-Stack-Strafe.
+- Cap: maximal 80% Relief, damit Softcaps als Balancing-Instrument erhalten bleiben.
 
 ## Shop-UI
 
-Jede Karte zeigt:
-
-- Icon, Name, Rolle und Synergie-Hook.
-- Besitz, Kosten, aktuelle Produktion, Produktion nach Kauf.
-- Anteil an Gesamt-BPS.
-- ROI und Effizienzstatus.
-- Naechsten Milestone.
-- Buy One, x10, x25 und Max.
-- Locked-Hinweis mit konkreter Freischaltung.
+Jede Karte zeigt weiterhin Icon, Name, Rolle, Besitz, Kosten, aktuelle Produktion, Produktion nach Kauf, BPS-Anteil, ROI, Milestone und Buy One/x10/x25/Max. Neu ist, dass aktive Cross-Synergien in der Hook-Zeile sichtbar werden.
 
 ## Balance-Risiken
 
-- Die Item-Boost-Upgrades dürfen nicht alle gleichzeitig erschwinglich wirken.
-- x25 kann im Early Game lange deaktiviert sein; das ist beabsichtigt.
-- Synergie-Upgrades müssen im 60-Minuten-Playthrough beobachtet werden, damit keine Einzelstrategie dominiert.
+- Synergien stapeln multiplikativ über Item-Basisproduktion; extreme Late-Game-Runs müssen nach Sprint 19-20 erneut simuliert werden.
+- Fünf Boost-Stufen pro Item erhöhen Content-Dichte. Die Sortierung zeigt verfügbare/erschwingliche Upgrades zuerst, damit keine Upgrade-Flut entsteht.
+- Softcap-Relief darf breite Shops stärken, aber späte Items nicht komplett entwerten.

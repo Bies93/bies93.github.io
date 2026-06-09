@@ -22,9 +22,15 @@ export type UpgradeEffect =
   | { type: 'buildingCostMultiplier'; targets: readonly ItemId[]; value: number }
   | { type: 'autoClick'; value: number }
   | { type: 'seedClickBonus'; value: number }
-  | { type: 'eventRewardMultiplier'; value: number };
+  | { type: 'clickBpsSeconds'; value: number }
+  | { type: 'clickCritChance'; value: number }
+  | { type: 'automationBpsShare'; value: number }
+  | { type: 'eventRewardMultiplier'; value: number }
+  | { type: 'eventSpawnRateMultiplier'; value: number }
+  | { type: 'eventDurationMultiplier'; value: number }
+  | { type: 'softcapRelief'; value: number };
 
-type BuildingUpgradeStage = 1 | 2 | 3;
+type BuildingUpgradeStage = 1 | 2 | 3 | 4 | 5;
 type TrimmerUpgradeStage = 1 | 2 | 3 | 4 | 5 | 6;
 
 type BuildingUpgradeId = `${ItemId}_boost_${BuildingUpgradeStage}` | 'grow_light_lenses';
@@ -40,6 +46,11 @@ export type UpgradeId =
   | 'event_spotters'
   | 'seed_sorting'
   | 'prestige_journal'
+  | 'active_harvest_chain'
+  | 'servo_feedback'
+  | 'event_magnet_array'
+  | 'softcap_tuning'
+  | 'seed_focus_lenses'
   | 'synergy_closed_loop'
   | 'synergy_precision_irrigation'
   | 'synergy_root_network'
@@ -65,9 +76,9 @@ export interface UpgradeDefinition {
   order: number;
 }
 
-const BUILDING_THRESHOLDS = [10, 50, 150] as const;
-const BUILDING_COST_FACTORS = [7, 46, 320] as const;
-const BUILDING_MULTIPLIERS = [1.75, 2.1, 2.65] as const;
+const BUILDING_THRESHOLDS = [10, 50, 150, 300, 500] as const;
+const BUILDING_COST_FACTORS = [7, 46, 320, 900, 2200] as const;
+const BUILDING_MULTIPLIERS = [1.75, 2.1, 2.65, 3.1, 3.75] as const;
 
 const BUILDING_ICON_OVERRIDES: Partial<Record<ItemId, string>> = {
   seedling: itemIcons.seedling,
@@ -350,6 +361,139 @@ function createSynergyUpgrades(): UpgradeDefinition[] {
   ];
 }
 
+function createArchetypeUpgrades(): UpgradeDefinition[] {
+  const seedlingBase = getBaseCost('seedling');
+  const co2Base = getBaseCost('co2_tank');
+  const climateBase = getBaseCost('climate_controller');
+  const geneticsBase = getBaseCost('genetics_lab');
+  const trimmerBase = getBaseCost('trimming_robot');
+
+  return [
+    {
+      id: 'active_harvest_chain',
+      category: 'click',
+      targetIds: ['seedling', 'cultivator'] as const,
+      name: {
+        de: 'Erntekette',
+        en: 'Harvest Chain',
+      },
+      description: {
+        de: 'Klicks gewinnen 0,02 Sekunden deiner BPS dazu und erhalten +2 Prozentpunkte Krit-Chance.',
+        en: 'Clicks gain 0.02 seconds of your BPS and +2 percentage points critical chance.',
+      },
+      cost: Math.round(seedlingBase * 160_000),
+      icon: upgradeIcons.clickPower,
+      effects: [
+        { type: 'clickBpsSeconds', value: 0.02 },
+        { type: 'clickCritChance', value: 0.02 },
+      ],
+      requirement: {
+        itemsOwned: { seedling: 75, cultivator: 20 },
+        totalBuds: 1_800_000,
+      },
+      order: 5100,
+    },
+    {
+      id: 'servo_feedback',
+      category: 'automation',
+      targetIds: ['trimming_robot', 'cultivator'] as const,
+      name: {
+        de: 'Servo-Feedback',
+        en: 'Servo Feedback',
+      },
+      description: {
+        de: 'Auto-Klick-Systeme ernten zusätzlich 1,2 % deiner BPS, solange Automation läuft.',
+        en: 'Auto-click systems harvest an extra 1.2% of your BPS while automation is running.',
+      },
+      cost: Math.round(trimmerBase * 16),
+      icon: upgradeIcons.automation,
+      effects: [
+        { type: 'autoClick', value: 0.75 },
+        { type: 'automationBpsShare', value: 0.012 },
+      ],
+      requirement: {
+        itemsOwned: { trimming_robot: 10, cultivator: 75 },
+        totalBuds: 120_000_000,
+      },
+      order: 5150,
+    },
+    {
+      id: 'event_magnet_array',
+      category: 'event',
+      targetIds: ['co2_tank', 'climate_controller'] as const,
+      name: {
+        de: 'Event-Magnetarray',
+        en: 'Event Magnet Array',
+      },
+      description: {
+        de: 'Events erscheinen +12 % häufiger, dauern +10 % länger und zahlen +12 % besser.',
+        en: 'Events appear 12% more often, last 10% longer, and pay 12% better.',
+      },
+      cost: Math.round(co2Base * 420),
+      icon: upgradeIcons.globalBps,
+      effects: [
+        { type: 'eventSpawnRateMultiplier', value: 1.12 },
+        { type: 'eventDurationMultiplier', value: 1.1 },
+        { type: 'eventRewardMultiplier', value: 1.12 },
+      ],
+      requirement: {
+        itemsOwned: { co2_tank: 30, climate_controller: 20 },
+        totalBuds: 95_000_000,
+      },
+      order: 5200,
+    },
+    {
+      id: 'softcap_tuning',
+      category: 'utility',
+      targetIds: ['irrigation_system', 'climate_controller'] as const,
+      name: {
+        de: 'Softcap-Tuning',
+        en: 'Softcap Tuning',
+      },
+      description: {
+        de: 'Späte Softcap-Strafen werden um 8 % abgeschwächt. Breite Shops bleiben länger relevant.',
+        en: 'Late softcap penalties are softened by 8%. Wide shops stay relevant longer.',
+      },
+      cost: Math.round(climateBase * 160),
+      icon: upgradeIcons.costEfficiency,
+      effects: [{ type: 'softcapRelief', value: 0.08 }],
+      requirement: {
+        itemsOwned: { irrigation_system: 80, climate_controller: 30 },
+        totalBuds: 600_000_000,
+      },
+      order: 5250,
+    },
+    {
+      id: 'seed_focus_lenses',
+      category: 'seed',
+      targetIds: ['genetics_lab', 'seedling'] as const,
+      name: {
+        de: 'Seed-Fokuslinsen',
+        en: 'Seed Focus Lenses',
+      },
+      description: {
+        de: '+1,5 Prozentpunkte Seed-Chance beim Klicken und +20 % für Keimlinge und Genetik-Labore.',
+        en: '+1.5 percentage points click seed chance and +20% for seedlings and genetics labs.',
+      },
+      cost: Math.round(geneticsBase * 70),
+      icon: upgradeIcons.costEfficiency,
+      effects: [
+        { type: 'seedClickBonus', value: 0.015 },
+        {
+          type: 'buildingMultiplier',
+          targets: ['seedling', 'genetics_lab'] as const,
+          value: 1.2,
+        },
+      ],
+      requirement: {
+        itemsOwned: { genetics_lab: 25, seedling: 150 },
+        totalBuds: 1_200_000_000,
+      },
+      order: 5300,
+    },
+  ];
+}
+
 const TRIMMER_THRESHOLDS = [25, 50, 75, 100, 150, 200] as const;
 const TRIMMER_COST_FACTORS = [12, 18, 26, 36, 48, 64] as const;
 
@@ -551,11 +695,13 @@ const legacyUpgrades: UpgradeDefinition[] = [
 
 const buildingUpgrades = createBuildingUpgrades();
 const synergyUpgrades = createSynergyUpgrades();
+const archetypeUpgrades = createArchetypeUpgrades();
 const trimmerUpgrades = createTrimmerUpgrades();
 
 export const upgrades: UpgradeDefinition[] = [
   ...legacyUpgrades,
   ...buildingUpgrades,
+  ...archetypeUpgrades,
   ...synergyUpgrades,
   ...trimmerUpgrades,
 ].sort((a, b) => a.order - b.order);

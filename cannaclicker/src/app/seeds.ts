@@ -1,8 +1,8 @@
-import { updatePrestigeMultiplier } from './prestige';
 import type { GameState, SeedGainEntry, SeedGainSource, SeedNotification } from './state';
 import type { ItemId } from '../data/items';
 import type { ResearchId } from '../data/research';
 import type { UpgradeId } from '../data/upgrades';
+import { abilityMultiplierFor } from './abilities';
 
 export const SEED_SYNERGY_IDS = ['closed_loop', 'hydro_link', 'climate_genetics'] as const;
 
@@ -119,7 +119,6 @@ export function awardSeeds(
   state.prestige.seeds += safeAmount;
   state.prestige.totalSeeds =
     Math.max(state.prestige.totalSeeds ?? 0, previousSpendable) + safeAmount;
-  updatePrestigeMultiplier(state);
 
   const entry: SeedGainEntry = { time: now, amount: safeAmount, source };
   if (!Array.isArray(state.meta.seedHistory)) {
@@ -154,7 +153,8 @@ export function maybeRollClickSeed(
   const rate = updateSeedRate(state, now);
   const cap = state.temp.seedRateCap;
   const bonus = Math.min(MAX_CLICK_BONUS, Math.max(0, state.temp.seedClickBonus ?? 0));
-  const chance = Math.min(1, BASE_CLICK_SEED_CHANCE + bonus);
+  const seedAbilityMult = abilityMultiplierFor(state, 'seed');
+  const chance = Math.min(1, (BASE_CLICK_SEED_CHANCE + bonus) * seedAbilityMult);
   const throttled = cap > 0 && rate >= cap;
 
   if (throttled) {
@@ -162,7 +162,7 @@ export function maybeRollClickSeed(
   }
 
   if (rng() < chance) {
-    const gained = awardSeeds(state, 1, 'click', now);
+    const gained = awardSeeds(state, Math.max(1, Math.floor(seedAbilityMult)), 'click', now);
     return { gained, chance, throttled: false } satisfies ClickSeedResult;
   }
 

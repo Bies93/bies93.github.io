@@ -10,6 +10,7 @@ import type { MilestoneId } from '../data/milestones';
 import type { ResearchId } from '../data/research';
 import type { UpgradeId } from '../data/upgrades';
 import type { GoalId } from '../data/goals';
+import type { AscensionNodeId } from '../data/ascension';
 import type { SeedSynergyId } from './seeds';
 import {
   createDefaultEventState,
@@ -19,7 +20,7 @@ import {
 } from './events';
 export type { AbilityId } from '../data/abilities';
 
-export const SAVE_VERSION = 7 as const;
+export const SAVE_VERSION = 8 as const;
 
 export type SeedGainSource = 'event' | 'click' | 'synergy' | 'passive';
 
@@ -61,8 +62,22 @@ export interface EventBoostState {
 }
 
 export interface PrestigeState {
+  /**
+   * Run/research seeds from events, clicks, synergies, and passive systems.
+   * These are spendable for Research and do not power the Prestige multiplier.
+   */
   seeds: number;
   totalSeeds: number;
+  /**
+   * Ascension seeds come only from performing Prestige.
+   * They drive the Prestige multiplier and the Ascension tree.
+   */
+  ascensionSeeds: number;
+  totalAscensionSeeds: number;
+  ascensionSpent: number;
+  ascensionOwned: AscensionNodeId[];
+  permanentSlots: number;
+  permanentUpgradeIds: UpgradeId[];
   mult: Decimal;
   lifetimeBuds: Decimal;
   lastResetAt: number;
@@ -86,6 +101,7 @@ export interface TempState {
   costMultiplier: Decimal;
   buildingCostMultipliers: Partial<Record<ItemId, Decimal>>;
   autoClickRate: number;
+  automationBpsShare: number;
   abilityPowerBonus: number;
   abilityDurationMult: number;
   offlineCapMs: number;
@@ -121,6 +137,14 @@ export interface TempState {
   kickstartRemainingMs: number;
   kickstartEndsAt: number;
   seedClickBonus: number;
+  clickBpsSeconds: number;
+  clickComboCount: number;
+  clickComboMult: number;
+  clickComboExpiresAt: number;
+  clickCritChance: number;
+  clickCritMult: number;
+  lastClickCritical: boolean;
+  softcapRelief: number;
   seedPassiveConfig: SeedPassiveConfig | null;
   seedPassiveThrottled: boolean;
   seedPassiveProgress: number;
@@ -248,6 +272,12 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
     prestige: {
       seeds: 0,
       totalSeeds: 0,
+      ascensionSeeds: 0,
+      totalAscensionSeeds: 0,
+      ascensionSpent: 0,
+      ascensionOwned: [],
+      permanentSlots: 0,
+      permanentUpgradeIds: [],
       mult: new Decimal(1),
       lifetimeBuds: new Decimal(0),
       lastResetAt: now,
@@ -275,6 +305,7 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       costMultiplier: new Decimal(1),
       buildingCostMultipliers: {},
       autoClickRate: 0,
+      automationBpsShare: 0,
       abilityPowerBonus: 0,
       abilityDurationMult: 1,
       offlineCapMs: OFFLINE_CAP_MS,
@@ -310,6 +341,14 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       kickstartRemainingMs: 0,
       kickstartEndsAt: 0,
       seedClickBonus: 0,
+      clickBpsSeconds: 0,
+      clickComboCount: 0,
+      clickComboMult: 1,
+      clickComboExpiresAt: 0,
+      clickCritChance: 0,
+      clickCritMult: 2,
+      lastClickCritical: false,
+      softcapRelief: 0,
       seedPassiveConfig: null,
       seedPassiveThrottled: false,
       seedPassiveProgress: 0,

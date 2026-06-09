@@ -1,7 +1,7 @@
 import { t } from '../../../i18n';
 import type { GameState } from '../../../state';
 import { getResearchList, type ResearchFilter, type ResearchViewModel } from '../../../research';
-import type { ResearchId } from '../../../../data/research';
+import { RESEARCH_PATHS, type ResearchId, type ResearchPath } from '../../../../data/research';
 import type { UIRefs } from '../../types';
 import type { ResearchCardRefs } from '../../types';
 import { renderResearchCard } from './renderCard';
@@ -20,6 +20,7 @@ export function renderResearchList(
   const data = entries ?? getResearchList(state, activeFilter);
 
   researchRefs.emptyState.textContent = t(state.locale, 'research.empty');
+  updateResearchPathSummary(state, refs, data);
 
   if (data.length === 0) {
     ensureEmptyState(list, researchRefs.emptyState);
@@ -38,6 +39,32 @@ export function renderResearchList(
   });
 
   removeHiddenCards(list, researchRefs.entries, visible);
+}
+
+function updateResearchPathSummary(
+  state: GameState,
+  refs: UIRefs,
+  visibleEntries: ResearchViewModel[],
+): void {
+  const wrapper = refs.sidePanel.research.pathSummary;
+  wrapper.innerHTML = '';
+  const visibleIds = new Set(visibleEntries.map((entry) => entry.node.id));
+
+  (Object.keys(RESEARCH_PATHS) as ResearchPath[]).forEach((path) => {
+    const nodes = RESEARCH_PATHS[path];
+    const owned = nodes.filter((node) => state.researchOwned.includes(node.id)).length;
+    const available = nodes.filter((node) => visibleIds.has(node.id)).length;
+    const chip = document.createElement('span');
+    chip.className = 'research-path-summary__chip';
+    chip.dataset.path = path;
+    chip.textContent = t(state.locale, 'research.pathSummary', {
+      path: t(state.locale, `research.path.${path}`),
+      owned,
+      total: nodes.length,
+      available,
+    });
+    wrapper.appendChild(chip);
+  });
 }
 
 function ensureEmptyState(list: Element, emptyState: HTMLElement): void {

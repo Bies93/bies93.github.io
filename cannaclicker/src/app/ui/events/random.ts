@@ -1,8 +1,7 @@
-import { asset } from '../../assets';
 import { eventIcons } from '../../assetManifest';
 import { createItemSrcset } from '../components/media';
 import { t } from '../../i18n';
-import type { EventId } from '../../events';
+import { EVENT_I18N_KEYS, EVENT_IDS, getEventDefinition, type EventId } from '../../events';
 import type { GameState } from '../../state';
 import type { UIRefs } from '../types';
 
@@ -12,20 +11,11 @@ export interface EventPresentation {
   labelKey: string;
 }
 
-export const EVENT_PRESENTATIONS: readonly EventPresentation[] = [
-  { id: 'golden_bud', icon: eventIcons.golden_bud, labelKey: 'events.goldenBud.name' },
-  { id: 'seed_pack', icon: eventIcons.seed_pack, labelKey: 'events.seedPack.name' },
-  { id: 'lucky_joint', icon: eventIcons.lucky_joint, labelKey: 'events.luckyJoint.name' },
-  { id: 'fertile_rain', icon: eventIcons.fertile_rain, labelKey: 'events.fertileRain.name' },
-  { id: 'market_rush', icon: eventIcons.market_rush, labelKey: 'events.marketRush.name' },
-  { id: 'green_surge', icon: eventIcons.green_surge, labelKey: 'events.greenSurge.name' },
-  { id: 'mutant_sprout', icon: eventIcons.mutant_sprout, labelKey: 'events.mutantSprout.name' },
-  { id: 'supply_drop', icon: eventIcons.supply_drop, labelKey: 'events.supplyDrop.name' },
-  { id: 'flash_harvest', icon: eventIcons.flash_harvest, labelKey: 'events.flashHarvest.name' },
-  { id: 'calm_growth', icon: eventIcons.calm_growth, labelKey: 'events.calmGrowth.name' },
-  { id: 'overgrowth', icon: eventIcons.overgrowth, labelKey: 'events.overgrowth.name' },
-  { id: 'seed_bloom', icon: eventIcons.seed_bloom, labelKey: 'events.seedBloom.name' },
-];
+export const EVENT_PRESENTATIONS: readonly EventPresentation[] = EVENT_IDS.map((id) => ({
+  id,
+  icon: eventIcons[id],
+  labelKey: `events.${EVENT_I18N_KEYS[id]}.name`,
+}));
 
 export function getEventPresentation(id: EventId): EventPresentation {
   return EVENT_PRESENTATIONS.find((entry) => entry.id === id) ?? EVENT_PRESENTATIONS[0];
@@ -45,10 +35,13 @@ export function createEventButton(
   const path = computeEventPath(rect, lifetime);
 
   const button = document.createElement('button');
+  const eventDefinition = getEventDefinition(definition.id);
   button.type = 'button';
   button.className = 'event-icon';
   button.dataset.eventId = definition.id;
-  button.dataset.rarity = isRareEvent(definition.id) ? 'rare' : 'common';
+  button.dataset.rarity = eventDefinition.rarity;
+  button.dataset.eventType = eventDefinition.category;
+  button.dataset.season = eventDefinition.season;
   button.dataset.uiRole = 'random-event';
   button.dataset.testid = 'random-event';
   button.style.left = `${path.startX}px`;
@@ -57,7 +50,7 @@ export function createEventButton(
   button.setAttribute('aria-label', t(state.locale, definition.labelKey));
   button.title = t(state.locale, definition.labelKey);
 
-  const iconPath = asset(definition.icon);
+  const iconPath = definition.icon;
   const image = new Image();
   image.src = iconPath;
   image.srcset = createItemSrcset(iconPath);
@@ -97,10 +90,6 @@ export function createEventButton(
   );
 
   return button;
-}
-
-function isRareEvent(id: EventId): boolean {
-  return id === 'mutant_sprout' || id === 'overgrowth' || id === 'seed_bloom';
 }
 
 export function computeEventPath(

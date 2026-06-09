@@ -1,4 +1,12 @@
-export type AbilityTarget = 'bps' | 'bpc' | 'auto' | 'cost';
+export type AbilityTarget =
+  | 'bps'
+  | 'bpc'
+  | 'auto'
+  | 'cost'
+  | 'event'
+  | 'seed'
+  | 'chain'
+  | 'cooldown';
 
 export interface AbilityUnlock {
   totalBuds?: number;
@@ -43,6 +51,46 @@ const ABILITY_DATA = [
     baseMultiplier: 0.85,
     appliesTo: 'cost',
     unlock: { totalBuds: 15_000 },
+  },
+  {
+    id: 'event_magnet',
+    nameKey: 'abilities.eventMagnet.name',
+    descriptionKey: 'abilities.eventMagnet.desc',
+    durationSec: 18,
+    cooldownSec: 180,
+    baseMultiplier: 1.9,
+    appliesTo: 'event',
+    unlock: { totalBuds: 120_000 },
+  },
+  {
+    id: 'seed_focus',
+    nameKey: 'abilities.seedFocus.name',
+    descriptionKey: 'abilities.seedFocus.desc',
+    durationSec: 16,
+    cooldownSec: 210,
+    baseMultiplier: 2,
+    appliesTo: 'seed',
+    unlock: { totalBuds: 650_000 },
+  },
+  {
+    id: 'harvest_chain',
+    nameKey: 'abilities.harvestChain.name',
+    descriptionKey: 'abilities.harvestChain.desc',
+    durationSec: 14,
+    cooldownSec: 170,
+    baseMultiplier: 1.65,
+    appliesTo: 'chain',
+    unlock: { prestigeSeeds: 2 },
+  },
+  {
+    id: 'cooldown_sync',
+    nameKey: 'abilities.cooldownSync.name',
+    descriptionKey: 'abilities.cooldownSync.desc',
+    durationSec: 2,
+    cooldownSec: 260,
+    baseMultiplier: 0.55,
+    appliesTo: 'cooldown',
+    unlock: { prestigeSeeds: 4 },
   },
 ] as const satisfies readonly {
   id: string;

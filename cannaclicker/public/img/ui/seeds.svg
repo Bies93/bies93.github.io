@@ -4,9 +4,29 @@
     <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
       <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".28"/>
     </filter>
+    <filter id="brushRough" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".032" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="inkBleed" x="-18%" y="-18%" width="136%" height="136%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation=".55" result="blur"/>
+      <feOffset dy=".45" result="offset"/>
+      <feMerge>
+        <feMergeNode in="offset"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values=".18"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .13"/>
+      </feComponentTransfer>
+    </filter>
     <linearGradient id="leafGradient" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="#caff58"/>
-      <stop offset=".48" stop-color="#19c96f"/>
+      <stop offset="0" stop-color="#f4ffe3"/>
+      <stop offset=".18" stop-color="#caff58"/>
+      <stop offset=".58" stop-color="#19c96f"/>
       <stop offset="1" stop-color="#0c7f46"/>
     </linearGradient>
     <linearGradient id="goldGradient" x1="0" x2="1" y1="0" y2="1">
@@ -20,7 +40,11 @@
       <stop offset="1" stop-color="#71c7ff" stop-opacity=".48"/>
     </linearGradient>
   </defs>
-  <g fill="none" stroke="#76ffd0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M25 12c16 5 23 19 17 35-17-4-25-18-17-35Z"/><path d="M38 20c-10 11-15 20-17 32"/>
+  <g filter="url(#inkBleed)">
+      <path d="M32 5c8 0 17 4 23 11 4 10 3 23-2 32-7 7-14 10-22 11-9-1-17-5-23-13-4-10-3-21 2-31C16 9 24 5 32 5Z" fill="#050b08" stroke="#76ffd0" stroke-width="2.8" opacity=".96" filter="url(#brushRough)"/>
+      <path d="M17 16c8-7 19-8 31-2" fill="none" stroke="#f7ffe8" stroke-width="1.2" stroke-linecap="round" opacity=".25"/>
+      <g fill="none" stroke="#76ffd0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M25 12c16 5 23 19 17 35-17-4-25-18-17-35Z"/><path d="M38 20c-10 11-15 20-17 32"/>
+      </g>
     </g>
 </svg>

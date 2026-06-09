@@ -1,12 +1,24 @@
+import { getPrestigePreview } from '../../prestige';
+import { getResearchList } from '../../research';
+import { getShopEntries } from '../../shop';
+import { getUpgradeEntries } from '../../upgrades';
+import type { GameState } from '../../state';
 import type { SidePanelTab, UIRefs } from '../types';
 
-export function updateSidePanel(refs: UIRefs, activeTab: SidePanelTab): void {
+export function updateSidePanel(state: GameState, refs: UIRefs, activeTab: SidePanelTab): void {
+  const badges = getTabBadges(state);
   refs.sidePanel.tabs.forEach((button, tab) => {
     const isActive = tab === activeTab;
     button.classList.toggle('is-active', isActive);
     button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     button.setAttribute('aria-selected', isActive ? 'true' : 'false');
     button.tabIndex = isActive ? 0 : -1;
+    const badge = badges[tab];
+    if (badge) {
+      button.dataset.badge = badge;
+    } else {
+      delete button.dataset.badge;
+    }
   });
 
   (Object.entries(refs.sidePanel.views) as [SidePanelTab, HTMLElement][]).forEach(([tab, view]) => {
@@ -18,4 +30,24 @@ export function updateSidePanel(refs: UIRefs, activeTab: SidePanelTab): void {
       view.setAttribute('aria-hidden', 'true');
     }
   });
+}
+
+function getTabBadges(state: GameState): Partial<Record<SidePanelTab, string>> {
+  const affordableItems = getShopEntries(state).filter(
+    (entry) => entry.unlocked && entry.affordable,
+  ).length;
+  const availableUpgrades = getUpgradeEntries(state).filter(
+    (entry) => entry.unlocked && !entry.owned,
+  ).length;
+  const availableResearch = getResearchList(state, 'available').length;
+  const prestigePreview = getPrestigePreview(state);
+  const unlockedAchievements = Object.values(state.achievements).filter(Boolean).length;
+
+  return {
+    shop: affordableItems > 0 ? String(affordableItems) : '',
+    upgrades: availableUpgrades > 0 ? String(availableUpgrades) : '',
+    research: availableResearch > 0 ? String(availableResearch) : '',
+    prestige: prestigePreview.requirementMet ? `+${prestigePreview.seedGain}` : '',
+    achievements: unlockedAchievements > 0 ? String(unlockedAchievements) : '',
+  } satisfies Partial<Record<SidePanelTab, string>>;
 }

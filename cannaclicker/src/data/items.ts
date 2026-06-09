@@ -1,6 +1,11 @@
 import { itemIcons } from '../app/assetManifest';
 
-const STANDARD_MILESTONES = [10, 25, 50, 100, 150, 200, 300, 500] as const;
+const MASS_MILESTONES = [10, 25, 50, 100, 200, 350, 600, 1000] as const;
+const EARLY_MILESTONES = [10, 25, 50, 100, 150, 250, 400, 650] as const;
+const INDOOR_MILESTONES = [5, 15, 35, 75, 125, 200, 320, 500] as const;
+const INFRASTRUCTURE_MILESTONES = [5, 10, 25, 50, 100, 150, 250, 400] as const;
+const LATE_MILESTONES = [3, 10, 25, 50, 100, 150, 250, 400] as const;
+const COMPACT_MILESTONES = [1, 3, 10, 25, 50, 100, 150, 250] as const;
 
 const ITEM_DATA = [
   {
@@ -26,7 +31,7 @@ const ITEM_DATA = [
     costFactor: 1.13,
     bps: 0.12,
     icon: itemIcons.seedling,
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: MASS_MILESTONES,
     milestoneBonusMult: 1.18,
     softcapTier: 8,
     softcapMult: 1.08,
@@ -57,7 +62,7 @@ const ITEM_DATA = [
     unlock: {
       totalBuds: 40,
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: EARLY_MILESTONES,
     milestoneBonusMult: 1.17,
     softcapTier: 8,
     softcapMult: 1.08,
@@ -88,7 +93,7 @@ const ITEM_DATA = [
     unlock: {
       totalBuds: 250,
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: INDOOR_MILESTONES,
     milestoneBonusMult: 1.16,
     softcapTier: 8,
     softcapMult: 1.08,
@@ -119,7 +124,7 @@ const ITEM_DATA = [
     unlock: {
       itemsOwned: { grow_tent: 2 },
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: INDOOR_MILESTONES,
     milestoneBonusMult: 1.16,
     softcapTier: 8,
     softcapMult: 1.08,
@@ -150,7 +155,7 @@ const ITEM_DATA = [
     unlock: {
       totalBuds: 4_500,
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: EARLY_MILESTONES,
     milestoneBonusMult: 1.15,
     softcapTier: 8,
     softcapMult: 1.08,
@@ -181,7 +186,7 @@ const ITEM_DATA = [
     unlock: {
       totalBuds: 20_000,
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: INFRASTRUCTURE_MILESTONES,
     milestoneBonusMult: 1.15,
     softcapTier: 8,
     softcapMult: 1.08,
@@ -212,7 +217,7 @@ const ITEM_DATA = [
     unlock: {
       totalBuds: 90_000,
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: INFRASTRUCTURE_MILESTONES,
     milestoneBonusMult: 1.14,
     softcapTier: 8,
     softcapMult: 1.07,
@@ -245,7 +250,7 @@ const ITEM_DATA = [
     unlock: {
       totalBuds: 400_000,
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: INFRASTRUCTURE_MILESTONES,
     milestoneBonusMult: 1.14,
     softcapTier: 9,
     softcapMult: 1.07,
@@ -278,7 +283,7 @@ const ITEM_DATA = [
     unlock: {
       totalBuds: 2_000_000,
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: LATE_MILESTONES,
     milestoneBonusMult: 1.14,
     softcapTier: 9,
     softcapMult: 1.07,
@@ -311,7 +316,7 @@ const ITEM_DATA = [
     unlock: {
       totalBuds: 9_000_000,
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: LATE_MILESTONES,
     milestoneBonusMult: 1.13,
     softcapTier: 10,
     softcapMult: 1.06,
@@ -344,7 +349,7 @@ const ITEM_DATA = [
     unlock: {
       totalBuds: 55_000_000,
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: LATE_MILESTONES,
     milestoneBonusMult: 1.13,
     softcapTier: 10,
     softcapMult: 1.06,
@@ -377,7 +382,7 @@ const ITEM_DATA = [
     unlock: {
       totalBuds: 350_000_000,
     },
-    milestoneThresholds: STANDARD_MILESTONES,
+    milestoneThresholds: COMPACT_MILESTONES,
     milestoneBonusMult: 1.13,
     softcapTier: 10,
     softcapMult: 1.06,

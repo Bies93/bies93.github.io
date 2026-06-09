@@ -1,4 +1,7 @@
 import type { ResearchFilter } from '../research';
+import { purchaseAscensionNode } from '../ascension';
+import { recalcDerivedValues } from '../game';
+import type { AscensionNodeId } from '../../data/ascension';
 import { openPrestigeModal } from './services/prestigeModal';
 import type { WireContext } from './wire';
 
@@ -45,5 +48,18 @@ export function wireSidePanel(context: WireContext): void {
   refs.sidePanel.prestige.actionButton.addEventListener('click', () => {
     audio.playUi();
     openPrestigeModal(refs, state);
+  });
+
+  refs.sidePanel.prestige.ascensionNodes.forEach((card, id) => {
+    card.button.addEventListener('click', () => {
+      if (!purchaseAscensionNode(state, id as AscensionNodeId)) {
+        audio.playCannotBuy();
+        return;
+      }
+
+      audio.playUnlock();
+      recalcDerivedValues(state);
+      render(state);
+    });
   });
 }

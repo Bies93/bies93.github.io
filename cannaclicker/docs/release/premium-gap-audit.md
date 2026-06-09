@@ -1,6 +1,6 @@
 # Premium Gap Audit
 
-Stand: Chef-Feedback-Pass nach Sprint 12.
+Stand: Sprint 26 / `1.0.0-rc.1`.
 
 Dieser Audit dokumentiert den Chef-Feedback-Pass gegen den Repo-Stand und die direkt umgesetzten Gegenmassnahmen.
 
@@ -8,7 +8,7 @@ Dieser Audit dokumentiert den Chef-Feedback-Pass gegen den Repo-Stand und die di
 
 | Bereich              | Luecke                                           | Umsetzung                                                                 |
 | -------------------- | ----------------------------------------------- | ------------------------------------------------------------------------- |
-| Optische Identität   | V1 wirkte sauber, aber kosmetisch noch flach.   | Drei leichte UI-Themes und vier Plant-Skins als erster Cosmetic-Layer.     |
+| Optische Identität   | V1 wirkte sauber, aber kosmetisch noch flach.   | Fünf UI-Themes und sechs Plant-Skins als erster Cosmetic-Layer.            |
 | Release-Praesenz     | Settings hatten Version, aber keinen RC-Kontext. | Release Notes und Credits im Settings-Panel.                              |
 | Cosmetic Scope       | Cosmetics standen nur als Post-Launch-Idee.     | Erster nicht-mechanischer Cosmetic-Layer in V1 aufgenommen.                |
 | Spieltiefe im UI     | Strategie war in Systemen vorhanden, aber nicht als Spielerhinweis sichtbar. | Run Lens im Hauptscreen zeigt nächsten sinnvollen Fokus.        |
@@ -18,6 +18,9 @@ Dieser Audit dokumentiert den Chef-Feedback-Pass gegen den Repo-Stand und die di
 | Asset-Generator      | Generator konnte alte unreferenzierte Dateien erzeugen. | Generator erzeugt alle referenzierten Events und bereinigt Altdateien. |
 | Mobile-Overflow      | 320px-Smoke fand horizontales Scrollen.          | Klick-Aura und Tab-Layout korrigiert; Smoke wieder ohne Overflow.          |
 | Toast-Flut           | Debug-/Burst-Aktionen konnten Mobile überdecken. | Toast-Stack ist sichtbar begrenzt: 3 Mobile, 4 Desktop.                   |
+| Save UX              | Export/Import/Reset nutzten native Browser-Dialoge. | Eigene zugängliche Modal-Suite mit Copy, Datei-Download und Sicherheitsphrase. |
+| Release-CI           | Release-Smokes waren nicht vollständig reproduzierbar. | GitHub-Pages-Workflow mit Asset-Check, Lint, Tests, Build und Playwright-Matrix. |
+| Langzeit-Content     | 120 Achievements und 12 Events wurden schnell dünn. | 160 Achievements, 28 Events, 51 Research-Nodes und 8 Abilities.           |
 | Dokumentation        | Premium-Restpunkte waren nur implizit.          | Dieser Audit ergaenzt Scope, UI-System und Roadmap.                       |
 
 ## Bleibt als echte Premium-Luecke
@@ -26,9 +29,9 @@ Dieser Audit dokumentiert den Chef-Feedback-Pass gegen den Repo-Stand und die di
 | -------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | Bespoke Assets | SVG-System ist konsistent und leicht, aber noch kein handgezeichneter Signature-Look.  | Dedizierter Key-Art/Icon-Pass mit finaler visueller QA.        |
 | Sounddesign    | WebAudio-SFX sind performant, aber kein kuratiertes handgemachtes Soundpaket.          | Kleines externes SFX-Pack oder Sound-Design-Pass.              |
-| Langzeit-Tiefe | Economy ist plausibel kalibriert, echte 4-10h-Spielerdaten fehlen.                    | Mehrere echte Runs oder verwertbares Spielerfeedback.          |
+| Langzeit-Tiefe | Economy ist plausibel kalibriert, echte 4-20h-Spielerdaten fehlen.                    | Mehrere echte Runs oder verwertbares Spielerfeedback.          |
 | Geraeteabnahme | Chromium, Firefox und WebKit sind gruen; echter iOS-Safari-Hardwaretest bleibt offen. | Physische iOS-Abnahme vor finalem 1.0-Tag.                   |
 
 ## Release-Entscheidung
 
-Der Stand ist als `0.9.0-rc.1` weiterhin onlinefaehig. Für ein selbstbewusstes `1.0` sollte mindestens die echte iOS-Safari-Abnahme und ein kurzer echter Langzeit-Balance-Pass folgen.
+Der Stand ist als `1.0.0-rc.1` onlinefaehig. Fuer den finalen Tag bleiben echte iOS-Safari-Hardwareabnahme und reale Langzeit-Spielerdaten die einzigen nicht lokal beweisbaren Punkte.

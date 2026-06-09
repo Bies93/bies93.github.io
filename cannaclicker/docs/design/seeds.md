@@ -1,27 +1,30 @@
 # Seeds
 
-Stand: Sprint 7
+Stand: Sprint 15
 
 ## Trennung
 
-Seeds haben zwei Werte:
+Seeds haben jetzt drei klar getrennte Werte:
 
-| Wert               | Zweck                               | Sinkt beim Ausgeben? |
-| ------------------ | ----------------------------------- | -------------------- |
-| Spendable Seeds    | Währung für Research              | Ja                   |
-| Total Seeds Earned | Prestige-Macht und Unlock-Schwellen | Nein                 |
+| Wert                  | Zweck                                         | Sinkt beim Ausgeben? |
+| --------------------- | --------------------------------------------- | -------------------- |
+| Research-Seeds        | Währung für Seed-Research                     | Ja                   |
+| Ascension-Seeds       | Währung für Ascension-Nodes                   | Ja                   |
+| Total Ascension Seeds | Prestige-Macht und Ascension-Unlock-Schwellen | Nein                 |
 
-Damit fuehlt sich Research nicht wie eine versteckte Selbstbestrafung an. Der Prestige-Multiplikator nutzt immer `Total Seeds Earned`.
+Damit fuehlt sich Research nicht wie eine versteckte Selbstbestrafung an. Event-, Klick- und passive Seeds erhöhen den Prestige-Multiplikator nicht mehr. Der Prestige-Multiplikator nutzt immer `totalAscensionSeeds`.
 
 ## Quellen
 
 | Quelle           | Regel                                                                     |
 | ---------------- | ------------------------------------------------------------------------- |
-| Prestige         | Hauptquelle, berechnet aus Run-Lifetime-Buds.                             |
+| Prestige         | Erzeugt ausschließlich Ascension-Seeds, berechnet aus Run-Lifetime-Buds.  |
 | Events           | Seed Pack, Mutant Sprout, Supply Drop, Seed Bloom und seltene Nebendrops. |
 | Klicks           | Kleine Chance, erhoeht durch Research/Upgrades.                           |
-| Synergien        | Einmalige Seeds für klare Item-Kombinationen.                            |
+| Synergien        | Einmalige Seeds für klare Item-Kombinationen.                             |
 | Passive Research | Idle-Chance nach Research-Knoten.                                         |
+
+Events, Klicks, Synergien und passive Research erzeugen nur Research-Seeds.
 
 ## Cap
 

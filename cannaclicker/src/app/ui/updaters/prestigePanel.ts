@@ -4,8 +4,11 @@ import type { GameState } from '../../state';
 import { getPrestigePreview } from '../../prestige';
 import { milestones } from '../../../data/milestones';
 import type { MilestoneId } from '../../../data/milestones';
+import type { AscensionNodeId } from '../../../data/ascension';
 import type { MilestoneProgressSnapshot } from '../../milestones';
+import { getAscensionEffects, getAscensionViews } from '../../ascension';
 import type { UIRefs, MilestoneCardRefs } from '../types';
+import type { AscensionNodeCardRefs } from '../types/prestige';
 import {
   formatActiveKickstartSummary,
   formatMilestoneProgressText,
@@ -34,6 +37,7 @@ export function updatePrestigePanel(state: GameState, refs: UIRefs): void {
   panel.activeKickstartLabel.textContent = t(state.locale, 'panel.prestige.kickstartActive');
   panel.activeKickstartValue.textContent = formatActiveKickstartSummary(state.locale, preview);
 
+  updateAscensionTree(state, panel.ascensionNodes, panel.ascensionSummary);
   updateMilestoneCards(state, panel.milestones);
 
   const requirementText = preview.requirementMet
@@ -55,6 +59,57 @@ export function updatePrestigePanel(state: GameState, refs: UIRefs): void {
     'title',
     preview.requirementMet ? t(state.locale, 'actions.prestige') : requirementText,
   );
+}
+
+function updateAscensionTree(
+  state: GameState,
+  cards: Map<AscensionNodeId, AscensionNodeCardRefs>,
+  summary: HTMLElement,
+): void {
+  const locale = state.locale;
+  const effects = getAscensionEffects(state);
+  const ownedCount = state.prestige.ascensionOwned?.length ?? 0;
+  summary.textContent = t(locale, 'ascension.summary', {
+    owned: ownedCount,
+    total: cards.size,
+    seeds: state.prestige.ascensionSeeds ?? 0,
+    slots: effects.permanentSlots,
+  });
+
+  for (const view of getAscensionViews(state)) {
+    const card = cards.get(view.node.id);
+    if (!card) {
+      continue;
+    }
+
+    card.container.dataset.tier = String(view.node.tier);
+    card.container.dataset.category = view.node.category;
+    card.container.classList.toggle('is-owned', view.owned);
+    card.container.classList.toggle('is-affordable', view.affordable);
+    card.container.classList.toggle('is-locked', view.locked);
+    card.category.textContent = t(locale, `ascension.category.${view.node.category}`);
+    card.title.textContent = view.node.name[locale];
+    card.description.textContent = view.node.description[locale];
+    card.effect.textContent = view.node.effectSummary[locale];
+    card.cost.textContent = t(locale, 'ascension.cost', { cost: view.node.cost });
+
+    if (view.owned) {
+      card.status.textContent = t(locale, 'ascension.status.owned');
+    } else if (view.locked) {
+      card.status.textContent = t(locale, 'ascension.status.locked', {
+        count: view.missingRequirementIds.length,
+      });
+    } else if (view.affordable) {
+      card.status.textContent = t(locale, 'ascension.status.ready');
+    } else {
+      card.status.textContent = t(locale, 'ascension.status.needSeeds');
+    }
+
+    card.button.disabled = view.owned || view.locked || !view.affordable;
+    card.button.textContent = view.owned
+      ? t(locale, 'ascension.action.owned')
+      : t(locale, 'ascension.action.buy');
+  }
 }
 
 function updateMilestoneCards(state: GameState, cards: Map<MilestoneId, MilestoneCardRefs>): void {

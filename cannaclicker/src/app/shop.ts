@@ -123,7 +123,11 @@ function getSoftcapStacks(definition: ItemDefinition, owned: number): number {
   return Math.max(0, Math.floor(copies / step));
 }
 
-export function getSoftcapMultiplier(definition: ItemDefinition, owned: number): Decimal {
+export function getSoftcapMultiplier(
+  definition: ItemDefinition,
+  owned: number,
+  relief = 0,
+): Decimal {
   const penalty = definition.softcapPenalty;
   if (!penalty || penalty <= 0 || penalty >= 1) {
     return new Decimal(1);
@@ -132,11 +136,13 @@ export function getSoftcapMultiplier(definition: ItemDefinition, owned: number):
   if (stacks <= 0) {
     return new Decimal(1);
   }
-  return new Decimal(penalty).pow(stacks);
+  const safeRelief = Math.max(0, Math.min(0.8, relief));
+  const effectivePenalty = 1 - (1 - penalty) * (1 - safeRelief);
+  return new Decimal(effectivePenalty).pow(stacks);
 }
 
-export function getSoftcapInfo(definition: ItemDefinition, owned: number): SoftcapInfo {
-  const multiplier = getSoftcapMultiplier(definition, owned);
+export function getSoftcapInfo(definition: ItemDefinition, owned: number, relief = 0): SoftcapInfo {
+  const multiplier = getSoftcapMultiplier(definition, owned, relief);
   const stacks = getSoftcapStacks(definition, owned);
   const step = definition.softcapCopies ?? null;
   const nextThreshold = step && step > 0 ? (stacks + 1) * step : null;
@@ -154,18 +160,20 @@ export function deltaBpsNextBuy(
   definition: ItemDefinition,
   owned: number,
   baseMultiplier: Decimal,
+  softcapRelief = 0,
 ): Decimal {
-  return deltaBpsForQuantity(definition, owned, 1, baseMultiplier);
+  return deltaBpsForQuantity(definition, owned, 1, baseMultiplier, softcapRelief);
 }
 
 export function getBuildingProductionAt(
   definition: ItemDefinition,
   owned: number,
   baseMultiplier: Decimal,
+  softcapRelief = 0,
 ): Decimal {
   const perUnitBase = new Decimal(definition.bps).mul(baseMultiplier);
   const tier = getTierMultiplier(definition, owned);
-  const softcap = getSoftcapMultiplier(definition, owned);
+  const softcap = getSoftcapMultiplier(definition, owned, softcapRelief);
   return perUnitBase.mul(tier).mul(softcap).mul(Math.max(0, owned));
 }
 
@@ -174,13 +182,19 @@ export function deltaBpsForQuantity(
   owned: number,
   quantity: number,
   baseMultiplier: Decimal,
+  softcapRelief = 0,
 ): Decimal {
   const safeQuantity = Number.isFinite(quantity) && quantity > 0 ? Math.floor(quantity) : 0;
   if (safeQuantity <= 0) {
     return new Decimal(0);
   }
-  const totalNow = getBuildingProductionAt(definition, owned, baseMultiplier);
-  const totalNext = getBuildingProductionAt(definition, owned + safeQuantity, baseMultiplier);
+  const totalNow = getBuildingProductionAt(definition, owned, baseMultiplier, softcapRelief);
+  const totalNext = getBuildingProductionAt(
+    definition,
+    owned + safeQuantity,
+    baseMultiplier,
+    softcapRelief,
+  );
   return totalNext.sub(totalNow);
 }
 
@@ -245,10 +259,16 @@ export function getShopEntries(state: GameState): ShopEntry[] {
     const totalCostMult = state.temp.costMultiplier.mul(buildingCostMult);
     const cost = getItemCost(definition, owned, totalCostMult);
     const tier = getTierInfo(definition, owned);
-    const softcap = getSoftcapInfo(definition, owned);
+    const softcapRelief = state.temp.softcapRelief ?? 0;
+    const softcap = getSoftcapInfo(definition, owned, softcapRelief);
     const baseMultiplier = state.temp.buildingBaseMultipliers[definition.id] ?? new Decimal(1);
-    const currentBaseBps = getBuildingProductionAt(definition, owned, baseMultiplier);
-    const deltaBase = deltaBpsNextBuy(definition, owned, baseMultiplier);
+    const currentBaseBps = getBuildingProductionAt(
+      definition,
+      owned,
+      baseMultiplier,
+      softcapRelief,
+    );
+    const deltaBase = deltaBpsNextBuy(definition, owned, baseMultiplier, softcapRelief);
     const deltaBps = deltaBase.mul(state.temp.totalBpsMult);
     const currentBps = currentBaseBps.mul(state.temp.totalBpsMult);
     const nextBps = currentBps.add(deltaBps);
@@ -259,6 +279,7 @@ export function getShopEntries(state: GameState): ShopEntry[] {
       owned,
       baseMultiplier,
       totalCostMult,
+      softcapRelief,
     );
 
     return {
@@ -302,6 +323,7 @@ function createPurchaseOptions(
   owned: number,
   baseMultiplier: Decimal,
   costMultiplier: Decimal,
+  softcapRelief: number,
 ): Record<PurchaseQuantity, PurchaseOption> {
   const maxQuantity = getMaxAffordable(definition, state);
   const fixedOptions = {
@@ -314,7 +336,13 @@ function createPurchaseOptions(
   return Object.fromEntries(
     (Object.entries(fixedOptions) as [PurchaseQuantity, number][]).map(([key, quantity]) => {
       const cost = getBulkCost(definition, owned, quantity, costMultiplier);
-      const deltaBase = deltaBpsForQuantity(definition, owned, quantity, baseMultiplier);
+      const deltaBase = deltaBpsForQuantity(
+        definition,
+        owned,
+        quantity,
+        baseMultiplier,
+        softcapRelief,
+      );
       const deltaBps = deltaBase.mul(state.temp.totalBpsMult);
       const affordable = quantity > 0 && state.buds.greaterThanOrEqualTo(cost);
       const roi = deltaBps.lessThanOrEqualTo(0) ? null : Number(cost.div(deltaBps).toFixed(2));

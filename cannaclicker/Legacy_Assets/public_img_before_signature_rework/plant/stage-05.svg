@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="CannaClicker plant stage 5">
+  <defs>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".28"/>
+    </filter>
+    <linearGradient id="leafGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#caff58"/>
+      <stop offset=".48" stop-color="#19c96f"/>
+      <stop offset="1" stop-color="#0c7f46"/>
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff0a8"/>
+      <stop offset=".55" stop-color="#ffd15a"/>
+      <stop offset="1" stop-color="#ff9f43"/>
+    </linearGradient>
+    <linearGradient id="glassGradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#e8fff8" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#76ffd0" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#71c7ff" stop-opacity=".48"/>
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="232" r="112" fill="#19c96f" opacity=".08"/>
+    
+    <ellipse cx="256" cy="430" rx="126" ry="28" fill="#06140d" opacity=".38"/>
+    <path d="M205 405h102l-17 39h-68Z" fill="#10251a" stroke="#ffd15a" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M256 420V204" stroke="#19c96f" stroke-width="18" stroke-linecap="round"/>
+    <path d="M256 218c-16 55-16 126 0 190 16-64 16-135 0-190Z" fill="#76ffd0" opacity=".18"/>
+    <path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(217 392) rotate(-53) scale(1.75)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7428571428571429" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(299 368) rotate(53) scale(1.75)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7428571428571429" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(209 344) rotate(-53) scale(1.75)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7428571428571429" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(295 320) rotate(53) scale(1.75)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7428571428571429" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(213 296) rotate(-53) scale(1.75)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.7428571428571429" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(303 272) rotate(53) scale(1.9)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.6842105263157895" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(217 248) rotate(-53) scale(1.9)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.6842105263157895" opacity=".96"/><path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(299 224) rotate(53) scale(1.9)" fill="url(#leafGradient)" stroke="#f7ffe8" stroke-width="0.6842105263157895" opacity=".96"/>
+    
+    
+    <path d="M200 427h112" stroke="#ffd15a" stroke-width="11" stroke-linecap="round" opacity=".7"/>
+    <path d="M214 407c26 11 58 11 84 0" stroke="#76ffd0" stroke-width="4" stroke-linecap="round" opacity=".5"/>
+</svg>

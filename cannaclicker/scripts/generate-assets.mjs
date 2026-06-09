@@ -17,7 +17,10 @@ const obsoleteAssets = [
 
 const palette = {
   ink: '#07130d',
+  deep: '#050b08',
   panel: '#10251a',
+  wash: '#173727',
+  paper: '#f4ffe3',
   green: '#19c96f',
   mint: '#76ffd0',
   lime: '#caff58',
@@ -25,6 +28,7 @@ const palette = {
   amber: '#ff9f43',
   blue: '#71c7ff',
   violet: '#b58cff',
+  rose: '#ff7d8a',
   red: '#ff6b5f',
   cream: '#f7ffe8',
 };
@@ -52,9 +56,29 @@ function svg(viewBox, body, label = 'CannaClicker asset') {
     <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
       <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".28"/>
     </filter>
+    <filter id="brushRough" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".032" numOctaves="2" seed="8" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="inkBleed" x="-18%" y="-18%" width="136%" height="136%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation=".55" result="blur"/>
+      <feOffset dy=".45" result="offset"/>
+      <feMerge>
+        <feMergeNode in="offset"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values=".18"/>
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 .13"/>
+      </feComponentTransfer>
+    </filter>
     <linearGradient id="leafGradient" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0" stop-color="${palette.lime}"/>
-      <stop offset=".48" stop-color="${palette.green}"/>
+      <stop offset="0" stop-color="${palette.paper}"/>
+      <stop offset=".18" stop-color="${palette.lime}"/>
+      <stop offset=".58" stop-color="${palette.green}"/>
       <stop offset="1" stop-color="#0c7f46"/>
     </linearGradient>
     <linearGradient id="goldGradient" x1="0" x2="1" y1="0" y2="1">
@@ -76,10 +100,16 @@ function shell(content, accent = palette.green, label = 'CannaClicker icon') {
   return svg(
     '0 0 128 128',
     `<g filter="url(#softShadow)">
-      <path d="M64 8 108 32v48l-44 40-44-40V32Z" fill="${palette.panel}" stroke="${accent}" stroke-width="4" stroke-linejoin="round"/>
-      <path d="M64 15 100 35v40l-36 33-36-33V35Z" fill="#0b1c13" opacity=".94"/>
-      ${content}
-      <path d="M35 96c16 11 42 11 58 0" fill="none" stroke="${accent}" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+      <path d="M64 7c14 2 33 11 45 25 6 17 2 39-6 55-12 17-25 28-39 34-18-6-33-17-44-36-7-18-5-38 3-55C35 18 49 9 64 7Z" fill="${palette.deep}" stroke="${accent}" stroke-width="4.6" stroke-linejoin="round" filter="url(#brushRough)"/>
+      <path d="M64 15c12 2 27 10 36 21 4 13 2 30-5 43-9 13-20 22-31 27-14-5-26-13-35-28-5-14-4-29 2-42 9-10 21-18 33-21Z" fill="${palette.panel}" opacity=".96"/>
+      <path d="M31 37c10-11 22-17 34-18 10 2 20 7 29 14-18-3-38 2-62 16Z" fill="${accent}" opacity=".13"/>
+      <path d="M25 83c12 20 24 29 39 35 15-7 27-17 39-34-22 11-52 13-78-1Z" fill="#000" opacity=".2"/>
+      <g filter="url(#inkBleed)">${content}</g>
+      <path d="M34 96c16 12 43 12 60-1" fill="none" stroke="${accent}" stroke-width="3.4" stroke-linecap="round" opacity=".72"/>
+      <path d="M37 30c9-7 18-11 28-12M94 42c5 11 5 23 0 36M31 76c-4-14-3-26 2-38" fill="none" stroke="${palette.cream}" stroke-width="1.6" stroke-linecap="round" opacity=".34"/>
+      <circle cx="33" cy="92" r="1.8" fill="${accent}" opacity=".62"/>
+      <circle cx="101" cy="37" r="1.4" fill="${palette.cream}" opacity=".45"/>
+      <circle cx="50" cy="22" r="1.1" fill="${palette.cream}" opacity=".35"/>
     </g>`,
     label,
   );
@@ -88,15 +118,23 @@ function shell(content, accent = palette.green, label = 'CannaClicker icon') {
 function uiShell(content, accent = palette.mint, label = 'CannaClicker UI icon') {
   return svg(
     '0 0 64 64',
-    `<g fill="none" stroke="${accent}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-      ${content}
+    `<g filter="url(#inkBleed)">
+      <path d="M32 5c8 0 17 4 23 11 4 10 3 23-2 32-7 7-14 10-22 11-9-1-17-5-23-13-4-10-3-21 2-31C16 9 24 5 32 5Z" fill="${palette.deep}" stroke="${accent}" stroke-width="2.8" opacity=".96" filter="url(#brushRough)"/>
+      <path d="M17 16c8-7 19-8 31-2" fill="none" stroke="${palette.cream}" stroke-width="1.2" stroke-linecap="round" opacity=".25"/>
+      <g fill="none" stroke="${accent}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        ${content}
+      </g>
     </g>`,
     label,
   );
 }
 
 function leaf(x, y, scale = 1, rotate = 0, fill = 'url(#leafGradient)') {
-  return `<path d="M0-18C16-15 24-3 20 9 8 9 0 0 0-18Z" transform="translate(${x} ${y}) rotate(${rotate}) scale(${scale})" fill="${fill}" stroke="${palette.cream}" stroke-width="${1.3 / scale}" opacity=".96"/>`;
+  return `<g transform="translate(${x} ${y}) rotate(${rotate}) scale(${scale})">
+    <path d="M0-18C16-15 24-3 20 9 8 10 0 0 0-18Z" fill="${fill}" stroke="${palette.cream}" stroke-width="${1.2 / scale}" opacity=".97" filter="url(#brushRough)"/>
+    <path d="M1-14c7 7 11 13 16 21" fill="none" stroke="${palette.deep}" stroke-width="${1.45 / scale}" stroke-linecap="round" opacity=".34"/>
+    <path d="M7-8c5 1 9 4 12 9M6-2c4 1 7 3 10 7" fill="none" stroke="${palette.paper}" stroke-width="${0.72 / scale}" stroke-linecap="round" opacity=".55"/>
+  </g>`;
 }
 
 const itemGlyphs = {
@@ -114,8 +152,26 @@ const itemGlyphs = {
   micro_greenhouse: `<path d="M35 86V58c0-18 58-18 58 0v28Z" fill="url(#glassGradient)" stroke="${palette.cream}" stroke-width="4"/><path d="M42 86h44" stroke="${palette.green}" stroke-width="7" stroke-linecap="round"/>${leaf(58, 73, 0.58, -32)}${leaf(72, 72, 0.58, 34)}<path d="M64 80V58" stroke="${palette.green}" stroke-width="5" stroke-linecap="round"/>`,
 };
 
+const itemAccents = {
+  seedling: palette.lime,
+  planter: palette.amber,
+  grow_tent: palette.green,
+  grow_light: palette.gold,
+  cultivator: palette.mint,
+  irrigation_system: palette.blue,
+  co2_tank: palette.mint,
+  climate_controller: palette.blue,
+  hydroponic_rack: palette.lime,
+  genetics_lab: palette.violet,
+  trimming_robot: palette.gold,
+  micro_greenhouse: palette.mint,
+};
+
 for (const [id, glyph] of Object.entries(itemGlyphs)) {
-  writeAsset(`items/${id}.svg`, shell(glyph, palette.green, `CannaClicker item ${id}`));
+  writeAsset(
+    `items/${id}.svg`,
+    shell(glyph, itemAccents[id] ?? palette.green, `CannaClicker item ${id}`),
+  );
 }
 
 const upgradeGlyphs = {
@@ -157,13 +213,51 @@ const eventGlyphs = {
   'calm-growth': `${leaf(50, 73, 0.65, -42)}${leaf(78, 73, 0.65, 42)}<path d="M64 88V42" stroke="${palette.mint}" stroke-width="6" stroke-linecap="round"/><circle cx="64" cy="60" r="31" fill="none" stroke="${palette.blue}" stroke-width="5" stroke-dasharray="5 9" opacity=".85"/>`,
   overgrowth: `${leaf(42, 77, 0.9, -60)}${leaf(55, 64, 0.82, -30)}${leaf(73, 61, 0.82, 30)}${leaf(88, 77, 0.9, 60)}<path d="M64 93V35" stroke="${palette.green}" stroke-width="8" stroke-linecap="round"/><path d="M39 91c17 10 33 10 50 0" stroke="${palette.lime}" stroke-width="5" stroke-linecap="round"/>`,
   'seed-bloom': `<ellipse cx="51" cy="69" rx="12" ry="20" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="4" transform="rotate(-24 51 69)"/><ellipse cx="77" cy="70" rx="12" ry="20" fill="${palette.lime}" stroke="${palette.cream}" stroke-width="4" transform="rotate(24 77 70)"/><circle cx="64" cy="52" r="15" fill="url(#goldGradient)" stroke="${palette.cream}" stroke-width="4"/><path d="M64 92V61" stroke="${palette.mint}" stroke-width="6" stroke-linecap="round"/>`,
+  'tiny-spark': `<path d="M64 31 74 55h25L79 69l8 27-23-16-23 16 8-27-20-14h25Z" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="4" stroke-linejoin="round"/>`,
+  'dew-drop': `<path d="M64 31c19 24 27 38 27 52 0 16-12 27-27 27S37 99 37 83c0-14 8-28 27-52Z" fill="url(#glassGradient)" stroke="${palette.cream}" stroke-width="4"/><path d="M54 77c5 7 13 10 22 7" fill="none" stroke="${palette.blue}" stroke-width="4" stroke-linecap="round"/>`,
+  'compost-cache': `<path d="M38 50h52l-6 41H44Z" fill="${palette.amber}" stroke="${palette.cream}" stroke-width="4" stroke-linejoin="round"/><path d="M49 50c3-15 27-15 30 0" fill="none" stroke="${palette.lime}" stroke-width="5" stroke-linecap="round"/>${leaf(58, 72, 0.46, -24)}${leaf(72, 73, 0.46, 28)}`,
+  sunbeam: `<circle cx="64" cy="64" r="18" fill="url(#goldGradient)" stroke="${palette.cream}" stroke-width="4"/><path d="M64 26v16M64 86v16M26 64h16M86 64h16M38 38l11 11M79 79l11 11M90 38 79 49M49 79 38 90" stroke="${palette.gold}" stroke-width="5" stroke-linecap="round"/>`,
+  'mega-bud': `${leaf(45, 71, 0.92, -44, 'url(#goldGradient)')}${leaf(83, 71, 0.92, 44, 'url(#goldGradient)')}<ellipse cx="64" cy="64" rx="18" ry="24" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="4"/><path d="M64 91V39" stroke="${palette.lime}" stroke-width="6" stroke-linecap="round"/>`,
+  'jackpot-canopy': `<path d="M37 82c14-38 42-55 79-44-8 38-38 57-79 44Z" fill="url(#goldGradient)" stroke="${palette.cream}" stroke-width="4"/><path d="M43 87h42M49 98h30" stroke="${palette.gold}" stroke-width="6" stroke-linecap="round"/><circle cx="86" cy="45" r="9" fill="${palette.lime}" stroke="${palette.cream}" stroke-width="3"/>`,
+  'aurora-bloom': `<path d="M36 90c11-40 31-61 56-64-2 23-10 39-24 49 13-3 24-9 33-18-5 23-25 36-65 33Z" fill="url(#leafGradient)" stroke="${palette.cream}" stroke-width="4"/><path d="M38 39c20-12 45-12 64 0M43 52c16-8 34-8 50 0" stroke="${palette.violet}" stroke-width="5" stroke-linecap="round" opacity=".9"/>`,
+  'trail-marker': `<path d="M37 44h46l12 18-12 18H37l12-18Z" fill="${palette.panel}" stroke="${palette.blue}" stroke-width="4" stroke-linejoin="round"/><circle cx="57" cy="62" r="7" fill="${palette.lime}"/><path d="M68 62h18" stroke="${palette.gold}" stroke-width="5" stroke-linecap="round"/>`,
+  'cascade-bloom': `<path d="M41 36c9 9 9 18 0 27 9 9 9 18 0 27M64 36c9 9 9 18 0 27 9 9 9 18 0 27M87 36c9 9 9 18 0 27 9 9 9 18 0 27" fill="none" stroke="${palette.blue}" stroke-width="6" stroke-linecap="round"/><circle cx="64" cy="64" r="12" fill="${palette.lime}" stroke="${palette.cream}" stroke-width="3"/>`,
+  'echo-harvest': `<circle cx="64" cy="64" r="16" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="4"/><path d="M38 50c-12 12-12 28 0 40M90 50c12 12 12 28 0 40M28 39c-22 22-22 48 0 70M100 39c22 22 22 48 0 70" fill="none" stroke="${palette.mint}" stroke-width="4" stroke-linecap="round" opacity=".85"/>`,
+  'volatile-growth': `${leaf(46, 74, 0.72, -52, palette.red)}${leaf(64, 58, 0.78, 0, palette.lime)}${leaf(82, 74, 0.72, 52, palette.violet)}<path d="M64 91V39" stroke="${palette.red}" stroke-width="7" stroke-linecap="round"/><path d="M50 37 60 50 48 53 64 75" fill="none" stroke="${palette.gold}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+  'blackout-sale': `<path d="M38 86h52V54H38Z" fill="#111827" stroke="${palette.cream}" stroke-width="4"/><path d="M34 54h60l-8-18H42Z" fill="${palette.violet}" stroke="${palette.cream}" stroke-width="4"/><path d="M52 71h24M58 83h12" stroke="${palette.gold}" stroke-width="5" stroke-linecap="round"/><path d="M42 38 86 92" stroke="${palette.red}" stroke-width="4" stroke-linecap="round" opacity=".75"/>`,
+  'pest-scare': `<path d="M64 32c18 12 27 29 27 51-14 10-40 10-54 0 0-22 9-39 27-51Z" fill="${palette.panel}" stroke="${palette.red}" stroke-width="4"/><circle cx="55" cy="63" r="5" fill="${palette.gold}"/><circle cx="73" cy="63" r="5" fill="${palette.gold}"/><path d="M47 82c10-8 24-8 34 0M38 57l-12-8M90 57l12-8" stroke="${palette.cream}" stroke-width="4" stroke-linecap="round"/>`,
+  'solstice-seed': `<ellipse cx="64" cy="69" rx="16" ry="25" fill="url(#goldGradient)" stroke="${palette.cream}" stroke-width="4"/><path d="M64 23v17M64 98v8M34 43l12 11M94 43 82 54M27 72h15M86 72h15" stroke="${palette.gold}" stroke-width="5" stroke-linecap="round"/>`,
+  'night-market': `<path d="M38 84h52V55H38Z" fill="#14213d" stroke="${palette.cream}" stroke-width="4"/><path d="M34 55h60l-10-18H44Z" fill="${palette.violet}" stroke="${palette.cream}" stroke-width="4"/><path d="M50 70h28" stroke="${palette.gold}" stroke-width="5" stroke-linecap="round"/><path d="M82 31c-13 4-22-5-19-18-12 8-13 28 5 35" fill="${palette.gold}" opacity=".9"/>`,
+  'festival-lantern': `<path d="M48 42h32l8 17-8 33H48l-8-33Z" fill="url(#goldGradient)" stroke="${palette.cream}" stroke-width="4" stroke-linejoin="round"/><path d="M52 35h24M52 99h24M64 35v64" stroke="${palette.violet}" stroke-width="4" stroke-linecap="round"/><circle cx="64" cy="68" r="9" fill="${palette.lime}" opacity=".85"/>`,
 };
 
 for (const [id, glyph] of Object.entries(eventGlyphs)) {
-  writeAsset(
-    `events/${id}.svg`,
-    shell(glyph, id === 'mutant-sprout' ? palette.red : palette.gold, `CannaClicker event ${id}`),
-  );
+  const accent =
+    id.includes('blackout') || id.includes('volatile') || id.includes('pest')
+      ? palette.red
+      : id.includes('market') || id.includes('festival') || id.includes('aurora')
+        ? palette.violet
+        : id.includes('cascade') || id.includes('echo') || id.includes('trail')
+          ? palette.blue
+          : id === 'mutant-sprout'
+            ? palette.red
+            : palette.gold;
+  writeAsset(`events/${id}.svg`, shell(glyph, accent, `CannaClicker event ${id}`));
+}
+
+const abilityGlyphs = {
+  overdrive: `<path d="M42 88c12-38 26-51 48-59-5 27-18 45-39 53 13 1 24-2 34-10-10 18-25 25-43 16Z" fill="url(#leafGradient)" stroke="${palette.cream}" stroke-width="4"/><path d="M62 34 53 60h15l-12 34 30-46H70l9-14Z" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="3" stroke-linejoin="round"/>`,
+  burst: `<path d="M45 83 58 33h19L67 57h18L54 96l9-30H47Z" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="4" stroke-linejoin="round"/><circle cx="64" cy="64" r="36" fill="none" stroke="${palette.lime}" stroke-width="4" stroke-dasharray="4 8" opacity=".72"/>`,
+  'auto-burst': `<rect x="39" y="41" width="50" height="39" rx="11" fill="${palette.panel}" stroke="${palette.mint}" stroke-width="4"/><path d="M51 61h26M64 49v24" stroke="${palette.lime}" stroke-width="5" stroke-linecap="round"/><path d="M44 90c13 8 27 8 40 0" stroke="${palette.gold}" stroke-width="5" stroke-linecap="round"/>`,
+  'discount-window': `<path d="M74 36 42 92" stroke="${palette.gold}" stroke-width="8" stroke-linecap="round"/><circle cx="49" cy="47" r="10" fill="none" stroke="${palette.cream}" stroke-width="5"/><circle cx="78" cy="81" r="10" fill="none" stroke="${palette.cream}" stroke-width="5"/><path d="M35 32h58v68H35Z" fill="none" stroke="${palette.mint}" stroke-width="4" stroke-dasharray="6 7"/>`,
+  'event-magnet': `<path d="M42 39v24c0 13 10 22 22 22s22-9 22-22V39H73v24c0 5-4 9-9 9s-9-4-9-9V39Z" fill="${palette.red}" stroke="${palette.cream}" stroke-width="4" stroke-linejoin="round"/><path d="M41 31h17M70 31h17" stroke="${palette.mint}" stroke-width="5" stroke-linecap="round"/><circle cx="64" cy="96" r="6" fill="${palette.gold}"/>`,
+  'seed-focus': `<ellipse cx="57" cy="66" rx="13" ry="22" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="4" transform="rotate(-18 57 66)"/><ellipse cx="75" cy="68" rx="10" ry="18" fill="${palette.lime}" stroke="${palette.cream}" stroke-width="4" transform="rotate(23 75 68)"/><circle cx="64" cy="64" r="34" fill="none" stroke="${palette.mint}" stroke-width="4" stroke-dasharray="5 8"/>`,
+  'harvest-chain': `<path d="M38 52h22l8 12-8 12H38l8-12Z" fill="${palette.panel}" stroke="${palette.blue}" stroke-width="4" stroke-linejoin="round"/><path d="M68 52h22l8 12-8 12H68l8-12Z" fill="${palette.panel}" stroke="${palette.lime}" stroke-width="4" stroke-linejoin="round"/><path d="M57 64h18" stroke="${palette.gold}" stroke-width="5" stroke-linecap="round"/>`,
+  'cooldown-sync': `<circle cx="64" cy="64" r="30" fill="none" stroke="${palette.blue}" stroke-width="6"/><path d="M64 42v23l15 9" stroke="${palette.cream}" stroke-width="5" stroke-linecap="round"/><path d="M88 36v18H70M40 92V74h18" stroke="${palette.lime}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`,
+};
+
+for (const [id, glyph] of Object.entries(abilityGlyphs)) {
+  writeAsset(`abilities/${id}.svg`, shell(glyph, palette.violet, `CannaClicker ability ${id}`));
 }
 
 const uiGlyphs = {
@@ -210,6 +304,10 @@ function plantStage(stage) {
   const height = 96 + stage * 24;
   const leafCount = Math.min(14, Math.max(4, stage + 3));
   const flowers = stage > 7 ? stage - 7 : 0;
+  const viewTop = Math.max(0, Math.round(420 - height - 62));
+  const viewHeight = Math.min(500 - viewTop, Math.round(height + 138));
+  const viewX = stage >= 8 ? 72 : 118;
+  const viewWidth = stage >= 8 ? 368 : 276;
   let leaves = '';
   for (let i = 0; i < leafCount; i += 1) {
     const y = 392 - i * (height / (leafCount + 1));
@@ -223,16 +321,33 @@ function plantStage(stage) {
   for (let i = 0; i < flowers; i += 1) {
     const x = 222 + i * 24;
     const y = 250 - i * 13;
-    bloom += `<circle cx="${x}" cy="${y}" r="${8 + stage}" fill="${palette.gold}" stroke="${palette.cream}" stroke-width="3"/><circle cx="${x + 14}" cy="${y + 10}" r="${5 + stage * 0.55}" fill="${palette.lime}" stroke="${palette.cream}" stroke-width="2"/>`;
+    bloom += `<g filter="url(#inkBleed)">
+      <path d="M${x - 10} ${y}c8-15 23-15 31 0-5 15-23 18-31 0Z" fill="url(#goldGradient)" stroke="${palette.cream}" stroke-width="3"/>
+      <circle cx="${x + 12}" cy="${y + 8}" r="${5 + stage * 0.55}" fill="${palette.lime}" stroke="${palette.cream}" stroke-width="2"/>
+    </g>`;
   }
+  const crown =
+    stage >= 8
+      ? `<path d="M210 ${315 - stage * 8}c33-45 59-60 92-3" fill="none" stroke="${palette.gold}" stroke-width="${3 + stage * 0.45}" stroke-linecap="round" opacity=".62"/>
+        <path d="M218 ${328 - stage * 8}c29-28 53-35 79-2" fill="none" stroke="${palette.lime}" stroke-width="2.8" stroke-linecap="round" opacity=".38"/>`
+      : '';
+  const prestigeHalo =
+    stage >= 10
+      ? `<circle cx="256" cy="${420 - height + 44}" r="${86 + stage * 8}" fill="none" stroke="${palette.violet}" stroke-width="6" stroke-dasharray="10 18" opacity=".38"/>
+    <circle cx="256" cy="${420 - height + 44}" r="${58 + stage * 5}" fill="none" stroke="${palette.gold}" stroke-width="4" opacity=".34"/>`
+      : '';
   return svg(
-    '0 0 512 512',
+    `${viewX} ${viewTop} ${viewWidth} ${viewHeight}`,
     `<circle cx="256" cy="${420 - height + 28}" r="${72 + stage * 8}" fill="${palette.green}" opacity=".08"/>
+    ${prestigeHalo}
     <ellipse cx="256" cy="430" rx="126" ry="28" fill="#06140d" opacity=".38"/>
-    <path d="M205 405h102l-17 39h-68Z" fill="${palette.panel}" stroke="${palette.gold}" stroke-width="7" stroke-linejoin="round"/>
-    <path d="M256 420V${420 - height}" stroke="${palette.green}" stroke-width="${13 + stage}" stroke-linecap="round"/>
-    ${leaves}
+    <path d="M203 406c25 10 81 10 106 0l-18 39h-70Z" fill="${palette.panel}" stroke="${palette.gold}" stroke-width="7" stroke-linejoin="round" filter="url(#brushRough)"/>
+    <path d="M256 420c-${Math.max(7, stage)}-45-${Math.max(11, stage * 2)}-92 0-${height} 12 56 12 111 0 ${height}Z" fill="${palette.green}" stroke="${palette.cream}" stroke-width="2.2" opacity=".96" filter="url(#brushRough)"/>
+    <path d="M256 ${420 - height + 14}c-16 55-16 126 0 190 16-64 16-135 0-190Z" fill="${palette.mint}" opacity=".18"/>
+    <g filter="url(#inkBleed)">${leaves}</g>
+    ${crown}
     ${bloom}
+    <path d="M198 ${372 - stage * 10}c18-29 38-45 61-49M312 ${375 - stage * 10}c-17-29-36-46-58-52" fill="none" stroke="${palette.mint}" stroke-width="2.5" stroke-linecap="round" opacity=".22"/>
     <path d="M200 427h112" stroke="${palette.gold}" stroke-width="11" stroke-linecap="round" opacity=".7"/>
     <path d="M214 407c26 11 58 11 84 0" stroke="${palette.mint}" stroke-width="4" stroke-linecap="round" opacity=".5"/>`,
     `CannaClicker plant stage ${stage}`,
@@ -254,10 +369,13 @@ writeAsset(
       <stop offset="1" stop-color="#07100b" stop-opacity="0"/>
     </radialGradient>
     <rect width="1600" height="900" fill="url(#desktopGlow)"/>
-    <path d="M0 710C210 660 320 760 500 716c197-48 295-170 531-126 167 32 251 126 569 48v262H0Z" fill="#0b2118" opacity=".72"/>
-    <path d="M0 780c300-60 415 45 680 0 330-56 470-115 920-14v134H0Z" fill="#07150f" opacity=".9"/>
+    <path d="M0 704C207 650 321 760 502 714c198-51 294-174 532-127 169 33 252 129 566 46v267H0Z" fill="#0b2118" opacity=".76" filter="url(#brushRough)"/>
+    <path d="M0 779c303-59 416 46 681 0 329-57 469-116 919-14v135H0Z" fill="#07150f" opacity=".91"/>
+    <path d="M154 607c84-95 140-198 168-307M1362 626c-66-119-116-227-151-324M765 668c-19-118-20-246 5-381" fill="none" stroke="${palette.green}" stroke-width="7" stroke-linecap="round" opacity=".11"/>
+    <path d="M246 481c-70-20-119-71-148-154M1250 501c81-30 135-92 163-189M772 520c-61-22-106-70-134-143" fill="none" stroke="${palette.lime}" stroke-width="4" stroke-linecap="round" opacity=".1"/>
     <circle cx="1275" cy="180" r="180" fill="${palette.lime}" opacity=".08"/>
-    <circle cx="355" cy="212" r="130" fill="${palette.mint}" opacity=".07"/>`,
+    <circle cx="355" cy="212" r="130" fill="${palette.mint}" opacity=".07"/>
+    <rect width="1600" height="900" filter="url(#paperGrain)" opacity=".55"/>`,
     'CannaClicker desktop background',
   ),
 );
@@ -273,8 +391,10 @@ writeAsset(
       <stop offset="1" stop-color="#07100b" stop-opacity="0"/>
     </radialGradient>
     <rect width="720" height="1280" fill="url(#mobileGlow)"/>
-    <path d="M0 980c155-60 230-12 338-48 143-47 215-98 382-42v390H0Z" fill="#0b2118" opacity=".72"/>
-    <path d="M0 1102c170-38 291 42 420-5 108-39 188-53 300-19v202H0Z" fill="#07150f" opacity=".92"/>`,
+    <path d="M0 980c155-60 230-12 338-48 143-47 215-98 382-42v390H0Z" fill="#0b2118" opacity=".76" filter="url(#brushRough)"/>
+    <path d="M0 1102c170-38 291 42 420-5 108-39 188-53 300-19v202H0Z" fill="#07150f" opacity=".92"/>
+    <path d="M105 1010c30-175 72-302 126-390M598 1034c-25-153-70-278-135-374" fill="none" stroke="${palette.green}" stroke-width="6" stroke-linecap="round" opacity=".12"/>
+    <rect width="720" height="1280" filter="url(#paperGrain)" opacity=".5"/>`,
     'CannaClicker mobile background',
   ),
 );
@@ -286,6 +406,10 @@ writeAsset(
     `<g fill="none" stroke="${palette.green}" stroke-width="5" stroke-linecap="round" opacity=".12">
       <path d="M165 900c35-200 76-332 145-455M1420 900c-22-165-77-312-168-440M760 900c-18-130-18-270 6-420"/>
       <path d="M310 505c-82-18-136-76-164-173M1248 484c95-30 154-101 177-213M766 555c-74-22-124-78-150-168"/>
+    </g>
+    <g fill="none" stroke="${palette.lime}" stroke-width="2.8" stroke-linecap="round" opacity=".08" filter="url(#brushRough)">
+      <path d="M214 796c55-48 93-101 116-159M1337 786c-48-43-82-91-102-143M824 780c42-34 72-75 89-123"/>
+      <path d="M78 846c36-35 59-71 68-107M1499 844c-40-37-67-77-79-121"/>
     </g>`,
     'CannaClicker plant silhouettes',
   ),
