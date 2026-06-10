@@ -1,10 +1,10 @@
 import { t } from '../../i18n';
-import { uiIcons, upgradeIcons } from '../../assetManifest';
+import { uiIcons } from '../../assetManifest';
 
 function getStatIcon(key: string): string {
   const iconMap: Record<string, string> = {
     'stats.buds': uiIcons.leaf,
-    'stats.bps': upgradeIcons.globalBps,
+    'stats.bps': uiIcons.bps,
     'stats.bpc': uiIcons.bpc,
     'stats.total': uiIcons.total,
     'stats.seeds': uiIcons.seeds,

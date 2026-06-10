@@ -58,10 +58,12 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   infoList.setAttribute('role', 'list');
   infoRibbon.appendChild(infoList);
 
+  const budsStat = createStatBlock('stats.buds', infoList, statsLabels, statsMeta);
+  const bpsStat = createStatBlock('stats.bps', infoList, statsLabels, statsMeta);
   const totalStat = createStatBlock('stats.total', infoList, statsLabels, statsMeta);
   const seedsStat = createStatBlock('stats.seeds', infoList, statsLabels, statsMeta);
-  const seedRateStat = createStatBlock('stats.seedRate', infoList, statsLabels, statsMeta);
   const prestigeStat = createStatBlock('stats.prestigeMult', infoList, statsLabels, statsMeta);
+  const seedRateStat = document.createElement('span');
 
   const infoActions = document.createElement('div');
   infoActions.className = 'info-ribbon__actions';
@@ -234,8 +236,6 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
 
   strategyPanel.append(strategyKicker, strategyTitle, strategyBody, strategyDetail);
 
-  const budsStat = createStatBlock('stats.buds', clickStats, statsLabels, statsMeta);
-  const bpsStat = createStatBlock('stats.bps', clickStats, statsLabels, statsMeta);
   const bpcStat = createStatBlock('stats.bpc', clickStats, statsLabels, statsMeta);
 
   const announcer = document.createElement('p');

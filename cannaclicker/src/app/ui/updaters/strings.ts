@@ -7,20 +7,20 @@ import type { SidePanelTab, UIRefs } from '../types';
 
 const STAT_META: Record<LocaleKey, Record<string, string>> = {
   de: {
-    'stats.buds': 'Aktueller Vorrat',
-    'stats.bps': 'Produktion pro Sekunde',
+    'stats.buds': 'Ausgabbarer Bestand',
+    'stats.bps': 'Automatische Bud-Ernte',
     'stats.bpc': 'Ertrag pro Klick',
     'stats.total': 'Lebenszeit-Ernte',
-    'stats.seeds': 'Research-Währung',
+    'stats.seeds': 'Für Research und Aufstieg',
     'stats.seedRate': '60-Minuten-Fenster',
     'stats.prestigeMult': 'Aktiver Bonus',
   },
   en: {
-    'stats.buds': 'Current stock',
-    'stats.bps': 'Production each second',
+    'stats.buds': 'Spendable stock',
+    'stats.bps': 'Automatic bud harvest',
     'stats.bpc': 'Yield per click',
     'stats.total': 'Lifetime harvest',
-    'stats.seeds': 'Research currency',
+    'stats.seeds': 'For research and ascension',
     'stats.seedRate': '60-minute window',
     'stats.prestigeMult': 'Active boost',
   },

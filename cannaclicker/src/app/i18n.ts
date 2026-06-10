@@ -18,7 +18,7 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'ui.sections.eventLayer': 'Event-Layer',
     'ui.sections.toastContainer': 'Benachrichtigungen',
     'ui.controls.seedBadge': 'Ascension-Seed-Status',
-    'stats.buds': 'Buds',
+    'stats.buds': 'Vorhandene Buds',
     'stats.bpc': 'Buds pro Klick',
     'stats.bps': 'Buds pro Sekunde',
     'stats.total': 'Gesamt geerntet',
@@ -67,7 +67,8 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'modal.reset.body': 'Das löscht deinen aktuellen Fortschritt unwiderruflich.',
     'modal.reset.description':
       'Zur Sicherheit ist Reset erst aktiv, wenn du RESET in das Feld eingibst.',
-    'modal.reset.warning.items': 'Gelöscht werden Buds, Items, Upgrades, Research, Achievements und Prestige.',
+    'modal.reset.warning.items':
+      'Gelöscht werden Buds, Items, Upgrades, Research, Achievements und Prestige.',
     'modal.reset.warning.keep': 'Behalten werden Sprache, Sound- und Darstellungsoptionen.',
     'modal.reset.phrase': 'RESET',
     'modal.reset.placeholder': 'RESET eingeben',
@@ -103,8 +104,7 @@ const translations: Record<LocaleKey, Record<string, string>> = {
       'Sunset setzt wärmere Kontraste für ein cozy Spätspiel-Gefühl.',
     'settings.theme.description.moon':
       'Moon reduziert Farbflächen und betont ruhige Lesbarkeit für lange Sessions.',
-    'settings.theme.description.copper':
-      'Copper mischt warme Akzente mit dunklem Labor-Kontrast.',
+    'settings.theme.description.copper': 'Copper mischt warme Akzente mit dunklem Labor-Kontrast.',
     'settings.theme.option.botanical': 'Botanical',
     'settings.theme.option.neon': 'Neon',
     'settings.theme.option.sunset': 'Sunset',
@@ -541,7 +541,7 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'ui.sections.eventLayer': 'Random event area',
     'ui.sections.toastContainer': 'Toast notifications',
     'ui.controls.seedBadge': 'Ascension seed status',
-    'stats.buds': 'Buds',
+    'stats.buds': 'Available Buds',
     'stats.bpc': 'Buds per Click',
     'stats.bps': 'Buds per Second',
     'stats.total': 'Total Harvested',
@@ -589,7 +589,8 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'modal.reset.title': 'Reset progress?',
     'modal.reset.body': 'This cannot be undone and clears your current game.',
     'modal.reset.description': 'Reset is only enabled after typing RESET into the field.',
-    'modal.reset.warning.items': 'This deletes buds, items, upgrades, research, achievements and prestige.',
+    'modal.reset.warning.items':
+      'This deletes buds, items, upgrades, research, achievements and prestige.',
     'modal.reset.warning.keep': 'Language, sound and display preferences are kept.',
     'modal.reset.phrase': 'RESET',
     'modal.reset.placeholder': 'Type RESET',

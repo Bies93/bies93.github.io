@@ -2680,12 +2680,12 @@ body[data-plant-skin='ember'] .click-icon {
   }
 
   [data-ui-role='app-layout'] {
-    order: 1;
+    order: 2;
     gap: 0.75rem;
   }
 
   [data-ui-role='hud'] {
-    order: 2;
+    order: 1;
   }
 
   [data-ui-role='app-header'] {
