@@ -1,9 +1,10 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(__dirname, '../public/img');
+const rasterizedAssetDirs = ['items', 'upgrades', 'research', 'events', 'abilities', 'plant'];
 const obsoleteAssets = [
   'fx',
   'ui/achievement-pot.svg',
@@ -38,6 +39,10 @@ function ensure(filePath) {
 }
 
 function writeAsset(file, content) {
+  if (isRasterizedSvgOutput(file)) {
+    return;
+  }
+
   const target = path.join(outDir, file);
   ensure(target);
   writeFileSync(target, content.trimStart());
@@ -46,6 +51,32 @@ function writeAsset(file, content) {
 function removeObsoleteAssets() {
   for (const assetPath of obsoleteAssets) {
     rmSync(path.join(outDir, assetPath), { force: true, recursive: true });
+  }
+  removeRasterizedSvgOutputs();
+}
+
+function isRasterizedSvgOutput(file) {
+  return (
+    file.endsWith('.svg') &&
+    rasterizedAssetDirs.some((dir) => file === `${dir}.svg` || file.startsWith(`${dir}/`))
+  );
+}
+
+function removeRasterizedSvgOutputs() {
+  for (const dir of rasterizedAssetDirs) {
+    const targetDir = path.join(outDir, dir);
+    let entries = [];
+    try {
+      entries = readdirSync(targetDir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+
+    for (const entry of entries) {
+      if (entry.isFile() && entry.name.endsWith('.svg')) {
+        rmSync(path.join(targetDir, entry.name), { force: true });
+      }
+    }
   }
 }
 

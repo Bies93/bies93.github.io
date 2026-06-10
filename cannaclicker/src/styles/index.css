@@ -286,12 +286,18 @@ button {
 }
 
 @media (min-width: 1024px) {
-  .side-panel-shell {
+  .right-rail {
     position: sticky;
     top: 1rem;
     max-height: calc(100vh - 2rem);
     overflow: auto;
     scrollbar-gutter: stable;
+  }
+
+  .right-rail .side-panel-shell {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 }
 

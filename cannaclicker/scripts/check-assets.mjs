@@ -10,6 +10,7 @@ const manifestPath = resolve(root, 'src/app/assetManifest.ts');
 const publicDir = resolve(root, 'public');
 const imageDir = resolve(publicDir, 'img');
 const manifest = readFileSync(manifestPath, 'utf8');
+const rasterizedRuntimeDirs = ['items', 'upgrades', 'research', 'events', 'abilities', 'plant'];
 
 const referenced = new Set(
   Array.from(manifest.matchAll(/asset\(\s*['"]([^'"]+)['"]\s*\)/g), (match) => match[1]),
@@ -22,6 +23,10 @@ for (const path of referenced) {
   if (!absolute.startsWith(publicDir) || !existsFile(absolute)) {
     failures.push(`Missing asset referenced by manifest: ${path}`);
   }
+
+  if (isRasterizedRuntimeAsset(path) && !path.endsWith('.png')) {
+    failures.push(`Rasterized runtime asset must be PNG: ${path}`);
+  }
 }
 
 const imageFiles = walk(imageDir)
@@ -32,6 +37,10 @@ const imageFiles = walk(imageDir)
 for (const file of imageFiles) {
   if (!referenced.has(file)) {
     failures.push(`Orphan image not referenced by manifest: ${file}`);
+  }
+
+  if (isRasterizedRuntimeAsset(file) && file.endsWith('.svg')) {
+    failures.push(`Old SVG runtime asset should not ship in rasterized group: ${file}`);
   }
 }
 
@@ -72,6 +81,10 @@ function existsFile(path) {
   } catch {
     return false;
   }
+}
+
+function isRasterizedRuntimeAsset(path) {
+  return rasterizedRuntimeDirs.some((dir) => path.startsWith(`img/${dir}/`));
 }
 
 function walk(dir, options = {}) {

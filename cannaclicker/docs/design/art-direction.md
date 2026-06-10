@@ -24,7 +24,7 @@ CannaClicker soll wie ein modernes, eigenstaendiges Idle-Game wirken: cozy botan
 - Icons müssen auf hellen und dunklen Flächen funktionieren.
 - Jedes Icon braucht eine klare Silhouette bei 32px.
 - Keine schwarzen Kacheln, keine unerklaerten Fotoausschnitte.
-- Item- und Event-Icons nutzen einheitliche SVG-Shells und können verlustfrei skaliert werden.
+- Item-, Event-, Ability-, Upgrade- und Research-Assets nutzen detaillierte PNG-Cutouts; kleine UI-Glyphen bleiben SVG.
 
 ## Bildsprache
 
@@ -44,19 +44,19 @@ CannaClicker soll wie ein modernes, eigenstaendiges Idle-Game wirken: cozy botan
 - Header und Basis-Panels wurden optisch beruhigt: weniger Dauer-Glow, klarere Flaechen, Rewards bleiben die lauteren Momente.
 - Event-Kategorien haben eigene visuelle Lesbarkeit: Chain cyan, Risk rose/amber, Seasonal violet/gold, Major gold.
 - Die Hauptpflanze ist weiterhin stilisiert, bekommt aber in spaeten Stadien markantere Crown- und Halo-Signale.
-- Ability-Icons folgen jetzt derselben Premium-Shell wie Items/Events, damit aktive Skills nicht wie recycelte Controls wirken.
+- Ability-Icons sind eigenstaendige Raster-Cutouts, damit aktive Skills nicht wie recycelte Controls wirken.
 - Achievement-UI setzt Score, Progress und Rarity sichtbarer ein, ohne den Kartenfeed zu ueberladen.
 
 ## Signature-Art-Rework
 
-- Alle SVG-Icons werden nun als Botanical-Ink-Assets mit rauen Kanten, kleinen Ink-Flecks, Paper-Grain und handgezeichneten Blattadern erzeugt.
-- Items, Events, Abilities, Upgrades, Research und UI-Icons behalten ihre eindeutige Symbolik, wirken aber weniger generisch und weniger prototypisch.
-- Das neue `signature-key-art.png` traegt die Premium-Anmutung im ersten Viewport; SVG-Hintergruende bleiben als performante Fallbacks und subtile Atmosphaere.
+- Items, Events, Abilities, Upgrades, Research und Pflanzenstadien sind transparente PNG-Cutouts mit malerischer Botanical-Fantasy-Anmutung.
+- UI-Icons behalten ihre eindeutige Symbolik als kleine SVG-Glyphen.
+- Das `signature-key-art.png` traegt die Premium-Anmutung im ersten Viewport und dient als Stilreferenz; SVG-Hintergruende bleiben als performante Fallbacks und subtile Atmosphaere.
 - Alte Assets wurden nicht geloescht, sondern als `Legacy_Assets` gesichert.
 
 ## Asset-Qualitaetskriterien
 
 - Jedes neue Icon muss bei 32px noch als Silhouette lesbar sein.
 - Keine Event- oder Ability-Datei darf ausserhalb von `assetManifest.ts` referenziert werden.
-- Neue Bildideen werden bevorzugt im SVG-Generator umgesetzt; Raster-/Imagegen-Assets nur fuer echte Illustrationen oder Texturen.
-- Raster-Key-Art muss unter dem `public/img`-Budget bleiben und im Manifest referenziert sein.
+- Neue Gameplay-Illustrationen werden als transparente PNGs umgesetzt; SVG bleibt fuer kleine UI-Zeichen, Badges und leichte Texturen.
+- Raster-Key-Art und PNG-Cutouts muessen unter dem `public/img`-Budget bleiben und im Manifest referenziert sein.

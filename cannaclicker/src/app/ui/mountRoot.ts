@@ -62,7 +62,7 @@ export function mountRoot(): MountRootResult {
   primaryColumn.dataset.testid = 'primary-column';
 
   const secondaryColumn = document.createElement('div');
-  secondaryColumn.className = 'space-y-4';
+  secondaryColumn.className = 'right-rail space-y-4';
   secondaryColumn.dataset.uiRole = 'secondary-column';
   secondaryColumn.dataset.testid = 'secondary-column';
 
