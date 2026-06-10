@@ -1,8 +1,8 @@
-# CannaClicker Next Sprints
+# BiesyClicker Next Sprints
 
 Stand: 2026-05-31
 
-Ziel dieses Plans: CannaClicker vom alten `0.9.0-rc.1`-Ausgangspunkt zu einem langfristig motivierenden, öffentlich releasefähigen Idle-/Clicker-Game entwickeln, das in Tiefe und Langzeitspaß in Richtung Cookie Clicker geht, aber moderner, klarer und hochwertiger wirkt. Sprint 22-26 heben den Stand auf `1.0.0-rc.1`.
+Ziel dieses Plans: BiesyClicker vom alten `0.9.0-rc.1`-Ausgangspunkt zu einem langfristig motivierenden, öffentlich releasefähigen Idle-/Clicker-Game entwickeln, das in Tiefe und Langzeitspaß in Richtung Cookie Clicker geht, aber moderner, klarer und hochwertiger wirkt. Sprint 22-26 heben den Stand auf `1.0.0-rc.1`.
 
 Der aktuelle Stand ist bereits deutlich über Prototyp-Niveau: Core Loop, Shop, Upgrades, Research, Events, Seeds, Prestige, Achievements, Offline-Gain, Export/Import, Audio, Musik, Themes, Plant-Skins, responsive UI und GitHub-Pages-Build sind vorhanden. Die nächsten Sprints drehen sich deshalb nicht um “erstmal zum Laufen bringen”, sondern um Systemtiefe, Ergonomie, langfristige Progression, Premium-Polish und Release-Härtung.
 
@@ -1103,7 +1103,7 @@ Status: Implementiert.
 
 Ziel:
 
-- CannaClicker bekommt neue langfristige Entscheidungsebenen gegen den Cookie-Clicker-Vergleich.
+- BiesyClicker bekommt neue langfristige Entscheidungsebenen gegen den Cookie-Clicker-Vergleich.
 - Save-Version 9 erweitert den State ohne alte Saves hart zu brechen.
 - Roadmap und Design-Dokumente beschreiben die neue Depth-Phase.
 

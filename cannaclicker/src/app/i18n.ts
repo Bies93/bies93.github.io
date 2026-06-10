@@ -5,7 +5,7 @@ export const DEFAULT_LOCALE: LocaleKey = 'de';
 
 const translations: Record<LocaleKey, Record<string, string>> = {
   de: {
-    'app.title': 'CannaClicker',
+    'app.title': 'BiesyClicker',
     'ui.warning.fallbackRoot': 'UI-Container nicht gefunden – Fallback-Oberfläche aktiviert.',
     'ui.warning.eventsDisabled': 'Event-Layer fehlt – Zufallsereignisse vorübergehend deaktiviert.',
     'ui.sections.app': 'Spielfläche',
@@ -132,7 +132,7 @@ const translations: Record<LocaleKey, Record<string, string>> = {
       'RC-Fokus: Premium-UI, robuste Save-Modals, 160 Erfolge, 28 Events und klarer Prestige-Loop.',
     'settings.credits.title': 'Credits',
     'settings.credits.body':
-      'Design, Economy und Code wurden für CannaClicker Reboot datengetrieben neu aufgebaut.',
+      'Design, Economy und Code wurden für BiesyClicker Reboot datengetrieben neu aufgebaut.',
     'panel.tabs.shop': 'Shop',
     'panel.tabs.upgrades': 'Power',
     'panel.tabs.research': 'Labor',
@@ -528,7 +528,7 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'seeds.toast.click.body': '+{seeds} Seed beim Ernten entdeckt!',
   },
   en: {
-    'app.title': 'CannaClicker',
+    'app.title': 'BiesyClicker',
     'ui.warning.fallbackRoot': 'App container missing – running in fallback mode.',
     'ui.warning.eventsDisabled': 'Event layer unavailable – random events disabled.',
     'ui.sections.app': 'Game interface',
@@ -652,7 +652,7 @@ const translations: Record<LocaleKey, Record<string, string>> = {
       'RC focus: premium UI, robust save modals, 160 achievements, 28 events and a clear prestige loop.',
     'settings.credits.title': 'Credits',
     'settings.credits.body':
-      'Design, economy and code were rebuilt data-first for the CannaClicker reboot.',
+      'Design, economy and code were rebuilt data-first for the BiesyClicker reboot.',
     'panel.tabs.shop': 'Shop',
     'panel.tabs.upgrades': 'Power',
     'panel.tabs.research': 'Lab',

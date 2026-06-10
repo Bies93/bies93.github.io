@@ -1,10 +1,10 @@
-# CannaClicker Project Analysis
+# BiesyClicker Project Analysis
 
 Stand: Reboot Sprint 1/2.
 
 ## Kurzfazit
 
-CannaClicker ist technisch bereits ein brauchbares Vite/TypeScript-Idle-Game mit zentralem State, Save-Migrationen, Autosave, Offline-Fortschritt, Shop, Upgrades, Forschung, Achievements, Events und Prestige. Die größten Altlasten waren nicht die Grundlogik, sondern alte Windows-Workarounds, schwere und inkonsistente PNG-Assets, fehlende Asset-Disziplin und ein Prestige-Modell, das zu wenig klar kommuniziert wurde.
+BiesyClicker ist technisch bereits ein brauchbares Vite/TypeScript-Idle-Game mit zentralem State, Save-Migrationen, Autosave, Offline-Fortschritt, Shop, Upgrades, Forschung, Achievements, Events und Prestige. Die größten Altlasten waren nicht die Grundlogik, sondern alte Windows-Workarounds, schwere und inkonsistente PNG-Assets, fehlende Asset-Disziplin und ein Prestige-Modell, das zu wenig klar kommuniziert wurde.
 
 ## Aktueller Fortschritt
 

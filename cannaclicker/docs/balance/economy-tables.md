@@ -91,16 +91,16 @@ Sprint 18 ersetzt die uniforme Schwelle durch Item-Archetypen:
 
 ## Dev Balance Tools
 
-Bei aktiviertem `flags.devtools` wird im Browser `window.__cannaBalance` installiert.
+Bei aktiviertem `flags.devtools` wird im Browser `window.__biesyBalance` installiert.
 
 | Command                                             | Zweck                                                  |
 | --------------------------------------------------- | ------------------------------------------------------ |
-| `__cannaBalance.snapshot()`                         | Aktuelle Economy-Werte anzeigen.                       |
-| `__cannaBalance.addBuds(100000)`                    | Buds für Schwellen pruefen.                            |
-| `__cannaBalance.addSeeds(10)`                       | Seed-/Research-Kosten pruefen.                         |
-| `__cannaBalance.simulateSeconds(600)`               | Zeitraffer ohne Test-Suite.                            |
-| `__cannaBalance.forceEvent('golden_bud')`           | Event-UI und Reward pruefen.                           |
-| `__cannaBalance.unlockItem('hydroponic_rack', 10)`  | Item-Rollen und Shop-Lesbarkeit pruefen.               |
-| `__cannaBalance.unlockUpgrade('rich_soil')`         | Upgrade-Effekte pruefen.                               |
-| `__cannaBalance.unlockResearch('r_eff_foundation')` | Research-Pfade pruefen.                                |
-| `__cannaBalance.prestige()`                         | Prestige-Schwelle setzen, Reset und Kickstart pruefen. |
+| `__biesyBalance.snapshot()`                         | Aktuelle Economy-Werte anzeigen.                       |
+| `__biesyBalance.addBuds(100000)`                    | Buds für Schwellen pruefen.                            |
+| `__biesyBalance.addSeeds(10)`                       | Seed-/Research-Kosten pruefen.                         |
+| `__biesyBalance.simulateSeconds(600)`               | Zeitraffer ohne Test-Suite.                            |
+| `__biesyBalance.forceEvent('golden_bud')`           | Event-UI und Reward pruefen.                           |
+| `__biesyBalance.unlockItem('hydroponic_rack', 10)`  | Item-Rollen und Shop-Lesbarkeit pruefen.               |
+| `__biesyBalance.unlockUpgrade('rich_soil')`         | Upgrade-Effekte pruefen.                               |
+| `__biesyBalance.unlockResearch('r_eff_foundation')` | Research-Pfade pruefen.                                |
+| `__biesyBalance.prestige()`                         | Prestige-Schwelle setzen, Reset und Kickstart pruefen. |

@@ -4,7 +4,7 @@ Stand: Sprint 10.
 
 ## Ziel
 
-CannaClicker soll sofort reagieren, aber nicht hektisch wirken. Feedback ist kurz, lesbar und stapelt sich kontrolliert. Alle wichtigen Inputs haben visuelles und auditives Feedback.
+BiesyClicker soll sofort reagieren, aber nicht hektisch wirken. Feedback ist kurz, lesbar und stapelt sich kontrolliert. Alle wichtigen Inputs haben visuelles und auditives Feedback.
 
 ## Feedback-System
 

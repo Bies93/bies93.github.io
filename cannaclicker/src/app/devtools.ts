@@ -66,7 +66,7 @@ export interface BalanceDevtools {
 declare global {
   interface Window {
     __state?: GameState;
-    __cannaBalance?: BalanceDevtools;
+    __biesyBalance?: BalanceDevtools;
   }
 }
 
@@ -164,7 +164,7 @@ export function installBalanceDevtools(state: GameState, render: RenderFn): Bala
   };
 
   window.__state = state;
-  window.__cannaBalance = tools;
+  window.__biesyBalance = tools;
   return tools;
 }
 

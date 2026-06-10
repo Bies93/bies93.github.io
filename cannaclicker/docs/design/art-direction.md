@@ -2,7 +2,7 @@
 
 ## Stilziel
 
-CannaClicker soll wie ein modernes, eigenstaendiges Idle-Game wirken: cozy botanical, neon-green counterculture, clean UI und leicht verspielte Progression. Die Optik darf stilisiert sein und muss nicht fotorealistisch wirken.
+BiesyClicker soll wie ein modernes, eigenstaendiges Idle-Game wirken: cozy botanical, neon-green counterculture, clean UI und leicht verspielte Progression. Die Optik darf stilisiert sein und muss nicht fotorealistisch wirken.
 
 ## Farbwelt
 

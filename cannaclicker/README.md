@@ -1,6 +1,6 @@
-# CannaClicker
+# BiesyClicker
 
-CannaClicker is a stylised botanical idle clicker built with Vite, TypeScript and Tailwind CSS. The current release candidate focuses on gameplay clarity, polished feedback, a manifest-driven asset system, improved progression, expanded random events and a clearer prestige loop.
+BiesyClicker is a stylised botanical idle clicker built with Vite, TypeScript and Tailwind CSS. The current release candidate focuses on gameplay clarity, polished feedback, a manifest-driven asset system, improved progression, expanded random events and a clearer prestige loop.
 
 ## Requirements
 

@@ -52,4 +52,4 @@ Diese Systeme bleiben im ersten Online-Release:
 
 ## Finaler Scope-Satz
 
-CannaClicker V1 ist ein lokales Web-Idle-Game ohne Backend. Der Release soll als fertiger, schneller, mobiltauglicher Singleplayer-Clicker wirken, nicht als Live-Service-Plattform.
+BiesyClicker V1 ist ein lokales Web-Idle-Game ohne Backend. Der Release soll als fertiger, schneller, mobiltauglicher Singleplayer-Clicker wirken, nicht als Live-Service-Plattform.

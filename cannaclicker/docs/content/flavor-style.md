@@ -4,7 +4,7 @@ Stand: Sprint 8.
 
 ## Tonalitaet
 
-CannaClicker spricht kurz, clever und spielmechanisch. Der Ton ist premium, leicht humorvoll und nie belehrend. Texte sollen Fortschritt markieren, aber nicht erklaeren, wie reale Prozesse funktionieren.
+BiesyClicker spricht kurz, clever und spielmechanisch. Der Ton ist premium, leicht humorvoll und nie belehrend. Texte sollen Fortschritt markieren, aber nicht erklaeren, wie reale Prozesse funktionieren.
 
 ## Regeln
 

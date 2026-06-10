@@ -279,7 +279,7 @@ function downloadSaveFile(payload: string): void {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = `cannaclicker-save-${stamp}.txt`;
+  anchor.download = `biesyclicker-save-${stamp}.txt`;
   anchor.rel = 'noopener';
   document.body.appendChild(anchor);
   anchor.click();

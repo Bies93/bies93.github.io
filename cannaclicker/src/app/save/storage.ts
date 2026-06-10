@@ -1,11 +1,22 @@
 import type { PersistedStateV7 } from './types';
 
-export const SAVE_KEY = 'cannaclicker:save:v1';
-const MUTED_KEY = 'cannaclicker:muted';
+export const SAVE_KEY = 'biesyclicker:save:v1';
+const LEGACY_SAVE_KEY = 'cannaclicker:save:v1';
+const MUTED_KEY = 'biesyclicker:muted';
+const LEGACY_MUTED_KEY = 'cannaclicker:muted';
 
 export function readRawSave(): string | null {
   try {
-    return window.localStorage.getItem(SAVE_KEY);
+    const raw = window.localStorage.getItem(SAVE_KEY);
+    if (raw) {
+      return raw;
+    }
+
+    const legacyRaw = window.localStorage.getItem(LEGACY_SAVE_KEY);
+    if (legacyRaw) {
+      window.localStorage.setItem(SAVE_KEY, legacyRaw);
+    }
+    return legacyRaw;
   } catch {
     return null;
   }
@@ -35,6 +46,7 @@ export function writePersistedState(
 export function clearPersistedState(): boolean {
   try {
     window.localStorage.removeItem(SAVE_KEY);
+    window.localStorage.removeItem(LEGACY_SAVE_KEY);
     return true;
   } catch {
     return false;
@@ -58,7 +70,16 @@ export function ensureVersionedSave(raw: string | null): void {
 
 export function readMutedPreference(): boolean {
   try {
-    return window.localStorage.getItem(MUTED_KEY) === '1';
+    const raw = window.localStorage.getItem(MUTED_KEY);
+    if (raw !== null) {
+      return raw === '1';
+    }
+
+    const legacyRaw = window.localStorage.getItem(LEGACY_MUTED_KEY);
+    if (legacyRaw !== null) {
+      window.localStorage.setItem(MUTED_KEY, legacyRaw);
+    }
+    return legacyRaw === '1';
   } catch {
     return false;
   }

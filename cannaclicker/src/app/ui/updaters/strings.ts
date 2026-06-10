@@ -54,7 +54,9 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
   refs.root.dataset.theme = state.settings.uiTheme;
   refs.root.dataset.plantSkin = state.settings.plantSkin;
 
-  refs.headerTitle.textContent = t(state.locale, 'app.title');
+  const appTitle = t(state.locale, 'app.title');
+  refs.headerTitle.textContent = appTitle;
+  refs.headerTitle.dataset.text = appTitle;
   refs.clickButton.setAttribute('aria-label', t(state.locale, 'actions.click'));
   refs.clickLabel.textContent = t(state.locale, 'actions.click');
 

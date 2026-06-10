@@ -1,8 +1,8 @@
-# CannaClicker Depth Expansion Roadmap
+# BiesyClicker Depth Expansion Roadmap
 
 Stand: Sprint 27 / Depth Expansion.
 
-Ziel: CannaClicker bekommt neue Entscheidungsebenen statt nur mehr Content-Listen. Die Erweiterung baut auf dem bestehenden 1.0-RC-Fundament auf: Shop, Upgrades, Research, Events, Ascension, Achievements, Audio, Themes und responsive UI bleiben erhalten.
+Ziel: BiesyClicker bekommt neue Entscheidungsebenen statt nur mehr Content-Listen. Die Erweiterung baut auf dem bestehenden 1.0-RC-Fundament auf: Shop, Upgrades, Research, Events, Ascension, Achievements, Audio, Themes und responsive UI bleiben erhalten.
 
 ## Umgesetzte Depth-Systeme
 

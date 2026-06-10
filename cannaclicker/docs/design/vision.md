@@ -1,10 +1,10 @@
-# CannaClicker Reboot Vision
+# BiesyClicker Reboot Vision
 
 Stand: Sprint 1/2 Reboot.
 
 ## Produktziel
 
-CannaClicker ist ein kurzes, gut lesbares Idle-Clicker-Spiel mit Premium-UI, klarer Progression und humorvoll-abstrakter Counterculture-Identität. Das Spiel bleibt eine reine Spielmechanik-Fantasie: keine realistische Anleitung, keine Simulation echter Anbauabläufe.
+BiesyClicker ist ein kurzes, gut lesbares Idle-Clicker-Spiel mit Premium-UI, klarer Progression und humorvoll-abstrakter Counterculture-Identität. Das Spiel bleibt eine reine Spielmechanik-Fantasie: keine realistische Anleitung, keine Simulation echter Anbauabläufe.
 
 ## Design-Säulen
 

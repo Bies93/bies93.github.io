@@ -1,6 +1,6 @@
 import { persistAudioPreference } from './save';
-import musicMp3Url from '../cannaclicker_psy_dub_reggae_loop_92bpm.mp3?url';
-import musicOpusUrl from '../cannaclicker_psy_dub_reggae_loop_92bpm.opus?url';
+import musicMp3Url from '../biesyclicker_psy_dub_reggae_loop_92bpm.mp3?url';
+import musicOpusUrl from '../biesyclicker_psy_dub_reggae_loop_92bpm.opus?url';
 
 type OscillatorKind = 'sine' | 'square' | 'sawtooth' | 'triangle';
 type EventSoundKind = 'reward' | 'seed' | 'buff' | 'rare';

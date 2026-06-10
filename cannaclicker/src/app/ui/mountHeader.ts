@@ -2,30 +2,48 @@ import { uiIcons } from '../assetManifest';
 
 export function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): HTMLHeadingElement {
   const header = document.createElement('header');
-  header.className =
-    'grid w-full gap-3 rounded-3xl border border-white/10 bg-neutral-900/80 px-3 py-2 shadow-[0_20px_48px_rgba(10,12,21,0.45)] backdrop-blur-xl sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:gap-x-14 sm:gap-y-2 sm:px-6 lg:px-8';
+  header.className = 'app-header';
   header.dataset.uiRole = 'app-header';
   header.dataset.testid = 'app-header';
   header.setAttribute('role', 'banner');
 
+  const brand = document.createElement('div');
+  brand.className = 'app-brand';
+  brand.dataset.uiRole = 'app-brand';
+
   const logoWrap = document.createElement('div');
-  logoWrap.className =
-    'grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-lime-300/35 via-emerald-300/25 to-emerald-500/30 shadow-[0_0_20px_rgba(202,255,120,0.45)] ring-1 ring-lime-200/35 sm:h-14 sm:w-14';
+  logoWrap.className = 'app-brand__mark';
   logoWrap.dataset.uiRole = 'app-logo';
   logoWrap.dataset.testid = 'app-logo';
+
+  const monogram = document.createElement('span');
+  monogram.className = 'app-brand__monogram';
+  monogram.textContent = 'B';
+  monogram.setAttribute('aria-hidden', 'true');
+
+  const slash = document.createElement('span');
+  slash.className = 'app-brand__slash';
+  slash.setAttribute('aria-hidden', 'true');
 
   const leaf = new Image();
   leaf.src = uiIcons.leaf;
   leaf.alt = '';
   leaf.decoding = 'async';
-  leaf.className =
-    'h-8 w-8 drop-shadow-[0_12px_24px_rgba(202,255,150,0.55)] saturate-150 brightness-110 sm:h-10 sm:w-10';
+  leaf.className = 'app-brand__leaf';
 
-  logoWrap.appendChild(leaf);
+  logoWrap.append(monogram, leaf, slash);
+
+  const brandCopy = document.createElement('div');
+  brandCopy.className = 'app-brand__copy';
 
   const headerTitle = document.createElement('h1');
   headerTitle.className = 'app-header__title';
-  headerTitle.textContent = 'CannaClicker';
+  headerTitle.textContent = 'BiesyClicker';
+  headerTitle.dataset.text = 'BiesyClicker';
+
+  const tagline = document.createElement('span');
+  tagline.className = 'app-header__tagline';
+  tagline.textContent = 'Bloom mode';
 
   const actionWrap = document.createElement('div');
   actionWrap.className =
@@ -37,7 +55,9 @@ export function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): H
     actionWrap.append(control);
   });
 
-  header.append(logoWrap, headerTitle, actionWrap);
+  brandCopy.append(headerTitle, tagline);
+  brand.append(logoWrap, brandCopy);
+  header.append(brand, actionWrap);
   root.prepend(header);
   return headerTitle;
 }
