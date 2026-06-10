@@ -76,26 +76,43 @@ export const abilityIcons = {
 } as const;
 
 export const uiIcons = {
-  export: asset('img/ui/export.svg'),
-  import: asset('img/ui/import.svg'),
-  reset: asset('img/ui/reset.svg'),
-  seeds: asset('img/ui/seeds.svg'),
-  prestige: asset('img/ui/prestige.svg'),
-  research: asset('img/ui/research.svg'),
-  upgrade: asset('img/ui/upgrade.svg'),
-  shop: asset('img/ui/shop.svg'),
-  soundOn: asset('img/ui/sound-on.svg'),
-  soundOff: asset('img/ui/sound-off.svg'),
-  auto: asset('img/ui/auto.svg'),
-  warning: asset('img/ui/warning.svg'),
-  leaf: asset('img/ui/leaf.svg'),
-  bps: asset('img/ui/bps.svg'),
-  bpc: asset('img/ui/bpc.svg'),
-  total: asset('img/ui/total.svg'),
+  export: asset('img/ui/export.png'),
+  import: asset('img/ui/import.png'),
+  reset: asset('img/ui/reset.png'),
+  seeds: asset('img/ui/seeds.png'),
+  prestige: asset('img/ui/prestige.png'),
+  research: asset('img/ui/research.png'),
+  upgrade: asset('img/ui/upgrade.png'),
+  shop: asset('img/ui/shop.png'),
+  soundOn: asset('img/ui/sound-on.png'),
+  soundOff: asset('img/ui/sound-off.png'),
+  auto: asset('img/ui/auto.png'),
+  warning: asset('img/ui/warning.png'),
+  leaf: asset('img/ui/leaf.png'),
+  bps: asset('img/ui/bps.png'),
+  bpc: asset('img/ui/bpc.png'),
+  total: asset('img/ui/total.png'),
+  achievements: asset('img/ui/achievements.png'),
+  greenhouse: asset('img/ui/greenhouse.png'),
+  settings: asset('img/ui/settings.png'),
   achievementBase: asset('img/ui/achievement-base.svg'),
   achievementRibbon: asset('img/ui/achievement-ribbon.svg'),
   achievementLeaf: asset('img/ui/achievement-leaf.svg'),
   achievementLight: asset('img/ui/achievement-light.svg'),
+} as const;
+
+export const sidePanelTabIcons = {
+  shop: asset('img/ui/tab-shop.png'),
+  upgrades: asset('img/ui/tab-upgrades.png'),
+  research: asset('img/ui/tab-research.png'),
+  greenhouse: asset('img/ui/tab-greenhouse.png'),
+  prestige: asset('img/ui/tab-prestige.png'),
+  achievements: asset('img/ui/tab-achievements.png'),
+  settings: asset('img/ui/tab-settings.png'),
+} as const;
+
+export const clickerFxAssets = {
+  orbitBud: asset('img/ui/orbit-bud.png'),
 } as const;
 
 export const plantStages = [

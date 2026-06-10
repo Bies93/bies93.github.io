@@ -5,6 +5,24 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(__dirname, '../public/img');
 const rasterizedAssetDirs = ['items', 'upgrades', 'research', 'events', 'abilities', 'plant'];
+const pngReplacedUiSvgAssets = [
+  'ui/auto.svg',
+  'ui/bpc.svg',
+  'ui/bps.svg',
+  'ui/export.svg',
+  'ui/import.svg',
+  'ui/leaf.svg',
+  'ui/prestige.svg',
+  'ui/research.svg',
+  'ui/reset.svg',
+  'ui/seeds.svg',
+  'ui/shop.svg',
+  'ui/sound-off.svg',
+  'ui/sound-on.svg',
+  'ui/total.svg',
+  'ui/upgrade.svg',
+  'ui/warning.svg',
+];
 const obsoleteAssets = [
   'fx',
   'ui/achievement-pot.svg',
@@ -14,6 +32,7 @@ const obsoleteAssets = [
   'ui/locked.svg',
   'ui/settings.svg',
   'ui/stats.svg',
+  ...pngReplacedUiSvgAssets,
 ];
 
 const palette = {
@@ -40,6 +59,10 @@ function ensure(filePath) {
 
 function writeAsset(file, content) {
   if (isRasterizedSvgOutput(file)) {
+    return;
+  }
+
+  if (pngReplacedUiSvgAssets.includes(file)) {
     return;
   }
 

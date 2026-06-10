@@ -132,12 +132,19 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   preloadPlantStage(0);
   preloadPlantStage(1);
 
+  const orbitLayer = document.createElement('div');
+  orbitLayer.className = 'click-orbit';
+  orbitLayer.dataset.uiRole = 'click-orbit';
+  orbitLayer.dataset.testid = 'click-orbit';
+  orbitLayer.dataset.count = '0';
+  orbitLayer.setAttribute('aria-hidden', 'true');
+
   const clickLabel = document.createElement('span');
   clickLabel.className = 'click-label';
   clickLabel.dataset.uiRole = 'click-label';
   clickLabel.dataset.testid = 'click-label';
 
-  clickButton.append(clickIcon, clickLabel);
+  clickButton.append(clickIcon, orbitLayer, clickLabel);
   clickBody.appendChild(clickButton);
 
   const quickShopPanel = document.createElement('section');
@@ -311,6 +318,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     clickButton,
     clickLabel,
     clickIcon,
+    orbitLayer,
     quickShopPanel,
     quickShopKicker,
     quickShopName,

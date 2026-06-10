@@ -11,6 +11,7 @@ import type { UIRefs } from '../types';
 import { formatInteger } from '../utils/format';
 import { formatSeedRate } from './stats';
 import { updatePlantStage } from './plant';
+import { updateOrbitBuds } from './orbitBuds';
 import { items, itemById, type ItemId } from '../../../data/items';
 
 export function updateStats(state: GameState, refs: UIRefs): void {
@@ -78,6 +79,7 @@ export function updateStats(state: GameState, refs: UIRefs): void {
   updateStrategyPanel(state, refs);
 
   updatePlantStage(state, refs);
+  updateOrbitBuds(state, refs);
 }
 
 function updateClickComboLabel(state: GameState, refs: UIRefs): void {

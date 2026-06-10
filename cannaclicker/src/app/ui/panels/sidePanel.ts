@@ -8,6 +8,7 @@ import { strains, type StrainId } from '../../../data/strains';
 import { contracts, type ContractId } from '../../../data/contracts';
 import { seasons, type SeasonId } from '../../../data/seasons';
 import { challenges, type ChallengeId } from '../../../data/challenges';
+import { sidePanelTabIcons } from '../../assetManifest';
 import type { ResearchFilter } from '../../research';
 import { PLANT_SKINS, UI_THEMES } from '../../settings';
 import { createAchievementCard } from '../components/achievementCard';
@@ -51,6 +52,18 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
     button.className = 'tab-button';
     button.setAttribute('aria-pressed', 'false');
     button.setAttribute('role', 'tab');
+
+    const icon = new Image();
+    icon.src = sidePanelTabIcons[tab];
+    icon.alt = '';
+    icon.decoding = 'async';
+    icon.className = 'tab-button__icon';
+    icon.setAttribute('aria-hidden', 'true');
+
+    const label = document.createElement('span');
+    label.className = 'tab-button__label';
+
+    button.append(icon, label);
     tabList.appendChild(button);
     tabs.set(tab, button);
   });

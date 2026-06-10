@@ -36,16 +36,6 @@ const SIDE_PANEL_TAB_KEYS: Record<SidePanelTab, string> = {
   settings: 'panel.tabs.settings',
 };
 
-const SIDE_PANEL_TAB_ICONS: Record<SidePanelTab, string> = {
-  shop: '⬡',
-  upgrades: '✦',
-  research: '⌬',
-  greenhouse: '⌂',
-  prestige: '◇',
-  achievements: '✓',
-  settings: '☰',
-};
-
 export function updateStrings(state: GameState, refs: UIRefs): void {
   document.body.dataset.motion = state.settings.motionIntensity;
   document.body.dataset.theme = state.settings.uiTheme;
@@ -104,8 +94,12 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
   refs.sidePanel.tabs.forEach((button, tab) => {
     const key = SIDE_PANEL_TAB_KEYS[tab];
     const label = t(state.locale, key);
-    button.textContent = label;
-    button.dataset.icon = SIDE_PANEL_TAB_ICONS[tab];
+    const labelNode = button.querySelector<HTMLElement>('.tab-button__label');
+    if (labelNode) {
+      labelNode.textContent = label;
+    } else {
+      button.textContent = label;
+    }
     button.setAttribute('aria-label', label);
   });
 
