@@ -6,6 +6,7 @@ import { initUI, type UIInitResult } from './bootstrap';
 
 export interface UITicker {
   render(state: GameState): void;
+  playBuffExpire(): void;
   stop(): void;
   refs: UIInitResult['refs'];
 }
@@ -29,6 +30,9 @@ export function startUI(state: GameState): UITicker {
 
   return {
     render,
+    playBuffExpire() {
+      audio.playBuffExpire();
+    },
     stop() {
       runtime.scheduler.stop();
     },

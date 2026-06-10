@@ -14,6 +14,11 @@
   --ui-border: rgba(186, 230, 253, 0.14);
   --ui-border-strong: rgba(52, 211, 153, 0.45);
   --ui-text-soft: rgba(203, 213, 225, 0.82);
+  --soil-dark: rgba(23, 13, 7, 0.9);
+  --soil-warm: rgba(92, 48, 19, 0.42);
+  --crate-wood: rgba(113, 67, 29, 0.38);
+  --crate-wood-dark: rgba(57, 31, 17, 0.58);
+  --grow-line: rgba(94, 234, 212, 0.18);
   --reward-common: #86efac;
   --reward-rare: #38bdf8;
   --reward-epic: #a78bfa;
@@ -273,16 +278,37 @@ button {
 }
 
 .side-panel-shell {
+  position: relative;
+  overflow: hidden;
   border: 1px solid var(--ui-border);
   border-radius: var(--ui-radius);
   background:
-    linear-gradient(180deg, rgba(10, 16, 28, 0.92), rgba(7, 11, 20, 0.82)),
-    radial-gradient(circle at top right, rgba(56, 189, 248, 0.11), transparent 44%);
+    linear-gradient(90deg, var(--crate-wood-dark) 0 0.42rem, transparent 0.42rem),
+    repeating-linear-gradient(90deg, rgba(74, 44, 22, 0.16) 0 1px, transparent 1px 18px),
+    linear-gradient(180deg, rgba(9, 18, 24, 0.95), rgba(8, 12, 17, 0.9)),
+    linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent 48%, rgba(250, 204, 21, 0.06));
   padding: clamp(0.85rem, 1.8vw, 1.25rem);
   box-shadow:
-    0 24px 60px rgba(2, 6, 23, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 24px 60px rgba(2, 6, 23, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 0 0 1px rgba(120, 73, 33, 0.18);
   backdrop-filter: blur(18px);
+}
+
+.side-panel-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0.45rem 0.45rem auto;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(132, 204, 22, 0.48),
+    rgba(250, 204, 21, 0.36),
+    transparent
+  );
+  pointer-events: none;
 }
 
 @media (min-width: 1024px) {
@@ -302,46 +328,62 @@ button {
 }
 
 .click-button {
-  @apply relative grid place-items-center rounded-2xl border border-white/10 bg-neutral-900/60 overflow-hidden ring-1 ring-white/5 transition;
+  @apply relative grid place-items-center border border-white/10 bg-neutral-900/60 overflow-hidden ring-1 ring-white/5 transition;
   min-height: clamp(13.5rem, 28vw, 21rem);
   padding: clamp(1.25rem, 2.8vw, 2.25rem);
   cursor: pointer;
   contain: paint;
   isolation: isolate;
+  border-radius: var(--ui-radius);
+  background:
+    linear-gradient(180deg, rgba(11, 43, 31, 0.42), rgba(5, 13, 17, 0.78)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(78, 45, 19, 0.18) 0 12px,
+      rgba(32, 20, 13, 0.12) 12px 24px
+    ),
+    radial-gradient(circle at 50% 62%, var(--soil-warm), transparent 36%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 34px 76px rgba(22, 163, 74, 0.3);
+    inset 0 -10px 28px rgba(23, 13, 7, 0.28),
+    0 34px 76px rgba(22, 163, 74, 0.24);
 }
 
 .click-button::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 40%, rgba(74, 222, 128, 0.3), transparent 68%);
-  filter: blur(4px);
-  transform: scale(2.1);
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0 12%,
+      rgba(94, 234, 212, 0.08) 12% 13%,
+      transparent 13% 87%,
+      rgba(94, 234, 212, 0.08) 87% 88%,
+      transparent 88%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 0 16%,
+      rgba(250, 204, 21, 0.08) 16% 17%,
+      transparent 17% 83%,
+      rgba(250, 204, 21, 0.08) 83% 84%,
+      transparent 84%
+    );
   z-index: -1;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .click-button::after {
   content: '';
   position: absolute;
-  width: clamp(10rem, 24vw, 18rem);
-  aspect-ratio: 1;
-  border-radius: 9999px;
+  inset: clamp(0.8rem, 2vw, 1.2rem);
+  border: 1px solid rgba(132, 204, 22, 0.2);
+  border-radius: calc(var(--ui-radius) + 2px);
   background:
-    radial-gradient(circle, rgba(202, 255, 88, 0.16), transparent 58%),
-    conic-gradient(
-      from 180deg,
-      transparent,
-      rgba(118, 255, 208, 0.2),
-      transparent,
-      rgba(255, 209, 90, 0.16),
-      transparent
-    );
-  filter: blur(1px);
-  opacity: 0.74;
+    repeating-linear-gradient(135deg, transparent 0 13px, rgba(255, 255, 255, 0.035) 13px 14px),
+    linear-gradient(180deg, rgba(134, 239, 172, 0.07), transparent 45%, rgba(92, 48, 19, 0.1));
+  opacity: 0.9;
   z-index: -1;
 }
 
@@ -696,7 +738,12 @@ body[data-plant-skin='ember'] .click-icon {
 .app-brand__monogram {
   color: rgba(248, 250, 252, 0.98);
   font-family:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   font-size: 2.35rem;
   font-weight: 950;
   line-height: 1;
@@ -735,7 +782,12 @@ body[data-plant-skin='ember'] .click-icon {
   max-width: 100%;
   color: rgba(236, 253, 245, 0.98);
   font-family:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   font-size: 3rem;
   font-weight: 950;
   line-height: 0.92;
@@ -3230,9 +3282,7 @@ body[data-plant-skin='ember'] .click-icon {
   appearance: none;
   border: 1px solid rgb(148 163 184 / 0.18);
   border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgb(15 23 42 / 0.94), rgb(6 78 59 / 0.48)),
-    rgb(15 23 42);
+  background: linear-gradient(135deg, rgb(15 23 42 / 0.94), rgb(6 78 59 / 0.48)), rgb(15 23 42);
   color: rgb(241 245 249);
   cursor: pointer;
   display: grid;
@@ -3263,9 +3313,7 @@ body[data-plant-skin='ember'] .click-icon {
 
 .depth-card.is-active {
   border-color: rgb(45 212 191 / 0.72);
-  background:
-    linear-gradient(135deg, rgb(20 184 166 / 0.2), rgb(21 128 61 / 0.24)),
-    rgb(15 23 42);
+  background: linear-gradient(135deg, rgb(20 184 166 / 0.2), rgb(21 128 61 / 0.24)), rgb(15 23 42);
 }
 
 .depth-card.is-available {
@@ -3354,6 +3402,372 @@ body[data-plant-skin='ember'] .click-icon {
 
   .automation-controls {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Biesy growroom material pass: crate edges, tray grooves and stable text rhythm. */
+[data-ui-role='app-root'],
+[data-ui-role='app-root'] * {
+  letter-spacing: 0 !important;
+}
+
+body[data-theme] .side-panel-shell,
+.side-panel-shell,
+.quick-shop-panel,
+.stat-item,
+.info-ribbon,
+.goal-panel,
+.strategy-panel,
+.shop-card,
+.upgrade-card,
+.research-card,
+.prestige-panel,
+.milestone-card,
+.achievement-card,
+.ascension-panel,
+.settings-row,
+.modal-card,
+.greenhouse-summary,
+.depth-card,
+.toast {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--ui-border-strong) 42%, rgba(148, 163, 184, 0.18));
+  background:
+    linear-gradient(90deg, rgba(92, 52, 22, 0.26) 0 0.42rem, transparent 0.42rem),
+    repeating-linear-gradient(90deg, rgba(154, 96, 44, 0.1) 0 1px, transparent 1px 18px),
+    repeating-linear-gradient(0deg, rgba(190, 242, 100, 0.045) 0 1px, transparent 1px 15px),
+    linear-gradient(180deg, rgba(10, 23, 20, 0.94), rgba(7, 12, 18, 0.91));
+  box-shadow:
+    0 20px 46px rgba(2, 6, 23, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 0 0 1px rgba(120, 73, 33, 0.18);
+}
+
+body[data-theme] .side-panel-shell::before,
+.side-panel-shell::before,
+.quick-shop-panel::before,
+.shop-card::before,
+.upgrade-card::before,
+.research-card::before,
+.achievement-card::before,
+.prestige-panel::before,
+.modal-card::before,
+.depth-card::before {
+  content: '';
+  position: absolute;
+  inset: 0.45rem 0.45rem auto;
+  height: 2px;
+  border-radius: var(--ui-radius-sm);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(190, 242, 100, 0.46),
+    rgba(250, 204, 21, 0.34),
+    transparent
+  );
+  opacity: 0.82;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.quick-shop-panel > *,
+.shop-card > *,
+.upgrade-card > *,
+.research-card > *,
+.achievement-card > *,
+.prestige-panel > *,
+.modal-card > *,
+.depth-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+body[data-theme] .click-button,
+.click-button {
+  border-color: rgba(132, 204, 22, 0.32);
+  background:
+    linear-gradient(
+      90deg,
+      rgba(92, 52, 22, 0.32) 0 0.7rem,
+      transparent 0.7rem calc(100% - 0.7rem),
+      rgba(92, 52, 22, 0.28) calc(100% - 0.7rem)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(141, 82, 36, 0.18) 0 13px,
+      rgba(35, 22, 14, 0.14) 13px 26px
+    ),
+    repeating-linear-gradient(0deg, transparent 0 28px, rgba(190, 242, 100, 0.07) 28px 30px),
+    linear-gradient(180deg, rgba(10, 42, 30, 0.74), rgba(5, 12, 15, 0.92));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -14px 28px rgba(23, 13, 7, 0.34),
+    0 30px 70px rgba(22, 163, 74, 0.22);
+}
+
+body[data-theme] .click-button::before,
+.click-button::before {
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0 10%,
+      rgba(94, 234, 212, 0.08) 10% 11%,
+      transparent 11% 89%,
+      rgba(94, 234, 212, 0.08) 89% 90%,
+      transparent 90%
+    ),
+    linear-gradient(
+      0deg,
+      transparent 0 14%,
+      rgba(250, 204, 21, 0.09) 14% 15%,
+      transparent 15% 85%,
+      rgba(250, 204, 21, 0.09) 85% 86%,
+      transparent 86%
+    );
+  opacity: 0.72;
+}
+
+body[data-theme] .click-button::after,
+.click-button::after {
+  border-color: rgba(190, 242, 100, 0.24);
+  background:
+    repeating-linear-gradient(135deg, transparent 0 13px, rgba(255, 255, 255, 0.04) 13px 14px),
+    linear-gradient(180deg, rgba(134, 239, 172, 0.08), rgba(92, 48, 19, 0.12));
+  opacity: 0.78;
+}
+
+.click-card__header,
+.click-card__body {
+  background:
+    repeating-linear-gradient(90deg, rgba(120, 73, 33, 0.09) 0 1px, transparent 1px 20px),
+    linear-gradient(180deg, rgba(8, 16, 19, 0.82), rgba(7, 11, 18, 0.74));
+}
+
+.quick-shop-panel {
+  grid-template-columns: minmax(0, 1fr) auto;
+  border-color: rgba(132, 204, 22, 0.34);
+}
+
+.quick-shop-panel[data-affordable='true'],
+.shop-card[data-affordable='true'],
+.upgrade-card[data-state='affordable'],
+.research-card.is-owned,
+.prestige-panel.is-ready {
+  border-color: rgba(190, 242, 100, 0.62);
+  box-shadow:
+    0 22px 46px rgba(22, 163, 74, 0.18),
+    inset 0 0 0 1px rgba(190, 242, 100, 0.16);
+}
+
+.stat-item,
+.click-stats .stat-item {
+  background:
+    linear-gradient(90deg, rgba(92, 52, 22, 0.22) 0 0.34rem, transparent 0.34rem),
+    repeating-linear-gradient(0deg, rgba(134, 239, 172, 0.045) 0 1px, transparent 1px 12px),
+    linear-gradient(180deg, rgba(9, 27, 23, 0.94), rgba(7, 13, 21, 0.9));
+}
+
+.click-stats .stat-item::after {
+  border: 1px solid rgba(134, 239, 172, 0.12);
+  background: linear-gradient(90deg, transparent, rgba(134, 239, 172, 0.08), transparent);
+  opacity: 0.5;
+  mix-blend-mode: normal;
+}
+
+.stat-item__icon-wrap,
+.ability-icon,
+.upgrade-card__media,
+.research-icon {
+  border-radius: var(--ui-radius-sm);
+  border-color: rgba(190, 242, 100, 0.24);
+  background:
+    repeating-linear-gradient(0deg, rgba(190, 242, 100, 0.06) 0 1px, transparent 1px 8px),
+    linear-gradient(145deg, rgba(5, 46, 22, 0.64), rgba(6, 12, 23, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 12px 28px rgba(2, 6, 23, 0.45);
+}
+
+.info-ribbon,
+.info-ribbon__list .stat-item,
+.buff-chip,
+.achievement-summary,
+.settings-select {
+  border-color: rgba(132, 204, 22, 0.24);
+  background:
+    repeating-linear-gradient(90deg, rgba(113, 67, 29, 0.08) 0 1px, transparent 1px 16px),
+    linear-gradient(180deg, rgba(9, 24, 20, 0.9), rgba(7, 13, 22, 0.86));
+}
+
+.buy-btn,
+.quick-shop-panel__button,
+.goal-panel__button,
+.upgrade-card__button,
+.research-btn,
+.prestige-panel__action,
+.ascension-node__button,
+.settings-action,
+.modal-button.primary {
+  border: 1px solid rgba(190, 242, 100, 0.56);
+  background:
+    linear-gradient(180deg, rgba(190, 242, 100, 0.96), rgba(34, 197, 94, 0.86)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18), transparent);
+  color: rgba(3, 46, 21, 0.98);
+  font-weight: 900;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 14px 28px rgba(22, 163, 74, 0.24);
+}
+
+.buy-btn:hover:not(:disabled),
+.quick-shop-panel__button:hover:not(:disabled),
+.goal-panel__button:hover:not(:disabled),
+.upgrade-card__button:hover:not(:disabled),
+.research-btn:hover:not(:disabled),
+.prestige-panel__action:hover:not(:disabled),
+.ascension-node__button:hover:not(:disabled),
+.settings-action:hover,
+.modal-button.primary:hover:not(:disabled) {
+  border-color: rgba(236, 252, 203, 0.78);
+  background: linear-gradient(180deg, rgba(217, 249, 157, 0.98), rgba(74, 222, 128, 0.9));
+  color: rgba(2, 44, 18, 1);
+  transform: translateY(-1px);
+}
+
+.buy-btn:disabled,
+.quick-shop-panel__button:disabled,
+.upgrade-card__button:disabled,
+.research-btn:disabled,
+.prestige-panel__action:disabled,
+.ascension-node__button:disabled {
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.68);
+  color: rgba(148, 163, 184, 0.82);
+  box-shadow: none;
+}
+
+.modal-button.secondary,
+.shop-card__bulk-btn,
+.filter-pill,
+.roi-badge,
+.achievement-card__category,
+.achievement-card__status,
+.prestige-panel__stat,
+.modal-stat {
+  border-color: rgba(148, 163, 184, 0.18);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(8, 13, 23, 0.84)),
+    repeating-linear-gradient(90deg, rgba(190, 242, 100, 0.04) 0 1px, transparent 1px 12px);
+}
+
+.modal-button.danger,
+.settings-action.is-danger {
+  border-color: rgba(251, 113, 133, 0.44);
+  background: linear-gradient(180deg, rgba(190, 18, 60, 0.78), rgba(76, 5, 25, 0.86));
+  color: rgba(255, 228, 230, 0.98);
+}
+
+.ability-btn,
+.ascension-node,
+.depth-card {
+  background:
+    linear-gradient(90deg, rgba(92, 52, 22, 0.16) 0 0.3rem, transparent 0.3rem),
+    repeating-linear-gradient(0deg, rgba(148, 163, 184, 0.04) 0 1px, transparent 1px 10px),
+    linear-gradient(155deg, rgba(9, 24, 20, 0.94), rgba(7, 12, 22, 0.9));
+}
+
+.ability-btn.is-active,
+.ability-btn.is-ready,
+.ascension-node.is-affordable,
+.depth-card.is-available {
+  border-color: rgba(190, 242, 100, 0.6);
+  box-shadow:
+    0 18px 34px rgba(22, 163, 74, 0.14),
+    inset 0 0 0 1px rgba(190, 242, 100, 0.12);
+}
+
+.tab-strip {
+  border-color: rgba(132, 204, 22, 0.28);
+  background:
+    linear-gradient(90deg, rgba(92, 52, 22, 0.2) 0 0.42rem, transparent 0.42rem),
+    linear-gradient(180deg, rgba(8, 19, 17, 0.94), rgba(7, 13, 22, 0.9));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 14px 30px rgba(2, 6, 23, 0.26);
+}
+
+.tab-button {
+  border-color: transparent;
+  background: transparent;
+}
+
+.tab-button.is-active {
+  border-color: rgba(190, 242, 100, 0.42);
+  background:
+    repeating-linear-gradient(90deg, rgba(190, 242, 100, 0.08) 0 1px, transparent 1px 9px),
+    rgba(34, 197, 94, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(190, 242, 100, 0.12);
+}
+
+.shop-card::before,
+.upgrade-card::before,
+.research-card::before,
+.achievement-card::before,
+.prestige-panel::before,
+.modal-card::before,
+.depth-card::before {
+  inset: 0.5rem 0.5rem auto;
+}
+
+.shop-card::after,
+.upgrade-card::after,
+.research-card::after,
+.achievement-card::after,
+.prestige-panel::after {
+  content: '';
+  position: absolute;
+  inset: auto 0.55rem 0.55rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(120, 73, 33, 0.62), transparent);
+  pointer-events: none;
+}
+
+.achievement-card.is-unlocked,
+.milestone-card.is-active,
+.depth-card.is-owned {
+  border-color: rgba(250, 204, 21, 0.46);
+  background:
+    linear-gradient(90deg, rgba(113, 67, 29, 0.18) 0 0.42rem, transparent 0.42rem),
+    repeating-linear-gradient(0deg, rgba(250, 204, 21, 0.045) 0 1px, transparent 1px 12px),
+    linear-gradient(180deg, rgba(28, 29, 15, 0.93), rgba(8, 13, 22, 0.9));
+}
+
+.save-modal-textarea,
+.save-modal-input {
+  border-color: rgba(132, 204, 22, 0.24);
+  background:
+    linear-gradient(180deg, rgba(5, 10, 15, 0.94), rgba(8, 13, 23, 0.92)),
+    repeating-linear-gradient(0deg, rgba(190, 242, 100, 0.04) 0 1px, transparent 1px 12px);
+}
+
+.toast {
+  border-color: rgba(132, 204, 22, 0.34);
+  background:
+    linear-gradient(90deg, rgba(92, 52, 22, 0.22) 0 0.35rem, transparent 0.35rem),
+    linear-gradient(180deg, rgba(9, 24, 20, 0.96), rgba(7, 12, 22, 0.94));
+}
+
+@media (max-width: 767px) {
+  .quick-shop-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .info-ribbon,
+  .tab-strip,
+  .click-stats .stat-item {
+    border-radius: var(--ui-radius);
   }
 }
 

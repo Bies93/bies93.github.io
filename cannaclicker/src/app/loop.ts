@@ -15,6 +15,7 @@ interface LoopOptions {
 interface LoopHandlers {
   onTick: (state: GameState) => void;
   onAutosave?: (state: GameState) => void;
+  onAbilityExpired?: (state: GameState) => void;
 }
 
 export function startLoop(
@@ -69,6 +70,9 @@ export function startLoop(
     const abilityChanged = updateAbilityTimers(state, now);
     const eventEnded = clearExpiredEventBoost(state, now);
     const kickstartExpired = clearExpiredKickstart(state, now);
+    if (abilityChanged) {
+      handlers.onAbilityExpired?.(state);
+    }
     if (kickstartExpired) {
       state.temp.kickstartRemainingMs = 0;
     } else if (state.prestige.kickstart) {
@@ -145,7 +149,10 @@ function selectAutomationBuy(
     case 'cheapest':
       return [...entries].sort((a, b) => a.cost.cmp(b.cost))[0] ?? null;
     case 'best_roi':
-      return [...entries].sort((a, b) => (a.roi ?? Number.MAX_VALUE) - (b.roi ?? Number.MAX_VALUE))[0] ?? null;
+      return (
+        [...entries].sort((a, b) => (a.roi ?? Number.MAX_VALUE) - (b.roi ?? Number.MAX_VALUE))[0] ??
+        null
+      );
     case 'next_milestone':
       return [...entries].sort((a, b) => a.tier.remainingCount - b.tier.remainingCount)[0] ?? null;
     default:

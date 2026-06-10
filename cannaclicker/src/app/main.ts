@@ -28,6 +28,9 @@ startLoop(
     onAutosave: (current) => {
       save(current);
     },
+    onAbilityExpired: () => {
+      ui.playBuffExpire();
+    },
   },
   { autosaveSeconds: 10 },
 );
