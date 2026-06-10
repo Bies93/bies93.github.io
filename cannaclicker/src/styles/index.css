@@ -425,6 +425,18 @@ button {
   contain: paint;
 }
 
+.click-orbit[data-density='medium'] {
+  --orbit-bud-size: clamp(0.95rem, 2.05vw, 1.62rem);
+}
+
+.click-orbit[data-density='high'] {
+  --orbit-bud-size: clamp(0.7rem, 1.55vw, 1.15rem);
+}
+
+.click-orbit[data-density='max'] {
+  --orbit-bud-size: clamp(0.52rem, 1.18vw, 0.92rem);
+}
+
 .click-orbit[data-count='0'],
 .click-orbit.is-empty {
   display: none;
@@ -434,8 +446,8 @@ button {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: var(--orbit-bud-size);
-  height: var(--orbit-bud-size);
+  width: var(--orbit-bud-size-local, var(--orbit-bud-size));
+  height: var(--orbit-bud-size-local, var(--orbit-bud-size));
   background-image: var(--orbit-bud-image);
   background-position: center;
   background-repeat: no-repeat;
@@ -450,12 +462,14 @@ button {
 
 @keyframes orbitBudSpin {
   0% {
-    transform: translate(-50%, -50%) rotate(var(--orbit-angle)) translateX(var(--orbit-radius))
-      rotate(22deg) scale(var(--orbit-scale));
+    transform: translate(-50%, -50%) rotate(var(--orbit-angle))
+      translateX(var(--orbit-radius-local, var(--orbit-radius))) rotate(22deg)
+      scale(var(--orbit-scale));
   }
   100% {
     transform: translate(-50%, -50%) rotate(calc(var(--orbit-angle) + 360deg))
-      translateX(var(--orbit-radius)) rotate(382deg) scale(var(--orbit-scale));
+      translateX(var(--orbit-radius-local, var(--orbit-radius))) rotate(382deg)
+      scale(var(--orbit-scale));
   }
 }
 
@@ -2827,6 +2841,18 @@ body[data-plant-skin='ember'] .click-icon {
     --orbit-bud-size: clamp(0.92rem, 4.7vw, 1.32rem);
   }
 
+  .click-orbit[data-density='medium'] {
+    --orbit-bud-size: clamp(0.7rem, 3.4vw, 1rem);
+  }
+
+  .click-orbit[data-density='high'] {
+    --orbit-bud-size: clamp(0.48rem, 2.4vw, 0.72rem);
+  }
+
+  .click-orbit[data-density='max'] {
+    --orbit-bud-size: clamp(0.32rem, 1.8vw, 0.52rem);
+  }
+
   .click-label {
     letter-spacing: 0.2em;
     bottom: clamp(1rem, 4vw, 1.5rem);
@@ -3224,8 +3250,9 @@ body[data-plant-skin='ember'] .click-icon {
 
 [data-motion='minimal'] .click-orbit__bud {
   animation: none !important;
-  transform: translate(-50%, -50%) rotate(var(--orbit-angle)) translateX(var(--orbit-radius))
-    rotate(22deg) scale(var(--orbit-scale));
+  transform: translate(-50%, -50%) rotate(var(--orbit-angle))
+    translateX(var(--orbit-radius-local, var(--orbit-radius))) rotate(22deg)
+    scale(var(--orbit-scale));
 }
 
 @keyframes click-pop {
@@ -3329,8 +3356,9 @@ body[data-plant-skin='ember'] .click-icon {
 
   .click-orbit__bud {
     animation: none !important;
-    transform: translate(-50%, -50%) rotate(var(--orbit-angle)) translateX(var(--orbit-radius))
-      rotate(22deg) scale(var(--orbit-scale));
+    transform: translate(-50%, -50%) rotate(var(--orbit-angle))
+      translateX(var(--orbit-radius-local, var(--orbit-radius))) rotate(22deg)
+      scale(var(--orbit-scale));
   }
 }
 
