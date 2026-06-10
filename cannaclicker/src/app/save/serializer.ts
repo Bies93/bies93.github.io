@@ -138,6 +138,8 @@ export function createPersistedPayload(state: GameState, timestamp: number): Per
       seedPassiveIdleMs: state.meta.seedPassiveIdleMs,
       seedPassiveRollsDone: state.meta.seedPassiveRollsDone,
       eventStats: state.meta.eventStats,
+      eventRewardBudgetWindowStartedAt: state.meta.eventRewardBudgetWindowStartedAt,
+      eventRewardValueThisWindow: state.meta.eventRewardValueThisWindow,
       manualClicks: state.meta.manualClicks,
       totalItemsPurchased: state.meta.totalItemsPurchased,
       totalUpgradesPurchased: state.meta.totalUpgradesPurchased,
@@ -152,6 +154,13 @@ export function createPersistedPayload(state: GameState, timestamp: number): Per
       abilityUses: state.meta.abilityUses,
       completedGoals: state.meta.completedGoals,
     },
+    rooms: state.rooms,
+    strains: state.strains,
+    contracts: state.contracts,
+    seasons: state.seasons,
+    eventMastery: state.eventMastery,
+    collections: state.collections,
+    challenges: state.challenges,
   } satisfies PersistedStateV7;
 }
 

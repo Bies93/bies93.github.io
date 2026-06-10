@@ -17,8 +17,6 @@ export const ascensionNodeIds = [
   'event_echo',
   'click_to_canopy',
   'shop_momentum',
-  'permanent_slot_i',
-  'permanent_slot_ii',
   'ascended_events',
   'meta_greenhouse',
   'runway_protocol',
@@ -38,7 +36,6 @@ export type AscensionEffect =
   | { type: 'startingBuds'; value: number }
   | { type: 'startingItem'; itemId: 'seedling'; value: number }
   | { type: 'autoClickRate'; value: number }
-  | { type: 'permanentUpgradeSlot'; value: number }
   | { type: 'prestigeSeedMultiplier'; value: number };
 
 export interface AscensionNodeDefinition {
@@ -328,38 +325,8 @@ export const ascensionNodes: readonly AscensionNodeDefinition[] = [
     effects: [{ type: 'globalMultiplier', value: 1.14 }],
   },
   {
-    id: 'permanent_slot_i',
-    order: 19,
-    tier: 3,
-    category: 'utility',
-    cost: 8,
-    requires: ['prestige_focus'],
-    name: { de: 'Permanent Slot I', en: 'Permanent Slot I' },
-    description: {
-      de: 'Grundlage für spätere dauerhaft ausgerüstete Upgrades.',
-      en: 'Foundation for later permanently equipped upgrades.',
-    },
-    effectSummary: { de: '+1 Permanent-Slot', en: '+1 permanent slot' },
-    effects: [{ type: 'permanentUpgradeSlot', value: 1 }],
-  },
-  {
-    id: 'permanent_slot_ii',
-    order: 20,
-    tier: 3,
-    category: 'utility',
-    cost: 10,
-    requires: ['permanent_slot_i', 'research_discount_ii'],
-    name: { de: 'Permanent Slot II', en: 'Permanent Slot II' },
-    description: {
-      de: 'Mehr Raum für spätere Build-Identität.',
-      en: 'More room for future build identity.',
-    },
-    effectSummary: { de: '+1 Permanent-Slot', en: '+1 permanent slot' },
-    effects: [{ type: 'permanentUpgradeSlot', value: 1 }],
-  },
-  {
     id: 'ascended_events',
-    order: 21,
+    order: 19,
     tier: 4,
     category: 'events',
     cost: 12,
@@ -380,11 +347,11 @@ export const ascensionNodes: readonly AscensionNodeDefinition[] = [
   },
   {
     id: 'meta_greenhouse',
-    order: 22,
+    order: 20,
     tier: 4,
     category: 'prestige',
     cost: 14,
-    requires: ['shop_momentum', 'permanent_slot_i'],
+    requires: ['shop_momentum'],
     name: { de: 'Meta Greenhouse', en: 'Meta Greenhouse' },
     description: {
       de: 'Jeder weitere Run profitiert stärker von echter Ascension.',
@@ -395,7 +362,7 @@ export const ascensionNodes: readonly AscensionNodeDefinition[] = [
   },
   {
     id: 'runway_protocol',
-    order: 23,
+    order: 21,
     tier: 4,
     category: 'prestige',
     cost: 16,
@@ -416,11 +383,11 @@ export const ascensionNodes: readonly AscensionNodeDefinition[] = [
   },
   {
     id: 'botanical_legacy',
-    order: 24,
+    order: 22,
     tier: 4,
     category: 'core',
     cost: 20,
-    requires: ['ascended_events', 'runway_protocol', 'permanent_slot_ii'],
+    requires: ['ascended_events', 'runway_protocol', 'meta_greenhouse'],
     name: { de: 'Botanical Legacy', en: 'Botanical Legacy' },
     description: {
       de: 'Ein Release-Midgame-Ziel: stark, sichtbar, aber nicht endlos.',

@@ -185,9 +185,6 @@ function applyAscensionEffect(target: AscensionEffects, effect: AscensionEffect)
     case 'autoClickRate':
       target.autoClickRate += effect.value;
       break;
-    case 'permanentUpgradeSlot':
-      target.permanentSlots += effect.value;
-      break;
     case 'prestigeSeedMultiplier':
       target.prestigeSeedMultiplier *= effect.value;
       break;

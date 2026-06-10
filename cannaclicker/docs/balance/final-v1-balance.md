@@ -9,10 +9,10 @@ Stand: Sprint 26 / `1.0.0-rc.1`.
 | Erstes Item        |                             15-60 Sekunden | Seedling kostet 12 Buds, aktives Klicken bleibt klar.                        |
 | Passive Produktion |                                1-3 Minuten | Seedlings/Planters geben sichtbaren BPS, aber keine sofortige Idle-Dominanz. |
 | Erstes Upgrade     |                                5-8 Minuten | `precision_trim` bei 260 Buds/420 Kosten bleibt früher BPC-Anker.            |
-| Erste Events       | nach Item, 120 total Buds oder 90 Sekunden | Events dürfen motivieren, aber nicht den Start überspringen.                 |
+| Erste Events       | nach Item, 120 total Buds und 90 Sekunden  | Events dürfen motivieren, aber nicht den Start überspringen.                 |
 | Research sichtbar  |                              20-45 Minuten | Erste Bud-Research-Nodes sind erreichbar, Seed-Research bleibt Meta-Hook.    |
-| Prestige ready     |                              45-90 Minuten | 3M Lifetime-Buds ist Requirement, damit der erste Reset nicht zu früh kommt. |
-| Zweiter Run        |                             25%+ schneller | Ascension-Seeds, Ascension-Nodes und Kickstart beschleunigen moderat.        |
+| Prestige ready     |                              60-90 Minuten | 3M+ dynamische Lifetime-Buds plus Mindestlaufzeit verhindern Reset-Spam.     |
+| Zweiter Run        |                             25%+ schneller | Ascension-Seeds, Ascension-Nodes und Kickstart beschleunigen kontrolliert.   |
 
 ## Profile-Pass
 
@@ -33,12 +33,15 @@ Stand: Sprint 26 / `1.0.0-rc.1`.
 - Spaete Items haben bessere Basis-ROI, aber hoehere Cost-Factors und klare Unlocks.
 - Alte Items bleiben über Item-Boosts, Milestones und Synergy-Upgrades relevant.
 - Event-Rewards bleiben in Sekunden Produktion ausgedrueckt, damit sie mit dem Run skalieren; Golden Bud nutzt 12s statt 15s.
+- Event-Spawns sind bewusst seltene Bonusmomente; Spawn-Research skaliert kontrolliert und ist gedeckelt.
+- Event-Rewards nutzen ein 5-Minuten-Phasenbudget: Early 15%, Early Automation 35%, First Strategy 60%, spaeter mehr nur durch echte Research-/Ascension-Investition.
 - Event-Buffs stacken als sichtbare Liste mit eigenen Timern, gleiche Buffs refreshen statt unklar zu duplizieren.
 - Seed-Gain über Events ist begrenzt und wird durch Seed-Cap abgefedert; diese Seeds sind Research-Währung und erhöhen den Prestige-Multiplikator nicht.
 - Prestige erzeugt Ascension-Seeds; `totalAscensionSeeds` ist die einzige Seed-Basis für den globalen Prestige-Multiplikator.
+- Prestige-Anforderung skaliert mit `totalAscensionSeeds` und Prestige-Anzahl; zusaetzlich gilt eine Mindestlaufzeit von 60 Minuten pro Prestige.
 - Offline-Gain bleibt bei 20% der BPS-Produktion mit 8h Basis-Cap.
 - Offline-Gain speichert bewusst bereinigte BPS ohne temporäre Event-, Ability- oder Kickstart-Multiplikatoren.
-- `docs/balance/phase-targets-2-20h.md` und `docs/balance/simulation-results.md` dokumentieren den 2-20h-Pass.
+- `docs/balance/phase-targets-2-20h.md` und `docs/balance/simulation-results.md` dokumentieren den 2-20h-Pass aus der echten deterministischen Sim.
 
 ## Content-Entscheidungen
 

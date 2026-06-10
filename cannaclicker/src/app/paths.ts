@@ -26,15 +26,20 @@ const resolveBaseUrl = (): string | null => {
   return null;
 };
 
+const getConfiguredBaseUrl = (): string => {
+  const meta = import.meta as ImportMeta & { env?: { BASE_URL?: string } };
+  return meta.env?.BASE_URL ?? '/';
+};
+
 export const withBase = (path: string): string => {
   const normalized = stripLeading(path);
   const runtimeBase = resolveBaseUrl();
 
   if (runtimeBase) {
-    const baseUrl = new URL(import.meta.env.BASE_URL, runtimeBase);
+    const baseUrl = new URL(getConfiguredBaseUrl(), runtimeBase);
     return new URL(normalized, baseUrl).pathname;
   }
 
-  const fallback = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+  const fallback = getConfiguredBaseUrl().replace(/\/?$/, '/');
   return `${fallback}${normalized}`;
 };

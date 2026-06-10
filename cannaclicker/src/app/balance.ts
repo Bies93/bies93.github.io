@@ -1,5 +1,3 @@
-export const PRESTIGE_ALPHA = 0.5;
-export const PRESTIGE_K = 700;
 export const PRESTIGE_M = 0.05;
 export const PRESTIGE_MIN_REQUIREMENT = 3_000_000;
 

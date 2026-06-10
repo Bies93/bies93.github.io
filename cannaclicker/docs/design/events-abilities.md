@@ -6,10 +6,10 @@ Stand: Sprint 19
 
 | Regel           | Wert                                                                                   |
 | --------------- | -------------------------------------------------------------------------------------- |
-| Erste Events    | Gate bis erstes Item, 120 Gesamtbuds oder 90 Sekunden Runzeit.                         |
+| Erste Events    | Gate bis erstes Item, mindestens 120 Gesamtbuds und mindestens 90 Sekunden Runzeit.     |
 | Aktive Events   | 1 im Early Game, 2 ab 2.5 Mio Gesamtbuds oder `Event-Scouts`.                          |
-| Spawn-Intervall | Basis 14-26 Sekunden nach Gate, skaliert mit Event-Research.                           |
-| Pity            | Global 55 Sekunden plus getrennte Kategorie-Pity fuer Minor/Chain/Risk/Major/Seasonal. |
+| Spawn-Intervall | Basis 720-1200 Sekunden nach Gate, skaliert kontrolliert mit Event-Research.           |
+| Pity            | Global 720 Sekunden plus getrennte Kategorie-Pity fuer Minor/Chain/Risk/Major/Seasonal. |
 | Sichtbarkeit    | 7-12 Sekunden, skaliert mit Event-Dauer-Research.                                      |
 | Stack-Regel     | Unterschiedliche Event-Buffs stacken mit eigenen Timern; gleiche Buffs refreshen.      |
 | Qualität        | Event-Research und Event-Upgrades gewichten Chain/Major/Seasonal etwas hoeher.         |
@@ -18,11 +18,11 @@ Stand: Sprint 19
 
 | Kategorie | Rolle                          | Pity-Ziel | Balance-Notiz                                          |
 | --------- | ------------------------------ | --------: | ------------------------------------------------------ |
-| Minor     | Kleine Bud-/Seed-/Buff-Fenster |       52s | Haelt aktive Spieler wach, bricht Early nicht.         |
-| Chain     | Mehrstufige Event-Folge        |       92s | Gibt aktive Aufmerksamkeit eine klare Belohnung.       |
-| Risk      | Win/Soft-Fail mit Warnstil     |      124s | Nie harter Verlust, aber kurze Malus-Fenster moeglich. |
-| Major     | Seltene starke Momente         |      160s | Gated ab Strategy-/Prestige-Phase.                     |
-| Seasonal  | Spaetere Stimmungssets         |      190s | Kein Kalenderzwang; ueber Fortschritt freigeschaltet.  |
+| Minor     | Kleine Bud-/Seed-/Buff-Fenster |      720s | Haelt aktive Spieler wach, bricht Early nicht.         |
+| Chain     | Mehrstufige Event-Folge        |      960s | Gibt aktive Aufmerksamkeit eine klare Belohnung.       |
+| Risk      | Win/Soft-Fail mit Warnstil     |     1080s | Nie harter Verlust, aber kurze Malus-Fenster moeglich. |
+| Major     | Seltene starke Momente         |     1200s | Gated ab Strategy-/Prestige-Phase.                     |
+| Seasonal  | Spaetere Stimmungssets         |     1380s | Kein Kalenderzwang; ueber Fortschritt freigeschaltet.  |
 
 ## Event-Tabelle
 
@@ -59,8 +59,9 @@ Stand: Sprint 19
 
 ## Sprint-19-Balance
 
-- Early Events bleiben erst nach erstem Item, 120 Gesamtbuds oder 90 Sekunden aktiv.
-- Major Events sind durch niedrige Gewichte, Stage-Gates und 160s Kategorie-Pity von der ersten Progression entkoppelt.
+- Early Events bleiben erst nach erstem Item, 120 Gesamtbuds und 90 Sekunden aktiv.
+- Major Events sind durch niedrige Gewichte, Stage-Gates und lange Kategorie-Pity von der ersten Progression entkoppelt.
+- Event-Rewards laufen durch ein 5-Minuten-Phasenbudget, das Extreme weich daempft statt Events hart zu blockieren.
 - Risk Events verlieren keine Buds; Soft-Fails sind kurze Malusfenster, damit der Klick nie hart bestraft.
 - Chain-Events belohnen aktives Hinschauen, werden aber durch Stage-Gates und Chain-Chance kontrolliert.
 - Seasonal Events sind Fortschrittssets ohne Kalenderabhaengigkeit und koennen spaeter ueber Prestige/Research erweitert werden.

@@ -16,6 +16,7 @@ import { updateUpgrades } from './updaters/upgrades';
 import { updateResearch } from './updaters/research';
 import { updatePrestigePanel } from './updaters/prestigePanel';
 import { updateAchievements } from './updaters/achievements';
+import { updateGreenhouse } from './updaters/greenhouse';
 import { updatePrestigeModal } from './services/prestigeModal';
 import { updateOfflineToast } from './updaters/offline';
 import { save } from '../save';
@@ -107,6 +108,7 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
     context.setResearchState(result.activeFilter, result.researchFilterManuallySelected);
 
     updatePrestigePanel(state, refs);
+    updateGreenhouse(state, refs);
     updateAchievements(state, refs, (options: ToastOptions) => {
       audio.playAchievement(options.tone === 'rare' ? 'rare' : 'common');
       showToast(options);

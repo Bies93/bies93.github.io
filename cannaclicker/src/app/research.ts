@@ -11,6 +11,7 @@ import { updatePrestigeMultiplier } from './prestige';
 import { applyEffects } from '../game/effects';
 import { reapplyAbilityEffects } from './abilities';
 import { recordInteraction } from './seeds';
+import { awardStrainXp } from './depth';
 
 export type ResearchFilter = 'all' | 'available' | 'owned';
 
@@ -164,6 +165,7 @@ export function purchaseResearch(state: GameState, id: ResearchId): boolean {
 
   state.researchOwned = [...state.researchOwned, node.id];
   state.meta.totalResearchPurchased += 1;
+  awardStrainXp(state, 18);
   recordInteraction(state);
   applyResearchEffects(state);
   return true;

@@ -3140,6 +3140,171 @@ body[data-plant-skin='ember'] .click-icon {
   }
 }
 
+.greenhouse-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.greenhouse-summary {
+  border: 1px solid rgb(74 222 128 / 0.22);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgb(20 83 45 / 0.42), rgb(15 23 42 / 0.62));
+  color: rgb(220 252 231);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.85rem 1rem;
+}
+
+.depth-section {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.depth-section__title {
+  color: rgb(187 247 208);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.depth-section__list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.depth-card {
+  appearance: none;
+  border: 1px solid rgb(148 163 184 / 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgb(15 23 42 / 0.94), rgb(6 78 59 / 0.48)),
+    rgb(15 23 42);
+  color: rgb(241 245 249);
+  cursor: pointer;
+  display: grid;
+  gap: 0.35rem;
+  min-height: 72px;
+  padding: 0.8rem;
+  text-align: left;
+  transition:
+    border-color 140ms ease,
+    transform 140ms ease,
+    background 140ms ease;
+  width: 100%;
+}
+
+.depth-card[hidden] {
+  display: none !important;
+}
+
+.depth-card:hover:not(:disabled) {
+  border-color: rgb(134 239 172 / 0.55);
+  transform: translateY(-1px);
+}
+
+.depth-card:disabled {
+  cursor: default;
+  opacity: 0.82;
+}
+
+.depth-card.is-active {
+  border-color: rgb(45 212 191 / 0.72);
+  background:
+    linear-gradient(135deg, rgb(20 184 166 / 0.2), rgb(21 128 61 / 0.24)),
+    rgb(15 23 42);
+}
+
+.depth-card.is-available {
+  border-color: rgb(190 242 100 / 0.72);
+  box-shadow: 0 0 0 1px rgb(190 242 100 / 0.14);
+}
+
+.depth-card.is-owned {
+  border-color: rgb(250 204 21 / 0.46);
+}
+
+.depth-card.is-locked {
+  background: rgb(15 23 42 / 0.72);
+  color: rgb(148 163 184);
+}
+
+.depth-card--compact {
+  border-color: color-mix(in srgb, var(--season-accent, #56f39a) 42%, rgb(148 163 184 / 0.18));
+}
+
+.depth-card--static {
+  cursor: default;
+}
+
+.depth-card__head {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+.depth-card__head strong {
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.depth-card__head em {
+  color: rgb(190 242 100);
+  font-size: 0.76rem;
+  font-style: normal;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.depth-card__body,
+.depth-card__meta,
+.depth-card__action,
+.depth-empty {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  margin: 0;
+}
+
+.depth-card__body {
+  color: rgb(203 213 225);
+}
+
+.depth-card__meta {
+  color: rgb(148 163 184);
+}
+
+.depth-card__action {
+  color: rgb(187 247 208);
+  font-weight: 800;
+}
+
+.automation-controls {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.automation-controls .settings-select:last-child {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 640px) {
+  .depth-card {
+    min-height: 64px;
+    padding: 0.7rem;
+  }
+
+  .depth-card__head {
+    align-items: flex-start;
+  }
+
+  .automation-controls {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Dynamic UI visibility must override component display rules. */
 .hidden {
   display: none !important;

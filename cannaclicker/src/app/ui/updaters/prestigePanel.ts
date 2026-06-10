@@ -6,7 +6,7 @@ import { milestones } from '../../../data/milestones';
 import type { MilestoneId } from '../../../data/milestones';
 import type { AscensionNodeId } from '../../../data/ascension';
 import type { MilestoneProgressSnapshot } from '../../milestones';
-import { getAscensionEffects, getAscensionViews } from '../../ascension';
+import { getAscensionViews } from '../../ascension';
 import type { UIRefs, MilestoneCardRefs } from '../types';
 import type { AscensionNodeCardRefs } from '../types/prestige';
 import {
@@ -44,10 +44,14 @@ export function updatePrestigePanel(state: GameState, refs: UIRefs): void {
     ? t(state.locale, 'panel.prestige.readySeeds', {
         seeds: preview.seedGain,
       })
-    : t(state.locale, 'panel.prestige.progress', {
-        current: formatDecimal(preview.lifetimeBuds),
-        target: formatDecimal(preview.requirementTarget),
-      });
+    : !preview.runDurationMet && preview.seedGain > 0
+      ? t(state.locale, 'panel.prestige.minRun', {
+          minutes: Math.ceil((preview.minRunDurationMs - preview.runDurationMs) / 60_000),
+        })
+      : t(state.locale, 'panel.prestige.progress', {
+          current: formatDecimal(preview.lifetimeBuds),
+          target: formatDecimal(preview.requirementTarget),
+        });
 
   panel.requirement.textContent = requirementText;
   panel.container.classList.toggle('is-ready', preview.requirementMet);
@@ -67,13 +71,11 @@ function updateAscensionTree(
   summary: HTMLElement,
 ): void {
   const locale = state.locale;
-  const effects = getAscensionEffects(state);
   const ownedCount = state.prestige.ascensionOwned?.length ?? 0;
   summary.textContent = t(locale, 'ascension.summary', {
     owned: ownedCount,
     total: cards.size,
     seeds: state.prestige.ascensionSeeds ?? 0,
-    slots: effects.permanentSlots,
   });
 
   for (const view of getAscensionViews(state)) {

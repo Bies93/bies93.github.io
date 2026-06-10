@@ -30,6 +30,7 @@ test-results
 AGENTS.md
 .codex/
 .roo/
+Legacy_Assets/
 
 # Local high-resolution audio master. Runtime uses Opus + MP3.
 src/cannaclicker_psy_dub_reggae_loop_92bpm.wav

@@ -7,6 +7,13 @@ import type {
   KickstartState,
   MetaState,
   PreferencesState,
+  RoomsState,
+  StrainsState,
+  ContractsState,
+  SeasonsState,
+  EventMasteryState,
+  CollectionsState,
+  ChallengesState,
   SeedGainEntry,
 } from '../state';
 import type { EventCategory, EventId } from '../events';
@@ -20,6 +27,12 @@ import type { LocaleKey } from '../i18n';
 import type { SettingsState } from '../settings';
 import type { GoalId } from '../../data/goals';
 import type { AscensionNodeId } from '../../data/ascension';
+import type { RoomId } from '../../data/rooms';
+import type { StrainId } from '../../data/strains';
+import type { ContractId } from '../../data/contracts';
+import type { SeasonId } from '../../data/seasons';
+import type { ChallengeId } from '../../data/challenges';
+import type { CollectionId } from '../../data/collections';
 
 export interface PersistedAbilityState {
   active?: boolean;
@@ -64,6 +77,8 @@ export interface PersistedMetaState {
   seedPassiveIdleMs?: number;
   seedPassiveRollsDone?: number;
   eventStats?: PersistedEventStats;
+  eventRewardBudgetWindowStartedAt?: number;
+  eventRewardValueThisWindow?: number;
   manualClicks?: number;
   totalItemsPurchased?: number;
   totalUpgradesPurchased?: number;
@@ -100,6 +115,56 @@ export interface PersistedEventStats {
   lastSpawnAt?: number;
   lastClickAt?: number;
   perEvent?: Partial<Record<EventId, PersistedEventStatsPerEvent>>;
+}
+
+export interface PersistedRoomsState {
+  levels?: Partial<Record<RoomId, number>>;
+  lastUpgradedAt?: number;
+}
+
+export interface PersistedStrainsState {
+  selected?: StrainId | null;
+  xp?: Partial<Record<StrainId, number>>;
+  levels?: Partial<Record<StrainId, number>>;
+  selections?: Partial<Record<StrainId, number>>;
+}
+
+export interface PersistedContractRunBuff {
+  target?: 'bps' | 'bpc' | 'both' | 'events';
+  multiplier?: number;
+  remainingRuns?: number;
+}
+
+export interface PersistedContractsState {
+  tokens?: number;
+  offers?: ContractId[];
+  activeId?: ContractId | null;
+  completed?: Partial<Record<ContractId, number>>;
+  claimed?: Partial<Record<ContractId, boolean>>;
+  pendingBuff?: PersistedContractRunBuff | null;
+  activeBuff?: PersistedContractRunBuff | null;
+}
+
+export interface PersistedSeasonsState {
+  active?: SeasonId;
+  unlocked?: SeasonId[];
+}
+
+export interface PersistedEventMasteryState {
+  claimed?: Partial<Record<EventId, number>>;
+}
+
+export interface PersistedCollectionsState {
+  owned?: CollectionId[];
+  score?: number;
+}
+
+export interface PersistedChallengesState {
+  activeId?: ChallengeId | null;
+  startedAt?: number;
+  completed?: Partial<Record<ChallengeId, boolean>>;
+  attempts?: Partial<Record<ChallengeId, number>>;
+  unlocked?: ChallengeId[];
 }
 
 export interface PersistedStateV1Legacy {
@@ -194,6 +259,13 @@ interface PersistedStateBase {
   automation?: Partial<AutomationState>;
   settings: SettingsState;
   meta: PersistedMetaState;
+  rooms?: PersistedRoomsState;
+  strains?: PersistedStrainsState;
+  contracts?: PersistedContractsState;
+  seasons?: PersistedSeasonsState;
+  eventMastery?: PersistedEventMasteryState;
+  collections?: PersistedCollectionsState;
+  challenges?: PersistedChallengesState;
 }
 
 export interface PersistedStateV5 extends PersistedStateBase {
@@ -223,4 +295,11 @@ export type RestoredAbilityState = AbilityState;
 export type RestoredAbilityRuntimeState = AbilityRuntimeState;
 export type RestoredKickstartState = KickstartState | null;
 export type RestoredMetaState = MetaState;
+export type RestoredRoomsState = RoomsState;
+export type RestoredStrainsState = StrainsState;
+export type RestoredContractsState = ContractsState;
+export type RestoredSeasonsState = SeasonsState;
+export type RestoredEventMasteryState = EventMasteryState;
+export type RestoredCollectionsState = CollectionsState;
+export type RestoredChallengesState = ChallengesState;
 export type RestoredSeedGainEntry = SeedGainEntry;

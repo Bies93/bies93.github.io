@@ -14,6 +14,7 @@ import { recordInteraction, checkSeedSynergies } from './seeds';
 import { achievementRequirementMet, getAchievementScoreMultiplier } from './achievements';
 import { applyAscensionEffects } from './ascension';
 import { getItemSynergyMultiplier } from './itemSynergies';
+import { applyDepthEffects, awardStrainXp } from './depth';
 
 export function handleManualClick(state: GameState): Decimal {
   const now = Date.now();
@@ -25,12 +26,14 @@ export function handleManualClick(state: GameState): Decimal {
   state.buds = state.buds.add(gained);
   state.total = state.total.add(gained);
   state.prestige.lifetimeBuds = state.prestige.lifetimeBuds.add(gained);
+  awardStrainXp(state, state.temp.lastClickCritical ? 3 : 1);
   return gained;
 }
 
 export function recalcDerivedValues(state: GameState): void {
   applyResearchEffects(state);
   applyAscensionEffects(state);
+  applyDepthEffects(state);
 
   const milestoneResult = computeMilestones(state);
   state.temp.milestoneProgress = milestoneResult.progress;
@@ -142,6 +145,7 @@ export function recalcDerivedValues(state: GameState): void {
   const eventCostMult = state.temp.eventCostMult ?? new Decimal(1);
   state.temp.costMultiplier = state.temp.costMultiplier
     .mul(kickstartGlobalCost)
+    .mul(state.temp.depthCostMult ?? new Decimal(1))
     .mul(abilityCostMult)
     .mul(eventCostMult);
 
@@ -171,7 +175,8 @@ export function recalcDerivedValues(state: GameState): void {
   const baseMultiplier = globalMultiplier
     .mul(achievementMultiplier)
     .mul(prestigeMultiplier)
-    .mul(milestoneGlobalMult);
+    .mul(milestoneGlobalMult)
+    .mul(state.temp.depthGlobalMult ?? new Decimal(1));
   const researchBpsMult = state.temp.researchBpsMult ?? new Decimal(1);
   const researchBpcMult = state.temp.researchBpcMult ?? new Decimal(1);
   const abilityBpsMult = new Decimal(abilityMultiplierFor(state, 'bps'));
@@ -187,13 +192,16 @@ export function recalcDerivedValues(state: GameState): void {
     .mul(kickstartBps);
   const totalBpcMultiplier = baseMultiplier
     .mul(clickMultiplier)
+    .mul(state.temp.depthBpcMult ?? new Decimal(1))
     .mul(researchBpcMult)
     .mul(abilityBpcMult)
     .mul(eventBpcMult)
     .mul(milestoneBpcMult)
     .mul(kickstartBpc);
 
-  state.bps = sum(...buildingProduction).mul(totalBpsMultiplier);
+  state.bps = state.temp.challengeDisablePassiveProduction
+    ? new Decimal(0)
+    : sum(...buildingProduction).mul(totalBpsMultiplier);
   const bpsClickComponent = state.bps.mul(Math.max(0, state.temp.clickBpsSeconds ?? 0));
   state.bpc = new Decimal(1).add(bpsClickComponent).mul(totalBpcMultiplier);
   state.temp.totalBpsMult = totalBpsMultiplier;
@@ -211,6 +219,12 @@ export function buyItem(state: GameState, itemId: ItemId, quantity = 1): boolean
   }
 
   const owned = state.items[itemId] ?? 0;
+  if (
+    state.temp.challengeMaxPerItem !== null &&
+    owned + quantity > state.temp.challengeMaxPerItem
+  ) {
+    return false;
+  }
   const buildingCostMult = state.temp.buildingCostMultipliers?.[itemId] ?? new Decimal(1);
   const totalCostMult = state.temp.costMultiplier.mul(buildingCostMult);
   const totalCost = getBulkCost(definition, owned, quantity, totalCostMult);
@@ -222,6 +236,7 @@ export function buyItem(state: GameState, itemId: ItemId, quantity = 1): boolean
   state.buds = state.buds.sub(totalCost);
   state.items[itemId] = owned + quantity;
   state.meta.totalItemsPurchased += quantity;
+  awardStrainXp(state, Math.max(1, quantity));
   checkSeedSynergies(state);
   recordInteraction(state);
   recalcDerivedValues(state);
@@ -251,6 +266,7 @@ export function buyUpgrade(state: GameState, upgradeId: UpgradeId): boolean {
   state.buds = state.buds.sub(cost);
   state.upgrades[upgradeId] = true;
   state.meta.totalUpgradesPurchased += 1;
+  awardStrainXp(state, 12);
   recordInteraction(state);
   recalcDerivedValues(state);
   evaluateAchievements(state);

@@ -48,6 +48,8 @@ Stand: Sprint 26 / `1.0.0-rc.1`.
 ## Abnahme
 
 - [x] Finaler Build nach letztem Commit.
+- [x] Lokale Release-Pipeline nach Chef-Fix: `assets:check`, `balance:simulate`, `typecheck`, `lint`, `build`, `e2e`.
+- [ ] GitHub Actions `workflow_dispatch` fuer den final gepushten Commit starten und Pages-Run pruefen.
 - [x] Browser-Smoke: Chromium Desktop.
 - [x] Browser-Smoke: Mobile Viewports `320px`, `390px`, `768px`, `1440px`.
 - [x] Browser-Smoke: Firefox via Playwright.

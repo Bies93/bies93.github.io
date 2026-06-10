@@ -2,6 +2,7 @@ import { getPrestigePreview } from '../../prestige';
 import { getResearchList } from '../../research';
 import { getShopEntries } from '../../shop';
 import { getUpgradeEntries } from '../../upgrades';
+import { getContractViews, getRoomViews } from '../../depth';
 import type { GameState } from '../../state';
 import type { SidePanelTab, UIRefs } from '../types';
 
@@ -42,11 +43,16 @@ function getTabBadges(state: GameState): Partial<Record<SidePanelTab, string>> {
   const availableResearch = getResearchList(state, 'available').length;
   const prestigePreview = getPrestigePreview(state);
   const unlockedAchievements = Object.values(state.achievements).filter(Boolean).length;
+  const greenhouseActions =
+    getRoomViews(state).filter((room) => room.affordable).length +
+    getContractViews(state).filter((contract) => contract.active && contract.completed && !contract.claimed)
+      .length;
 
   return {
     shop: affordableItems > 0 ? String(affordableItems) : '',
     upgrades: availableUpgrades > 0 ? String(availableUpgrades) : '',
     research: availableResearch > 0 ? String(availableResearch) : '',
+    greenhouse: greenhouseActions > 0 ? String(greenhouseActions) : '',
     prestige: prestigePreview.requirementMet ? `+${prestigePreview.seedGain}` : '',
     achievements: unlockedAchievements > 0 ? String(unlockedAchievements) : '',
   } satisfies Partial<Record<SidePanelTab, string>>;

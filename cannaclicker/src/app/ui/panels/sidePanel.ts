@@ -3,6 +3,11 @@ import type { AchievementId } from '../../../data/achievements';
 import type { ItemId } from '../../../data/items';
 import type { ResearchId } from '../../../data/research';
 import type { UpgradeId } from '../../../data/upgrades';
+import { rooms, type RoomId } from '../../../data/rooms';
+import { strains, type StrainId } from '../../../data/strains';
+import { contracts, type ContractId } from '../../../data/contracts';
+import { seasons, type SeasonId } from '../../../data/seasons';
+import { challenges, type ChallengeId } from '../../../data/challenges';
 import type { ResearchFilter } from '../../research';
 import { PLANT_SKINS, UI_THEMES } from '../../settings';
 import { createAchievementCard } from '../components/achievementCard';
@@ -28,7 +33,15 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
 
   const tabs = new Map<SidePanelTab, HTMLButtonElement>();
   (
-    ['shop', 'upgrades', 'research', 'prestige', 'achievements', 'settings'] as SidePanelTab[]
+    [
+      'shop',
+      'upgrades',
+      'research',
+      'greenhouse',
+      'prestige',
+      'achievements',
+      'settings',
+    ] as SidePanelTab[]
   ).forEach((tab) => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -147,6 +160,116 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
     achievementRefs.set(definition.id, card);
     achievementsList.appendChild(card.container);
   });
+
+  const greenhouseView = document.createElement('div');
+  greenhouseView.className = 'greenhouse-panel space-y-4';
+  const greenhouseSummary = document.createElement('div');
+  greenhouseSummary.className = 'greenhouse-summary';
+  greenhouseView.appendChild(greenhouseSummary);
+
+  const roomsList = createDepthSection(greenhouseView, 'Greenhouse Rooms');
+  const roomButtons = new Map<RoomId, HTMLButtonElement>();
+  rooms.forEach((room) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'depth-card';
+    button.dataset.role = 'room-upgrade';
+    button.dataset.id = room.id;
+    roomsList.appendChild(button);
+    roomButtons.set(room.id, button);
+  });
+
+  const strainsList = createDepthSection(greenhouseView, 'Strains');
+  const strainButtons = new Map<StrainId, HTMLButtonElement>();
+  strains.forEach((strain) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'depth-card';
+    button.dataset.role = 'strain-select';
+    button.dataset.id = strain.id;
+    strainsList.appendChild(button);
+    strainButtons.set(strain.id, button);
+  });
+
+  const contractsList = createDepthSection(greenhouseView, 'Contracts');
+  const contractButtons = new Map<ContractId, HTMLButtonElement>();
+  contracts.forEach((contract) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'depth-card';
+    button.dataset.role = 'contract-action';
+    button.dataset.id = contract.id;
+    button.hidden = true;
+    contractsList.appendChild(button);
+    contractButtons.set(contract.id, button);
+  });
+
+  const seasonsList = createDepthSection(greenhouseView, 'Seasons');
+  const seasonButtons = new Map<SeasonId, HTMLButtonElement>();
+  seasons.forEach((season) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'depth-card depth-card--compact';
+    button.dataset.role = 'season-select';
+    button.dataset.id = season.id;
+    seasonsList.appendChild(button);
+    seasonButtons.set(season.id, button);
+  });
+
+  const eventMasteryList = createDepthSection(greenhouseView, 'Event Mastery');
+
+  const challengesList = createDepthSection(greenhouseView, 'Prestige Challenges');
+  const challengeButtons = new Map<ChallengeId, HTMLButtonElement>();
+  challenges.forEach((challenge) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'depth-card';
+    button.dataset.role = 'challenge-action';
+    button.dataset.id = challenge.id;
+    challengesList.appendChild(button);
+    challengeButtons.set(challenge.id, button);
+  });
+
+  const collectionList = createDepthSection(greenhouseView, 'Collection');
+  const automationSection = createDepthSection(greenhouseView, 'Automation Manager');
+  const automationStatus = document.createElement('p');
+  automationStatus.className = 'depth-card__meta';
+  const automationAutoClick = document.createElement('input');
+  automationAutoClick.type = 'checkbox';
+  automationAutoClick.className = 'settings-toggle';
+  automationAutoClick.dataset.role = 'automation-autoclick';
+  const automationBuyMode = document.createElement('select');
+  automationBuyMode.className = 'settings-select';
+  automationBuyMode.dataset.role = 'automation-buy-mode';
+  [
+    ['off', 'Auto-buy off'],
+    ['cheapest', 'Cheapest'],
+    ['best_roi', 'Best ROI'],
+    ['next_milestone', 'Next milestone'],
+  ].forEach(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    automationBuyMode.appendChild(option);
+  });
+  const automationAbilityMode = document.createElement('select');
+  automationAbilityMode.className = 'settings-select';
+  automationAbilityMode.dataset.role = 'automation-ability-mode';
+  [
+    ['manual', 'Abilities manual'],
+    ['event_buff', 'During events'],
+    ['cooldown_chain', 'Cooldown chain'],
+  ].forEach(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    automationAbilityMode.appendChild(option);
+  });
+  const automationControls = document.createElement('div');
+  automationControls.className = 'automation-controls';
+  automationControls.append(automationAutoClick, automationBuyMode, automationAbilityMode);
+  automationSection.append(automationStatus, automationControls);
+  viewsContainer.appendChild(greenhouseView);
 
   const settingsView = document.createElement('div');
   settingsView.className = 'settings-panel';
@@ -268,6 +391,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
     shop: shopView,
     upgrades: upgradesView,
     research: researchView,
+    greenhouse: greenhouseView,
     prestige: prestigePanel.container,
     achievements: achievementsView,
     settings: settingsView,
@@ -317,6 +441,25 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
       list: achievementsList,
       entries: achievementRefs,
     },
+    greenhouse: {
+      summary: greenhouseSummary,
+      roomsList,
+      roomButtons,
+      strainsList,
+      strainButtons,
+      contractsList,
+      contractButtons,
+      seasonsList,
+      seasonButtons,
+      eventMasteryList,
+      challengesList,
+      challengeButtons,
+      collectionList,
+      automationStatus,
+      automationAutoClick,
+      automationBuyMode,
+      automationAbilityMode,
+    },
     settings: {
       offlineToggle,
       offlineTitle: offlineSetting.title,
@@ -353,6 +496,19 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
       resetButton,
     },
   } satisfies SidePanelRefs;
+}
+
+function createDepthSection(parent: HTMLElement, title: string): HTMLElement {
+  const section = document.createElement('section');
+  section.className = 'depth-section';
+  const heading = document.createElement('h3');
+  heading.className = 'depth-section__title';
+  heading.textContent = title;
+  const list = document.createElement('div');
+  list.className = 'depth-section__list';
+  section.append(heading, list);
+  parent.appendChild(section);
+  return list;
 }
 
 function createSettingRow(id: string): {

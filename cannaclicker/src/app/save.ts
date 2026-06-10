@@ -8,6 +8,7 @@ import {
 import { computePrestigeMultiplier } from './prestige';
 import { applyAscensionEffects } from './ascension';
 import { applyResearchEffects } from './research';
+import { applyDepthEffects } from './depth';
 import { reapplyAbilityEffects } from './abilities';
 import { DEFAULT_LOCALE, resolveLocale, type LocaleKey } from './i18n';
 import { applyOfflineProgress, prepareStateForPersist } from './save/autosave';
@@ -26,6 +27,13 @@ import {
   normalisePreferences,
   normaliseAutomation,
   normaliseMeta,
+  normaliseRooms,
+  normaliseStrains,
+  normaliseContracts,
+  normaliseSeasons,
+  normaliseEventMastery,
+  normaliseCollections,
+  normaliseChallenges,
   upgradePersistedState,
 } from './save/migrations';
 import {
@@ -131,12 +139,20 @@ export function initState(saved: PersistedStateV7 | null): GameState {
     automation: normaliseAutomation(saved.automation),
     settings: saved.settings,
     meta: initialMeta,
+    rooms: normaliseRooms(saved.rooms),
+    strains: normaliseStrains(saved.strains),
+    contracts: normaliseContracts(saved.contracts),
+    seasons: normaliseSeasons(saved.seasons),
+    eventMastery: normaliseEventMastery(saved.eventMastery),
+    collections: normaliseCollections(saved.collections),
+    challenges: normaliseChallenges(saved.challenges),
     locale: saved.locale ?? detectLocale(),
     muted: saved.muted ?? loadAudioPreference(),
   });
 
   applyResearchEffects(state);
   applyAscensionEffects(state);
+  applyDepthEffects(state);
   reapplyAbilityEffects(state);
 
   applyOfflineProgress(state, now);

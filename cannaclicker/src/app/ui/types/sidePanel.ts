@@ -4,6 +4,11 @@ import type { ResearchId } from '../../../data/research';
 import type { UpgradeId } from '../../../data/upgrades';
 import type { ResearchFilter } from '../../research';
 import type { PrestigePanelRefs } from './prestige';
+import type { RoomId } from '../../../data/rooms';
+import type { StrainId } from '../../../data/strains';
+import type { ContractId } from '../../../data/contracts';
+import type { SeasonId } from '../../../data/seasons';
+import type { ChallengeId } from '../../../data/challenges';
 
 export type AchievementFilter = 'all' | 'unlocked' | 'near' | 'hidden';
 
@@ -114,6 +119,25 @@ export interface SidePanelRefs {
     list: HTMLElement;
     entries: Map<AchievementId, AchievementCardRefs>;
   };
+  greenhouse: {
+    summary: HTMLElement;
+    roomsList: HTMLElement;
+    roomButtons: Map<RoomId, HTMLButtonElement>;
+    strainsList: HTMLElement;
+    strainButtons: Map<StrainId, HTMLButtonElement>;
+    contractsList: HTMLElement;
+    contractButtons: Map<ContractId, HTMLButtonElement>;
+    seasonsList: HTMLElement;
+    seasonButtons: Map<SeasonId, HTMLButtonElement>;
+    eventMasteryList: HTMLElement;
+    challengesList: HTMLElement;
+    challengeButtons: Map<ChallengeId, HTMLButtonElement>;
+    collectionList: HTMLElement;
+    automationStatus: HTMLElement;
+    automationAutoClick: HTMLInputElement;
+    automationBuyMode: HTMLSelectElement;
+    automationAbilityMode: HTMLSelectElement;
+  };
   settings: {
     offlineToggle: HTMLInputElement;
     offlineTitle: HTMLElement;
@@ -155,6 +179,7 @@ export type SidePanelTab =
   | 'shop'
   | 'upgrades'
   | 'research'
+  | 'greenhouse'
   | 'prestige'
   | 'achievements'
   | 'settings';

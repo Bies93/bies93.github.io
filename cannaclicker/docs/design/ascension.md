@@ -32,7 +32,7 @@ Der erste Tree hat 24 Nodes in diesen Kategorien:
 
 ## Permanent Slots
 
-`permanentSlots` und `permanentUpgradeIds` sind im State/Save vorhanden. Sprint 15 aktiviert nur das Fundament; Auswahl und Balance fuer dauerhaft behaltene Upgrades gehoeren in einen spaeteren Sprint, sobald Research/Upgrade 2.0 finaler ist.
+`permanentSlots` und `permanentUpgradeIds` bleiben als internes State-/Save-Fundament erhalten, sind in Version 1.0 aber nicht als kaufbare Ascension-Nodes sichtbar. Dadurch gibt es keine Nodes ohne direkte Spielerfunktion. Die eigentliche Auswahl-UI fuer dauerhaft behaltene Upgrades ist Post-Launch-Scope.
 
 ## Balance-Leitplanken
 

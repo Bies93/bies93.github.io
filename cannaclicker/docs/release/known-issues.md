@@ -8,7 +8,7 @@ Stand: Sprint 26 / `1.0.0-rc.1`.
 - Android Chrome wurde als Chromium-Mobile-Viewport geprüft, aber nicht auf physischer Android-Hardware.
 - Firefox-Smoke ist via Playwright gruen; der alte System-Firefox/Snap-Prozess war nicht stabil steuerbar und wird nicht als Release-Abnahme genutzt.
 - WebKit-Smoke ist gruen, ersetzt aber keinen echten iOS-Safari-Test auf Hardware.
-- Lange 4-20h-Realtime-Runs sind durch heuristische Simulationen vorbereitet, aber noch nicht durch echte Spielerzeit ersetzt.
+- Lange 4-10h-Realtime-Runs sind durch eine deterministische Sim mit echten Spielfunktionen vorbereitet, aber noch nicht durch echte Spielerzeit ersetzt.
 - Prozeduraler Sound startet erst nach erster User-Interaktion, wie bei Browser-Audio ueblich.
 - Keine Cloud-Saves; Export/Import bleibt der vorgesehene Weg zum Sichern.
 
@@ -21,8 +21,8 @@ Stand: Sprint 26 / `1.0.0-rc.1`.
 
 ## Beobachten nach Launch
 
-- Event-Erwartungswert für sehr aktive Spieler.
-- Prestige-Timing nach zweitem und drittem Run.
+- Event-Erwartungswert für sehr aktive Spieler anhand echter Telemetrie nach Launch.
+- Prestige-Timing nach zweitem und drittem Run anhand echter Telemetrie nach Launch.
 - Mobile Performance bei sehr starkem Klickspam.
 - Ob 160 Achievements motivierend oder für manche Spieler zu viel wirken.
 - Ob die zusätzlichen Event-Kategorien in sehr langen Sessions klar genug bleiben.

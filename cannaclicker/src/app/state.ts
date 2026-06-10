@@ -11,6 +11,13 @@ import type { ResearchId } from '../data/research';
 import type { UpgradeId } from '../data/upgrades';
 import type { GoalId } from '../data/goals';
 import type { AscensionNodeId } from '../data/ascension';
+import type { RoomId } from '../data/rooms';
+import type { StrainId } from '../data/strains';
+import type { ContractId } from '../data/contracts';
+import type { SeasonId } from '../data/seasons';
+import type { EventId } from './events';
+import type { ChallengeId } from '../data/challenges';
+import type { CollectionId } from '../data/collections';
 import type { SeedSynergyId } from './seeds';
 import {
   createDefaultEventState,
@@ -20,7 +27,7 @@ import {
 } from './events';
 export type { AbilityId } from '../data/abilities';
 
-export const SAVE_VERSION = 8 as const;
+export const SAVE_VERSION = 9 as const;
 
 export type SeedGainSource = 'event' | 'click' | 'synergy' | 'passive';
 
@@ -86,6 +93,56 @@ export interface PrestigeState {
   kickstart: KickstartState | null;
 }
 
+export interface RoomsState {
+  levels: Partial<Record<RoomId, number>>;
+  lastUpgradedAt: number;
+}
+
+export interface StrainsState {
+  selected: StrainId | null;
+  xp: Partial<Record<StrainId, number>>;
+  levels: Partial<Record<StrainId, number>>;
+  selections: Partial<Record<StrainId, number>>;
+}
+
+export interface ContractRunBuff {
+  target: 'bps' | 'bpc' | 'both' | 'events';
+  multiplier: number;
+  remainingRuns: number;
+}
+
+export interface ContractsState {
+  tokens: number;
+  offers: ContractId[];
+  activeId: ContractId | null;
+  completed: Partial<Record<ContractId, number>>;
+  claimed: Partial<Record<ContractId, boolean>>;
+  pendingBuff: ContractRunBuff | null;
+  activeBuff: ContractRunBuff | null;
+}
+
+export interface SeasonsState {
+  active: SeasonId;
+  unlocked: SeasonId[];
+}
+
+export interface EventMasteryState {
+  claimed: Partial<Record<EventId, number>>;
+}
+
+export interface CollectionsState {
+  owned: CollectionId[];
+  score: number;
+}
+
+export interface ChallengesState {
+  activeId: ChallengeId | null;
+  startedAt: number;
+  completed: Partial<Record<ChallengeId, boolean>>;
+  attempts: Partial<Record<ChallengeId, number>>;
+  unlocked: ChallengeId[];
+}
+
 export interface KickstartState {
   level: number;
   endsAt: number;
@@ -117,6 +174,16 @@ export interface TempState {
   eventRewardMult: number;
   eventSpawnRateMult: number;
   eventDurationMult: number;
+  depthGlobalMult: Decimal;
+  depthBpcMult: Decimal;
+  depthCostMult: Decimal;
+  depthPrestigeSeedMult: number;
+  strainXpMult: number;
+  challengeDisableEvents: boolean;
+  challengeDisablePassiveProduction: boolean;
+  challengeDisableAbilities: boolean;
+  challengeMaxPerItem: number | null;
+  challengeRiskOnlyEvents: boolean;
   eventBoosts: EventBoostState[];
   eventBoostEndsAt: number;
   activeEventBoost: string | null;
@@ -169,6 +236,8 @@ export interface MetaState {
   seedPassiveIdleMs: number;
   seedPassiveRollsDone: number;
   eventStats: EventStats;
+  eventRewardBudgetWindowStartedAt: number;
+  eventRewardValueThisWindow: number;
   manualClicks: number;
   totalItemsPurchased: number;
   totalUpgradesPurchased: number;
@@ -188,10 +257,24 @@ export function createDefaultPreferences(): PreferencesState {
   return { shopSortMode: 'price' } satisfies PreferencesState;
 }
 
-export type AutomationState = Record<string, never>;
+export interface AutomationManagerState {
+  unlockedTier: number;
+  autoClick: boolean;
+  autoBuyMode: 'off' | 'cheapest' | 'best_roi' | 'next_milestone';
+  selectedItemId: ItemId | null;
+  abilityMode: 'manual' | 'event_buff' | 'cooldown_chain';
+}
+
+export type AutomationState = AutomationManagerState;
 
 export function createDefaultAutomation(): AutomationState {
-  return {};
+  return {
+    unlockedTier: 0,
+    autoClick: false,
+    autoBuyMode: 'off',
+    selectedItemId: null,
+    abilityMode: 'manual',
+  };
 }
 
 export interface SaveV5 {
@@ -212,6 +295,13 @@ export interface SaveV5 {
   automation: AutomationState;
   settings: SettingsState;
   meta: MetaState;
+  rooms: RoomsState;
+  strains: StrainsState;
+  contracts: ContractsState;
+  seasons: SeasonsState;
+  eventMastery: EventMasteryState;
+  collections: CollectionsState;
+  challenges: ChallengesState;
 }
 
 export interface GameState extends SaveV5 {
@@ -244,6 +334,8 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
     seedPassiveIdleMs: 0,
     seedPassiveRollsDone: 0,
     eventStats: createDefaultEventStats(now),
+    eventRewardBudgetWindowStartedAt: now,
+    eventRewardValueThisWindow: 0,
     manualClicks: 0,
     totalItemsPurchased: 0,
     totalUpgradesPurchased: 0,
@@ -257,6 +349,27 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
     abilityUsesTotal: 0,
     abilityUses: {},
     completedGoals: [],
+  };
+  const defaultRooms: RoomsState = { levels: {}, lastUpgradedAt: 0 };
+  const defaultStrains: StrainsState = { selected: null, xp: {}, levels: {}, selections: {} };
+  const defaultContracts: ContractsState = {
+    tokens: 0,
+    offers: [],
+    activeId: null,
+    completed: {},
+    claimed: {},
+    pendingBuff: null,
+    activeBuff: null,
+  };
+  const defaultSeasons: SeasonsState = { active: 'evergreen', unlocked: ['evergreen'] };
+  const defaultEventMastery: EventMasteryState = { claimed: {} };
+  const defaultCollections: CollectionsState = { owned: [], score: 0 };
+  const defaultChallenges: ChallengesState = {
+    activeId: null,
+    startedAt: 0,
+    completed: {},
+    attempts: {},
+    unlocked: [],
   };
 
   return {
@@ -292,6 +405,13 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
     automation: defaultAutomation,
     settings: defaultSettings,
     meta: defaultMeta,
+    rooms: defaultRooms,
+    strains: defaultStrains,
+    contracts: defaultContracts,
+    seasons: defaultSeasons,
+    eventMastery: defaultEventMastery,
+    collections: defaultCollections,
+    challenges: defaultChallenges,
     locale: DEFAULT_LOCALE,
     muted: false,
     lastTick,
@@ -321,6 +441,16 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       eventRewardMult: 1,
       eventSpawnRateMult: 1,
       eventDurationMult: 1,
+      depthGlobalMult: new Decimal(1),
+      depthBpcMult: new Decimal(1),
+      depthCostMult: new Decimal(1),
+      depthPrestigeSeedMult: 1,
+      strainXpMult: 1,
+      challengeDisableEvents: false,
+      challengeDisablePassiveProduction: false,
+      challengeDisableAbilities: false,
+      challengeMaxPerItem: null,
+      challengeRiskOnlyEvents: false,
       eventBoosts: [],
       eventBoostEndsAt: 0,
       activeEventBoost: null,

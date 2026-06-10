@@ -15,6 +15,7 @@ export function wirePersistence(context: WireContext): void {
     state.muted = audio.toggleMute();
     audio.playSettings();
     updateStrings(state, refs);
+    save(state);
   };
 
   const handleExport = () => {

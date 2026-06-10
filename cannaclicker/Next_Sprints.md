@@ -1094,3 +1094,104 @@ Alles, was unfertig wirkt, wird entfernt, verbessert oder bewusst als Post-Launc
 11. Sprint 26: Final 1.0 Polish.
 
 Diese Reihenfolge priorisiert das, was den Spielspaß am stärksten prägt: Mobile-Erreichbarkeit, Langzeit-Meta, Build-Tiefe und Balance.
+
+---
+
+## Sprint 27: Depth Expansion Foundation
+
+Status: Implementiert.
+
+Ziel:
+
+- CannaClicker bekommt neue langfristige Entscheidungsebenen gegen den Cookie-Clicker-Vergleich.
+- Save-Version 9 erweitert den State ohne alte Saves hart zu brechen.
+- Roadmap und Design-Dokumente beschreiben die neue Depth-Phase.
+
+Umsetzung:
+
+- `docs/roadmap/depth-expansion-roadmap.md`
+- `src/data/rooms.ts`
+- `src/data/strains.ts`
+- `src/data/contracts.ts`
+- `src/data/seasons.ts`
+- `src/data/eventMastery.ts`
+- `src/data/challenges.ts`
+- `src/data/collections.ts`
+- `src/app/depth.ts`
+
+Abnahme:
+
+- Neuer Save startet mit validen Defaults.
+- Alte Saves Version 7/8 werden weiter normalisiert.
+- Neue Systeme sind datengetrieben.
+
+## Sprint 28: Strains, Contracts und Greenhouse Rooms
+
+Status: Implementiert.
+
+Ziel:
+
+- Spieler waehlt pro Run eine Strain.
+- Contracts geben klare Run-Auftraege.
+- Rooms machen permanenten Ausbau sichtbar.
+
+Umsetzung:
+
+- 5 Strains mit XP und Level 1-3.
+- 20 Contracts mit Easy/Medium/Hard.
+- 6 Greenhouse Rooms mit je 5 Leveln.
+- Contract Tokens als spaetes Room-Gate.
+
+Abnahme:
+
+- Strain-Auswahl beeinflusst BPC/BPS/Events/Automation/Prestige.
+- Contract kann angenommen und bei Erfuellung geclaimed werden.
+- Room-Level verbrauchen Buds/Ascension-Seeds/Score/Tokens.
+
+## Sprint 29: Seasons, Event Mastery und Prestige Challenges
+
+Status: Implementiert.
+
+Ziel:
+
+- Events bekommen langfristige Mastery.
+- Seasons verschieben Event-Gewichte ohne Kalenderpflicht.
+- Challenges erzeugen neue Run-Regeln.
+
+Umsetzung:
+
+- 4 Seasons: Evergreen, Sunshift, Night Market, Harvest Festival.
+- Event Mastery Level 1-3 pro Event.
+- 6 Prestige Challenges mit echten Regelmodifikatoren.
+- Challenge Rewards schalten Cosmetics und kleine Boni frei.
+
+Abnahme:
+
+- No Events deaktiviert Event-Spawns.
+- Manual Garden deaktiviert passive Produktion.
+- Silent Greenhouse blockiert Abilities.
+- Risk Market fokussiert Risk-Events.
+- Tiny Pot begrenzt Item-Kopien.
+
+## Sprint 30: Collection und Automation Manager
+
+Status: Implementiert.
+
+Ziel:
+
+- Cosmetics werden als Sammlung sichtbarer Meta-Fortschritt.
+- Automation wird freigeschaltete Progression statt Default.
+
+Umsetzung:
+
+- Collection Score mit hartem +3 Prozent Meta-Cap.
+- Auto-Click ab Automation-Tier 1.
+- Auto-Buy-Regeln ab Tier 2.
+- Ability Scheduling ab Tier 4.
+- Automation bleibt im Greenhouse-Tab optional steuerbar.
+
+Abnahme:
+
+- Automation laeuft nicht von Spielstart an.
+- Auto-Buy nutzt kleine Einzelkaeufe, kein Buy-Max-Spike.
+- Collection-Bonus kann Balance nicht dominieren.

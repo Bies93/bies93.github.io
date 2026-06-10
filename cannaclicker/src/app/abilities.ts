@@ -32,6 +32,9 @@ function getRuntime(state: GameState, id: AbilityId) {
 }
 
 export function isAbilityReady(state: GameState, id: AbilityId, now = Date.now()): boolean {
+  if (state.temp.challengeDisableAbilities) {
+    return false;
+  }
   if (!isAbilityUnlocked(state, id)) {
     return false;
   }

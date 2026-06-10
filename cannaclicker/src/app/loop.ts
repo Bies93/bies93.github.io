@@ -1,10 +1,11 @@
 import Decimal from 'break_infinity.js';
 import type { GameState } from './state';
-import { updateAbilityTimers } from './abilities';
-import { recalcDerivedValues } from './game';
+import { activateAbility, isAbilityReady, listAbilities, updateAbilityTimers } from './abilities';
+import { buyItem, recalcDerivedValues } from './game';
 import { advanceEventPipeline, clearExpiredEventBoost } from './events';
 import { clearExpiredKickstart } from './milestones';
 import { processSeedSystems } from './seeds';
+import { getShopEntries } from './shop';
 
 interface LoopOptions {
   autosaveSeconds?: number;
@@ -26,6 +27,7 @@ export function startLoop(
   let last = performance.now();
   let accumulator = 0;
   let autosaveTimer = 0;
+  let automationTimer = 0;
   let frame = 0;
 
   const step = (timestamp: number) => {
@@ -48,8 +50,11 @@ export function startLoop(
       state.prestige.lifetimeBuds = state.prestige.lifetimeBuds.add(production);
     }
 
-    if (state.temp.autoClickRate > 0) {
-      const autoClicks = new Decimal(state.temp.autoClickRate * delta);
+    const managerClickRate =
+      state.automation.autoClick && state.automation.unlockedTier >= 1 ? 0.5 : 0;
+    const effectiveAutoClickRate = state.temp.autoClickRate + managerClickRate;
+    if (effectiveAutoClickRate > 0) {
+      const autoClicks = new Decimal(effectiveAutoClickRate * delta);
       const automationBpsGain = state.bps
         .mul(Math.max(0, state.temp.automationBpsShare ?? 0))
         .mul(delta);
@@ -78,6 +83,11 @@ export function startLoop(
 
     processSeedSystems(state, delta, now);
     advanceEventPipeline(state, delta, now);
+    automationTimer += delta;
+    if (automationTimer >= 3) {
+      runAutomationManager(state, now);
+      automationTimer = 0;
+    }
 
     accumulator += delta;
     autosaveTimer += delta;
@@ -98,4 +108,47 @@ export function startLoop(
   frame = requestAnimationFrame(step);
 
   return () => cancelAnimationFrame(frame);
+}
+
+function runAutomationManager(state: GameState, now: number): void {
+  if (state.automation.unlockedTier >= 2 && state.automation.autoBuyMode !== 'off') {
+    const entries = getShopEntries(state).filter((entry) => entry.unlocked && entry.affordable);
+    const selected = selectAutomationBuy(state, entries);
+    if (selected) {
+      buyItem(state, selected.definition.id, 1);
+    }
+  }
+
+  if (state.automation.unlockedTier >= 4 && state.automation.abilityMode !== 'manual') {
+    const wantsEventWindow =
+      state.automation.abilityMode === 'event_buff' &&
+      ((state.temp.eventBoosts?.length ?? 0) > 0 || state.events.active.length > 0);
+    const wantsCooldownChain = state.automation.abilityMode === 'cooldown_chain';
+    if (wantsEventWindow || wantsCooldownChain) {
+      const ability = listAbilities().find((entry) => isAbilityReady(state, entry.id, now));
+      if (ability) {
+        activateAbility(state, ability.id, now);
+        recalcDerivedValues(state);
+      }
+    }
+  }
+}
+
+function selectAutomationBuy(
+  state: GameState,
+  entries: ReturnType<typeof getShopEntries>,
+): ReturnType<typeof getShopEntries>[number] | null {
+  if (entries.length === 0) {
+    return null;
+  }
+  switch (state.automation.autoBuyMode) {
+    case 'cheapest':
+      return [...entries].sort((a, b) => a.cost.cmp(b.cost))[0] ?? null;
+    case 'best_roi':
+      return [...entries].sort((a, b) => (a.roi ?? Number.MAX_VALUE) - (b.roi ?? Number.MAX_VALUE))[0] ?? null;
+    case 'next_milestone':
+      return [...entries].sort((a, b) => a.tier.remainingCount - b.tier.remainingCount)[0] ?? null;
+    default:
+      return null;
+  }
 }
