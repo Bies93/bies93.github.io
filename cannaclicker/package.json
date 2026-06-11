@@ -11,6 +11,7 @@
   "scripts": {
     "dev": "vite",
     "assets:generate": "node scripts/generate-assets.mjs",
+    "assets:social": "node scripts/create-social-preview.mjs",
     "assets:check": "node scripts/check-assets.mjs",
     "balance:simulate": "tsx scripts/simulate-real-run.ts",
     "typecheck": "tsc --noEmit",

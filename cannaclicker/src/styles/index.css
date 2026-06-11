@@ -3218,7 +3218,13 @@ body[data-plant-skin='ember'] .click-icon {
   /* Larger touch targets on touch devices */
   .tab-button,
   .filter-pill,
-  .ability-btn {
+  .ability-btn,
+  .buy-btn,
+  .quick-shop-panel__button,
+  .goal-panel__button,
+  .modal-button,
+  .settings-action,
+  .settings-select {
     min-height: 44px;
     min-width: 44px;
   }
@@ -3231,7 +3237,12 @@ body[data-plant-skin='ember'] .click-icon {
 
   .tab-button:active,
   .filter-pill:active,
-  .ability-btn:active {
+  .ability-btn:active,
+  .buy-btn:active,
+  .quick-shop-panel__button:active,
+  .goal-panel__button:active,
+  .modal-button:active,
+  .settings-action:active {
     transform: scale(0.95);
     transition: transform 100ms ease;
   }

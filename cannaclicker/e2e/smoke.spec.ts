@@ -100,3 +100,112 @@ test('uses accessible custom modals for save export, import, and reset', async (
 
   expect(consoleErrors).toEqual([]);
 });
+
+test('keeps mobile touch menus and shop details usable', async ({ page, isMobile, browserName }) => {
+  test.skip(!isMobile, 'mobile touch audit');
+
+  const consoleErrors: string[] = [];
+  const failedResources: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') {
+      consoleErrors.push(message.text());
+    }
+  });
+  page.on('pageerror', (error) => consoleErrors.push(error.message));
+  page.on('response', (response) => {
+    const request = response.request();
+    if (
+      response.status() >= 400 &&
+      ['document', 'script', 'stylesheet', 'image', 'font'].includes(request.resourceType())
+    ) {
+      failedResources.push(`${response.status()} ${response.url()}`);
+    }
+  });
+
+  await page.addInitScript(() => window.localStorage.clear());
+  await page.goto('/');
+
+  const expectNoHorizontalOverflow = async () => {
+    const overflow = await page.evaluate(() => {
+      const width = window.innerWidth;
+      return Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - width;
+    });
+    expect(overflow).toBeLessThanOrEqual(1);
+  };
+
+  await expectNoHorizontalOverflow();
+
+  const shopMedia = page.locator('.shop-card__media').first();
+  const shopDetails = page.locator('.shop-card__details-popover').first();
+  await shopMedia.tap();
+  await expect(shopDetails).toBeVisible();
+
+  const detailBox = await shopDetails.boundingBox();
+  const viewport = page.viewportSize();
+  expect(detailBox).not.toBeNull();
+  expect(viewport).not.toBeNull();
+  expect(detailBox!.x).toBeGreaterThanOrEqual(-1);
+  expect(detailBox!.x + detailBox!.width).toBeLessThanOrEqual(viewport!.width + 1);
+  await expect(shopDetails).toContainText(/Kosten|Cost|Besitzt|Owned|BPS/i);
+  await expectNoHorizontalOverflow();
+
+  await page.getByRole('button', { name: /Menü|Menu/i }).tap();
+  const menuDialog = page.getByRole('dialog', { name: /Menü|Menu/i });
+  await expect(menuDialog).toBeVisible();
+
+  const selects = menuDialog.locator('select');
+  await expect(selects).toHaveCount(3);
+  await selects.last().scrollIntoViewIfNeeded();
+
+  const selectContrast = await selects.evaluateAll((elements) =>
+    elements.map((select) => {
+      const option = select.options[0];
+      const optionStyle = option ? getComputedStyle(option) : null;
+      return {
+        optionColor: optionStyle?.color ?? '',
+        optionBackground: optionStyle?.backgroundColor ?? '',
+      };
+    }),
+  );
+  expect(selectContrast).not.toContainEqual(
+    expect.objectContaining({
+      optionColor: 'rgb(255, 255, 255)',
+      optionBackground: 'rgb(255, 255, 255)',
+    }),
+  );
+
+  for (const select of await selects.all()) {
+    const values = await select
+      .locator('option')
+      .evaluateAll((options) => options.map((option) => option.value));
+    if (values[1]) {
+      await select.selectOption(values[1]);
+    }
+  }
+
+  await expectNoHorizontalOverflow();
+  await menuDialog.getByRole('button', { name: /Schließen|Close/i }).tap();
+  await expect(menuDialog).toBeHidden();
+
+  if (browserName !== 'webkit') {
+    for (const tabName of [
+      /Shop/i,
+      /Power/i,
+      /Lab|Labor/i,
+      /Greenhouse|Gewächshaus/i,
+      /Ascend|Aufstieg/i,
+      /Goals|Ziele/i,
+    ]) {
+      const tab = page.getByRole('tab', { name: tabName }).first();
+      if ((await tab.count()) > 0) {
+        await tab.scrollIntoViewIfNeeded();
+        await tab.click();
+        await expect(tab).toHaveAttribute('aria-selected', 'true');
+        await expectNoHorizontalOverflow();
+      }
+    }
+  }
+
+  expect(failedResources).toEqual([]);
+  expect(consoleErrors).toEqual([]);
+});

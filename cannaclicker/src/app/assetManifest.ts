@@ -135,3 +135,8 @@ export const backgroundAssets = {
   plants: asset('img/backgrounds/plants.svg'),
   noise: asset('img/backgrounds/noise.svg'),
 } as const;
+
+export const socialAssets = {
+  preview: asset('img/social/biesyclicker-preview.png'),
+  previewKeyArt: asset('img/social/biesyclicker-preview-keyart.png'),
+} as const;
