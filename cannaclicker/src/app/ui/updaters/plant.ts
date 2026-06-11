@@ -5,7 +5,26 @@ import type { GameState } from '../../state';
 import type { UIRefs } from '../types';
 
 const PLANT_STAGE_THRESHOLDS = [
-  0, 50, 250, 1_000, 5_000, 25_000, 100_000, 500_000, 2_500_000, 10_000_000, 50_000_000,
+  0,
+  25,
+  75,
+  150,
+  300,
+  700,
+  1_500,
+  3_000,
+  6_000,
+  12_500,
+  25_000,
+  50_000,
+  100_000,
+  250_000,
+  500_000,
+  1_000_000,
+  2_500_000,
+  7_500_000,
+  20_000_000,
+  50_000_000,
 ];
 const PLANT_STAGE_MAX = PLANT_STAGE_THRESHOLDS.length - 1;
 const preloadedPlantStages = new Set<string>();

@@ -139,6 +139,15 @@ export const plantStages = [
   asset('img/plant/stage-09.png'),
   asset('img/plant/stage-10.png'),
   asset('img/plant/stage-11.png'),
+  asset('img/plant/stage-12.png'),
+  asset('img/plant/stage-13.png'),
+  asset('img/plant/stage-14.png'),
+  asset('img/plant/stage-15.png'),
+  asset('img/plant/stage-16.png'),
+  asset('img/plant/stage-17.png'),
+  asset('img/plant/stage-18.png'),
+  asset('img/plant/stage-19.png'),
+  asset('img/plant/stage-20.png'),
 ] as const;
 
 export const backgroundAssets = {
