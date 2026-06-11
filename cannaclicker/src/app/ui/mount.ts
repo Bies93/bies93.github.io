@@ -24,7 +24,7 @@ export function mountUI(state: GameState): UIRefs {
   const muteControl = createActionButton(uiIcons.soundOff);
   const exportControl = createActionButton(uiIcons.export);
   const importControl = createActionButton(uiIcons.import);
-  const resetControl = createDangerButton(uiIcons.reset);
+  const resetControl = createDangerButton(uiIcons.resetDanger);
   const menuControl = createActionButton(uiIcons.settings);
 
   const headerTitle = mountHeader(root, [

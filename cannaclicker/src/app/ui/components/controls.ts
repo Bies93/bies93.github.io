@@ -34,6 +34,7 @@ export function createActionButton(iconPath: string): ControlButtonRefs {
   button.dataset.kind = 'control';
   button.dataset.uiRole = 'ui-control';
   button.dataset.testid = 'control-button';
+  button.classList.add('button--utility');
 
   const controlId = `ui-control-${++controlIdCounter}`;
   const labelId = `${controlId}-label`;
@@ -66,7 +67,7 @@ export function createDangerButton(iconPath: string): ControlButtonRefs {
     .replace('hover:border-emerald-400/40', 'hover:border-rose-400/60')
     .replace('hover:bg-neutral-800/70', 'hover:bg-rose-900/30')
     .replace('focus-visible:ring-emerald-300/70', 'focus-visible:ring-rose-300/70');
-  control.button.classList.add('text-rose-300');
+  control.button.classList.add('text-rose-300', 'button--danger');
   return control;
 }
 

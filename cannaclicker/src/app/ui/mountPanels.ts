@@ -45,7 +45,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   const statsMeta = new Map<string, HTMLElement>();
 
   const infoRibbon = document.createElement('section');
-  infoRibbon.className = 'info-ribbon fade-in';
+  infoRibbon.className = 'info-ribbon fade-in surface--growbox';
   infoRibbon.dataset.uiRole = 'hud';
   infoRibbon.dataset.testid = 'hud-ribbon';
   infoRibbon.setAttribute('role', 'region');
@@ -88,7 +88,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   infoActions.appendChild(seedBadge);
 
   const clickCard = document.createElement('section');
-  clickCard.className = 'card fade-in click-card';
+  clickCard.className = 'card fade-in click-card surface--growbox';
   clickCard.dataset.uiRole = 'clicker-card';
   clickCard.dataset.testid = 'clicker-card';
   clickCard.setAttribute('role', 'region');
@@ -117,7 +117,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   clickCard.appendChild(clickBody);
 
   const clickButton = document.createElement('button');
-  clickButton.className = 'click-button w-full';
+  clickButton.className = 'click-button w-full surface--growbox';
   clickButton.type = 'button';
   clickButton.dataset.uiRole = 'click-button';
   clickButton.dataset.testid = 'click-button';
@@ -173,7 +173,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   clickBody.appendChild(clickHeader);
 
   const goalPanel = document.createElement('section');
-  goalPanel.className = 'goal-panel';
+  goalPanel.className = 'goal-panel surface--reward';
   goalPanel.dataset.uiRole = 'goal-panel';
   goalPanel.dataset.testid = 'goal-panel';
 
@@ -219,7 +219,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   primaryColumn.appendChild(clickCard);
 
   const abilitySection = document.createElement('section');
-  abilitySection.className = 'card fade-in space-y-4';
+  abilitySection.className = 'card fade-in space-y-4 surface--growbox';
   abilitySection.dataset.uiRole = 'ability-panel';
   abilitySection.dataset.testid = 'ability-panel';
   abilitySection.setAttribute('role', 'region');

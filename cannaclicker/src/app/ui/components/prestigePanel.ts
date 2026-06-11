@@ -10,7 +10,7 @@ import { createMilestoneCard } from './milestoneCard';
 
 export function createPrestigePanel(): PrestigePanelRefs {
   const container = document.createElement('div');
-  container.className = 'prestige-panel';
+  container.className = 'prestige-panel surface--prestige';
 
   const description = document.createElement('p');
   description.className = 'prestige-panel__description';
@@ -27,7 +27,7 @@ export function createPrestigePanel(): PrestigePanelRefs {
   const active = createPrestigePanelStat(stats);
 
   const ascensionSection = document.createElement('section');
-  ascensionSection.className = 'ascension-panel';
+  ascensionSection.className = 'ascension-panel surface--prestige';
   container.appendChild(ascensionSection);
 
   const ascensionHeader = document.createElement('div');
@@ -102,7 +102,7 @@ export function createPrestigePanel(): PrestigePanelRefs {
 
 function createAscensionNodeCard(id: AscensionNodeId): AscensionNodeCardRefs {
   const container = document.createElement('article');
-  container.className = 'ascension-node';
+  container.className = 'ascension-node surface--prestige';
   container.dataset.id = id;
 
   const category = document.createElement('p');

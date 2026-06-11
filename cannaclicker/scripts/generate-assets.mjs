@@ -6,6 +6,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const outDir = path.resolve(__dirname, '../public/img');
 const rasterizedAssetDirs = ['items', 'upgrades', 'research', 'events', 'abilities', 'plant'];
 const pngReplacedUiSvgAssets = [
+  'ui/achievement-base.svg',
+  'ui/achievement-leaf.svg',
+  'ui/achievement-light.svg',
+  'ui/achievement-ribbon.svg',
   'ui/auto.svg',
   'ui/bpc.svg',
   'ui/bps.svg',

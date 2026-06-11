@@ -9,7 +9,7 @@ export function createShopCard(definition: ItemDefinition, state: GameState): Sh
   const container = document.createElement('article');
   container.className =
     'relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-white/10 bg-neutral-900/70 p-3 shadow-card backdrop-blur-sm transition hover:border-emerald-400/40';
-  container.classList.add('shop-card');
+  container.classList.add('shop-card', 'surface--crate');
   container.dataset.itemId = definition.id;
 
   const info = document.createElement('div');

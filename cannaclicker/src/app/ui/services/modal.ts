@@ -40,7 +40,10 @@ export function openActionModal(options: ActionModalOptions): ModalHandle {
   overlay.setAttribute('aria-hidden', 'true');
 
   const dialog = document.createElement('div');
-  dialog.className = 'modal-card modal-card--wide';
+  dialog.className =
+    options.tone === 'danger'
+      ? 'modal-card modal-card--wide surface--utility surface--danger'
+      : 'modal-card modal-card--wide surface--utility';
   dialog.setAttribute('role', 'dialog');
   dialog.setAttribute('aria-modal', 'true');
   dialog.setAttribute('aria-labelledby', `${id}-title`);

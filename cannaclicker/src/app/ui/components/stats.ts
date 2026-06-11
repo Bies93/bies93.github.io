@@ -21,7 +21,7 @@ export function createCompactStatBlock(
   meta: Map<string, HTMLElement>,
 ): HTMLElement {
   const wrapper = document.createElement('div');
-  wrapper.className = 'stat-item';
+  wrapper.className = 'stat-item surface--growbox';
   wrapper.dataset.variant = key;
 
   const iconWrap = document.createElement('span');

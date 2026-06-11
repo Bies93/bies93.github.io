@@ -7,7 +7,7 @@ export function createPrestigeModal(): PrestigeModalRefs {
   overlay.setAttribute('aria-hidden', 'true');
 
   const dialog = document.createElement('div');
-  dialog.className = 'modal-card';
+  dialog.className = 'modal-card surface--prestige';
   dialog.setAttribute('role', 'dialog');
   dialog.setAttribute('aria-modal', 'true');
   dialog.setAttribute('aria-labelledby', 'prestige-modal-title');

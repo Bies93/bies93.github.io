@@ -10,7 +10,8 @@ export function createUpgradeCard(
   state: GameState,
 ): UpgradeCardRefs {
   const container = document.createElement('article');
-  container.className = 'upgrade-card';
+  container.className =
+    definition.category === 'prestige' ? 'upgrade-card surface--prestige' : 'upgrade-card surface--lab';
   container.dataset.upgradeId = definition.id;
   container.dataset.category = definition.category;
 

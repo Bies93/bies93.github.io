@@ -4190,6 +4190,75 @@ body[data-theme] .click-button::after,
 }
 
 /* v1.1 signature art pass: material surfaces, role buttons and system identities. */
+.surface--growbox,
+.surface--crate,
+.surface--lab,
+.surface--prestige,
+.surface--utility,
+.surface--reward {
+  background-repeat: repeat;
+  background-size: auto;
+}
+
+.surface--growbox {
+  border-color: rgba(132, 204, 22, 0.28);
+  background-image:
+    linear-gradient(180deg, rgba(6, 16, 16, 0.88), rgba(5, 10, 16, 0.9)),
+    var(--texture-growbox);
+  background-blend-mode: normal, soft-light;
+}
+
+.surface--crate {
+  border-color: rgba(120, 73, 33, 0.34);
+  background-image:
+    linear-gradient(90deg, rgba(80, 48, 24, 0.32) 0 0.42rem, transparent 0.42rem),
+    linear-gradient(180deg, rgba(12, 22, 18, 0.9), rgba(7, 12, 18, 0.93)),
+    var(--texture-crate);
+  background-blend-mode: normal, normal, multiply;
+}
+
+.surface--lab {
+  border-color: rgba(94, 234, 212, 0.28);
+  background-image:
+    linear-gradient(180deg, rgba(6, 29, 31, 0.88), rgba(5, 10, 17, 0.92)),
+    var(--texture-lab);
+  background-blend-mode: normal, soft-light;
+}
+
+.surface--prestige {
+  border-color: rgba(250, 204, 21, 0.34);
+  background-image:
+    linear-gradient(90deg, rgba(113, 67, 29, 0.24) 0 0.42rem, transparent 0.42rem),
+    linear-gradient(180deg, rgba(31, 28, 14, 0.9), rgba(5, 10, 17, 0.93)),
+    var(--texture-prestige);
+  background-blend-mode: normal, normal, soft-light;
+}
+
+.surface--utility {
+  border-color: rgba(148, 163, 184, 0.2);
+  background-image:
+    linear-gradient(180deg, rgba(7, 16, 20, 0.93), rgba(5, 9, 16, 0.94)),
+    var(--texture-control);
+  background-blend-mode: normal, soft-light;
+}
+
+.surface--reward {
+  border-color: rgba(250, 204, 21, 0.42);
+  background-image:
+    linear-gradient(180deg, rgba(35, 31, 13, 0.88), rgba(6, 12, 18, 0.92)),
+    var(--texture-reward);
+  background-blend-mode: normal, soft-light;
+}
+
+.surface--danger,
+.button--danger {
+  border-color: rgba(251, 113, 133, 0.46);
+  background-image:
+    linear-gradient(180deg, rgba(117, 28, 45, 0.88), rgba(55, 8, 21, 0.92)),
+    var(--texture-control);
+  background-blend-mode: normal, soft-light;
+}
+
 .app-header {
   border-color: rgba(190, 242, 100, 0.26);
   background:
@@ -4580,6 +4649,158 @@ body[data-theme] .click-button::after,
     linear-gradient(180deg, rgba(28, 78, 45, 0.42), rgba(8, 24, 20, 0.64)),
     var(--texture-growbox);
   background-blend-mode: normal, soft-light;
+}
+
+body[data-theme] .click-button.surface--growbox,
+.click-button.surface--growbox {
+  border-color: rgba(190, 242, 100, 0.34);
+  background:
+    radial-gradient(circle at 50% 56%, rgba(190, 242, 100, 0.16), transparent 28%),
+    linear-gradient(180deg, rgba(7, 31, 23, 0.62), rgba(3, 9, 11, 0.9)),
+    var(--texture-growbox);
+  background-blend-mode: screen, normal, soft-light;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 -18px 36px rgba(23, 13, 7, 0.34),
+    0 32px 76px rgba(16, 185, 129, 0.22);
+}
+
+/* v1.1 texture visibility pass: show the bitmap materials, keep text readable. */
+body[data-theme] .surface--growbox,
+.surface--growbox {
+  background:
+    linear-gradient(180deg, rgba(4, 15, 13, 0.5), rgba(3, 8, 12, 0.72)),
+    var(--texture-growbox);
+  background-size: auto, 320px 320px;
+  background-position: center, center;
+  background-blend-mode: normal, normal;
+}
+
+body[data-theme] .side-panel-shell.surface--growbox,
+.side-panel-shell.surface--growbox,
+body[data-theme] .click-card.surface--growbox,
+.click-card.surface--growbox,
+body[data-theme] .info-ribbon.surface--growbox,
+.info-ribbon.surface--growbox {
+  background:
+    linear-gradient(180deg, rgba(4, 14, 13, 0.42), rgba(3, 8, 12, 0.76)),
+    var(--texture-growbox);
+  background-size: auto, 360px 360px;
+  background-position: center, center;
+  background-blend-mode: normal, normal;
+}
+
+body[data-theme] .click-button.surface--growbox,
+.click-button.surface--growbox {
+  background:
+    radial-gradient(circle at 50% 56%, rgba(190, 242, 100, 0.18), transparent 30%),
+    linear-gradient(180deg, rgba(7, 31, 23, 0.36), rgba(3, 9, 11, 0.68)),
+    var(--texture-growbox);
+  background-size: auto, auto, 420px 420px;
+  background-position: center, center, center;
+  background-blend-mode: screen, normal, normal;
+}
+
+body[data-theme] .surface--crate,
+.surface--crate {
+  background:
+    linear-gradient(90deg, rgba(80, 48, 24, 0.3) 0 0.42rem, transparent 0.42rem),
+    linear-gradient(180deg, rgba(9, 14, 12, 0.38), rgba(4, 8, 12, 0.72)),
+    var(--texture-crate);
+  background-size: auto, auto, 330px 330px;
+  background-position: center, center, center;
+  background-blend-mode: normal, normal, normal;
+}
+
+body[data-theme] .shop-card.surface--crate,
+.shop-card.surface--crate,
+body[data-theme] .shop-card__details-popover,
+.shop-card__details-popover {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--shop-accent, rgba(190, 242, 100, 0.42)) 28%, rgba(80, 48, 24, 0.22)) 0 0.42rem, transparent 0.42rem),
+    linear-gradient(180deg, rgba(8, 14, 12, 0.34), rgba(4, 8, 12, 0.78)),
+    var(--texture-crate);
+  background-size: auto, auto, 340px 340px;
+  background-blend-mode: normal, normal, normal;
+}
+
+body[data-theme] .shop-card.surface--crate[data-item-id='genetics_lab'],
+.shop-card.surface--crate[data-item-id='genetics_lab'],
+body[data-theme] .shop-card.surface--crate[data-item-id='micro_greenhouse'],
+.shop-card.surface--crate[data-item-id='micro_greenhouse'],
+body[data-theme] .shop-card.surface--crate[data-item-id='hydroponic_rack'],
+.shop-card.surface--crate[data-item-id='hydroponic_rack'] {
+  background:
+    linear-gradient(90deg, rgba(14, 116, 144, 0.18) 0 0.42rem, transparent 0.42rem),
+    linear-gradient(180deg, rgba(5, 24, 27, 0.34), rgba(4, 8, 12, 0.76)),
+    var(--texture-lab);
+  background-size: auto, auto, 340px 340px;
+}
+
+body[data-theme] .surface--lab,
+.surface--lab {
+  background:
+    linear-gradient(180deg, rgba(4, 25, 28, 0.38), rgba(3, 8, 13, 0.72)),
+    var(--texture-lab);
+  background-size: auto, 340px 340px;
+  background-position: center, center;
+  background-blend-mode: normal, normal;
+}
+
+body[data-theme] .surface--prestige,
+.surface--prestige {
+  background:
+    linear-gradient(90deg, rgba(113, 67, 29, 0.18) 0 0.42rem, transparent 0.42rem),
+    linear-gradient(180deg, rgba(31, 26, 10, 0.34), rgba(4, 8, 12, 0.76)),
+    var(--texture-prestige);
+  background-size: auto, auto, 340px 340px;
+  background-position: center, center, center;
+  background-blend-mode: normal, normal, normal;
+}
+
+body[data-theme] .surface--utility,
+.surface--utility {
+  background:
+    linear-gradient(180deg, rgba(7, 14, 18, 0.34), rgba(4, 7, 12, 0.78)),
+    var(--texture-control);
+  background-size: auto, 320px 320px;
+  background-position: center, center;
+  background-blend-mode: normal, normal;
+}
+
+body[data-theme] .surface--reward,
+.surface--reward {
+  background:
+    radial-gradient(circle at 50% 32%, rgba(250, 204, 21, 0.13), transparent 44%),
+    linear-gradient(180deg, rgba(31, 28, 12, 0.38), rgba(4, 8, 12, 0.76)),
+    var(--texture-reward);
+  background-size: auto, auto, 340px 340px;
+  background-position: center, center, center;
+  background-blend-mode: screen, normal, normal;
+}
+
+body[data-theme] .info-ribbon__list .stat-item.surface--growbox,
+.info-ribbon__list .stat-item.surface--growbox,
+body[data-theme] .stat-item.surface--growbox,
+.stat-item.surface--growbox {
+  background:
+    linear-gradient(90deg, rgba(65, 38, 16, 0.16) 0 0.3rem, transparent 0.3rem),
+    linear-gradient(180deg, rgba(8, 21, 18, 0.38), rgba(4, 8, 13, 0.76)),
+    var(--texture-growbox);
+  background-size: auto, auto, 300px 300px;
+  background-blend-mode: normal, normal, normal;
+}
+
+body[data-theme] .stat-item.surface--growbox[data-variant='stats.seeds'],
+.stat-item.surface--growbox[data-variant='stats.seeds'],
+body[data-theme] .stat-item.surface--growbox[data-variant='stats.prestigeMult'],
+.stat-item.surface--growbox[data-variant='stats.prestigeMult'] {
+  background:
+    linear-gradient(90deg, rgba(113, 67, 29, 0.2) 0 0.3rem, transparent 0.3rem),
+    linear-gradient(180deg, rgba(31, 28, 12, 0.36), rgba(4, 8, 13, 0.76)),
+    var(--texture-prestige);
+  background-size: auto, auto, 300px 300px;
+  background-blend-mode: normal, normal, normal;
 }
 
 @media (max-width: 767px) {

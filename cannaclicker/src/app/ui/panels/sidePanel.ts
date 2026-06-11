@@ -25,10 +25,10 @@ import type {
 
 export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs {
   const section = document.createElement('section');
-  section.className = 'side-panel-shell fade-in space-y-5';
+  section.className = 'side-panel-shell fade-in space-y-5 surface--growbox';
 
   const tabList = document.createElement('div');
-  tabList.className = 'tab-strip';
+  tabList.className = 'tab-strip surface--utility';
   tabList.setAttribute('role', 'tablist');
   section.appendChild(tabList);
 
@@ -81,7 +81,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   const researchView = document.createElement('div');
   researchView.className = 'space-y-4';
   const researchControls = document.createElement('div');
-  researchControls.className = 'research-controls';
+  researchControls.className = 'research-controls surface--lab';
   const filterWrap = document.createElement('div');
   filterWrap.className = 'research-filters';
   const researchFilters = new Map<ResearchFilter, HTMLButtonElement>();
@@ -113,7 +113,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   const achievementsView = document.createElement('div');
   achievementsView.className = 'space-y-4';
   const achievementSummary = document.createElement('div');
-  achievementSummary.className = 'achievement-summary';
+  achievementSummary.className = 'achievement-summary surface--reward';
   const achievementSummaryHeader = document.createElement('div');
   achievementSummaryHeader.className = 'achievement-summary__header';
   const achievementSummaryProgressText = document.createElement('span');
@@ -167,9 +167,9 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   });
 
   const greenhouseView = document.createElement('div');
-  greenhouseView.className = 'greenhouse-panel space-y-4';
+  greenhouseView.className = 'greenhouse-panel space-y-4 surface--growbox';
   const greenhouseSummary = document.createElement('div');
-  greenhouseSummary.className = 'greenhouse-summary';
+  greenhouseSummary.className = 'greenhouse-summary surface--growbox';
   greenhouseView.appendChild(greenhouseSummary);
 
   const roomsList = createDepthSection(greenhouseView, 'Greenhouse Rooms');
@@ -177,7 +177,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   rooms.forEach((room) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'depth-card';
+    button.className = 'depth-card surface--growbox';
     button.dataset.role = 'room-upgrade';
     button.dataset.id = room.id;
     roomsList.appendChild(button);
@@ -189,7 +189,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   strains.forEach((strain) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'depth-card';
+    button.className = 'depth-card surface--growbox';
     button.dataset.role = 'strain-select';
     button.dataset.id = strain.id;
     strainsList.appendChild(button);
@@ -201,7 +201,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   contracts.forEach((contract) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'depth-card';
+    button.className = 'depth-card surface--utility';
     button.dataset.role = 'contract-action';
     button.dataset.id = contract.id;
     button.hidden = true;
@@ -214,7 +214,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   seasons.forEach((season) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'depth-card depth-card--compact';
+    button.className = 'depth-card depth-card--compact surface--reward';
     button.dataset.role = 'season-select';
     button.dataset.id = season.id;
     seasonsList.appendChild(button);
@@ -228,7 +228,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   challenges.forEach((challenge) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'depth-card';
+    button.className = 'depth-card surface--prestige';
     button.dataset.role = 'challenge-action';
     button.dataset.id = challenge.id;
     challengesList.appendChild(button);
@@ -277,7 +277,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   viewsContainer.appendChild(greenhouseView);
 
   const settingsView = document.createElement('div');
-  settingsView.className = 'settings-panel settings-panel--modal';
+  settingsView.className = 'settings-panel settings-panel--modal surface--utility';
   settingsView.dataset.uiRole = 'settings-panel';
 
   const offlineSetting = createSettingRow('offline');
@@ -474,7 +474,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
 
 function createDepthSection(parent: HTMLElement, title: string): HTMLElement {
   const section = document.createElement('section');
-  section.className = 'depth-section';
+  section.className = 'depth-section surface--growbox';
   const heading = document.createElement('h3');
   heading.className = 'depth-section__title';
   heading.textContent = title;
@@ -492,7 +492,7 @@ function createSettingRow(id: string): {
   action: HTMLElement;
 } {
   const row = document.createElement('div');
-  row.className = 'settings-row';
+  row.className = 'settings-row surface--utility';
   row.dataset.id = id;
 
   const copy = document.createElement('div');

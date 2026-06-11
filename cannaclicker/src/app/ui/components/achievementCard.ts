@@ -5,7 +5,7 @@ import type { AchievementCardRefs } from '../types';
 
 export function createAchievementCard(definition: AchievementDefinition): AchievementCardRefs {
   const container = document.createElement('article');
-  container.className = 'achievement-card';
+  container.className = 'achievement-card surface--reward';
 
   const badge = document.createElement('div');
   badge.className = 'achievement-card__badge';

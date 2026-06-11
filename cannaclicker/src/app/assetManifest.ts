@@ -79,6 +79,7 @@ export const uiIcons = {
   export: asset('img/ui/export.png'),
   import: asset('img/ui/import.png'),
   reset: asset('img/ui/reset.png'),
+  resetDanger: asset('img/ui/danger-reset.png'),
   seeds: asset('img/ui/seeds.png'),
   prestige: asset('img/ui/prestige.png'),
   research: asset('img/ui/research.png'),
@@ -96,10 +97,10 @@ export const uiIcons = {
   greenhouse: asset('img/ui/greenhouse.png'),
   settings: asset('img/ui/settings.png'),
   prestigeSeal: asset('img/ui/prestige-seal.png'),
-  achievementBase: asset('img/ui/achievement-base.svg'),
-  achievementRibbon: asset('img/ui/achievement-ribbon.svg'),
-  achievementLeaf: asset('img/ui/achievement-leaf.svg'),
-  achievementLight: asset('img/ui/achievement-light.svg'),
+  achievementBase: asset('img/ui/achievement-base.png'),
+  achievementRibbon: asset('img/ui/achievement-ribbon.png'),
+  achievementLeaf: asset('img/ui/achievement-leaf.png'),
+  achievementLight: asset('img/ui/achievement-light.png'),
 } as const;
 
 export const sidePanelTabIcons = {

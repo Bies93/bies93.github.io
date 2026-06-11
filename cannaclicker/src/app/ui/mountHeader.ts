@@ -2,7 +2,7 @@ import { uiIcons } from '../assetManifest';
 
 export function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): HTMLHeadingElement {
   const header = document.createElement('header');
-  header.className = 'app-header';
+  header.className = 'app-header surface--utility';
   header.dataset.uiRole = 'app-header';
   header.dataset.testid = 'app-header';
   header.setAttribute('role', 'banner');
@@ -47,7 +47,7 @@ export function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): H
 
   const actionWrap = document.createElement('div');
   actionWrap.className =
-    'flex flex-nowrap items-center justify-self-stretch gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/70 px-3 py-1 shadow-[0_16px_30px_rgba(10,12,21,0.4)] ring-1 ring-white/10 backdrop-blur sm:justify-self-end';
+    'surface--utility flex flex-nowrap items-center justify-self-stretch gap-2 overflow-x-auto rounded-2xl border border-white/10 bg-neutral-900/70 px-3 py-1 shadow-[0_16px_30px_rgba(10,12,21,0.4)] ring-1 ring-white/10 backdrop-blur sm:justify-self-end';
   actionWrap.dataset.uiRole = 'control-strip';
   actionWrap.dataset.testid = 'control-strip';
   controls.forEach((control) => {

@@ -9,7 +9,7 @@ export function createResearchCard(id: ResearchId): ResearchCardRefs {
   }
 
   const container = document.createElement('article');
-  container.className = 'research-card';
+  container.className = 'research-card surface--lab';
   container.dataset.id = id;
   container.dataset.kind = 'research';
   container.dataset.role = 'card';
