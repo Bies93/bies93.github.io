@@ -24,7 +24,7 @@ test('loads the game, clicks once, and renders image assets', async ({ page }) =
 
   const clickButton = page.getByTestId('click-button');
   const budsValue = page.locator(
-    '[data-testid="clicker-card"] [data-variant="stats.buds"] .stat-item__value',
+    '[data-testid="hud-list"] [data-variant="stats.buds"] .stat-item__value',
   );
 
   await expect(clickButton).toBeVisible();
