@@ -1,0 +1,64 @@
+{
+  "version": "v1.1-audio-pack-2026-06-11",
+  "design_goal": "short, warm, soft, varied; idle-game friendly",
+  "recommended_volume": {
+    "sfx": 0.35,
+    "music": 0.18
+  },
+  "sfx": {
+    "click": [
+      "sfx/click/click_leaf_soft_01.wav",
+      "sfx/click/click_leaf_soft_02.wav",
+      "sfx/click/click_leaf_soft_03.wav",
+      "sfx/click/click_leaf_soft_04.wav",
+      "sfx/click/click_leaf_soft_05.wav",
+      "sfx/click/click_leaf_soft_06.wav"
+    ],
+    "buy": [
+      "sfx/buy/buy_normal_01.wav",
+      "sfx/buy/buy_normal_02.wav",
+      "sfx/buy/buy_normal_03.wav",
+      "sfx/buy/buy_important_01.wav",
+      "sfx/buy/buy_important_02.wav",
+      "sfx/buy/buy_milestone_01.wav",
+      "sfx/buy/buy_milestone_02.wav",
+      "sfx/buy/buy_new_item_01.wav",
+      "sfx/buy/buy_new_item_02.wav"
+    ],
+    "event": [
+      "sfx/event/event_spawn_soft_01.wav",
+      "sfx/event/event_spawn_soft_02.wav",
+      "sfx/event/event_spawn_soft_03.wav",
+      "sfx/event/event_collect_soft_01.wav",
+      "sfx/event/event_collect_soft_02.wav",
+      "sfx/event/event_collect_soft_03.wav",
+      "sfx/event/reward_rare_gold_01.wav",
+      "sfx/event/reward_rare_gold_02.wav"
+    ],
+    "prestige": [
+      "sfx/prestige/prestige_seed_ascend_01.wav",
+      "sfx/prestige/prestige_seed_ascend_02.wav"
+    ],
+    "ui": [
+      "sfx/ui/ui_soft_toggle_01.wav",
+      "sfx/ui/ui_soft_deny_01.wav"
+    ]
+  },
+  "music": {
+    "music_early_base_loop_24s": "music/music_early_base_loop_24s.wav",
+    "music_mid_growth_layer_loop_24s": "music/music_mid_growth_layer_loop_24s.wav",
+    "music_late_prestige_shimmer_layer_loop_24s": "music/music_late_prestige_shimmer_layer_loop_24s.wav",
+    "music_event_pulse_layer_loop_24s": "music/music_event_pulse_layer_loop_24s.wav"
+  },
+  "runtime_recommendation": {
+    "sfx_preferred": "ogg/opus, wav fallback",
+    "music_preferred": "ogg/opus, mp3 fallback",
+    "click_randomization": "choose one click_leaf_soft_01..06 and optionally apply playbackRate 0.96..1.04",
+    "buy_mapping": {
+      "normal": "buy_normal_01..03",
+      "important": "buy_important_01..02",
+      "milestone": "buy_milestone_01..02",
+      "new_item": "buy_new_item_01..02"
+    }
+  }
+}
