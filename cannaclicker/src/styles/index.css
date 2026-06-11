@@ -518,81 +518,64 @@ body[data-plant-skin='ember'] .click-icon {
   }
 }
 
-.click-label {
-  @apply absolute left-1/2 -translate-x-1/2 text-sm uppercase tracking-[0.45em] text-white/90;
+.click-label-stack {
+  position: absolute;
+  left: 50%;
   z-index: 3;
   bottom: clamp(1.75rem, 5vw, 2.75rem);
+  display: inline-grid;
+  justify-items: center;
+  gap: 0.45rem;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.click-label {
+  @apply text-sm uppercase tracking-[0.45em] text-white/90;
   letter-spacing: 0.2em;
   text-shadow:
     0 2px 10px rgba(0, 0, 0, 0.86),
     0 0 18px rgba(6, 20, 14, 0.82);
 }
 
-.quick-shop-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+.click-yield {
+  display: inline-flex;
+  min-height: 2rem;
   align-items: center;
-  gap: 0.8rem;
-  border: 1px solid rgba(52, 211, 153, 0.22);
-  border-radius: var(--ui-radius);
+  gap: 0.38rem;
+  border: 1px solid rgba(190, 242, 100, 0.34);
+  border-radius: 999px;
   background:
-    linear-gradient(135deg, rgba(6, 78, 59, 0.22), rgba(8, 13, 23, 0.78)),
-    radial-gradient(circle at top right, rgba(250, 204, 21, 0.12), transparent 52%);
-  padding: clamp(0.75rem, 1.8vw, 1rem);
+    linear-gradient(90deg, rgba(92, 52, 22, 0.18) 0 0.3rem, transparent 0.3rem),
+    linear-gradient(180deg, rgba(9, 26, 22, 0.9), rgba(6, 12, 20, 0.76));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 22px rgba(22, 163, 74, 0.16);
+  color: rgba(220, 252, 231, 0.92);
+  padding: 0.28rem 0.62rem;
+  white-space: nowrap;
 }
 
-.quick-shop-panel[data-affordable='true'] {
-  border-color: rgba(74, 222, 128, 0.48);
-  box-shadow: 0 18px 34px rgba(16, 185, 129, 0.12);
+.click-yield__icon {
+  width: 1rem;
+  height: 1rem;
+  filter: drop-shadow(0 0 0.45rem rgba(202, 255, 88, 0.28));
 }
 
-.quick-shop-panel__copy {
-  min-width: 0;
+.click-yield__value {
+  color: rgba(247, 254, 231, 0.98);
+  font-size: 0.82rem;
+  font-weight: 950;
+  line-height: 1;
 }
 
-.quick-shop-panel__kicker {
-  color: rgba(134, 239, 172, 0.82);
-  font-size: 0.68rem;
+.click-yield__label {
+  color: rgba(167, 243, 208, 0.72);
+  font-size: 0.58rem;
   font-weight: 900;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
+  line-height: 1;
   text-transform: uppercase;
-}
-
-.quick-shop-panel__name {
-  color: rgba(248, 250, 252, 0.96);
-  font-size: clamp(0.95rem, 2.4vw, 1.08rem);
-  font-weight: 850;
-}
-
-.quick-shop-panel__meta {
-  color: rgba(203, 213, 225, 0.78);
-  font-size: 0.8rem;
-  font-weight: 650;
-  overflow-wrap: anywhere;
-}
-
-.quick-shop-panel__button {
-  min-height: 2.65rem;
-  min-width: 6.5rem;
-  border-radius: var(--ui-radius-sm);
-  border: 1px solid rgba(52, 211, 153, 0.42);
-  background: rgba(16, 185, 129, 0.2);
-  color: rgba(209, 250, 229, 0.98);
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.quick-shop-panel__button:disabled {
-  cursor: not-allowed;
-  border-color: rgba(148, 163, 184, 0.18);
-  background: rgba(15, 23, 42, 0.68);
-  color: rgba(148, 163, 184, 0.8);
-}
-
-.quick-shop-panel.is-denied {
-  animation: denied-shake 260ms ease-out;
 }
 .stats-list {
   display: grid;
@@ -931,16 +914,6 @@ body[data-plant-skin='ember'] .click-icon {
   padding: clamp(1.25rem, 3.2vw, 2.2rem) clamp(1.1rem, 3vw, 2rem) clamp(2.5rem, 5vw, 3rem);
 }
 
-.click-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: clamp(0.75rem, 2vw, 1.25rem);
-}
-
-.click-card__header .click-stats {
-  margin-top: 0;
-}
-
 .next-unlock-hint {
   border-radius: var(--ui-radius);
   border: 1px solid rgba(52, 211, 153, 0.2);
@@ -1101,86 +1074,6 @@ body[data-plant-skin='ember'] .click-icon {
   opacity: 0.62;
 }
 
-.strategy-panel {
-  display: grid;
-  gap: 0.35rem;
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: var(--ui-radius);
-  background:
-    linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(7, 12, 22, 0.62)),
-    radial-gradient(circle at top left, rgba(52, 211, 153, 0.12), transparent 50%);
-  padding: clamp(0.8rem, 2vw, 1rem);
-}
-
-.strategy-panel[data-tone='active'] {
-  border-color: rgba(132, 204, 22, 0.3);
-}
-
-.strategy-panel[data-tone='shop'] {
-  border-color: rgba(52, 211, 153, 0.28);
-}
-
-.strategy-panel[data-tone='upgrade'] {
-  border-color: rgba(250, 204, 21, 0.34);
-}
-
-.strategy-panel[data-tone='research'] {
-  border-color: rgba(56, 189, 248, 0.32);
-}
-
-.strategy-panel[data-tone='prestige'] {
-  border-color: rgba(216, 180, 254, 0.4);
-  box-shadow: 0 18px 42px rgba(168, 85, 247, 0.1);
-}
-
-.strategy-panel__kicker {
-  color: rgba(134, 239, 172, 0.78);
-  font-size: 0.64rem;
-  font-weight: 900;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-
-.strategy-panel__title {
-  color: rgba(248, 250, 252, 0.96);
-  font-size: 1rem;
-  font-weight: 850;
-}
-
-.strategy-panel__body {
-  color: rgba(203, 213, 225, 0.78);
-  font-size: 0.84rem;
-  line-height: 1.38;
-}
-
-.strategy-panel__detail {
-  color: rgba(186, 230, 253, 0.78);
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.click-stats .stat-item {
-  position: relative;
-  @apply px-4 py-3;
-  border-radius: 1.35rem;
-  background: linear-gradient(160deg, rgba(15, 23, 42, 0.94), rgba(6, 12, 24, 0.88));
-  border-color: rgba(148, 163, 184, 0.22);
-  box-shadow: 0 26px 52px -28px rgba(2, 6, 23, 0.85);
-}
-
-.click-stats .stat-item::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(circle at top right, rgba(34, 197, 94, 0.25), transparent 65%);
-  opacity: 0.4;
-  mix-blend-mode: screen;
-  pointer-events: none;
-}
-
 .stat-item[data-variant='stats.buds'] .stat-item__icon {
   filter: drop-shadow(0 0 4px hsl(150 76% 52% / 0.6));
 }
@@ -1304,7 +1197,89 @@ body[data-plant-skin='ember'] .click-icon {
   --stat-color: 318 68% 66%;
 }
 .buy-btn {
-  @apply flex h-9 items-center justify-center rounded-md bg-emerald-500 text-sm font-semibold text-neutral-900 transition hover:bg-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:cursor-not-allowed disabled:opacity-50;
+  position: relative;
+  display: flex;
+  min-height: 2.55rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(132, 204, 22, 0.26);
+  border-radius: var(--ui-radius-sm);
+  background:
+    linear-gradient(180deg, rgba(32, 45, 36, 0.96), rgba(13, 22, 21, 0.94)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent 42%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 12px 22px rgba(2, 6, 23, 0.28);
+  color: rgba(203, 213, 225, 0.86);
+  font-size: 0.78rem;
+  font-weight: 900;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.buy-btn::before {
+  content: '';
+  position: absolute;
+  inset: 1px 1px auto;
+  height: 42%;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.buy-btn[data-affordable='true'] {
+  border-color: rgba(190, 242, 100, 0.5);
+  background:
+    linear-gradient(180deg, rgba(102, 131, 63, 0.98), rgba(31, 102, 57, 0.94)),
+    linear-gradient(90deg, rgba(255, 239, 184, 0.18), transparent 48%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(2, 44, 18, 0.35),
+    0 14px 28px rgba(22, 163, 74, 0.18);
+  color: rgba(247, 254, 231, 0.98);
+}
+
+.buy-btn[data-affordable='true']:hover:not(:disabled) {
+  border-color: rgba(236, 252, 203, 0.68);
+  background:
+    linear-gradient(180deg, rgba(133, 160, 82, 0.98), rgba(42, 127, 72, 0.94)),
+    linear-gradient(90deg, rgba(255, 244, 204, 0.2), transparent 48%);
+  color: rgba(255, 255, 245, 1);
+  transform: translateY(-1px);
+}
+
+.buy-btn[data-affordable='false']:not(:disabled) {
+  cursor: not-allowed;
+  border-color: rgba(100, 116, 139, 0.26);
+  background:
+    linear-gradient(180deg, rgba(31, 41, 55, 0.92), rgba(12, 18, 28, 0.9)),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08), transparent 48%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: rgba(148, 163, 184, 0.78);
+  opacity: 0.78;
+}
+
+.buy-btn:disabled {
+  cursor: not-allowed;
+  border-color: rgba(71, 85, 105, 0.24);
+  background: rgba(15, 23, 42, 0.62);
+  box-shadow: none;
+  color: rgba(100, 116, 139, 0.74);
+  opacity: 0.58;
+}
+
+.buy-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(190, 242, 100, 0.28),
+    0 14px 28px rgba(22, 163, 74, 0.18);
 }
 
 .fade-in {
@@ -1530,8 +1505,11 @@ body[data-plant-skin='ember'] .click-icon {
   border-color: rgba(16, 185, 129, 0.45);
 }
 
-.shop-card.is-affordable .buy-btn {
-  box-shadow: 0 16px 32px rgba(16, 185, 129, 0.35);
+.shop-card .buy-btn[data-affordable='true'] {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(2, 44, 18, 0.35),
+    0 16px 32px rgba(16, 185, 129, 0.22);
 }
 
 .shop-card.is-purchased {
@@ -1606,6 +1584,32 @@ body[data-plant-skin='ember'] .click-icon {
   background: rgba(16, 185, 129, 0.16);
   border-color: rgba(52, 211, 153, 0.45);
   color: rgba(236, 253, 245, 0.98);
+}
+
+.shop-card .buy-btn[data-affordable='true']:not(:disabled) {
+  border-color: rgba(190, 242, 100, 0.5);
+  background:
+    linear-gradient(180deg, rgba(102, 131, 63, 0.98), rgba(31, 102, 57, 0.94)),
+    linear-gradient(90deg, rgba(255, 239, 184, 0.18), transparent 48%);
+  color: rgba(247, 254, 231, 0.98);
+}
+
+.shop-card .buy-btn[data-affordable='true']:hover:not(:disabled) {
+  border-color: rgba(236, 252, 203, 0.68);
+  background:
+    linear-gradient(180deg, rgba(133, 160, 82, 0.98), rgba(42, 127, 72, 0.94)),
+    linear-gradient(90deg, rgba(255, 244, 204, 0.2), transparent 48%);
+  color: rgba(255, 255, 245, 1);
+}
+
+.shop-card .buy-btn[data-affordable='false']:not(:disabled) {
+  cursor: not-allowed;
+  border-color: rgba(100, 116, 139, 0.26);
+  background:
+    linear-gradient(180deg, rgba(31, 41, 55, 0.92), rgba(12, 18, 28, 0.9)),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08), transparent 48%);
+  color: rgba(148, 163, 184, 0.78);
+  opacity: 0.78;
 }
 
 .shop-card__media {
@@ -2867,7 +2871,6 @@ body[data-plant-skin='ember'] .click-icon {
 .click-button,
 .stat-item,
 .info-ribbon,
-.click-stats .stat-item,
 .stat-line,
 .ability-btn,
 .ability-icon,
@@ -2975,52 +2978,6 @@ body[data-plant-skin='ember'] .click-icon {
     padding: 0.75rem 0.7rem 1rem;
   }
 
-  .click-stats {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.55rem;
-  }
-
-  .click-stats .stat-item {
-    border-radius: 0.9rem;
-    min-height: 4.35rem;
-    padding: 0.65rem 0.75rem;
-  }
-
-  .click-stats .stat-item__icon-wrap {
-    width: 2.35rem;
-    height: 2.35rem;
-    flex: 0 0 auto;
-  }
-
-  .click-stats .stat-item__content {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    column-gap: 0.65rem;
-    row-gap: 0.1rem;
-  }
-
-  .click-stats .stat-item__label {
-    grid-column: 1;
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-
-  .click-stats .stat-item__value {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    align-self: center;
-    min-width: 3.5rem;
-    text-align: right;
-    white-space: nowrap;
-  }
-
-  .click-stats .stat-item__meta {
-    grid-column: 1;
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-
   .next-unlock-hint {
     padding: 0.55rem 0.65rem;
     font-size: 0.76rem;
@@ -3120,17 +3077,7 @@ body[data-plant-skin='ember'] .click-icon {
     height: 1.25rem;
   }
 
-  .quick-shop-panel {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.55rem;
-  }
-
-  .quick-shop-panel__button {
-    width: 100%;
-  }
-
-  .goal-panel,
-  .strategy-panel {
+  .goal-panel {
     padding: 0.7rem;
   }
 
@@ -3220,7 +3167,6 @@ body[data-plant-skin='ember'] .click-icon {
   .filter-pill,
   .ability-btn,
   .buy-btn,
-  .quick-shop-panel__button,
   .goal-panel__button,
   .modal-button,
   .settings-action,
@@ -3239,7 +3185,6 @@ body[data-plant-skin='ember'] .click-icon {
   .filter-pill:active,
   .ability-btn:active,
   .buy-btn:active,
-  .quick-shop-panel__button:active,
   .goal-panel__button:active,
   .modal-button:active,
   .settings-action:active {
@@ -3763,11 +3708,9 @@ body[data-plant-skin='ember'] .click-icon {
 
 body[data-theme] .side-panel-shell,
 .side-panel-shell,
-.quick-shop-panel,
 .stat-item,
 .info-ribbon,
 .goal-panel,
-.strategy-panel,
 .shop-card,
 .upgrade-card,
 .research-card,
@@ -3797,7 +3740,6 @@ body[data-theme] .side-panel-shell,
 
 body[data-theme] .side-panel-shell::before,
 .side-panel-shell::before,
-.quick-shop-panel::before,
 .shop-card::before,
 .upgrade-card::before,
 .research-card::before,
@@ -3822,7 +3764,6 @@ body[data-theme] .side-panel-shell::before,
   z-index: 0;
 }
 
-.quick-shop-panel > *,
 .shop-card > *,
 .upgrade-card > *,
 .research-card > *,
@@ -3895,12 +3836,6 @@ body[data-theme] .click-button::after,
     linear-gradient(180deg, rgba(8, 16, 19, 0.82), rgba(7, 11, 18, 0.74));
 }
 
-.quick-shop-panel {
-  grid-template-columns: minmax(0, 1fr) auto;
-  border-color: rgba(132, 204, 22, 0.34);
-}
-
-.quick-shop-panel[data-affordable='true'],
 .shop-card[data-affordable='true'],
 .upgrade-card[data-state='affordable'],
 .research-card.is-owned,
@@ -3911,19 +3846,11 @@ body[data-theme] .click-button::after,
     inset 0 0 0 1px rgba(190, 242, 100, 0.16);
 }
 
-.stat-item,
-.click-stats .stat-item {
+.stat-item {
   background:
     linear-gradient(90deg, rgba(92, 52, 22, 0.22) 0 0.34rem, transparent 0.34rem),
     repeating-linear-gradient(0deg, rgba(134, 239, 172, 0.045) 0 1px, transparent 1px 12px),
     linear-gradient(180deg, rgba(9, 27, 23, 0.94), rgba(7, 13, 21, 0.9));
-}
-
-.click-stats .stat-item::after {
-  border: 1px solid rgba(134, 239, 172, 0.12);
-  background: linear-gradient(90deg, transparent, rgba(134, 239, 172, 0.08), transparent);
-  opacity: 0.5;
-  mix-blend-mode: normal;
 }
 
 .stat-item__icon-wrap,
@@ -3951,8 +3878,6 @@ body[data-theme] .click-button::after,
     linear-gradient(180deg, rgba(9, 24, 20, 0.9), rgba(7, 13, 22, 0.86));
 }
 
-.buy-btn,
-.quick-shop-panel__button,
 .goal-panel__button,
 .upgrade-card__button,
 .research-btn,
@@ -3971,8 +3896,6 @@ body[data-theme] .click-button::after,
     0 14px 28px rgba(22, 163, 74, 0.24);
 }
 
-.buy-btn:hover:not(:disabled),
-.quick-shop-panel__button:hover:not(:disabled),
 .goal-panel__button:hover:not(:disabled),
 .upgrade-card__button:hover:not(:disabled),
 .research-btn:hover:not(:disabled),
@@ -3986,8 +3909,6 @@ body[data-theme] .click-button::after,
   transform: translateY(-1px);
 }
 
-.buy-btn:disabled,
-.quick-shop-panel__button:disabled,
 .upgrade-card__button:disabled,
 .research-btn:disabled,
 .prestige-panel__action:disabled,
@@ -4114,13 +4035,8 @@ body[data-theme] .click-button::after,
 }
 
 @media (max-width: 767px) {
-  .quick-shop-panel {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .info-ribbon,
-  .tab-strip,
-  .click-stats .stat-item {
+  .tab-strip {
     border-radius: var(--ui-radius);
   }
 }

@@ -3,11 +3,6 @@ export interface UIClickerRefs {
   clickLabel: HTMLSpanElement;
   clickIcon: HTMLDivElement;
   orbitLayer: HTMLElement;
-  quickShopPanel: HTMLElement;
-  quickShopKicker: HTMLElement;
-  quickShopName: HTMLElement;
-  quickShopMeta: HTMLElement;
-  quickShopButton: HTMLButtonElement;
   nextUnlockHint: HTMLElement;
   buffList: HTMLElement;
   goalPanel: HTMLElement;
@@ -18,10 +13,5 @@ export interface UIClickerRefs {
   goalProgressText: HTMLElement;
   goalButton: HTMLButtonElement;
   nextGoalHint: HTMLElement;
-  strategyPanel: HTMLElement;
-  strategyKicker: HTMLElement;
-  strategyTitle: HTMLElement;
-  strategyBody: HTMLElement;
-  strategyDetail: HTMLElement;
   announcer: HTMLElement;
 }

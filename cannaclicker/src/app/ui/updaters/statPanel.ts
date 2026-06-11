@@ -5,8 +5,7 @@ import { computePrestigeMultiplier, getPrestigePreview } from '../../prestige';
 import { getAbilityLabel, listAbilities } from '../../abilities';
 import { EVENT_I18N_KEYS, getActiveEventBoosts } from '../../events';
 import { getGoalView } from '../../goals';
-import { getStrategySnapshot } from '../../strategy';
-import { canUnlockItem, getShopEntries } from '../../shop';
+import { canUnlockItem } from '../../shop';
 import type { UIRefs } from '../types';
 import { formatInteger } from '../utils/format';
 import { formatSeedRate } from './stats';
@@ -19,6 +18,14 @@ export function updateStats(state: GameState, refs: UIRefs): void {
   refs.buds.textContent = formatDecimal(state.buds);
   refs.bps.textContent = formatDecimal(state.bps);
   refs.bpc.textContent = formatDecimal(state.bpc);
+  const clickYield = refs.bpc.closest('.click-yield');
+  if (clickYield) {
+    clickYield.setAttribute(
+      'aria-label',
+      `${t(state.locale, 'stats.bpc')}: ${formatDecimal(state.bpc)}`,
+    );
+    clickYield.setAttribute('title', `${t(state.locale, 'stats.bpc')}: ${formatDecimal(state.bpc)}`);
+  }
   refs.total.textContent = formatDecimal(state.total);
   const seedText = formatInteger(state.locale, state.prestige.seeds);
   refs.seeds.textContent = seedText;
@@ -73,10 +80,8 @@ export function updateStats(state: GameState, refs: UIRefs): void {
 
   refs.nextUnlockHint.textContent = getNextUnlockHint(state);
   updateClickComboLabel(state, refs);
-  updateQuickShopPanel(state, refs);
   updateBuffList(state, refs);
   updateGoalPanel(state, refs);
-  updateStrategyPanel(state, refs);
 
   updatePlantStage(state, refs);
   updateOrbitBuds(state, refs);
@@ -88,66 +93,6 @@ function updateClickComboLabel(state: GameState, refs: UIRefs): void {
   refs.clickLabel.textContent = comboActive
     ? t(state.locale, 'click.combo', { count: state.temp.clickComboCount })
     : t(state.locale, 'actions.click');
-}
-
-function updateQuickShopPanel(state: GameState, refs: UIRefs): void {
-  const entries = getShopEntries(state);
-  const target =
-    entries.find((entry) => entry.unlocked && entry.affordable) ??
-    entries.find((entry) => entry.unlocked) ??
-    entries.find((entry) => !entry.unlocked);
-
-  if (!target) {
-    refs.quickShopPanel.classList.add('hidden');
-    return;
-  }
-
-  refs.quickShopPanel.classList.remove('hidden');
-  refs.quickShopPanel.dataset.affordable = target.affordable && target.unlocked ? 'true' : 'false';
-  refs.quickShopPanel.dataset.locked = target.unlocked ? 'false' : 'true';
-  refs.quickShopButton.dataset.id = target.definition.id;
-  refs.quickShopKicker.textContent = t(state.locale, 'quickShop.kicker');
-  refs.quickShopName.textContent = target.definition.name[state.locale];
-
-  if (!target.unlocked) {
-    refs.quickShopMeta.textContent = getNextUnlockHint(state);
-    refs.quickShopButton.disabled = true;
-    refs.quickShopButton.textContent = t(state.locale, 'quickShop.locked');
-    return;
-  }
-
-  refs.quickShopMeta.textContent = t(state.locale, 'quickShop.meta', {
-    cost: target.formattedCost,
-    bps: formatDecimal(target.deltaBps),
-  });
-  refs.quickShopButton.disabled = !target.affordable;
-  const missingCost = target.cost.sub(state.buds);
-  refs.quickShopButton.textContent = target.affordable
-    ? t(state.locale, 'quickShop.buy')
-    : t(state.locale, 'quickShop.need', {
-        amount: formatDecimal(missingCost.greaterThan(0) ? missingCost : target.cost),
-      });
-  refs.quickShopButton.setAttribute(
-    'title',
-    t(state.locale, 'shop.buyPreview', {
-      count: 1,
-      cost: target.formattedCost,
-      bps: formatDecimal(target.deltaBps),
-    }),
-  );
-}
-
-function updateStrategyPanel(state: GameState, refs: UIRefs): void {
-  const snapshot = getStrategySnapshot(state);
-  refs.strategyPanel.dataset.tone = snapshot.tone;
-  refs.strategyKicker.textContent = t(state.locale, 'strategy.kicker');
-  refs.strategyTitle.textContent = t(state.locale, snapshot.titleKey);
-  refs.strategyBody.textContent = t(state.locale, snapshot.bodyKey);
-  refs.strategyDetail.textContent = t(
-    state.locale,
-    snapshot.detailKey,
-    snapshot.detailParams ?? {},
-  );
 }
 
 function updateGoalPanel(state: GameState, refs: UIRefs): void {

@@ -1,8 +1,7 @@
-import { buyItem, evaluateAchievements, handleManualClick, recalcDerivedValues } from '../game';
+import { evaluateAchievements, handleManualClick, recalcDerivedValues } from '../game';
 import { activateAbility } from '../abilities';
 import { claimGoal } from '../goals';
 import type { GoalId } from '../../data/goals';
-import type { ItemId } from '../../data/items';
 import { formatDecimal } from '../math';
 import { pulseElement, spawnFloatingValue, spawnParticleBurst } from '../effects';
 import { maybeRollClickSeed } from '../seeds';
@@ -93,26 +92,6 @@ export function wireCoreClicks(context: WireContext): void {
     evaluateAchievements(state);
     spawnFloatingValue(refs.goalPanel, i18n.t(state.locale, 'goals.fx.claim'), 'achievement');
     spawnParticleBurst(refs.goalPanel, 'achievement', 8);
-    render(state);
-  });
-
-  refs.quickShopButton.addEventListener('click', () => {
-    const itemId = refs.quickShopButton.dataset.id as ItemId | undefined;
-    if (!itemId || !buyItem(state, itemId, 1)) {
-      audio.playCannotBuy();
-      pulseElement(refs.quickShopPanel, 'is-denied', 300);
-      return;
-    }
-
-    audio.playPurchase();
-    spawnFloatingValue(
-      refs.quickShopPanel,
-      i18n.t(state.locale, 'shop.deltaBps', {
-        value: formatDecimal(state.bps),
-      }),
-      'bud',
-    );
-    spawnParticleBurst(refs.quickShopPanel, 'milestone', 6);
     render(state);
   });
 

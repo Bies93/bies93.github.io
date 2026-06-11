@@ -96,8 +96,6 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
 
   const clickHeader = document.createElement('div');
   clickHeader.className = 'click-card__header';
-  const clickStats = document.createElement('div');
-  clickStats.className = 'click-stats';
 
   const nextUnlockHint = document.createElement('p');
   nextUnlockHint.className = 'next-unlock-hint';
@@ -110,7 +108,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   buffList.dataset.testid = 'buff-list';
   buffList.setAttribute('aria-label', t(state.locale, 'ui.sections.activeBuffs'));
 
-  clickHeader.append(clickStats, nextUnlockHint, buffList);
+  clickHeader.append(nextUnlockHint, buffList);
 
   const clickBody = document.createElement('div');
   clickBody.className = 'click-card__body';
@@ -146,36 +144,32 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   clickLabel.dataset.uiRole = 'click-label';
   clickLabel.dataset.testid = 'click-label';
 
-  clickButton.append(clickIcon, orbitLayer, clickLabel);
+  const clickYield = document.createElement('span');
+  clickYield.className = 'click-yield';
+  clickYield.dataset.uiRole = 'click-yield';
+  clickYield.dataset.testid = 'click-yield';
+
+  const clickYieldIcon = new Image();
+  clickYieldIcon.className = 'click-yield__icon';
+  clickYieldIcon.src = uiIcons.bpc;
+  clickYieldIcon.alt = '';
+  clickYieldIcon.decoding = 'async';
+
+  const clickYieldValue = document.createElement('span');
+  clickYieldValue.className = 'click-yield__value';
+
+  const clickYieldLabel = document.createElement('span');
+  clickYieldLabel.className = 'click-yield__label';
+  statsLabels.set('stats.bpc', clickYieldLabel);
+
+  clickYield.append(clickYieldIcon, clickYieldValue, clickYieldLabel);
+
+  const clickLabelStack = document.createElement('span');
+  clickLabelStack.className = 'click-label-stack';
+  clickLabelStack.append(clickLabel, clickYield);
+
+  clickButton.append(clickIcon, orbitLayer, clickLabelStack);
   clickBody.appendChild(clickButton);
-
-  const quickShopPanel = document.createElement('section');
-  quickShopPanel.className = 'quick-shop-panel';
-  quickShopPanel.dataset.uiRole = 'quick-shop-panel';
-  quickShopPanel.dataset.testid = 'quick-shop-panel';
-
-  const quickShopCopy = document.createElement('div');
-  quickShopCopy.className = 'quick-shop-panel__copy';
-
-  const quickShopKicker = document.createElement('p');
-  quickShopKicker.className = 'quick-shop-panel__kicker';
-
-  const quickShopName = document.createElement('h2');
-  quickShopName.className = 'quick-shop-panel__name';
-
-  const quickShopMeta = document.createElement('p');
-  quickShopMeta.className = 'quick-shop-panel__meta';
-
-  quickShopCopy.append(quickShopKicker, quickShopName, quickShopMeta);
-
-  const quickShopButton = document.createElement('button');
-  quickShopButton.type = 'button';
-  quickShopButton.className = 'quick-shop-panel__button';
-  quickShopButton.dataset.role = 'quick-shop-buy';
-  quickShopButton.dataset.kind = 'shop';
-
-  quickShopPanel.append(quickShopCopy, quickShopButton);
-  clickBody.appendChild(quickShopPanel);
   clickBody.appendChild(clickHeader);
 
   const goalPanel = document.createElement('section');
@@ -217,27 +211,6 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
 
   goalPanel.append(goalCopy, goalProgress, goalProgressText, goalButton, nextGoalHint);
 
-  const strategyPanel = document.createElement('section');
-  strategyPanel.className = 'strategy-panel';
-  strategyPanel.dataset.uiRole = 'strategy-panel';
-  strategyPanel.dataset.testid = 'strategy-panel';
-
-  const strategyKicker = document.createElement('p');
-  strategyKicker.className = 'strategy-panel__kicker';
-
-  const strategyTitle = document.createElement('h2');
-  strategyTitle.className = 'strategy-panel__title';
-
-  const strategyBody = document.createElement('p');
-  strategyBody.className = 'strategy-panel__body';
-
-  const strategyDetail = document.createElement('p');
-  strategyDetail.className = 'strategy-panel__detail';
-
-  strategyPanel.append(strategyKicker, strategyTitle, strategyBody, strategyDetail);
-
-  const bpcStat = createStatBlock('stats.bpc', clickStats, statsLabels, statsMeta);
-
   const announcer = document.createElement('p');
   announcer.setAttribute('data-sr-only', 'true');
   announcer.setAttribute('aria-live', 'polite');
@@ -277,7 +250,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   sidePanel.section.setAttribute('role', 'region');
   sidePanel.section.setAttribute('aria-label', t(state.locale, 'ui.sections.sidePanel'));
   secondaryColumn.appendChild(sidePanel.section);
-  secondaryColumn.append(goalPanel, strategyPanel);
+  secondaryColumn.appendChild(goalPanel);
   secondaryColumn.appendChild(abilitySection);
 
   root.append(infoRibbon, layout);
@@ -308,7 +281,7 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     statsMeta,
     buds: budsStat,
     bps: bpsStat,
-    bpc: bpcStat,
+    bpc: clickYieldValue,
     total: totalStat,
     seeds: seedsStat,
     seedRate: seedRateStat,
@@ -319,11 +292,6 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     clickLabel,
     clickIcon,
     orbitLayer,
-    quickShopPanel,
-    quickShopKicker,
-    quickShopName,
-    quickShopMeta,
-    quickShopButton,
     nextUnlockHint,
     buffList,
     goalPanel,
@@ -334,11 +302,6 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     goalProgressText,
     goalButton,
     nextGoalHint,
-    strategyPanel,
-    strategyKicker,
-    strategyTitle,
-    strategyBody,
-    strategyDetail,
     announcer,
     abilityTitle,
     abilityList: abilityRefs,
