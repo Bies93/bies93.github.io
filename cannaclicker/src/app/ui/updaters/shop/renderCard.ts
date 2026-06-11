@@ -141,6 +141,8 @@ function updateAffordability(card: ShopCardRefs, entry: ShopEntry): void {
 function updateCostAndOwned(card: ShopCardRefs, entry: ShopEntry): void {
   card.cost.textContent = entry.formattedCost;
   card.owned.textContent = entry.owned.toString();
+  card.ownedBadge.textContent = `x${entry.owned}`;
+  card.ownedBadge.dataset.empty = entry.owned > 0 ? 'false' : 'true';
 }
 
 function updateProductionDetails(

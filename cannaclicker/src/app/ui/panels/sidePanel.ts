@@ -34,15 +34,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
 
   const tabs = new Map<SidePanelTab, HTMLButtonElement>();
   (
-    [
-      'shop',
-      'upgrades',
-      'research',
-      'greenhouse',
-      'prestige',
-      'achievements',
-      'settings',
-    ] as SidePanelTab[]
+    ['shop', 'upgrades', 'research', 'greenhouse', 'prestige', 'achievements'] as SidePanelTab[]
   ).forEach((tab) => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -285,7 +277,8 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   viewsContainer.appendChild(greenhouseView);
 
   const settingsView = document.createElement('div');
-  settingsView.className = 'settings-panel';
+  settingsView.className = 'settings-panel settings-panel--modal';
+  settingsView.dataset.uiRole = 'settings-panel';
 
   const offlineSetting = createSettingRow('offline');
   const offlineToggle = document.createElement('input');
@@ -377,29 +370,6 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
   plantSkinSetting.action.appendChild(plantSkinSelect);
   settingsView.appendChild(plantSkinSetting.row);
 
-  const versionSetting = createSettingRow('version');
-  versionSetting.row.classList.add('settings-row--static');
-  settingsView.appendChild(versionSetting.row);
-
-  const releaseSetting = createSettingRow('release');
-  releaseSetting.row.classList.add('settings-row--static');
-  settingsView.appendChild(releaseSetting.row);
-
-  const creditsSetting = createSettingRow('credits');
-  creditsSetting.row.classList.add('settings-row--static');
-  settingsView.appendChild(creditsSetting.row);
-
-  const tools = document.createElement('div');
-  tools.className = 'settings-tools';
-
-  const exportButton = createSettingsButton('export');
-  const importButton = createSettingsButton('import');
-  const resetButton = createSettingsButton('reset');
-  resetButton.classList.add('is-danger');
-  tools.append(exportButton, importButton, resetButton);
-  settingsView.appendChild(tools);
-  viewsContainer.appendChild(settingsView);
-
   const views: Record<SidePanelTab, HTMLElement> = {
     shop: shopView,
     upgrades: upgradesView,
@@ -407,7 +377,6 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
     greenhouse: greenhouseView,
     prestige: prestigePanel.container,
     achievements: achievementsView,
-    settings: settingsView,
   };
 
   Object.entries(views).forEach(([tab, view]) => {
@@ -474,6 +443,7 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
       automationAbilityMode,
     },
     settings: {
+      container: settingsView,
       offlineToggle,
       offlineTitle: offlineSetting.title,
       offlineDescription: offlineSetting.description,
@@ -498,15 +468,6 @@ export function createSidePanel(activeSidePanelTab: SidePanelTab): SidePanelRefs
       plantSkinTitle: plantSkinSetting.title,
       plantSkinDescription: plantSkinSetting.description,
       plantSkinSelect,
-      versionTitle: versionSetting.title,
-      versionDescription: versionSetting.description,
-      releaseTitle: releaseSetting.title,
-      releaseDescription: releaseSetting.description,
-      creditsTitle: creditsSetting.title,
-      creditsDescription: creditsSetting.description,
-      exportButton,
-      importButton,
-      resetButton,
     },
   } satisfies SidePanelRefs;
 }
@@ -550,14 +511,4 @@ function createSettingRow(id: string): {
 
   row.append(copy, action);
   return { row, title, description, action };
-}
-
-function createSettingsButton(id: string): HTMLButtonElement {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'settings-action';
-  button.dataset.id = id;
-  button.dataset.role = `settings-${id}`;
-  button.dataset.kind = 'settings';
-  return button;
 }

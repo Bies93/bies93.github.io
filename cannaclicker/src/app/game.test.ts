@@ -1,10 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import Decimal from 'break_infinity.js';
 import { buyItem, handleManualClick } from './game';
 import { purchaseResearch } from './research';
 import { createDefaultState } from './state';
+import { advanceEventPipeline, createDefaultEventState } from './events';
 
 describe('core game mechanics', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('adds buds and lifetime total on a manual click', () => {
     const state = createDefaultState();
 
@@ -38,5 +43,56 @@ describe('core game mechanics', () => {
     expect(state.buds.toNumber()).toBe(0);
     expect(state.researchOwned).toContain('r_eff_foundation');
     expect(state.temp.researchBpsMult.toNumber()).toBeCloseTo(1.2);
+  });
+
+  it('schedules the first random event in the opening two minutes', () => {
+    const now = 1_000_000;
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+
+    const events = createDefaultEventState(now);
+
+    expect(events.queue).toHaveLength(1);
+    expect(events.queue[0].scheduledAt - now).toBe(90_000);
+  });
+
+  it('uses a 3 to 6 minute event cadence in the early game', () => {
+    const now = Date.now();
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    const state = createDefaultState();
+    state.time = now - 140_000;
+    state.prestige.lastResetAt = state.time;
+    state.total = new Decimal(120);
+    state.items.seedling = 1;
+    state.events.queue = [];
+    state.meta.eventStats.totalSpawns = 1;
+
+    advanceEventPipeline(state, 1, now);
+
+    expect(state.events.queue).toHaveLength(1);
+    expect(state.events.queue[0].scheduledAt - now).toBe(180_000);
+  });
+
+  it('shortens stale first-event queues from old saves once random events are eligible', () => {
+    const now = Date.now();
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    const state = createDefaultState();
+    state.time = now - 130_000;
+    state.prestige.lastResetAt = state.time;
+    state.total = new Decimal(120);
+    state.items.seedling = 1;
+    state.events.queue = [
+      {
+        id: 'golden_bud',
+        token: 'stale_first_event',
+        scheduledAt: now + 900_000,
+        priority: 0,
+        pity: false,
+      },
+    ];
+
+    advanceEventPipeline(state, 1, now);
+
+    expect(state.events.queue).toHaveLength(1);
+    expect(state.events.queue[0].scheduledAt - now).toBe(2_000);
   });
 });

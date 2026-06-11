@@ -8,29 +8,28 @@ import type { ShopCardRefs } from '../../types';
 export function createShopCard(definition: ItemDefinition, state: GameState): ShopCardRefs {
   const container = document.createElement('article');
   container.className =
-    'relative grid gap-4 rounded-xl border border-white/10 bg-neutral-900/70 p-4 shadow-card backdrop-blur-sm transition hover:border-emerald-400/40 sm:grid-cols-[1fr_auto] sm:items-center sm:p-5';
+    'relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-white/10 bg-neutral-900/70 p-3 shadow-card backdrop-blur-sm transition hover:border-emerald-400/40';
   container.classList.add('shop-card');
 
   const info = document.createElement('div');
-  info.className = 'flex flex-col gap-3';
+  info.className = 'shop-card__info';
 
   const headerRow = document.createElement('div');
-  headerRow.className = 'flex items-start justify-between gap-3';
+  headerRow.className = 'shop-card__header';
 
   const titleWrap = document.createElement('div');
-  titleWrap.className = 'space-y-1 flex-1';
+  titleWrap.className = 'shop-card__title-wrap';
 
   const name = document.createElement('h3');
-  name.className = 'text-lg font-semibold text-neutral-100';
+  name.className = 'shop-card__name';
   titleWrap.appendChild(name);
-
-  const description = document.createElement('p');
-  description.className = 'text-sm leading-snug text-neutral-400';
-  titleWrap.appendChild(description);
 
   const role = document.createElement('p');
   role.className = 'shop-card__role';
   titleWrap.appendChild(role);
+
+  const description = document.createElement('p');
+  description.className = 'shop-card__description';
 
   const roiBadge = document.createElement('span');
   roiBadge.className = 'roi-badge';
@@ -73,18 +72,15 @@ export function createShopCard(definition: ItemDefinition, state: GameState): Sh
 
   const unlockHint = document.createElement('p');
   unlockHint.className = 'shop-card__unlock-hint hidden';
-  info.appendChild(unlockHint);
 
   const details = document.createElement('dl');
-  details.className = 'grid grid-cols-2 gap-x-4 gap-y-1 text-sm opacity-90';
+  details.className = 'shop-card__details-grid';
 
   const cost = createDetail(details, t(state.locale, 'shop.cost'));
   const owned = createDetail(details, t(state.locale, 'shop.owned'));
   const currentProduction = createDetail(details, t(state.locale, 'shop.productionCurrent'));
   const nextProduction = createDetail(details, t(state.locale, 'shop.productionAfter'));
   const share = createDetail(details, t(state.locale, 'shop.productionShare'));
-
-  info.appendChild(details);
 
   const delta = document.createElement('p');
   delta.className = 'shop-card__delta';
@@ -133,17 +129,32 @@ export function createShopCard(definition: ItemDefinition, state: GameState): Sh
   info.appendChild(actions);
 
   const media = document.createElement('div');
-  media.className =
-    'w-24 aspect-square shrink-0 justify-self-center sm:justify-self-end sm:w-28 md:w-32';
+  media.className = 'shop-card__media';
+  media.tabIndex = 0;
+  media.setAttribute('role', 'group');
+
+  const iconFrame = document.createElement('div');
+  iconFrame.className = 'shop-card__icon-frame';
 
   const icon = document.createElement('img');
   icon.src = definition.icon;
   icon.srcset = createItemSrcset(definition.icon);
   icon.alt = definition.name[state.locale];
   icon.decoding = 'async';
-  icon.className = 'h-full w-full object-contain';
+  icon.className = 'shop-card__icon';
 
-  media.appendChild(icon);
+  const ownedBadge = document.createElement('span');
+  ownedBadge.className = 'shop-card__owned-badge';
+
+  const detailPanel = document.createElement('div');
+  detailPanel.id = `shop-card-details-${definition.id}`;
+  detailPanel.className = 'shop-card__details-popover';
+  detailPanel.setAttribute('aria-live', 'polite');
+  media.setAttribute('aria-describedby', detailPanel.id);
+
+  iconFrame.appendChild(icon);
+  detailPanel.append(description, details, unlockHint);
+  media.append(iconFrame, ownedBadge, detailPanel);
 
   container.append(info, media);
 
@@ -155,6 +166,7 @@ export function createShopCard(definition: ItemDefinition, state: GameState): Sh
     role,
     roiBadge,
     roiValue,
+    ownedBadge,
     stageLabel,
     stageProgressBar: progressBar,
     stageProgressText,

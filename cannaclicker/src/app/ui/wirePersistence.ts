@@ -208,10 +208,26 @@ export function wirePersistence(context: WireContext): void {
     });
   };
 
+  const handleMenu = () => {
+    audio.playUi();
+    openActionModal({
+      title: t(state.locale, 'settings.modal.title'),
+      description: t(state.locale, 'settings.modal.description'),
+      body: refs.sidePanel.settings.container,
+      actions: [
+        {
+          label: t(state.locale, 'actions.close'),
+          variant: 'primary',
+        },
+      ],
+    });
+  };
+
   refs.controls.mute.button.addEventListener('click', handleMute);
   refs.controls.export.button.addEventListener('click', handleExport);
   refs.controls.import.button.addEventListener('click', handleImport);
   refs.controls.reset.button.addEventListener('click', handleReset);
+  refs.controls.menu.button.addEventListener('click', handleMenu);
 
   refs.sidePanel.settings.soundButton.addEventListener('click', handleMute);
   refs.sidePanel.settings.sfxVolumeInput.addEventListener('input', (event) => {
@@ -241,9 +257,6 @@ export function wirePersistence(context: WireContext): void {
     audio.playSettings();
     save(state);
   });
-  refs.sidePanel.settings.exportButton.addEventListener('click', handleExport);
-  refs.sidePanel.settings.importButton.addEventListener('click', handleImport);
-  refs.sidePanel.settings.resetButton.addEventListener('click', handleReset);
   refs.sidePanel.settings.offlineToggle.addEventListener('change', (event) => {
     state.settings.showOfflineEarnings = (event.target as HTMLInputElement).checked;
     audio.playSettings();

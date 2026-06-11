@@ -108,7 +108,6 @@ export const sidePanelTabIcons = {
   greenhouse: asset('img/ui/tab-greenhouse.png'),
   prestige: asset('img/ui/tab-prestige.png'),
   achievements: asset('img/ui/tab-achievements.png'),
-  settings: asset('img/ui/tab-settings.png'),
 } as const;
 
 export const clickerFxAssets = {

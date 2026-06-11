@@ -2,7 +2,6 @@ import type { GameState } from '../../state';
 import { uiIcons } from '../../assetManifest';
 import { t, type LocaleKey } from '../../i18n';
 import { formatAbilityTooltip, getAbilityLabel } from '../../abilities';
-import { APP_VERSION } from '../../version';
 import type { SidePanelTab, UIRefs } from '../types';
 
 const STAT_META: Record<LocaleKey, Record<string, string>> = {
@@ -33,7 +32,6 @@ const SIDE_PANEL_TAB_KEYS: Record<SidePanelTab, string> = {
   greenhouse: 'panel.tabs.greenhouse',
   prestige: 'panel.tabs.prestige',
   achievements: 'panel.tabs.achievements',
-  settings: 'panel.tabs.settings',
 };
 
 export function updateStrings(state: GameState, refs: UIRefs): void {
@@ -70,6 +68,10 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
   refs.controls.reset.label.textContent = t(state.locale, 'actions.reset');
   refs.controls.reset.button.setAttribute('aria-label', t(state.locale, 'actions.reset'));
   refs.controls.reset.button.setAttribute('title', t(state.locale, 'actions.reset'));
+
+  refs.controls.menu.label.textContent = t(state.locale, 'actions.menu');
+  refs.controls.menu.button.setAttribute('aria-label', t(state.locale, 'actions.menu'));
+  refs.controls.menu.button.setAttribute('title', t(state.locale, 'actions.menu'));
 
   refs.statsLabels.forEach((label, key) => {
     label.textContent = t(state.locale, key);
@@ -207,22 +209,6 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
   Array.from(refs.sidePanel.settings.plantSkinSelect.options).forEach((option) => {
     option.textContent = t(state.locale, `settings.plantSkin.option.${option.value}`);
   });
-  refs.sidePanel.settings.versionTitle.textContent = t(state.locale, 'settings.version.title');
-  refs.sidePanel.settings.versionDescription.textContent = t(
-    state.locale,
-    'settings.version.body',
-    {
-      version: APP_VERSION,
-    },
-  );
-  refs.sidePanel.settings.releaseTitle.textContent = t(state.locale, 'settings.release.title');
-  refs.sidePanel.settings.releaseDescription.textContent = t(state.locale, 'settings.release.body');
-  refs.sidePanel.settings.creditsTitle.textContent = t(state.locale, 'settings.credits.title');
-  refs.sidePanel.settings.creditsDescription.textContent = t(state.locale, 'settings.credits.body');
-  refs.sidePanel.settings.exportButton.textContent = t(state.locale, 'actions.export');
-  refs.sidePanel.settings.importButton.textContent = t(state.locale, 'actions.import');
-  refs.sidePanel.settings.resetButton.textContent = t(state.locale, 'actions.reset');
-
   refs.sidePanel.prestige.description.textContent = t(state.locale, 'panel.prestige.description');
   refs.sidePanel.prestige.spendableSeedsLabel.textContent = t(
     state.locale,

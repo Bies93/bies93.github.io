@@ -25,12 +25,14 @@ export function mountUI(state: GameState): UIRefs {
   const exportControl = createActionButton(uiIcons.export);
   const importControl = createActionButton(uiIcons.import);
   const resetControl = createDangerButton(uiIcons.reset);
+  const menuControl = createActionButton(uiIcons.settings);
 
   const headerTitle = mountHeader(root, [
     muteControl.button,
     exportControl.button,
     importControl.button,
     resetControl.button,
+    menuControl.button,
   ]);
 
   const panels = mountPanels({ state, root, layout, primaryColumn, secondaryColumn });
@@ -44,6 +46,7 @@ export function mountUI(state: GameState): UIRefs {
       export: exportControl,
       import: importControl,
       reset: resetControl,
+      menu: menuControl,
     },
     ...panels,
   };

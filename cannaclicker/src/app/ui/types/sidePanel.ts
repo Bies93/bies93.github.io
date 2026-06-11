@@ -48,6 +48,7 @@ export interface ShopCardRefs {
   role: HTMLElement;
   roiBadge: HTMLElement;
   roiValue: HTMLElement;
+  ownedBadge: HTMLElement;
   stageLabel: HTMLElement;
   stageProgressBar: HTMLElement;
   stageProgressText: HTMLElement;
@@ -139,6 +140,7 @@ export interface SidePanelRefs {
     automationAbilityMode: HTMLSelectElement;
   };
   settings: {
+    container: HTMLElement;
     offlineToggle: HTMLInputElement;
     offlineTitle: HTMLElement;
     offlineDescription: HTMLElement;
@@ -163,15 +165,6 @@ export interface SidePanelRefs {
     plantSkinTitle: HTMLElement;
     plantSkinDescription: HTMLElement;
     plantSkinSelect: HTMLSelectElement;
-    versionTitle: HTMLElement;
-    versionDescription: HTMLElement;
-    releaseTitle: HTMLElement;
-    releaseDescription: HTMLElement;
-    creditsTitle: HTMLElement;
-    creditsDescription: HTMLElement;
-    exportButton: HTMLButtonElement;
-    importButton: HTMLButtonElement;
-    resetButton: HTMLButtonElement;
   };
 }
 
@@ -181,5 +174,4 @@ export type SidePanelTab =
   | 'research'
   | 'greenhouse'
   | 'prestige'
-  | 'achievements'
-  | 'settings';
+  | 'achievements';

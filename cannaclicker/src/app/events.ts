@@ -75,9 +75,19 @@ const SEED_BLOOM_DURATION_MS = 18_000;
 const SUPPLY_DROP_DISCOUNT = 0.85;
 const SUPPLY_DROP_DURATION_MS = 16_000;
 
-const EVENT_SPAWN_MIN_MS = 720_000;
-const EVENT_SPAWN_MAX_MS = 1_200_000;
-const FIRST_EVENT_MIN_MS = 90_000;
+const EVENT_FIRST_SPAWN_MIN_MS = 90_000;
+const EVENT_FIRST_SPAWN_MAX_MS = 120_000;
+const EVENT_EARLY_SPAWN_MIN_MS = 180_000;
+const EVENT_EARLY_SPAWN_MAX_MS = 360_000;
+const EVENT_MID_SPAWN_MIN_MS = 300_000;
+const EVENT_MID_SPAWN_MAX_MS = 540_000;
+const EVENT_LATE_SPAWN_MIN_MS = 480_000;
+const EVENT_LATE_SPAWN_MAX_MS = 720_000;
+const EVENT_EARLY_PHASE_MS = 30 * 60 * 1000;
+const EVENT_MID_PHASE_MS = 90 * 60 * 1000;
+const EVENT_RETIME_SOON_MIN_MS = 2_000;
+const EVENT_RETIME_SOON_MAX_MS = 8_000;
+const FIRST_EVENT_MIN_MS = EVENT_FIRST_SPAWN_MIN_MS;
 const EVENT_VISIBLE_MIN_MS = 7_000;
 const EVENT_VISIBLE_MAX_MS = 12_000;
 const EVENT_QUEUE_TARGET_SIZE = 1;
@@ -689,7 +699,7 @@ function getEventSpawnRateMult(state: GameState): number {
   const value = state.temp.eventSpawnRateMult ?? 1;
   const ability = abilityMultiplierFor(state, 'event');
   const combined = (Number.isFinite(value) ? value : 1) * (Number.isFinite(ability) ? ability : 1);
-  return Math.max(0.5, Math.min(1, combined));
+  return Math.max(0.5, Math.min(2.5, combined));
 }
 
 function getEventDurationMult(state: GameState): number {
@@ -704,6 +714,59 @@ function scaleSpawnDelay(state: GameState, delay: number): number {
 function getRunAgeMs(state: GameState, now: number): number {
   const runStartedAt = state.prestige.lastResetAt || state.time || now;
   return Math.max(0, now - runStartedAt);
+}
+
+interface EventSpawnWindow {
+  min: number;
+  max: number;
+}
+
+function getInitialEventSpawnDelayMs(): number {
+  return randomBetween(EVENT_FIRST_SPAWN_MIN_MS, EVENT_FIRST_SPAWN_MAX_MS);
+}
+
+function isWaitingForFirstEvent(state: GameState): boolean {
+  return (
+    state.meta.eventStats.totalSpawns <= 0 &&
+    state.events.active.length === 0 &&
+    state.events.history.length === 0
+  );
+}
+
+function getStandardEventSpawnWindow(state: GameState, now: number): EventSpawnWindow {
+  if (isWaitingForFirstEvent(state)) {
+    return { min: EVENT_FIRST_SPAWN_MIN_MS, max: EVENT_FIRST_SPAWN_MAX_MS };
+  }
+
+  const runAgeMs = getRunAgeMs(state, now);
+  const totalSpawns = Math.max(0, state.meta.eventStats.totalSpawns);
+  if (runAgeMs < EVENT_EARLY_PHASE_MS || totalSpawns < 4) {
+    return { min: EVENT_EARLY_SPAWN_MIN_MS, max: EVENT_EARLY_SPAWN_MAX_MS };
+  }
+  if (runAgeMs < EVENT_MID_PHASE_MS || totalSpawns < 10) {
+    return { min: EVENT_MID_SPAWN_MIN_MS, max: EVENT_MID_SPAWN_MAX_MS };
+  }
+  return { min: EVENT_LATE_SPAWN_MIN_MS, max: EVENT_LATE_SPAWN_MAX_MS };
+}
+
+function getStandardEventSpawnDelayMs(state: GameState, now: number): number {
+  const window = getStandardEventSpawnWindow(state, now);
+  return randomBetween(window.min, window.max);
+}
+
+function getRetimedEventSpawnDelayMs(state: GameState, now: number): number {
+  if (!isWaitingForFirstEvent(state)) {
+    return getStandardEventSpawnDelayMs(state, now);
+  }
+
+  const runAgeMs = getRunAgeMs(state, now);
+  if (runAgeMs >= EVENT_FIRST_SPAWN_MAX_MS) {
+    return randomBetween(EVENT_RETIME_SOON_MIN_MS, EVENT_RETIME_SOON_MAX_MS);
+  }
+
+  const minRemaining = Math.max(0, EVENT_FIRST_SPAWN_MIN_MS - runAgeMs);
+  const maxRemaining = Math.max(minRemaining + 1_000, EVENT_FIRST_SPAWN_MAX_MS - runAgeMs);
+  return randomBetween(minRemaining, maxRemaining);
 }
 
 function getEventPhaseAccelerationCap(state: GameState, now: number): number {
@@ -811,7 +874,7 @@ export function createDefaultEventState(now = Date.now()): EventRuntimeState {
   const weights = { ...DEFAULT_EVENT_WEIGHTS } satisfies Record<EventId, number>;
   const queue: EventQueueEntry[] = [];
   for (let i = 0; i < EVENT_QUEUE_TARGET_SIZE; i += 1) {
-    const delay = randomBetween(EVENT_SPAWN_MIN_MS, EVENT_SPAWN_MAX_MS);
+    const delay = getInitialEventSpawnDelayMs();
     const scheduledAt = now + Math.round(delay) + i * 250;
     queue.push({
       id: pickEventIdFromWeights(weights),
@@ -935,6 +998,7 @@ export function advanceEventPipeline(
     tickEventPityTimers(stats, elapsedMs);
   }
   expireEvents(state, now);
+  retimeOverlongEventQueue(state, now);
   spawnDueEvents(state, now);
   ensureQueueCapacity(state, now);
 }
@@ -955,6 +1019,29 @@ function getMutablePityByCategory(stats: EventStats): Partial<Record<EventCatego
 
 function resetPityForCategory(stats: EventStats, category: EventCategory): void {
   getMutablePityByCategory(stats)[category] = 0;
+}
+
+function retimeOverlongEventQueue(state: GameState, now: number): void {
+  if (state.events.queue.length === 0 || !isEarlyEventGateOpen(state, now)) {
+    return;
+  }
+
+  state.events.queue.sort(compareQueueEntries);
+  const next = state.events.queue[0];
+  if (!next || next.pity) {
+    return;
+  }
+
+  const window = getStandardEventSpawnWindow(state, now);
+  const maxDelay = scaleSpawnDelay(state, window.max);
+  const remaining = next.scheduledAt - now;
+  if (remaining <= maxDelay) {
+    return;
+  }
+
+  next.scheduledAt =
+    now + Math.round(scaleSpawnDelay(state, getRetimedEventSpawnDelayMs(state, now)));
+  state.events.queue.sort(compareQueueEntries);
 }
 
 function expireEvents(state: GameState, now: number): void {
@@ -1035,7 +1122,7 @@ function ensureQueueCapacity(state: GameState, now: number): void {
     const immediate = pityReady;
     const rawDelay = immediate
       ? randomBetween(1_500, 3_500)
-      : randomBetween(EVENT_SPAWN_MIN_MS, EVENT_SPAWN_MAX_MS);
+      : getStandardEventSpawnDelayMs(state, now);
     const delay = scaleSpawnDelay(state, rawDelay);
     const scheduledAt = now + Math.round(delay);
     const id = pityCategory

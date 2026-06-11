@@ -10,5 +10,6 @@ export interface UIControlGroupRefs {
     export: ControlButtonRefs;
     import: ControlButtonRefs;
     reset: ControlButtonRefs;
+    menu: ControlButtonRefs;
   };
 }
