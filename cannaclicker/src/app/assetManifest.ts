@@ -95,6 +95,7 @@ export const uiIcons = {
   achievements: asset('img/ui/achievements.png'),
   greenhouse: asset('img/ui/greenhouse.png'),
   settings: asset('img/ui/settings.png'),
+  prestigeSeal: asset('img/ui/prestige-seal.png'),
   achievementBase: asset('img/ui/achievement-base.svg'),
   achievementRibbon: asset('img/ui/achievement-ribbon.svg'),
   achievementLeaf: asset('img/ui/achievement-leaf.svg'),
@@ -112,6 +113,17 @@ export const sidePanelTabIcons = {
 
 export const clickerFxAssets = {
   orbitBud: asset('img/ui/orbit-bud.png'),
+  orbitBudGold: asset('img/ui/orbit-bud-gold.png'),
+  orbitBudShadow: asset('img/ui/orbit-bud-shadow.png'),
+} as const;
+
+export const textureAssets = {
+  growboxGrid: asset('img/textures/growbox-grid.png'),
+  crateWood: asset('img/textures/crate-wood.png'),
+  labGlass: asset('img/textures/lab-glass.png'),
+  prestigeFoil: asset('img/textures/prestige-foil.png'),
+  controlMetal: asset('img/textures/control-metal.png'),
+  rewardGlow: asset('img/textures/reward-glow.png'),
 } as const;
 
 export const plantStages = [

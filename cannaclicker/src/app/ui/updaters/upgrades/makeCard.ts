@@ -12,6 +12,7 @@ export function createUpgradeCard(
   const container = document.createElement('article');
   container.className = 'upgrade-card';
   container.dataset.upgradeId = definition.id;
+  container.dataset.category = definition.category;
 
   const iconWrap = document.createElement('div');
   iconWrap.className = 'upgrade-card__media';

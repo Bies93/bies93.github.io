@@ -4,6 +4,11 @@ import type { GameState } from '../state';
 import type { ResearchFilter } from '../research';
 import { getResearchList } from '../research';
 import { getUpgradeEntries } from '../upgrades';
+import {
+  getFallbackSidePanelTab,
+  getVisibleSidePanelTabs,
+  type ProgressionPanel,
+} from '../progression';
 import type { InitI18nApi } from './bootstrap';
 import type { UIRefs, SidePanelTab } from './types';
 import { updateStrings } from './updaters/strings';
@@ -33,6 +38,7 @@ interface RendererContext {
   getResearchState(): { filter: ResearchFilter; manual: boolean };
   setResearchState(filter: ResearchFilter, manual: boolean): void;
   getActiveSidePanelTab(): SidePanelTab;
+  setActiveSidePanelTab(tab: SidePanelTab): void;
 }
 
 export function createRenderer(context: RendererContext): (state: GameState) => void {
@@ -52,7 +58,13 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
     updateStats(state, refs);
     processSeedNotifications(state, refs, (options: ToastOptions) => showToast(options));
     updateAbilities(state, refs);
-    updateSidePanel(state, refs, context.getActiveSidePanelTab());
+    const visibleTabs = getVisibleSidePanelTabs(state);
+    let activeSidePanelTab = context.getActiveSidePanelTab();
+    if (!visibleTabs.has(activeSidePanelTab as ProgressionPanel)) {
+      activeSidePanelTab = getFallbackSidePanelTab(visibleTabs) as SidePanelTab;
+      context.setActiveSidePanelTab(activeSidePanelTab);
+    }
+    updateSidePanel(state, refs, activeSidePanelTab, visibleTabs);
 
     updateShop(state, refs, {
       onPurchase: (feedback) => {

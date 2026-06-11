@@ -10,6 +10,7 @@ export function createShopCard(definition: ItemDefinition, state: GameState): Sh
   container.className =
     'relative grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border border-white/10 bg-neutral-900/70 p-3 shadow-card backdrop-blur-sm transition hover:border-emerald-400/40';
   container.classList.add('shop-card');
+  container.dataset.itemId = definition.id;
 
   const info = document.createElement('div');
   info.className = 'shop-card__info';
@@ -131,7 +132,8 @@ export function createShopCard(definition: ItemDefinition, state: GameState): Sh
   const media = document.createElement('div');
   media.className = 'shop-card__media';
   media.tabIndex = 0;
-  media.setAttribute('role', 'group');
+  media.setAttribute('role', 'button');
+  media.setAttribute('aria-expanded', 'false');
 
   const iconFrame = document.createElement('div');
   iconFrame.className = 'shop-card__icon-frame';
@@ -160,6 +162,8 @@ export function createShopCard(definition: ItemDefinition, state: GameState): Sh
 
   return {
     container,
+    media,
+    detailPanel,
     icon,
     name,
     description,

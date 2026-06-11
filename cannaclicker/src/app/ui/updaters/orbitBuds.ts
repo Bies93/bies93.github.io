@@ -51,6 +51,14 @@ export function updateOrbitBuds(state: GameState, refs: UIRefs): void {
   const visible = getVisibleBudCount(state);
   const current = Number(refs.orbitLayer.dataset.count ?? '0');
   refs.orbitLayer.style.setProperty('--orbit-bud-image', `url("${clickerFxAssets.orbitBud}")`);
+  refs.orbitLayer.style.setProperty(
+    '--orbit-bud-gold-image',
+    `url("${clickerFxAssets.orbitBudGold}")`,
+  );
+  refs.orbitLayer.style.setProperty(
+    '--orbit-bud-shadow-image',
+    `url("${clickerFxAssets.orbitBudShadow}")`,
+  );
 
   if (current === visible) {
     return;
@@ -82,6 +90,10 @@ export function updateOrbitBuds(state: GameState, refs: UIRefs): void {
       const opacity = 0.68 + (globalIndex % 4) * 0.055;
 
       bud.className = 'click-orbit__bud';
+      if ((globalIndex + 1) % 25 === 0) {
+        bud.classList.add('click-orbit__bud--gold');
+        bud.style.setProperty('--orbit-bud-image-local', `var(--orbit-bud-gold-image)`);
+      }
       bud.style.setProperty('--orbit-angle', `${angle.toFixed(3)}deg`);
       bud.style.setProperty('--orbit-radius-local', ringRadii[ringIndex]);
       bud.style.setProperty('--orbit-scale', scale.toFixed(2));

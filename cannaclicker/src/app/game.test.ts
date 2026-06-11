@@ -72,6 +72,21 @@ describe('core game mechanics', () => {
     expect(state.events.queue[0].scheduledAt - now).toBe(180_000);
   });
 
+  it('allows the first random event after the first shop purchase within two minutes', () => {
+    const now = 1_000_000;
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    const state = createDefaultState({ time: now - 95_000 });
+    state.prestige.lastResetAt = now - 95_000;
+    state.total = new Decimal(12);
+    state.items.seedling = 1;
+    state.events = createDefaultEventState(now - 95_000);
+
+    advanceEventPipeline(state, 1, now);
+
+    expect(state.events.active).toHaveLength(1);
+    expect(state.meta.eventStats.totalSpawns).toBe(1);
+  });
+
   it('shortens stale first-event queues from old saves once random events are eligible', () => {
     const now = Date.now();
     vi.spyOn(Math, 'random').mockReturnValue(0);

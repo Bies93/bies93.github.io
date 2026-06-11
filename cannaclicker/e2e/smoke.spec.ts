@@ -29,6 +29,10 @@ test('loads the game, clicks once, and renders image assets', async ({ page }) =
 
   await expect(clickButton).toBeVisible();
   await expect(budsValue).toHaveText(/^0(?:[,.]00)?$/);
+  await expect(page.getByTestId('next-unlock-hint')).toContainText(/Pflanze|plant/i);
+  await expect(page.getByRole('tab', { name: /Lab|Labor|Research/i })).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: /Greenhouse|Gewächshaus/i })).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: /Ascend|Aufstieg|Prestige/i })).toHaveCount(0);
 
   await clickButton.click();
 
@@ -139,6 +143,7 @@ test('keeps mobile touch menus and shop details usable', async ({ page, isMobile
   const shopDetails = page.locator('.shop-card__details-popover').first();
   await shopMedia.tap();
   await expect(shopDetails).toBeVisible();
+  await expect(shopMedia).toHaveAttribute('aria-expanded', 'true');
 
   const detailBox = await shopDetails.boundingBox();
   const viewport = page.viewportSize();
@@ -148,6 +153,12 @@ test('keeps mobile touch menus and shop details usable', async ({ page, isMobile
   expect(detailBox!.x + detailBox!.width).toBeLessThanOrEqual(viewport!.width + 1);
   await expect(shopDetails).toContainText(/Kosten|Cost|Besitzt|Owned|BPS/i);
   await expectNoHorizontalOverflow();
+  await shopMedia.tap();
+  await expect(shopMedia).toHaveAttribute('aria-expanded', 'false');
+  await expect(shopDetails).toBeHidden();
+  await shopMedia.tap();
+  await page.locator('body').tap({ position: { x: 8, y: 8 } });
+  await expect(shopDetails).toBeHidden();
 
   await page.getByRole('button', { name: /Menü|Menu/i }).tap();
   const menuDialog = page.getByRole('dialog', { name: /Menü|Menu/i });

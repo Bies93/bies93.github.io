@@ -68,6 +68,54 @@ export function wireShopCard(
     const count = getMaxAffordable(definition, state);
     purchase(count);
   });
+
+  const setDetailsOpen = (open: boolean) => {
+    card.container.dataset.detailsOpen = open ? 'true' : 'false';
+    card.media.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  const useTouchDetailMode = () => {
+    card.container.dataset.detailInput = 'touch';
+  };
+
+  card.container.dataset.detailsOpen = 'false';
+  card.media.addEventListener('pointerdown', (event) => {
+    if (event.pointerType !== 'mouse' || navigator.maxTouchPoints > 0) {
+      useTouchDetailMode();
+    }
+  });
+  card.media.addEventListener('pointerenter', (event) => {
+    if (event.pointerType === 'mouse' && navigator.maxTouchPoints === 0) {
+      delete card.container.dataset.detailInput;
+    }
+  });
+  card.media.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    if (navigator.maxTouchPoints > 0) {
+      useTouchDetailMode();
+    }
+    setDetailsOpen(card.container.dataset.detailsOpen !== 'true');
+  });
+  card.media.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      setDetailsOpen(card.container.dataset.detailsOpen !== 'true');
+    } else if (event.key === 'Escape') {
+      setDetailsOpen(false);
+    }
+  });
+  const closeDetailsOnOutsidePointer = (event: MouseEvent | PointerEvent) => {
+    if (card.container.dataset.detailsOpen !== 'true') {
+      return;
+    }
+    if (event.target instanceof Node && card.container.contains(event.target)) {
+      return;
+    }
+    setDetailsOpen(false);
+  };
+
+  document.addEventListener('pointerdown', closeDetailsOnOutsidePointer);
+  document.addEventListener('click', closeDetailsOnOutsidePointer);
 }
 
 function getCrossedMilestone(

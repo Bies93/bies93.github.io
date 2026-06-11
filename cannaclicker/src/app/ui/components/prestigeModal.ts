@@ -1,3 +1,4 @@
+import { uiIcons } from '../../assetManifest';
 import type { PrestigeModalRefs } from '../types';
 
 export function createPrestigeModal(): PrestigeModalRefs {
@@ -16,6 +17,13 @@ export function createPrestigeModal(): PrestigeModalRefs {
   const title = document.createElement('h2');
   title.id = 'prestige-modal-title';
   title.className = 'modal-title';
+
+  const seal = new Image();
+  seal.src = uiIcons.prestigeSeal;
+  seal.alt = '';
+  seal.decoding = 'async';
+  seal.className = 'prestige-modal__seal';
+  seal.setAttribute('aria-hidden', 'true');
 
   const description = document.createElement('p');
   description.id = 'prestige-modal-description';
@@ -59,7 +67,7 @@ export function createPrestigeModal(): PrestigeModalRefs {
   confirmButton.className = 'modal-button primary';
 
   actions.append(cancelButton, confirmButton);
-  dialog.append(title, description, stats, warning, checkboxWrap, statusLabel, actions);
+  dialog.append(seal, title, description, stats, warning, checkboxWrap, statusLabel, actions);
   overlay.appendChild(dialog);
 
   return {

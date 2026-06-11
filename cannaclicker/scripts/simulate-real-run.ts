@@ -355,7 +355,7 @@ ${rows}
 - First prestige timing is checked through 90 minutes and longer 4h/10h runs.
 - Event-focused profile uses 90% event catch rate to stress event acceleration and seed drops.
 - Event rewards now run through a phase budget before being applied.
-- Early events require first item ownership, 90 seconds of run time, and at least 120 total Buds.
+- Early events require first item ownership, 90 seconds of run time, and at least 12 total Buds.
 `;
 }
 

@@ -37,6 +37,9 @@ function updateCoreDetails(
   card.icon.src = definition.icon;
   card.icon.srcset = createItemSrcset(definition.icon);
   card.icon.alt = definition.name[locale];
+  card.media.setAttribute('aria-label', t(locale, 'shop.detailsToggle', {
+    item: definition.name[locale],
+  }));
 
   card.name.textContent = definition.name[locale];
   card.description.textContent = definition.description[locale];

@@ -3,19 +3,30 @@ import { getResearchList } from '../../research';
 import { getShopEntries } from '../../shop';
 import { getUpgradeEntries } from '../../upgrades';
 import { getContractViews, getRoomViews } from '../../depth';
+import type { ProgressionPanel } from '../../progression';
 import type { GameState } from '../../state';
 import type { SidePanelTab, UIRefs } from '../types';
 
-export function updateSidePanel(state: GameState, refs: UIRefs, activeTab: SidePanelTab): void {
+export function updateSidePanel(
+  state: GameState,
+  refs: UIRefs,
+  activeTab: SidePanelTab,
+  visibleTabs: ReadonlySet<ProgressionPanel>,
+): void {
   const badges = getTabBadges(state);
+  refs.sidePanel.tabList.dataset.visibleCount = String(visibleTabs.size);
   refs.sidePanel.tabs.forEach((button, tab) => {
+    const isVisible = visibleTabs.has(tab as ProgressionPanel);
     const isActive = tab === activeTab;
+    button.hidden = !isVisible;
+    button.disabled = !isVisible;
+    button.setAttribute('aria-hidden', isVisible ? 'false' : 'true');
     button.classList.toggle('is-active', isActive);
     button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     button.setAttribute('aria-selected', isActive ? 'true' : 'false');
-    button.tabIndex = isActive ? 0 : -1;
+    button.tabIndex = isVisible ? (isActive ? 0 : -1) : -1;
     const badge = badges[tab];
-    if (badge) {
+    if (isVisible && badge) {
       button.dataset.badge = badge;
     } else {
       delete button.dataset.badge;
@@ -23,6 +34,7 @@ export function updateSidePanel(state: GameState, refs: UIRefs, activeTab: SideP
   });
 
   (Object.entries(refs.sidePanel.views) as [SidePanelTab, HTMLElement][]).forEach(([tab, view]) => {
+    const isVisible = visibleTabs.has(tab as ProgressionPanel);
     if (tab === activeTab) {
       view.classList.remove('hidden');
       view.setAttribute('aria-hidden', 'false');
@@ -30,6 +42,7 @@ export function updateSidePanel(state: GameState, refs: UIRefs, activeTab: SideP
       view.classList.add('hidden');
       view.setAttribute('aria-hidden', 'true');
     }
+    view.hidden = !isVisible && tab !== activeTab;
   });
 }
 

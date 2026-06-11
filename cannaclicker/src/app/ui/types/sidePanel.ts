@@ -42,6 +42,8 @@ export interface AchievementCardRefs {
 
 export interface ShopCardRefs {
   container: HTMLElement;
+  media: HTMLElement;
+  detailPanel: HTMLElement;
   icon: HTMLImageElement;
   name: HTMLElement;
   description: HTMLElement;

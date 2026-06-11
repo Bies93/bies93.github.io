@@ -1102,7 +1102,7 @@ function spawnDueEvents(state: GameState, now: number): void {
 function isEarlyEventGateOpen(state: GameState, now: number): boolean {
   const ownsAnyItem = Object.values(state.items).some((amount) => (amount ?? 0) > 0);
   const minTimeReached = getRunAgeMs(state, now) >= FIRST_EVENT_MIN_MS;
-  const minProgressReached = state.total.greaterThanOrEqualTo(120);
+  const minProgressReached = state.total.greaterThanOrEqualTo(12);
 
   return ownsAnyItem && minTimeReached && minProgressReached;
 }

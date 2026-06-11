@@ -5,13 +5,12 @@ import { computePrestigeMultiplier, getPrestigePreview } from '../../prestige';
 import { getAbilityLabel, listAbilities } from '../../abilities';
 import { EVENT_I18N_KEYS, getActiveEventBoosts } from '../../events';
 import { getGoalView } from '../../goals';
-import { canUnlockItem } from '../../shop';
+import { getNextActionHint } from '../../progression';
 import type { UIRefs } from '../types';
 import { formatInteger } from '../utils/format';
 import { formatSeedRate } from './stats';
 import { updatePlantStage } from './plant';
 import { updateOrbitBuds } from './orbitBuds';
-import { items, itemById, type ItemId } from '../../../data/items';
 
 export function updateStats(state: GameState, refs: UIRefs): void {
   const preview = getPrestigePreview(state);
@@ -78,7 +77,14 @@ export function updateStats(state: GameState, refs: UIRefs): void {
   refs.seedBadge.setAttribute('title', badgeTooltip);
   refs.seedBadge.setAttribute('aria-label', badgeTooltip);
 
-  refs.nextUnlockHint.textContent = getNextUnlockHint(state);
+  const nextAction = getNextActionHint(state);
+  refs.nextUnlockHint.textContent = t(state.locale, nextAction.key, nextAction.params);
+  refs.nextUnlockHint.dataset.tone = nextAction.tone;
+  if (nextAction.tab) {
+    refs.nextUnlockHint.dataset.targetTab = nextAction.tab;
+  } else {
+    delete refs.nextUnlockHint.dataset.targetTab;
+  }
   updateClickComboLabel(state, refs);
   updateBuffList(state, refs);
   updateGoalPanel(state, refs);
@@ -202,34 +208,4 @@ function formatEventBoostMultiplier(multiplier: number, target: string): string 
   }
 
   return `×${multiplier.toFixed(multiplier >= 2 ? 1 : 2)}`;
-}
-
-function getNextUnlockHint(state: GameState): string {
-  const locked = items.find((item) => !canUnlockItem(state, item));
-  if (!locked) {
-    return t(state.locale, 'nextUnlock.allUnlocked');
-  }
-
-  const name = locked.name[state.locale];
-  const unlock = locked.unlock;
-  if (unlock?.totalBuds) {
-    const remaining = Math.max(0, unlock.totalBuds - state.total.toNumber());
-    return t(state.locale, 'nextUnlock.total', {
-      item: name,
-      amount: formatDecimal(remaining),
-    });
-  }
-
-  if (unlock?.itemsOwned) {
-    const [itemId, required] = Object.entries(unlock.itemsOwned)[0] ?? [];
-    const current = itemId ? (state.items[itemId as ItemId] ?? 0) : 0;
-    const item = itemById.get(itemId as ItemId);
-    return t(state.locale, 'nextUnlock.items', {
-      item: name,
-      count: Math.max(0, (required ?? 0) - current),
-      source: item?.name[state.locale] ?? itemId,
-    });
-  }
-
-  return t(state.locale, 'nextUnlock.allUnlocked');
 }

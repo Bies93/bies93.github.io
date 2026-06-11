@@ -52,6 +52,9 @@ export function initUI(
       researchFilterManuallySelected = manual;
     },
     getActiveSidePanelTab: () => activeSidePanelTab,
+    setActiveSidePanelTab(tab) {
+      activeSidePanelTab = tab;
+    },
   });
 
   const scheduler = createEventScheduler({

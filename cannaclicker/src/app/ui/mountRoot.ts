@@ -1,4 +1,4 @@
-import { backgroundAssets } from '../assetManifest';
+import { backgroundAssets, textureAssets } from '../assetManifest';
 
 export interface MountRootResult {
   root: HTMLElement;
@@ -40,6 +40,21 @@ export function mountRoot(): MountRootResult {
   );
   document.documentElement.style.setProperty('--bg-plants', `url("${backgroundAssets.plants}")`);
   document.documentElement.style.setProperty('--bg-noise', `url("${backgroundAssets.noise}")`);
+  document.documentElement.style.setProperty(
+    '--texture-growbox',
+    `url("${textureAssets.growboxGrid}")`,
+  );
+  document.documentElement.style.setProperty('--texture-crate', `url("${textureAssets.crateWood}")`);
+  document.documentElement.style.setProperty('--texture-lab', `url("${textureAssets.labGlass}")`);
+  document.documentElement.style.setProperty(
+    '--texture-prestige',
+    `url("${textureAssets.prestigeFoil}")`,
+  );
+  document.documentElement.style.setProperty(
+    '--texture-control',
+    `url("${textureAssets.controlMetal}")`,
+  );
+  document.documentElement.style.setProperty('--texture-reward', `url("${textureAssets.rewardGlow}")`);
 
   const hudNotice = document.createElement('div');
   hudNotice.className =
