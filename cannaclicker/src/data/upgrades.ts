@@ -340,8 +340,8 @@ function createSynergyUpgrades(): UpgradeDefinition[] {
         en: 'Micro Cycle',
       },
       description: {
-        de: 'Mikro-Gewächshäuser und ihre Support-Systeme produzieren +40 %. Vorbereitung für spätere Prestige-Loops.',
-        en: 'Micro greenhouses and their support systems produce +40%. Preparation for later prestige loops.',
+        de: 'Mikro-Gewächshäuser und ihre Support-Systeme produzieren +40 %. Ein sauberer Schub für spätere Runs.',
+        en: 'Micro greenhouses and their support systems produce +40%. A clean boost for later runs.',
       },
       cost: Math.round(microBase * 38),
       icon: upgradeIcons.costEfficiency,

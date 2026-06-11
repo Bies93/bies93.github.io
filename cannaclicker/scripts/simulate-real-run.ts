@@ -21,7 +21,7 @@ import { upgrades } from '../src/data/upgrades';
 import type { UpgradeId } from '../src/data/upgrades';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const docsDir = resolve(root, 'docs/balance');
+const reportsDir = resolve(root, 'tmp/balance');
 const originalDateNow = Date.now;
 const originalRandom = Math.random;
 
@@ -385,11 +385,11 @@ Event rewards are budgeted per 5-minute rolling phase window:
 
 try {
   const allResults = profiles.map((profile) => ({ profile, checkpoints: runProfile(profile) }));
-  mkdirSync(docsDir, { recursive: true });
-  writeFileSync(resolve(docsDir, 'phase-targets-2-20h.md'), renderTargets());
-  writeFileSync(resolve(docsDir, 'simulation-results.md'), renderResults(allResults));
+  mkdirSync(reportsDir, { recursive: true });
+  writeFileSync(resolve(reportsDir, 'phase-targets-2-20h.md'), renderTargets());
+  writeFileSync(resolve(reportsDir, 'simulation-results.md'), renderResults(allResults));
   console.log(
-    `Real balance simulation written: ${profiles.length} profiles, ${
+    `Real balance simulation written to tmp/balance: ${profiles.length} profiles, ${
       profiles.length * checkpointsMinutes.length
     } checkpoints.`,
   );

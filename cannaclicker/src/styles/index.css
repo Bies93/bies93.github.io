@@ -2483,7 +2483,7 @@ body[data-plant-skin='ember'] .click-icon {
   transform: translate(1.42rem, -50%);
 }
 
-/* Sprint 21 premium pass: calmer base chrome, stronger reward moments via rarity/event states. */
+/* Calmer base chrome with stronger reward moments via rarity and event states. */
 .side-panel-shell {
   background:
     linear-gradient(180deg, rgba(10, 16, 28, 0.94), rgba(7, 11, 20, 0.86)),
