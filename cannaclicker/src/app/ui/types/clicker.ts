@@ -2,6 +2,8 @@ export interface UIClickerRefs {
   clickButton: HTMLButtonElement;
   clickIcon: HTMLDivElement;
   orbitLayer: HTMLElement;
+  aphidButton: HTMLButtonElement;
+  aphidHits: HTMLElement;
   nextUnlockHint: HTMLElement;
   buffList: HTMLElement;
   goalPanel: HTMLElement;

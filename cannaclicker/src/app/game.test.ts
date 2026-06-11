@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import Decimal from 'break_infinity.js';
-import { buyItem, handleManualClick } from './game';
+import { buyItem, handleManualClick, recalcDerivedValues } from './game';
 import { purchaseResearch } from './research';
 import { createDefaultState } from './state';
 import { advanceEventPipeline, createDefaultEventState } from './events';
+import { advanceAphid, hitAphid, spawnAphid } from './aphid';
 
 describe('core game mechanics', () => {
   afterEach(() => {
@@ -109,5 +110,50 @@ describe('core game mechanics', () => {
 
     expect(state.events.queue).toHaveLength(1);
     expect(state.events.queue[0].scheduledAt - now).toBe(2_000);
+  });
+
+  it('rolls the aphid pest once per online minute with a ten percent spawn chance', () => {
+    const now = 1_000_000;
+    const state = createDefaultState({ time: now });
+    state.temp.aphid.nextRollAt = now;
+
+    expect(advanceAphid(state, now, () => 0.09)).toBe(true);
+    expect(state.temp.aphid.active).toBe(true);
+    expect(state.temp.aphid.hitsRemaining).toBe(3);
+    expect(state.temp.aphid.xPercent).toBeGreaterThanOrEqual(54);
+    expect(state.temp.aphid.yPercent).toBeGreaterThanOrEqual(24);
+
+    const missState = createDefaultState({ time: now });
+    missState.temp.aphid.nextRollAt = now;
+
+    expect(advanceAphid(missState, now, () => 0.1)).toBe(false);
+    expect(missState.temp.aphid.active).toBe(false);
+    expect(missState.temp.aphid.nextRollAt).toBe(now + 60_000);
+  });
+
+  it('halves passive production while an aphid is active and restores it after three hits', () => {
+    const state = createDefaultState();
+    state.items.seedling = 20;
+    recalcDerivedValues(state);
+    const normalBps = state.bps;
+
+    spawnAphid(state, 1_000_000, () => 0.5);
+    recalcDerivedValues(state);
+
+    expect(state.temp.aphid.active).toBe(true);
+    expect(state.temp.aphidBpsMult.toNumber()).toBe(0.5);
+    expect(state.bps.toNumber()).toBeCloseTo(normalBps.mul(0.5).toNumber());
+
+    expect(hitAphid(state, 1_001_000)).toBe('hit');
+    expect(state.temp.aphid.hitsRemaining).toBe(2);
+    expect(hitAphid(state, 1_002_000)).toBe('hit');
+    expect(state.temp.aphid.hitsRemaining).toBe(1);
+    expect(hitAphid(state, 1_003_000)).toBe('defeated');
+
+    recalcDerivedValues(state);
+
+    expect(state.temp.aphid.active).toBe(false);
+    expect(state.temp.aphidBpsMult.toNumber()).toBe(1);
+    expect(state.bps.toNumber()).toBeCloseTo(normalBps.toNumber());
   });
 });

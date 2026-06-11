@@ -11,6 +11,7 @@ import { formatInteger } from '../utils/format';
 import { formatSeedRate } from './stats';
 import { updatePlantStage } from './plant';
 import { updateOrbitBuds } from './orbitBuds';
+import { updateAphid } from './aphid';
 
 export function updateStats(state: GameState, refs: UIRefs): void {
   const preview = getPrestigePreview(state);
@@ -90,6 +91,7 @@ export function updateStats(state: GameState, refs: UIRefs): void {
 
   updatePlantStage(state, refs);
   updateOrbitBuds(state, refs);
+  updateAphid(state, refs);
 }
 
 function updateGoalPanel(state: GameState, refs: UIRefs): void {
@@ -158,6 +160,14 @@ function updateBuffList(state: GameState, refs: UIRefs): void {
       label: t(state.locale, 'buffs.kickstart'),
       value: `${Math.ceil(state.temp.kickstartRemainingMs / 1000)}s`,
       tone: 'prestige',
+    });
+  }
+
+  if (state.temp.aphid?.active) {
+    buffs.push({
+      label: t(state.locale, 'pests.aphid.name'),
+      value: '-50% BPS',
+      tone: 'pest',
     });
   }
 

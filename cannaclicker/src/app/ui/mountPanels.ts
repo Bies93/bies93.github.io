@@ -1,5 +1,5 @@
 import { listAbilities } from '../abilities';
-import { uiIcons } from '../assetManifest';
+import { clickerFxAssets, uiIcons } from '../assetManifest';
 import { t } from '../i18n';
 import type { GameState } from '../state';
 import type { AbilityId } from '../../data/abilities';
@@ -171,6 +171,25 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
 
   clickButton.append(clickIcon, orbitLayer, clickSpark, clickLabelStack);
   clickBody.appendChild(clickButton);
+
+  const aphidButton = document.createElement('button');
+  aphidButton.className = 'aphid-pest';
+  aphidButton.type = 'button';
+  aphidButton.hidden = true;
+  aphidButton.dataset.uiRole = 'aphid-pest';
+  aphidButton.dataset.testid = 'aphid-pest';
+
+  const aphidImage = new Image();
+  aphidImage.className = 'aphid-pest__image';
+  aphidImage.src = clickerFxAssets.aphid;
+  aphidImage.alt = '';
+  aphidImage.decoding = 'async';
+
+  const aphidHits = document.createElement('span');
+  aphidHits.className = 'aphid-pest__hits';
+  aphidHits.dataset.testid = 'aphid-hits';
+  aphidButton.append(aphidImage, aphidHits);
+  clickBody.appendChild(aphidButton);
   clickBody.appendChild(clickHeader);
 
   const goalPanel = document.createElement('section');
@@ -292,6 +311,8 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     clickButton,
     clickIcon,
     orbitLayer,
+    aphidButton,
+    aphidHits,
     nextUnlockHint,
     buffList,
     goalPanel,

@@ -5,6 +5,7 @@ import type { GoalId } from '../../data/goals';
 import { formatDecimal } from '../math';
 import { pulseElement, spawnFloatingValue, spawnParticleBurst } from '../effects';
 import { maybeRollClickSeed } from '../seeds';
+import { hitAphid } from '../aphid';
 import { formatInteger } from './utils/format';
 import { showToast, announce } from './services/toast';
 import {
@@ -18,6 +19,32 @@ import type { WireContext } from './wire';
 
 export function wireCoreClicks(context: WireContext): void {
   const { refs, state, audio, i18n, render } = context;
+
+  refs.aphidButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const result = hitAphid(state);
+    if (result === 'miss') {
+      return;
+    }
+
+    const defeated = result === 'defeated';
+    if (defeated) {
+      audio.playEventCollect('rare');
+      recalcDerivedValues(state);
+      pulseElement(refs.aphidButton, 'is-defeated-hit', 580);
+      spawnFloatingValue(refs.aphidButton, i18n.t(state.locale, 'pests.aphid.defeated'), 'gold');
+      spawnParticleBurst(refs.aphidButton, 'gold', 16);
+    } else {
+      audio.playCannotBuy();
+      pulseElement(refs.aphidButton, 'is-hit', 260);
+      spawnFloatingValue(refs.aphidButton, i18n.t(state.locale, 'pests.aphid.hit'), 'error');
+      spawnParticleBurst(refs.aphidButton, 'error', 7);
+    }
+
+    render(state);
+  });
 
   refs.clickButton.addEventListener('click', () => {
     const gained = handleManualClick(state);

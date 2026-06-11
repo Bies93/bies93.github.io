@@ -15,6 +15,7 @@ import { achievementRequirementMet, getAchievementScoreMultiplier } from './achi
 import { applyAscensionEffects } from './ascension';
 import { getItemSynergyMultiplier } from './itemSynergies';
 import { applyDepthEffects, awardStrainXp } from './depth';
+import { getAphidBpsMultiplier } from './aphid';
 
 export function handleManualClick(state: GameState): Decimal {
   const now = Date.now();
@@ -183,13 +184,16 @@ export function recalcDerivedValues(state: GameState): void {
   const abilityBpcMult = new Decimal(abilityMultiplierFor(state, 'bpc'));
   const eventBpsMult = state.temp.eventBpsMult ?? new Decimal(1);
   const eventBpcMult = state.temp.eventBpcMult ?? new Decimal(1);
+  const aphidBpsMult = getAphidBpsMultiplier(state);
+  state.temp.aphidBpsMult = aphidBpsMult;
 
   const totalBpsMultiplier = baseMultiplier
     .mul(researchBpsMult)
     .mul(abilityBpsMult)
     .mul(eventBpsMult)
     .mul(milestoneBpsMult)
-    .mul(kickstartBps);
+    .mul(kickstartBps)
+    .mul(aphidBpsMult);
   const totalBpcMultiplier = baseMultiplier
     .mul(clickMultiplier)
     .mul(state.temp.depthBpcMult ?? new Decimal(1))

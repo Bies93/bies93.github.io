@@ -116,6 +116,7 @@ export const clickerFxAssets = {
   orbitBud: asset('img/ui/orbit-bud.png'),
   orbitBudGold: asset('img/ui/orbit-bud-gold.png'),
   orbitBudShadow: asset('img/ui/orbit-bud-shadow.png'),
+  aphid: asset('img/ui/aphid.png'),
 } as const;
 
 export const textureAssets = {

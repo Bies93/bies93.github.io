@@ -6,6 +6,7 @@ import { advanceEventPipeline, clearExpiredEventBoost } from './events';
 import { clearExpiredKickstart } from './milestones';
 import { processSeedSystems } from './seeds';
 import { getShopEntries } from './shop';
+import { advanceAphid } from './aphid';
 
 interface LoopOptions {
   autosaveSeconds?: number;
@@ -87,6 +88,10 @@ export function startLoop(
 
     processSeedSystems(state, delta, now);
     advanceEventPipeline(state, delta, now);
+    const aphidChanged = advanceAphid(state, now);
+    if (aphidChanged) {
+      recalcDerivedValues(state);
+    }
     automationTimer += delta;
     if (automationTimer >= 3) {
       runAutomationManager(state, now);

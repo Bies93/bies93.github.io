@@ -49,6 +49,18 @@ export type SeedNotification =
 
 export type DecimalLike = Decimal | number | string | null | undefined;
 
+export interface AphidRuntimeState {
+  active: boolean;
+  hitsRemaining: number;
+  totalHits: number;
+  spawnedAt: number;
+  nextRollAt: number;
+  xPercent: number;
+  yPercent: number;
+  lastHitAt: number;
+  defeatedAt: number;
+}
+
 export interface AbilityRuntimeState {
   active: boolean;
   endsAt: number;
@@ -218,6 +230,8 @@ export interface TempState {
   seedNotifications: SeedNotification[];
   seedRatePerHour: number;
   seedRateCap: number;
+  aphid: AphidRuntimeState;
+  aphidBpsMult: Decimal;
   needsRecalc: boolean;
 }
 
@@ -485,6 +499,18 @@ export function createDefaultState(partial: Partial<GameState> = {}): GameState 
       seedNotifications: [],
       seedRatePerHour: 0,
       seedRateCap: 0,
+      aphid: {
+        active: false,
+        hitsRemaining: 0,
+        totalHits: 3,
+        spawnedAt: 0,
+        nextRollAt: now + 60_000,
+        xPercent: 64,
+        yPercent: 38,
+        lastHitAt: 0,
+        defeatedAt: 0,
+      },
+      aphidBpsMult: new Decimal(1),
       needsRecalc: false,
     },
     events: createDefaultEventState(now),

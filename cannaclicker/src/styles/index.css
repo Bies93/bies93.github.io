@@ -1022,6 +1022,7 @@ body[data-plant-skin='ember'] .click-icon {
 }
 
 .click-card__body {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: clamp(1.5rem, 3.5vw, 2.25rem);
@@ -1127,6 +1128,13 @@ body[data-plant-skin='ember'] .click-icon {
   border-color: rgba(216, 180, 254, 0.5);
   background: rgba(126, 34, 206, 0.18);
   color: rgba(243, 232, 255, 0.98);
+}
+
+.buff-chip[data-tone='pest'] {
+  border-color: rgba(251, 113, 133, 0.5);
+  background: linear-gradient(135deg, rgba(127, 29, 29, 0.24), rgba(88, 28, 135, 0.14));
+  color: rgba(255, 228, 230, 0.98);
+  box-shadow: inset 0 0 0 1px rgba(251, 113, 133, 0.08);
 }
 
 .buff-chip.is-empty {
@@ -3531,6 +3539,110 @@ body[data-plant-skin='ember'] .click-icon {
     0 24px 72px rgba(96, 165, 250, 0.18);
 }
 
+.aphid-pest {
+  position: absolute;
+  top: var(--aphid-y, 38%);
+  left: var(--aphid-x, 64%);
+  z-index: 24;
+  display: grid;
+  width: clamp(3.1rem, 7vw, 5.2rem);
+  height: clamp(3.1rem, 7vw, 5.2rem);
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(251, 191, 36, 0.2), rgba(132, 204, 22, 0.12) 42%, transparent 72%);
+  cursor: crosshair;
+  filter:
+    drop-shadow(0 0 0.8rem rgba(251, 191, 36, 0.34))
+    drop-shadow(0 0.85rem 1.3rem rgba(2, 6, 23, 0.62));
+  transform: translate(-50%, -50%);
+  transform-origin: center;
+  transition:
+    filter 160ms ease,
+    opacity 160ms ease;
+  will-change: transform, opacity, filter;
+}
+
+.aphid-pest[hidden] {
+  display: none;
+}
+
+.aphid-pest:focus-visible {
+  outline: 2px solid rgba(250, 204, 21, 0.86);
+  outline-offset: 0.18rem;
+}
+
+.aphid-pest__image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  transform-origin: center;
+  will-change: transform, filter;
+}
+
+.aphid-pest.is-active .aphid-pest__image {
+  animation: aphid-nibble 1.28s ease-in-out infinite;
+}
+
+.aphid-pest__hits {
+  position: absolute;
+  bottom: -0.12rem;
+  left: 50%;
+  display: flex;
+  gap: 0.18rem;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.25rem;
+  padding: 0.12rem 0.22rem;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: 999px;
+  background: rgba(5, 8, 13, 0.76);
+  box-shadow: 0 0.45rem 1rem rgba(2, 6, 23, 0.34);
+  transform: translateX(-50%);
+}
+
+.aphid-pest__hit {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: rgba(190, 242, 100, 0.95);
+  box-shadow: 0 0 0.45rem rgba(190, 242, 100, 0.58);
+  transition:
+    background-color 140ms ease,
+    opacity 140ms ease,
+    transform 140ms ease;
+}
+
+.aphid-pest__hit[data-used='true'] {
+  background: rgba(251, 113, 133, 0.92);
+  box-shadow: 0 0 0.42rem rgba(251, 113, 133, 0.48);
+  opacity: 0.55;
+  transform: scale(0.68);
+}
+
+.aphid-pest.is-hit .aphid-pest__image {
+  animation: aphid-hit-pop 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.aphid-pest.is-defeated-hit .aphid-pest__image,
+.aphid-pest.is-defeated .aphid-pest__image {
+  animation: aphid-burst 620ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.aphid-pest.is-defeated {
+  pointer-events: none;
+}
+
+[data-aphid='active'] .click-button {
+  box-shadow:
+    0 0 0 1px rgba(251, 113, 133, 0.2),
+    0 24px 72px rgba(127, 29, 29, 0.16),
+    inset 0 0 36px rgba(251, 113, 133, 0.07);
+}
+
 .shop-card.is-denied,
 .upgrade-card.is-denied,
 .research-card.is-denied {
@@ -3665,10 +3777,16 @@ body[data-plant-skin='ember'] .click-icon {
 [data-motion='minimal'] .click-spark,
 [data-motion='minimal'] .click-spark::before,
 [data-motion='minimal'] .click-spark::after,
+[data-motion='minimal'] .aphid-pest,
+[data-motion='minimal'] .aphid-pest__image,
 [data-motion='minimal'] .event-icon,
 [data-motion='minimal'] .toast {
   animation: none !important;
   transition-duration: 1ms !important;
+}
+
+[data-motion='reduced'] .aphid-pest.is-active .aphid-pest__image {
+  animation-duration: 2.4s;
 }
 
 [data-motion='reduced'] .click-orbit__bud {
@@ -3680,6 +3798,52 @@ body[data-plant-skin='ember'] .click-icon {
   transform: translate(-50%, -50%) rotate(var(--orbit-angle))
     translateX(var(--orbit-radius-local, var(--orbit-radius))) rotate(22deg)
     scale(var(--orbit-scale));
+}
+
+@keyframes aphid-nibble {
+  0%,
+  100% {
+    transform: rotate(-2deg) scale(1);
+  }
+  40% {
+    transform: translate(0.1rem, -0.08rem) rotate(2deg) scale(1.04);
+  }
+  70% {
+    transform: translate(-0.07rem, 0.05rem) rotate(-1deg) scale(0.98);
+  }
+}
+
+@keyframes aphid-hit-pop {
+  0% {
+    transform: scale(1) rotate(0deg);
+    filter: saturate(1) brightness(1);
+  }
+  45% {
+    transform: scale(0.82) rotate(-8deg);
+    filter: saturate(1.35) brightness(1.25);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    filter: saturate(1) brightness(1);
+  }
+}
+
+@keyframes aphid-burst {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+    filter: saturate(1.05) brightness(1);
+  }
+  44% {
+    opacity: 1;
+    transform: scale(1.28) rotate(10deg);
+    filter: saturate(1.55) brightness(1.5);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-16deg);
+    filter: saturate(0.5) brightness(1.8) blur(0.12rem);
+  }
 }
 
 @keyframes click-pop {
@@ -3785,6 +3949,8 @@ body[data-plant-skin='ember'] .click-icon {
   .click-button.is-clicking .click-spark::after,
   .click-button.is-boosted-click .click-spark::after,
   .click-button.is-critical-click .click-spark::after,
+  .aphid-pest,
+  .aphid-pest__image,
   .shop-card.is-milestone-purchase,
   [data-ui-role='app-root'].is-prestiging,
   .event-icon {
