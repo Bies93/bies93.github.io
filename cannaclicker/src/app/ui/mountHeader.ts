@@ -38,8 +38,8 @@ export function mountHeader(root: HTMLElement, controls: HTMLButtonElement[]): H
 
   const headerTitle = document.createElement('h1');
   headerTitle.className = 'app-header__title';
-  headerTitle.textContent = 'BiesyClicker';
-  headerTitle.dataset.text = 'BiesyClicker';
+  headerTitle.textContent = 'CannaBies';
+  headerTitle.dataset.text = 'CannaBies';
 
   const tagline = document.createElement('span');
   tagline.className = 'app-header__tagline';

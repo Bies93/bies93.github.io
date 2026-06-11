@@ -139,11 +139,6 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
   orbitLayer.dataset.count = '0';
   orbitLayer.setAttribute('aria-hidden', 'true');
 
-  const clickLabel = document.createElement('span');
-  clickLabel.className = 'click-label';
-  clickLabel.dataset.uiRole = 'click-label';
-  clickLabel.dataset.testid = 'click-label';
-
   const clickYield = document.createElement('span');
   clickYield.className = 'click-yield';
   clickYield.dataset.uiRole = 'click-yield';
@@ -164,11 +159,17 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
 
   clickYield.append(clickYieldIcon, clickYieldValue, clickYieldLabel);
 
+  const clickSpark = document.createElement('span');
+  clickSpark.className = 'click-spark';
+  clickSpark.dataset.uiRole = 'click-spark';
+  clickSpark.dataset.testid = 'click-spark';
+  clickSpark.setAttribute('aria-hidden', 'true');
+
   const clickLabelStack = document.createElement('span');
   clickLabelStack.className = 'click-label-stack';
-  clickLabelStack.append(clickLabel, clickYield);
+  clickLabelStack.append(clickYield);
 
-  clickButton.append(clickIcon, orbitLayer, clickLabelStack);
+  clickButton.append(clickIcon, orbitLayer, clickSpark, clickLabelStack);
   clickBody.appendChild(clickButton);
   clickBody.appendChild(clickHeader);
 
@@ -289,7 +290,6 @@ export function mountPanels(args: MountPanelsArgs): MountPanelsResult {
     seedBadge,
     seedBadgeValue,
     clickButton,
-    clickLabel,
     clickIcon,
     orbitLayer,
     nextUnlockHint,

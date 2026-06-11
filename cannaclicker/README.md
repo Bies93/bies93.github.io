@@ -1,4 +1,4 @@
-# BiesyClicker
+# CannaBies
 
 Sowas wie CookieClicker in grün.
 

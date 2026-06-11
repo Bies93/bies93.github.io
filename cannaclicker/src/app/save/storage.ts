@@ -1,9 +1,9 @@
 import type { PersistedStateV7 } from './types';
 
-export const SAVE_KEY = 'biesyclicker:save:v1';
-const LEGACY_SAVE_KEY = 'cannaclicker:save:v1';
-const MUTED_KEY = 'biesyclicker:muted';
-const LEGACY_MUTED_KEY = 'cannaclicker:muted';
+export const SAVE_KEY = 'cannabies:save:v1';
+const LEGACY_SAVE_KEYS = ['biesyclicker:save:v1', 'cannaclicker:save:v1'] as const;
+const MUTED_KEY = 'cannabies:muted';
+const LEGACY_MUTED_KEYS = ['biesyclicker:muted', 'cannaclicker:muted'] as const;
 
 export function readRawSave(): string | null {
   try {
@@ -12,11 +12,15 @@ export function readRawSave(): string | null {
       return raw;
     }
 
-    const legacyRaw = window.localStorage.getItem(LEGACY_SAVE_KEY);
-    if (legacyRaw) {
-      window.localStorage.setItem(SAVE_KEY, legacyRaw);
+    for (const legacyKey of LEGACY_SAVE_KEYS) {
+      const legacyRaw = window.localStorage.getItem(legacyKey);
+      if (legacyRaw) {
+        window.localStorage.setItem(SAVE_KEY, legacyRaw);
+        return legacyRaw;
+      }
     }
-    return legacyRaw;
+
+    return null;
   } catch {
     return null;
   }
@@ -46,7 +50,9 @@ export function writePersistedState(
 export function clearPersistedState(): boolean {
   try {
     window.localStorage.removeItem(SAVE_KEY);
-    window.localStorage.removeItem(LEGACY_SAVE_KEY);
+    for (const legacyKey of LEGACY_SAVE_KEYS) {
+      window.localStorage.removeItem(legacyKey);
+    }
     return true;
   } catch {
     return false;
@@ -75,11 +81,15 @@ export function readMutedPreference(): boolean {
       return raw === '1';
     }
 
-    const legacyRaw = window.localStorage.getItem(LEGACY_MUTED_KEY);
-    if (legacyRaw !== null) {
-      window.localStorage.setItem(MUTED_KEY, legacyRaw);
+    for (const legacyKey of LEGACY_MUTED_KEYS) {
+      const legacyRaw = window.localStorage.getItem(legacyKey);
+      if (legacyRaw !== null) {
+        window.localStorage.setItem(MUTED_KEY, legacyRaw);
+        return legacyRaw === '1';
+      }
     }
-    return legacyRaw === '1';
+
+    return false;
   } catch {
     return false;
   }

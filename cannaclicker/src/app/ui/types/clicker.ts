@@ -1,6 +1,5 @@
 export interface UIClickerRefs {
   clickButton: HTMLButtonElement;
-  clickLabel: HTMLSpanElement;
   clickIcon: HTMLDivElement;
   orbitLayer: HTMLElement;
   nextUnlockHint: HTMLElement;

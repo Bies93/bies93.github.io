@@ -5,9 +5,9 @@ import { chromium } from 'playwright';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const socialDir = resolve(root, 'public/img/social');
-const keyArtPath = resolve(socialDir, 'biesyclicker-preview-keyart.png');
+const keyArtPath = resolve(socialDir, 'cannabies-preview-keyart.png');
 const keyArtUrl = `data:image/png;base64,${readFileSync(keyArtPath).toString('base64')}`;
-const outputPath = resolve(socialDir, 'biesyclicker-preview.png');
+const outputPath = resolve(socialDir, 'cannabies-preview.png');
 
 mkdirSync(socialDir, { recursive: true });
 
@@ -222,12 +222,12 @@ await page.setContent(
       </style>
     </head>
     <body>
-      <main class="preview" aria-label="BiesyClicker Social Preview">
+      <main class="preview" aria-label="CannaBies Social Preview">
         <img class="keyart" src="${keyArtUrl}" alt="" />
         <section class="content">
           <div class="brand">
             <div class="mark" aria-hidden="true"><span>B</span><i></i></div>
-            <h1>Biesy<strong>Clicker</strong></h1>
+            <h1>Canna<strong>Bies</strong></h1>
           </div>
           <div class="rule"></div>
           <p class="tagline">Sowas wie CookieClicker in grün!</p>

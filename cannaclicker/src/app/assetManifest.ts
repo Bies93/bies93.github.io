@@ -150,8 +150,8 @@ export const backgroundAssets = {
 } as const;
 
 export const socialAssets = {
-  preview: asset('img/social/biesyclicker-preview.png'),
-  previewKeyArt: asset('img/social/biesyclicker-preview-keyart.png'),
+  preview: asset('img/social/cannabies-preview.png'),
+  previewKeyArt: asset('img/social/cannabies-preview-keyart.png'),
 } as const;
 
 export const audioSfxAssets = {
@@ -203,20 +203,16 @@ export const audioSfxAssets = {
 } as const;
 
 export const audioMusicAssets = {
-  earlyBase: {
-    ogg: asset('audio/music/music_early_base_loop_24s.ogg'),
-    mp3: asset('audio/music/music_early_base_loop_24s.mp3'),
+  earlyDub: {
+    mp3: asset('audio/music/cannabies_early_greenhouse_dub.mp3'),
   },
-  midGrowth: {
-    ogg: asset('audio/music/music_mid_growth_layer_loop_24s.ogg'),
-    mp3: asset('audio/music/music_mid_growth_layer_loop_24s.mp3'),
+  mainDrive: {
+    mp3: asset('audio/music/cannabies_main_melodic_drive.mp3'),
   },
-  latePrestige: {
-    ogg: asset('audio/music/music_late_prestige_shimmer_layer_loop_24s.ogg'),
-    mp3: asset('audio/music/music_late_prestige_shimmer_layer_loop_24s.mp3'),
+  eventDrive: {
+    mp3: asset('audio/music/cannabies_event_psy_drive.mp3'),
   },
-  eventPulse: {
-    ogg: asset('audio/music/music_event_pulse_layer_loop_24s.ogg'),
-    mp3: asset('audio/music/music_event_pulse_layer_loop_24s.mp3'),
+  prestigeWarm: {
+    mp3: asset('audio/music/cannabies_prestige_warm_remaster.mp3'),
   },
 } as const;

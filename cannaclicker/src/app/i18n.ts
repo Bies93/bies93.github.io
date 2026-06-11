@@ -5,7 +5,7 @@ export const DEFAULT_LOCALE: LocaleKey = 'de';
 
 const translations: Record<LocaleKey, Record<string, string>> = {
   de: {
-    'app.title': 'BiesyClicker',
+    'app.title': 'CannaBies',
     'ui.warning.fallbackRoot': 'UI-Container nicht gefunden – Fallback-Oberfläche aktiviert.',
     'ui.warning.eventsDisabled': 'Event-Layer fehlt – Zufallsereignisse vorübergehend deaktiviert.',
     'ui.sections.app': 'Spielfläche',
@@ -509,7 +509,7 @@ const translations: Record<LocaleKey, Record<string, string>> = {
     'seeds.toast.click.body': '+{seeds} Seed beim Ernten entdeckt!',
   },
   en: {
-    'app.title': 'BiesyClicker',
+    'app.title': 'CannaBies',
     'ui.warning.fallbackRoot': 'App container missing – running in fallback mode.',
     'ui.warning.eventsDisabled': 'Event layer unavailable – random events disabled.',
     'ui.sections.app': 'Game interface',

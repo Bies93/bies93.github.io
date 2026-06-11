@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" role="img" aria-label="BiesyClicker mobile background">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 1280" role="img" aria-label="CannaBies mobile background">
   <defs>
     <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
       <feDropShadow dx="0" dy="7" stdDeviation="5" flood-color="#000" flood-opacity=".28"/>

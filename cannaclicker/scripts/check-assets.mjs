@@ -9,6 +9,7 @@ const root = resolve(scriptDir, '..');
 const manifestPath = resolve(root, 'src/app/assetManifest.ts');
 const publicDir = resolve(root, 'public');
 const imageDir = resolve(publicDir, 'img');
+const audioDir = resolve(publicDir, 'audio');
 const manifest = readFileSync(manifestPath, 'utf8');
 const rasterizedRuntimeDirs = ['items', 'upgrades', 'research', 'events', 'abilities', 'plant'];
 
@@ -34,6 +35,11 @@ const imageFiles = walk(imageDir)
   .map((file) => relative(publicDir, file).split(sep).join('/'))
   .sort();
 
+const audioFiles = walk(audioDir)
+  .filter((file) => /\.(mp3|ogg|opus)$/i.test(file))
+  .map((file) => relative(publicDir, file).split(sep).join('/'))
+  .sort();
+
 for (const file of imageFiles) {
   if (!referenced.has(file)) {
     failures.push(`Orphan image not referenced by manifest: ${file}`);
@@ -41,6 +47,12 @@ for (const file of imageFiles) {
 
   if (isRasterizedRuntimeAsset(file) && file.endsWith('.svg')) {
     failures.push(`Old SVG runtime asset should not ship in rasterized group: ${file}`);
+  }
+}
+
+for (const file of audioFiles) {
+  if (!referenced.has(file)) {
+    failures.push(`Orphan audio not referenced by manifest: ${file}`);
   }
 }
 
@@ -72,7 +84,7 @@ if (failures.length > 0) {
 }
 
 console.log(
-  `Asset check passed: ${referenced.size} manifest references, ${imageFiles.length} public images, generator idempotent.`,
+  `Asset check passed: ${referenced.size} manifest references, ${imageFiles.length} public images, ${audioFiles.length} public audio files, generator idempotent.`,
 );
 
 function existsFile(path) {
@@ -100,7 +112,6 @@ function walk(dir, options = {}) {
           '.git',
           'test-results',
           'playwright-report',
-          'biesyclicker_v11_audio_pack',
         ].includes(entry.name)
       ) {
         return [];

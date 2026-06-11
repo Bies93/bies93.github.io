@@ -34,33 +34,33 @@ export interface AudioManager {
 const CLICK_RATE_LIMIT_MS = 34;
 const SFX_POOL_SIZE = 3;
 const SFX_GAIN = 0.38;
-const MUSIC_GAIN = 0.34;
+const MUSIC_GAIN = 0.28;
 const MUSIC_LAYER_KEYS = Object.keys(audioMusicAssets) as MusicLayerKey[];
 
 const MUSIC_PROFILES: Record<MusicPhase, Record<MusicLayerKey, number>> = {
   early: {
-    earlyBase: 1,
-    midGrowth: 0,
-    latePrestige: 0,
-    eventPulse: 0,
+    earlyDub: 0.82,
+    mainDrive: 0,
+    eventDrive: 0,
+    prestigeWarm: 0,
   },
   growth: {
-    earlyBase: 0.9,
-    midGrowth: 0.45,
-    latePrestige: 0,
-    eventPulse: 0,
+    earlyDub: 0,
+    mainDrive: 0.88,
+    eventDrive: 0,
+    prestigeWarm: 0,
   },
   event: {
-    earlyBase: 0.82,
-    midGrowth: 0.42,
-    latePrestige: 0,
-    eventPulse: 0.5,
+    earlyDub: 0,
+    mainDrive: 0,
+    eventDrive: 0.82,
+    prestigeWarm: 0,
   },
   prestige: {
-    earlyBase: 0.74,
-    midGrowth: 0.35,
-    latePrestige: 0.52,
-    eventPulse: 0,
+    earlyDub: 0,
+    mainDrive: 0,
+    eventDrive: 0,
+    prestigeWarm: 0.78,
   },
 };
 
@@ -71,6 +71,11 @@ interface AudioPool {
 
 interface MusicLayer {
   audio: HTMLAudioElement;
+}
+
+interface MusicSourceAsset {
+  mp3: string;
+  ogg?: string;
 }
 
 export function resolveMusicPhase(state: GameState): MusicPhase {
@@ -187,8 +192,8 @@ export function createAudioManager(
     }
   }
 
-  function selectMusicSource(sources: (typeof audioMusicAssets)[MusicLayerKey]): string {
-    if (typeof document === 'undefined') {
+  function selectMusicSource(sources: MusicSourceAsset): string {
+    if (typeof document === 'undefined' || !sources.ogg) {
       return sources.mp3;
     }
 
@@ -224,7 +229,9 @@ export function createAudioManager(
   }
 
   function alignLayer(player: HTMLAudioElement): void {
-    const base = musicLayers.get('earlyBase')?.audio;
+    const base = Array.from(musicLayers.values()).find(
+      (layer) => layer.audio !== player && !layer.audio.paused,
+    )?.audio;
     if (!base || base === player || base.paused) {
       return;
     }
@@ -251,13 +258,13 @@ export function createAudioManager(
     const profile = MUSIC_PROFILES[musicPhase];
     for (const key of MUSIC_LAYER_KEYS) {
       const targetGain = profile[key] ?? 0;
-      const layer = getMusicLayer(key);
-      if (!layer) {
+      if (targetGain <= 0) {
+        musicLayers.get(key)?.audio.pause();
         continue;
       }
 
-      if (targetGain <= 0) {
-        layer.audio.pause();
+      const layer = getMusicLayer(key);
+      if (!layer) {
         continue;
       }
 

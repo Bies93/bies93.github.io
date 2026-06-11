@@ -1,12 +1,12 @@
-# BiesyClicker Roadmap v1.1
+# CannaBies Roadmap v1.1
 
 ## Leitbild
 
-v1.1 soll BiesyClicker nicht groesser um jeden Preis machen, sondern klarer, verstaendlicher und charakterstaerker.
+v1.1 soll CannaBies nicht groesser um jeden Preis machen, sondern klarer, verstaendlicher und charakterstaerker.
 
 Der wichtigste Fokus ist die erste Session: Neue Spieler sollen innerhalb von 30 Sekunden verstehen, dass sie die Pflanze klicken, Buds sammeln, im Shop investieren und dadurch spuerbar schneller vorankommen.
 
-Der zweite Fokus ist Mobile. BiesyClicker wird wahrscheinlich oft per Link an Freunde geschickt. Deshalb muss das Spiel auf dem Handy ohne Erklaerungen funktionieren: kurze Wege, klare Buttons, keine ueberladenen Panels, keine versteckten Hover-Informationen.
+Der zweite Fokus ist Mobile. CannaBies wird wahrscheinlich oft per Link an Freunde geschickt. Deshalb muss das Spiel auf dem Handy ohne Erklaerungen funktionieren: kurze Wege, klare Buttons, keine ueberladenen Panels, keine versteckten Hover-Informationen.
 
 Der dritte Fokus ist Systemfuehrung. Das Spiel hat viele starke Meta-Systeme, aber v1.1 soll verhindern, dass neue Spieler zu frueh von Rooms, Strains, Contracts, Seasons, Challenges, Collection, Automation, Event Mastery, Ascension, Research und Achievements erschlagen werden.
 
@@ -104,13 +104,13 @@ Mobile soll sich nicht wie eine verkleinerte Desktop-Version anfuehlen, sondern 
 
 ### Ziel
 
-Ein Screenshot soll sofort nach BiesyClicker aussehen.
+Ein Screenshot soll sofort nach CannaBies aussehen.
 
 Kapitel 3 ist kein reiner "huebsch machen"-Sprint. Es definiert die visuelle Identitaet des Spiels. v1.1 soll nicht mehr nach dunklem Standard-Dashboard aussehen, sondern nach einer edlen, leicht ueberzeichneten Growbox-Werkbank: dunkel, lesbar, gruengolden, warm, mit echten Materialien und klaren Systemzonen.
 
 ### Art Brief
 
-BiesyClicker soll wirken wie:
+CannaBies soll wirken wie:
 
 - ein legaler, leicht magischer Indoor-Grow
 - Premium-Idle-Game statt generischer Web-App
@@ -740,7 +740,7 @@ v1.1 ist releasefaehig, wenn:
 - spaete Meta-Systeme nicht zu frueh ueberfordern
 - Prestige/Ascension ueber viele Runs traegt
 - Sound nicht nervt und wichtige Momente besser markiert
-- das Spiel auf Screenshots staerker nach BiesyClicker aussieht
+- das Spiel auf Screenshots staerker nach CannaBies aussieht
 - GitHub Pages Build, Asset-Check, Unit-Tests, E2E und Balance-Simulation gruen sind
 
 ---

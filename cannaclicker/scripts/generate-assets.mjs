@@ -107,7 +107,7 @@ function removeRasterizedSvgOutputs() {
   }
 }
 
-function svg(viewBox, body, label = 'BiesyClicker asset') {
+function svg(viewBox, body, label = 'CannaBies asset') {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" role="img" aria-label="${label}">
   <defs>
@@ -154,7 +154,7 @@ function svg(viewBox, body, label = 'BiesyClicker asset') {
 </svg>`;
 }
 
-function shell(content, accent = palette.green, label = 'BiesyClicker icon') {
+function shell(content, accent = palette.green, label = 'CannaBies icon') {
   return svg(
     '0 0 128 128',
     `<g filter="url(#softShadow)">
@@ -173,7 +173,7 @@ function shell(content, accent = palette.green, label = 'BiesyClicker icon') {
   );
 }
 
-function uiShell(content, accent = palette.mint, label = 'BiesyClicker UI icon') {
+function uiShell(content, accent = palette.mint, label = 'CannaBies UI icon') {
   return svg(
     '0 0 64 64',
     `<g filter="url(#inkBleed)">
@@ -228,7 +228,7 @@ const itemAccents = {
 for (const [id, glyph] of Object.entries(itemGlyphs)) {
   writeAsset(
     `items/${id}.svg`,
-    shell(glyph, itemAccents[id] ?? palette.green, `BiesyClicker item ${id}`),
+    shell(glyph, itemAccents[id] ?? palette.green, `CannaBies item ${id}`),
   );
 }
 
@@ -241,7 +241,7 @@ const upgradeGlyphs = {
 };
 
 for (const [id, glyph] of Object.entries(upgradeGlyphs)) {
-  writeAsset(`upgrades/${id}.svg`, shell(glyph, palette.gold, `BiesyClicker upgrade ${id}`));
+  writeAsset(`upgrades/${id}.svg`, shell(glyph, palette.gold, `CannaBies upgrade ${id}`));
 }
 
 const researchGlyphs = {
@@ -255,7 +255,7 @@ const researchGlyphs = {
 };
 
 for (const [id, glyph] of Object.entries(researchGlyphs)) {
-  writeAsset(`research/${id}.svg`, shell(glyph, palette.mint, `BiesyClicker research ${id}`));
+  writeAsset(`research/${id}.svg`, shell(glyph, palette.mint, `CannaBies research ${id}`));
 }
 
 const eventGlyphs = {
@@ -300,7 +300,7 @@ for (const [id, glyph] of Object.entries(eventGlyphs)) {
           : id === 'mutant-sprout'
             ? palette.red
             : palette.gold;
-  writeAsset(`events/${id}.svg`, shell(glyph, accent, `BiesyClicker event ${id}`));
+  writeAsset(`events/${id}.svg`, shell(glyph, accent, `CannaBies event ${id}`));
 }
 
 const abilityGlyphs = {
@@ -315,7 +315,7 @@ const abilityGlyphs = {
 };
 
 for (const [id, glyph] of Object.entries(abilityGlyphs)) {
-  writeAsset(`abilities/${id}.svg`, shell(glyph, palette.violet, `BiesyClicker ability ${id}`));
+  writeAsset(`abilities/${id}.svg`, shell(glyph, palette.violet, `CannaBies ability ${id}`));
 }
 
 const uiGlyphs = {
@@ -343,7 +343,7 @@ for (const [id, glyph] of Object.entries(uiGlyphs)) {
   const body = id === 'leaf' ? glyph : glyph;
   writeAsset(
     `ui/${id}.svg`,
-    uiShell(body, id === 'warning' ? palette.amber : palette.mint, `BiesyClicker UI ${id}`),
+    uiShell(body, id === 'warning' ? palette.amber : palette.mint, `CannaBies UI ${id}`),
   );
 }
 
@@ -355,7 +355,7 @@ const achievementGlyphs = {
 };
 
 for (const [id, glyph] of Object.entries(achievementGlyphs)) {
-  writeAsset(`ui/${id}.svg`, uiShell(glyph, palette.gold, `BiesyClicker ${id}`));
+  writeAsset(`ui/${id}.svg`, uiShell(glyph, palette.gold, `CannaBies ${id}`));
 }
 
 function plantStage(stage) {
@@ -408,7 +408,7 @@ function plantStage(stage) {
     <path d="M198 ${372 - stage * 10}c18-29 38-45 61-49M312 ${375 - stage * 10}c-17-29-36-46-58-52" fill="none" stroke="${palette.mint}" stroke-width="2.5" stroke-linecap="round" opacity=".22"/>
     <path d="M200 427h112" stroke="${palette.gold}" stroke-width="11" stroke-linecap="round" opacity=".7"/>
     <path d="M214 407c26 11 58 11 84 0" stroke="${palette.mint}" stroke-width="4" stroke-linecap="round" opacity=".5"/>`,
-    `BiesyClicker plant stage ${stage}`,
+    `CannaBies plant stage ${stage}`,
   );
 }
 
@@ -434,7 +434,7 @@ writeAsset(
     <circle cx="1275" cy="180" r="180" fill="${palette.lime}" opacity=".08"/>
     <circle cx="355" cy="212" r="130" fill="${palette.mint}" opacity=".07"/>
     <rect width="1600" height="900" filter="url(#paperGrain)" opacity=".55"/>`,
-    'BiesyClicker desktop background',
+    'CannaBies desktop background',
   ),
 );
 
@@ -453,7 +453,7 @@ writeAsset(
     <path d="M0 1102c170-38 291 42 420-5 108-39 188-53 300-19v202H0Z" fill="#07150f" opacity=".92"/>
     <path d="M105 1010c30-175 72-302 126-390M598 1034c-25-153-70-278-135-374" fill="none" stroke="${palette.green}" stroke-width="6" stroke-linecap="round" opacity=".12"/>
     <rect width="720" height="1280" filter="url(#paperGrain)" opacity=".5"/>`,
-    'BiesyClicker mobile background',
+    'CannaBies mobile background',
   ),
 );
 
@@ -469,7 +469,7 @@ writeAsset(
       <path d="M214 796c55-48 93-101 116-159M1337 786c-48-43-82-91-102-143M824 780c42-34 72-75 89-123"/>
       <path d="M78 846c36-35 59-71 68-107M1499 844c-40-37-67-77-79-121"/>
     </g>`,
-    'BiesyClicker plant silhouettes',
+    'CannaBies plant silhouettes',
   ),
 );
 
@@ -478,9 +478,9 @@ writeAsset(
   svg(
     '0 0 256 256',
     `<filter id="noise"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .08"/></feComponentTransfer></filter><rect width="256" height="256" filter="url(#noise)"/>`,
-    'BiesyClicker subtle noise',
+    'CannaBies subtle noise',
   ),
 );
 
 removeObsoleteAssets();
-console.log('Generated BiesyClicker SVG assets in public/img.');
+console.log('Generated CannaBies SVG assets in public/img.');

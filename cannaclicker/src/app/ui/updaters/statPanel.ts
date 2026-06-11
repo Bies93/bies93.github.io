@@ -85,20 +85,11 @@ export function updateStats(state: GameState, refs: UIRefs): void {
   } else {
     delete refs.nextUnlockHint.dataset.targetTab;
   }
-  updateClickComboLabel(state, refs);
   updateBuffList(state, refs);
   updateGoalPanel(state, refs);
 
   updatePlantStage(state, refs);
   updateOrbitBuds(state, refs);
-}
-
-function updateClickComboLabel(state: GameState, refs: UIRefs): void {
-  const comboActive =
-    (state.temp.clickComboExpiresAt ?? 0) > Date.now() && (state.temp.clickComboCount ?? 0) >= 5;
-  refs.clickLabel.textContent = comboActive
-    ? t(state.locale, 'click.combo', { count: state.temp.clickComboCount })
-    : t(state.locale, 'actions.click');
 }
 
 function updateGoalPanel(state: GameState, refs: UIRefs): void {

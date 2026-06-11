@@ -46,7 +46,6 @@ export function updateStrings(state: GameState, refs: UIRefs): void {
   refs.headerTitle.textContent = appTitle;
   refs.headerTitle.dataset.text = appTitle;
   refs.clickButton.setAttribute('aria-label', t(state.locale, 'actions.click'));
-  refs.clickLabel.textContent = t(state.locale, 'actions.click');
 
   const muteAssets = state.muted
     ? { label: t(state.locale, 'actions.unmute'), icon: uiIcons.soundOn }
