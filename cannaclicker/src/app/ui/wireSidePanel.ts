@@ -71,7 +71,7 @@ export function wireSidePanel(context: WireContext): void {
         return;
       }
 
-      audio.playUnlock();
+      audio.playPurchase({ important: true });
       recalcDerivedValues(state);
       render(state);
     });
@@ -83,7 +83,7 @@ export function wireSidePanel(context: WireContext): void {
         audio.playCannotBuy();
         return;
       }
-      audio.playUnlock();
+      audio.playPurchase({ important: true });
       recalcDerivedValues(state);
       render(state);
     });
@@ -95,7 +95,7 @@ export function wireSidePanel(context: WireContext): void {
         audio.playCannotBuy();
         return;
       }
-      audio.playUnlock();
+      audio.playPurchase({ important: true });
       recalcDerivedValues(state);
       render(state);
     });
@@ -111,7 +111,7 @@ export function wireSidePanel(context: WireContext): void {
         audio.playCannotBuy();
         return;
       }
-      audio.playUnlock();
+      audio.playAchievement('common');
       recalcDerivedValues(state);
       render(state);
     });

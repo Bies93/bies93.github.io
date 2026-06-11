@@ -22,9 +22,9 @@ export function createDefaultSettings(): SettingsState {
     motionIntensity: 'full',
     uiTheme: 'botanical',
     plantSkin: 'classic',
-    sfxVolume: 0.8,
+    sfxVolume: 0.6,
     musicEnabled: true,
-    musicVolume: 0.45,
+    musicVolume: 0.35,
   };
 }
 

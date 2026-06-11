@@ -87,7 +87,7 @@ export function wireCoreClicks(context: WireContext): void {
       return;
     }
 
-    audio.playUnlock();
+    audio.playAchievement('common');
     recalcDerivedValues(state);
     evaluateAchievements(state);
     spawnFloatingValue(refs.goalPanel, i18n.t(state.locale, 'goals.fx.claim'), 'achievement');

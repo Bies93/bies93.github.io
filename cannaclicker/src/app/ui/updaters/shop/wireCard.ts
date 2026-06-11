@@ -45,7 +45,13 @@ export function wireShopCard(
       }, 520);
       spawnFloatingValue(card.container, `+${quantity}`, milestone ? 'milestone' : 'bud');
       save(state);
-      options.onPurchase({ definition, quantity, milestone });
+      options.onPurchase({
+        definition,
+        quantity,
+        ownedBefore,
+        ownedAfter: ownedBefore + quantity,
+        milestone,
+      });
       return;
     }
 

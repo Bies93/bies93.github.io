@@ -153,3 +153,70 @@ export const socialAssets = {
   preview: asset('img/social/biesyclicker-preview.png'),
   previewKeyArt: asset('img/social/biesyclicker-preview-keyart.png'),
 } as const;
+
+export const audioSfxAssets = {
+  click: [
+    asset('audio/sfx/click/click_leaf_soft_01.ogg'),
+    asset('audio/sfx/click/click_leaf_soft_02.ogg'),
+    asset('audio/sfx/click/click_leaf_soft_03.ogg'),
+    asset('audio/sfx/click/click_leaf_soft_04.ogg'),
+    asset('audio/sfx/click/click_leaf_soft_05.ogg'),
+    asset('audio/sfx/click/click_leaf_soft_06.ogg'),
+  ],
+  buyNormal: [
+    asset('audio/sfx/buy/buy_normal_01.ogg'),
+    asset('audio/sfx/buy/buy_normal_02.ogg'),
+    asset('audio/sfx/buy/buy_normal_03.ogg'),
+  ],
+  buyImportant: [
+    asset('audio/sfx/buy/buy_important_01.ogg'),
+    asset('audio/sfx/buy/buy_important_02.ogg'),
+  ],
+  buyMilestone: [
+    asset('audio/sfx/buy/buy_milestone_01.ogg'),
+    asset('audio/sfx/buy/buy_milestone_02.ogg'),
+  ],
+  buyNewItem: [
+    asset('audio/sfx/buy/buy_new_item_01.ogg'),
+    asset('audio/sfx/buy/buy_new_item_02.ogg'),
+  ],
+  eventSpawn: [
+    asset('audio/sfx/event/event_spawn_soft_01.ogg'),
+    asset('audio/sfx/event/event_spawn_soft_02.ogg'),
+    asset('audio/sfx/event/event_spawn_soft_03.ogg'),
+  ],
+  eventCollect: [
+    asset('audio/sfx/event/event_collect_soft_01.ogg'),
+    asset('audio/sfx/event/event_collect_soft_02.ogg'),
+    asset('audio/sfx/event/event_collect_soft_03.ogg'),
+  ],
+  rareReward: [
+    asset('audio/sfx/event/reward_rare_gold_01.ogg'),
+    asset('audio/sfx/event/reward_rare_gold_02.ogg'),
+  ],
+  prestige: [
+    asset('audio/sfx/prestige/prestige_seed_ascend_01.ogg'),
+    asset('audio/sfx/prestige/prestige_seed_ascend_02.ogg'),
+  ],
+  uiToggle: [asset('audio/sfx/ui/ui_soft_toggle_01.ogg')],
+  uiDeny: [asset('audio/sfx/ui/ui_soft_deny_01.ogg')],
+} as const;
+
+export const audioMusicAssets = {
+  earlyBase: {
+    ogg: asset('audio/music/music_early_base_loop_24s.ogg'),
+    mp3: asset('audio/music/music_early_base_loop_24s.mp3'),
+  },
+  midGrowth: {
+    ogg: asset('audio/music/music_mid_growth_layer_loop_24s.ogg'),
+    mp3: asset('audio/music/music_mid_growth_layer_loop_24s.mp3'),
+  },
+  latePrestige: {
+    ogg: asset('audio/music/music_late_prestige_shimmer_layer_loop_24s.ogg'),
+    mp3: asset('audio/music/music_late_prestige_shimmer_layer_loop_24s.mp3'),
+  },
+  eventPulse: {
+    ogg: asset('audio/music/music_event_pulse_layer_loop_24s.ogg'),
+    mp3: asset('audio/music/music_event_pulse_layer_loop_24s.mp3'),
+  },
+} as const;

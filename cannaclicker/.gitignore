@@ -36,6 +36,9 @@ Legacy_Assets/
 # Local high-resolution audio master. Runtime uses Opus + MP3.
 src/biesyclicker_psy_dub_reggae_loop_92bpm.wav
 
+# Local audio delivery/drop package. Runtime assets live in public/audio.
+biesyclicker_v11_audio_pack/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

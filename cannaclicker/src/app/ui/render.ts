@@ -1,5 +1,5 @@
 import { evaluateAchievements, recalcDerivedValues } from '../game';
-import type { AudioManager } from '../audio';
+import { resolveMusicPhase, type AudioManager } from '../audio';
 import type { GameState } from '../state';
 import type { ResearchFilter } from '../research';
 import { getResearchList } from '../research';
@@ -54,6 +54,8 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
       state.temp.needsRecalc = false;
     }
 
+    audio.setMusicPhase(resolveMusicPhase(state));
+
     updateStrings(state, refs);
     updateStats(state, refs);
     processSeedNotifications(state, refs, (options: ToastOptions) => showToast(options));
@@ -70,7 +72,11 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
       onPurchase: (feedback) => {
         const locale = state.locale;
         const milestone = feedback.milestone;
-        audio.playPurchase({ milestone: Boolean(milestone) });
+        audio.playPurchase({
+          milestone: Boolean(milestone),
+          newItem: feedback.ownedBefore <= 0,
+          important: feedback.quantity >= 10,
+        });
         if (milestone) {
           showToast({
             title: i18n.t(locale, 'shop.milestone.toast.title'),
@@ -98,7 +104,7 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
 
     updateUpgrades(state, refs, {
       onPurchase: (definition, container) => {
-        audio.playPurchase();
+        audio.playPurchase({ important: true });
         const locale = state.locale;
         const title = i18n.t(locale, 'upgrades.toast.title');
         const message = i18n.t(locale, 'upgrades.toast.message', { name: definition.name[locale] });
@@ -112,7 +118,7 @@ export function createRenderer(context: RendererContext): (state: GameState) => 
 
     const researchState = context.getResearchState();
     const result = updateResearch(state, refs, researchState.filter, researchState.manual, () => {
-      audio.playUnlock();
+      audio.playPurchase({ important: true });
       recalcDerivedValues(state);
       render(state);
     });

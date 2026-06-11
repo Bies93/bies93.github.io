@@ -5,7 +5,8 @@ const ASSET_VERSION = encodeURIComponent(APP_VERSION);
 
 export function asset(path: string): string {
   const resolved = withBase(path);
-  if (!path.replace(/^\.?\/+/, '').startsWith('img/')) {
+  const normalized = path.replace(/^\.?\/+/, '');
+  if (!normalized.startsWith('img/') && !normalized.startsWith('audio/')) {
     return resolved;
   }
 

@@ -94,7 +94,14 @@ function walk(dir, options = {}) {
     if (entry.isDirectory()) {
       if (
         skipHeavyDirs &&
-        ['node_modules', 'dist', '.git', 'test-results', 'playwright-report'].includes(entry.name)
+        [
+          'node_modules',
+          'dist',
+          '.git',
+          'test-results',
+          'playwright-report',
+          'biesyclicker_v11_audio_pack',
+        ].includes(entry.name)
       ) {
         return [];
       }

@@ -6,6 +6,8 @@ import { renderShopList } from './list';
 export interface ShopPurchaseFeedback {
   definition: ItemDefinition;
   quantity: number;
+  ownedBefore: number;
+  ownedAfter: number;
   milestone: number | null;
 }
 

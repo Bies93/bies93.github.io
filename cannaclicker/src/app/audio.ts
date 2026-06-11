@@ -1,33 +1,17 @@
+import { audioMusicAssets, audioSfxAssets } from './assetManifest';
 import { persistAudioPreference } from './save';
-import musicMp3Url from '../biesyclicker_psy_dub_reggae_loop_92bpm.mp3?url';
-import musicOpusUrl from '../biesyclicker_psy_dub_reggae_loop_92bpm.opus?url';
+import type { GameState } from './state';
 
-type OscillatorKind = 'sine' | 'square' | 'sawtooth' | 'triangle';
 type EventSoundKind = 'reward' | 'seed' | 'buff' | 'rare';
 type AchievementSoundKind = 'common' | 'rare' | 'epic' | 'legendary';
-type NoiseFilterKind = 'lowpass' | 'highpass' | 'bandpass';
+type SfxKey = keyof typeof audioSfxAssets;
+type MusicLayerKey = keyof typeof audioMusicAssets;
 
-interface Tone {
-  at?: number;
-  frequency: number;
-  endFrequency?: number;
-  duration: number;
-  volume: number;
-  type?: OscillatorKind;
-}
-
-interface NoiseBurst {
-  at?: number;
-  duration: number;
-  volume: number;
-  filter?: NoiseFilterKind;
-  frequency?: number;
-  q?: number;
-}
+export type MusicPhase = 'early' | 'growth' | 'event' | 'prestige';
 
 export interface AudioManager {
   playClick(options?: { boosted?: boolean }): void;
-  playPurchase(options?: { milestone?: boolean }): void;
+  playPurchase(options?: { milestone?: boolean; newItem?: boolean; important?: boolean }): void;
   playCannotBuy(): void;
   playUnlock(): void;
   playEventSpawn(kind?: EventSoundKind): void;
@@ -38,6 +22,7 @@ export interface AudioManager {
   playPrestige(): void;
   playUi(): void;
   playSettings(): void;
+  setMusicPhase(phase: MusicPhase): void;
   toggleMute(): boolean;
   setMuted(muted: boolean): void;
   setVolume(volume: number): void;
@@ -46,389 +31,326 @@ export interface AudioManager {
   isMuted(): boolean;
 }
 
-const MASTER_GAIN = 0.16;
-const MUSIC_GAIN = 0.42;
 const CLICK_RATE_LIMIT_MS = 34;
-const MUSIC_SOURCES = [
-  { url: musicOpusUrl, type: 'audio/ogg; codecs=opus' },
-  { url: musicMp3Url, type: 'audio/mpeg' },
-] as const;
+const SFX_POOL_SIZE = 3;
+const SFX_GAIN = 0.38;
+const MUSIC_GAIN = 0.34;
+const MUSIC_LAYER_KEYS = Object.keys(audioMusicAssets) as MusicLayerKey[];
+
+const MUSIC_PROFILES: Record<MusicPhase, Record<MusicLayerKey, number>> = {
+  early: {
+    earlyBase: 1,
+    midGrowth: 0,
+    latePrestige: 0,
+    eventPulse: 0,
+  },
+  growth: {
+    earlyBase: 0.9,
+    midGrowth: 0.45,
+    latePrestige: 0,
+    eventPulse: 0,
+  },
+  event: {
+    earlyBase: 0.82,
+    midGrowth: 0.42,
+    latePrestige: 0,
+    eventPulse: 0.5,
+  },
+  prestige: {
+    earlyBase: 0.74,
+    midGrowth: 0.35,
+    latePrestige: 0.52,
+    eventPulse: 0,
+  },
+};
+
+interface AudioPool {
+  cursor: number;
+  slots: (HTMLAudioElement | null)[];
+}
+
+interface MusicLayer {
+  audio: HTMLAudioElement;
+}
+
+export function resolveMusicPhase(state: GameState): MusicPhase {
+  if (
+    state.events.active.length > 0 ||
+    state.temp.eventBoosts.length > 0 ||
+    state.temp.hybridActiveBuffs > 0
+  ) {
+    return 'event';
+  }
+
+  if (
+    state.meta.prestigeCount > 0 ||
+    state.prestige.ascensionSeeds > 0 ||
+    state.prestige.totalAscensionSeeds > 0 ||
+    state.prestige.lifetimeBuds.greaterThanOrEqualTo(1_000_000)
+  ) {
+    return 'prestige';
+  }
+
+  if (
+    state.meta.totalItemsPurchased >= 3 ||
+    state.bps.greaterThan(0) ||
+    state.total.greaterThanOrEqualTo(120)
+  ) {
+    return 'growth';
+  }
+
+  return 'early';
+}
 
 export function createAudioManager(
   initialMuted: boolean,
-  initialVolume = 0.8,
+  initialVolume = 0.6,
   musicOptions: { musicEnabled?: boolean; musicVolume?: number } = {},
 ): AudioManager {
   let muted = initialMuted;
-  let sfxVolume = Math.max(0, Math.min(1, initialVolume));
+  let sfxVolume = clamp01(initialVolume);
   let musicEnabled = musicOptions.musicEnabled ?? true;
-  let musicVolume = Math.max(0, Math.min(1, musicOptions.musicVolume ?? 0.45));
-  let context: AudioContext | null = null;
-  let music: HTMLAudioElement | null = null;
-  let noiseBuffer: AudioBuffer | null = null;
+  let musicVolume = clamp01(musicOptions.musicVolume ?? 0.35);
+  let musicPhase: MusicPhase = 'early';
   let lastClickAt = 0;
 
-  function selectMusicSource(): string {
-    if (typeof document === 'undefined') {
-      return musicMp3Url;
-    }
+  const sfxPools = new Map<string, AudioPool>();
+  const musicLayers = new Map<MusicLayerKey, MusicLayer>();
 
-    const probe = document.createElement('audio');
-    const supported = MUSIC_SOURCES.find((source) => probe.canPlayType(source.type) !== '');
-    return supported?.url ?? musicMp3Url;
+  function canUseAudio(): boolean {
+    return typeof Audio !== 'undefined';
   }
 
-  function getMusicElement(): HTMLAudioElement | null {
-    if (typeof Audio === 'undefined') {
+  function pickUrl(urls: readonly string[]): string | null {
+    if (urls.length === 0) {
+      return null;
+    }
+    return urls[Math.floor(Math.random() * urls.length)] ?? urls[0] ?? null;
+  }
+
+  function getAudioPool(url: string): AudioPool | null {
+    if (!canUseAudio()) {
       return null;
     }
 
-    if (!music) {
-      music = new Audio(selectMusicSource());
-      music.loop = true;
-      music.preload = 'none';
-      music.volume = Math.max(0, Math.min(1, musicVolume * MUSIC_GAIN));
+    let pool = sfxPools.get(url);
+    if (!pool) {
+      pool = {
+        cursor: 0,
+        slots: Array.from({ length: SFX_POOL_SIZE }, () => null),
+      };
+      sfxPools.set(url, pool);
+    }
+    return pool;
+  }
+
+  function createSfxElement(url: string): HTMLAudioElement {
+    const audio = new Audio(url);
+    audio.preload = 'auto';
+    return audio;
+  }
+
+  function playSample(
+    key: SfxKey,
+    options: { gain?: number; rateMin?: number; rateMax?: number } = {},
+  ): void {
+    syncMusic();
+    if (muted || sfxVolume <= 0) {
+      return;
     }
 
-    return music;
+    const url = pickUrl(audioSfxAssets[key]);
+    if (!url) {
+      return;
+    }
+
+    const pool = getAudioPool(url);
+    if (!pool || pool.slots.length === 0) {
+      return;
+    }
+
+    const slotIndex = pool.cursor % pool.slots.length;
+    const player = pool.slots[slotIndex] ?? createSfxElement(url);
+    pool.slots[slotIndex] = player;
+    pool.cursor += 1;
+
+    try {
+      player.pause();
+      player.currentTime = 0;
+      player.volume = clamp01(SFX_GAIN * sfxVolume * (options.gain ?? 1));
+      player.playbackRate = randomBetween(options.rateMin ?? 1, options.rateMax ?? 1);
+      void player.play().catch(() => {
+        // Autoplay policies may still block sounds before the first trusted interaction.
+      });
+    } catch {
+      // A failed one-shot sound should never interrupt gameplay.
+    }
+  }
+
+  function selectMusicSource(sources: (typeof audioMusicAssets)[MusicLayerKey]): string {
+    if (typeof document === 'undefined') {
+      return sources.mp3;
+    }
+
+    const probe = document.createElement('audio');
+    if (probe.canPlayType('audio/ogg; codecs=opus') || probe.canPlayType('audio/ogg')) {
+      return sources.ogg;
+    }
+    return sources.mp3;
+  }
+
+  function getMusicLayer(key: MusicLayerKey): MusicLayer | null {
+    if (!canUseAudio()) {
+      return null;
+    }
+
+    let layer = musicLayers.get(key);
+    if (!layer) {
+      const source = selectMusicSource(audioMusicAssets[key]);
+      const audio = new Audio(source);
+      audio.loop = true;
+      audio.preload = 'none';
+      audio.volume = 0;
+      layer = { audio };
+      musicLayers.set(key, layer);
+    }
+    return layer;
+  }
+
+  function pauseMusic(): void {
+    for (const layer of musicLayers.values()) {
+      layer.audio.pause();
+    }
+  }
+
+  function alignLayer(player: HTMLAudioElement): void {
+    const base = musicLayers.get('earlyBase')?.audio;
+    if (!base || base === player || base.paused) {
+      return;
+    }
+
+    if (
+      Number.isFinite(base.currentTime) &&
+      Number.isFinite(player.duration) &&
+      player.duration > 0
+    ) {
+      try {
+        player.currentTime = base.currentTime % player.duration;
+      } catch {
+        // Duration can be unknown while the layer is still loading.
+      }
+    }
   }
 
   function syncMusic(): void {
     if (muted || !musicEnabled || musicVolume <= 0) {
-      music?.pause();
+      pauseMusic();
       return;
     }
 
-    const player = getMusicElement();
-    if (!player) {
-      return;
-    }
-
-    player.volume = Math.max(0, Math.min(1, musicVolume * MUSIC_GAIN));
-    if (player.paused) {
-      void player.play().catch(() => {
-        // Browsers require a user gesture before background music may start.
-      });
-    }
-  }
-
-  function getContext(): AudioContext | null {
-    if (muted || typeof window === 'undefined') {
-      return null;
-    }
-
-    const AudioContextCtor = window.AudioContext ?? window.webkitAudioContext;
-    if (!AudioContextCtor) {
-      return null;
-    }
-
-    context ??= new AudioContextCtor();
-    if (context.state === 'suspended') {
-      void context.resume();
-    }
-    return context;
-  }
-
-  function getNoiseBuffer(ctx: AudioContext): AudioBuffer {
-    if (noiseBuffer && noiseBuffer.sampleRate === ctx.sampleRate) {
-      return noiseBuffer;
-    }
-
-    const buffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let index = 0; index < data.length; index += 1) {
-      data[index] = Math.random() * 2 - 1;
-    }
-    noiseBuffer = buffer;
-    return buffer;
-  }
-
-  function play(tones: readonly Tone[], noises: readonly NoiseBurst[] = []): void {
-    syncMusic();
-    const ctx = getContext();
-    if (!ctx) {
-      return;
-    }
-
-    const start = ctx.currentTime;
-    for (const tone of tones) {
-      const oscillator = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const at = start + (tone.at ?? 0);
-      const duration = Math.max(0.02, tone.duration);
-      const endAt = at + duration;
-      const volume = Math.max(0, Math.min(1, tone.volume)) * MASTER_GAIN * sfxVolume;
-
-      oscillator.type = tone.type ?? 'sine';
-      oscillator.frequency.setValueAtTime(tone.frequency, at);
-      if (tone.endFrequency) {
-        oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, tone.endFrequency), endAt);
+    const profile = MUSIC_PROFILES[musicPhase];
+    for (const key of MUSIC_LAYER_KEYS) {
+      const targetGain = profile[key] ?? 0;
+      const layer = getMusicLayer(key);
+      if (!layer) {
+        continue;
       }
 
-      gain.gain.setValueAtTime(0.0001, at);
-      gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume), at + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.0001, endAt);
+      if (targetGain <= 0) {
+        layer.audio.pause();
+        continue;
+      }
 
-      oscillator.connect(gain);
-      gain.connect(ctx.destination);
-      oscillator.start(at);
-      oscillator.stop(endAt + 0.02);
-    }
-
-    for (const noise of noises) {
-      const source = ctx.createBufferSource();
-      const filter = ctx.createBiquadFilter();
-      const gain = ctx.createGain();
-      const at = start + (noise.at ?? 0);
-      const duration = Math.max(0.02, noise.duration);
-      const endAt = at + duration;
-      const volume = Math.max(0, Math.min(1, noise.volume)) * MASTER_GAIN * sfxVolume;
-
-      source.buffer = getNoiseBuffer(ctx);
-      source.loop = true;
-      filter.type = noise.filter ?? 'bandpass';
-      filter.frequency.setValueAtTime(Math.max(20, noise.frequency ?? 1200), at);
-      filter.Q.setValueAtTime(Math.max(0.0001, noise.q ?? 0.9), at);
-      gain.gain.setValueAtTime(0.0001, at);
-      gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume), at + 0.008);
-      gain.gain.exponentialRampToValueAtTime(0.0001, endAt);
-
-      source.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-      source.start(at);
-      source.stop(endAt + 0.02);
+      layer.audio.volume = clamp01(musicVolume * MUSIC_GAIN * targetGain);
+      if (layer.audio.paused) {
+        alignLayer(layer.audio);
+        void layer.audio.play().catch(() => {
+          // Browsers require a user gesture before background music may start.
+        });
+      }
     }
   }
 
   return {
     playClick(options) {
-      const now = performance.now();
+      const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
       if (now - lastClickAt < CLICK_RATE_LIMIT_MS) {
         return;
       }
       lastClickAt = now;
-      const boosted = Boolean(options?.boosted);
-      play(
-        boosted
-          ? [
-              { frequency: 620, endFrequency: 920, duration: 0.05, volume: 0.5, type: 'triangle' },
-              { at: 0.035, frequency: 980, duration: 0.035, volume: 0.25, type: 'sine' },
-            ]
-          : [
-              {
-                frequency: 460,
-                endFrequency: 680,
-                duration: 0.045,
-                volume: 0.34,
-                type: 'triangle',
-              },
-            ],
-        [
-          {
-            duration: boosted ? 0.038 : 0.026,
-            volume: boosted ? 0.32 : 0.18,
-            filter: 'bandpass',
-            frequency: boosted ? 1900 : 1250,
-            q: boosted ? 1.35 : 0.9,
-          },
-        ],
-      );
+      playSample('click', {
+        gain: options?.boosted ? 0.56 : 0.42,
+        rateMin: options?.boosted ? 0.99 : 0.96,
+        rateMax: options?.boosted ? 1.06 : 1.04,
+      });
     },
     playPurchase(options) {
-      const milestone = Boolean(options?.milestone);
-      play(
-        milestone
-          ? [
-              { frequency: 320, endFrequency: 640, duration: 0.07, volume: 0.48, type: 'triangle' },
-              { at: 0.055, frequency: 760, duration: 0.08, volume: 0.34, type: 'sine' },
-              { at: 0.11, frequency: 1080, duration: 0.09, volume: 0.22, type: 'sine' },
-            ]
-          : [
-              {
-                frequency: 360,
-                endFrequency: 540,
-                duration: 0.055,
-                volume: 0.36,
-                type: 'triangle',
-              },
-              { at: 0.045, frequency: 690, duration: 0.06, volume: 0.24, type: 'sine' },
-            ],
-        milestone
-          ? [
-              { duration: 0.06, volume: 0.18, filter: 'lowpass', frequency: 720, q: 0.65 },
-              { at: 0.09, duration: 0.06, volume: 0.16, filter: 'bandpass', frequency: 1800, q: 1 },
-            ]
-          : [{ duration: 0.052, volume: 0.14, filter: 'lowpass', frequency: 620, q: 0.65 }],
-      );
+      if (options?.milestone) {
+        playSample('buyMilestone', { gain: 0.96, rateMin: 0.98, rateMax: 1.02 });
+        return;
+      }
+      if (options?.newItem) {
+        playSample('buyNewItem', { gain: 0.9, rateMin: 0.98, rateMax: 1.02 });
+        return;
+      }
+      if (options?.important) {
+        playSample('buyImportant', { gain: 0.86, rateMin: 0.98, rateMax: 1.02 });
+        return;
+      }
+      playSample('buyNormal', { gain: 0.72, rateMin: 0.97, rateMax: 1.03 });
     },
     playCannotBuy() {
-      play(
-        [
-          { frequency: 180, endFrequency: 140, duration: 0.055, volume: 0.18, type: 'triangle' },
-          {
-            at: 0.055,
-            frequency: 150,
-            endFrequency: 120,
-            duration: 0.055,
-            volume: 0.12,
-            type: 'triangle',
-          },
-        ],
-        [{ duration: 0.07, volume: 0.1, filter: 'lowpass', frequency: 240, q: 0.7 }],
-      );
+      playSample('uiDeny', { gain: 0.36, rateMin: 0.98, rateMax: 1.01 });
     },
     playUnlock() {
-      play(
-        [
-          { frequency: 520, endFrequency: 780, duration: 0.08, volume: 0.34, type: 'sine' },
-          { at: 0.07, frequency: 1040, duration: 0.1, volume: 0.22, type: 'triangle' },
-          { at: 0.135, frequency: 1320, duration: 0.075, volume: 0.14, type: 'sine' },
-        ],
-        [{ at: 0.025, duration: 0.07, volume: 0.1, filter: 'highpass', frequency: 1900, q: 0.7 }],
-      );
+      playSample('buyNewItem', { gain: 0.82, rateMin: 0.98, rateMax: 1.02 });
     },
     playEventSpawn(kind = 'reward') {
-      const base = kind === 'rare' ? 760 : kind === 'seed' ? 560 : kind === 'buff' ? 480 : 620;
-      play(
-        [
-          {
-            frequency: base,
-            endFrequency: base * 1.45,
-            duration: 0.075,
-            volume: kind === 'rare' ? 0.3 : 0.24,
-            type: 'sine',
-          },
-          ...(kind === 'rare'
-            ? [
-                {
-                  at: 0.055,
-                  frequency: base * 2,
-                  duration: 0.08,
-                  volume: 0.16,
-                  type: 'triangle' as const,
-                },
-              ]
-            : []),
-        ],
-        [
-          {
-            duration: kind === 'rare' ? 0.085 : 0.052,
-            volume: kind === 'seed' ? 0.12 : 0.09,
-            filter: 'highpass',
-            frequency: kind === 'seed' ? 2400 : 1800,
-            q: 0.8,
-          },
-        ],
-      );
+      playSample(kind === 'rare' ? 'rareReward' : 'eventSpawn', {
+        gain: kind === 'rare' ? 0.72 : 0.56,
+        rateMin: kind === 'seed' ? 1.01 : 0.98,
+        rateMax: kind === 'seed' ? 1.05 : 1.02,
+      });
     },
     playEventCollect(kind = 'reward') {
-      if (kind === 'seed') {
-        play(
-          [
-            { frequency: 650, duration: 0.06, volume: 0.32, type: 'triangle' },
-            { at: 0.05, frequency: 980, duration: 0.08, volume: 0.24, type: 'sine' },
-            { at: 0.11, frequency: 1220, duration: 0.06, volume: 0.12, type: 'sine' },
-          ],
-          [{ duration: 0.09, volume: 0.15, filter: 'bandpass', frequency: 2600, q: 1.2 }],
-        );
-        return;
-      }
-      if (kind === 'buff' || kind === 'rare') {
-        play(
-          [
-            { frequency: 430, endFrequency: 860, duration: 0.1, volume: 0.35, type: 'triangle' },
-            { at: 0.08, frequency: 1290, duration: 0.11, volume: 0.22, type: 'sine' },
-            ...(kind === 'rare'
-              ? [
-                  {
-                    at: 0.15,
-                    frequency: 1720,
-                    duration: 0.1,
-                    volume: 0.15,
-                    type: 'triangle' as const,
-                  },
-                ]
-              : []),
-          ],
-          [
-            {
-              duration: 0.08,
-              volume: kind === 'rare' ? 0.16 : 0.11,
-              filter: 'highpass',
-              frequency: 2100,
-            },
-          ],
-        );
-        return;
-      }
-      play(
-        [{ frequency: 540, endFrequency: 820, duration: 0.08, volume: 0.3, type: 'triangle' }],
-        [{ duration: 0.05, volume: 0.1, filter: 'bandpass', frequency: 1500 }],
-      );
+      playSample(kind === 'rare' ? 'rareReward' : 'eventCollect', {
+        gain: kind === 'rare' ? 0.96 : kind === 'seed' ? 0.82 : 0.74,
+        rateMin: kind === 'buff' ? 0.96 : 0.98,
+        rateMax: kind === 'buff' ? 1.01 : 1.04,
+      });
     },
     playBuffActivate() {
-      play(
-        [
-          { frequency: 240, endFrequency: 520, duration: 0.12, volume: 0.28, type: 'sawtooth' },
-          { at: 0.1, frequency: 780, duration: 0.08, volume: 0.16, type: 'sine' },
-        ],
-        [{ at: 0.02, duration: 0.1, volume: 0.12, filter: 'bandpass', frequency: 900, q: 0.8 }],
-      );
+      playSample('eventSpawn', { gain: 0.7, rateMin: 0.97, rateMax: 1.02 });
     },
     playBuffExpire() {
-      play(
-        [{ frequency: 360, endFrequency: 210, duration: 0.12, volume: 0.12, type: 'triangle' }],
-        [{ duration: 0.08, volume: 0.07, filter: 'lowpass', frequency: 420, q: 0.6 }],
-      );
+      playSample('uiToggle', { gain: 0.24, rateMin: 0.96, rateMax: 0.99 });
     },
     playAchievement(kind = 'common') {
-      const lift = kind === 'legendary' ? 1.5 : kind === 'epic' ? 1.32 : kind === 'rare' ? 1.16 : 1;
-      play(
-        [
-          { frequency: 520 * lift, duration: 0.08, volume: 0.24, type: 'sine' },
-          { at: 0.07, frequency: 720 * lift, duration: 0.08, volume: 0.22, type: 'sine' },
-          { at: 0.14, frequency: 960 * lift, duration: 0.12, volume: 0.18, type: 'triangle' },
-          ...(kind === 'legendary'
-            ? [
-                {
-                  at: 0.24,
-                  frequency: 1340 * lift,
-                  duration: 0.14,
-                  volume: 0.12,
-                  type: 'sine' as const,
-                },
-              ]
-            : []),
-        ],
-        [{ at: 0.03, duration: 0.13, volume: 0.1, filter: 'highpass', frequency: 2400, q: 0.9 }],
-      );
+      if (kind === 'common') {
+        playSample('buyMilestone', { gain: 0.72, rateMin: 0.98, rateMax: 1.02 });
+        return;
+      }
+      playSample('rareReward', {
+        gain: kind === 'legendary' ? 1 : kind === 'epic' ? 0.94 : 0.86,
+        rateMin: 0.98,
+        rateMax: 1.03,
+      });
     },
     playPrestige() {
-      play(
-        [
-          { frequency: 220, endFrequency: 440, duration: 0.16, volume: 0.36, type: 'sine' },
-          { at: 0.12, frequency: 660, duration: 0.14, volume: 0.28, type: 'triangle' },
-          { at: 0.24, frequency: 990, duration: 0.18, volume: 0.22, type: 'sine' },
-          { at: 0.38, frequency: 1480, duration: 0.16, volume: 0.14, type: 'triangle' },
-        ],
-        [
-          { duration: 0.16, volume: 0.12, filter: 'lowpass', frequency: 520, q: 0.5 },
-          { at: 0.18, duration: 0.22, volume: 0.1, filter: 'highpass', frequency: 2600, q: 0.8 },
-        ],
-      );
+      playSample('prestige', { gain: 1, rateMin: 0.99, rateMax: 1.01 });
     },
     playUi() {
-      play(
-        [{ frequency: 420, endFrequency: 510, duration: 0.035, volume: 0.14, type: 'triangle' }],
-        [{ duration: 0.018, volume: 0.05, filter: 'bandpass', frequency: 1600, q: 0.7 }],
-      );
+      playSample('uiToggle', { gain: 0.32, rateMin: 0.98, rateMax: 1.02 });
     },
     playSettings() {
-      play(
-        [{ frequency: 520, endFrequency: 390, duration: 0.045, volume: 0.14, type: 'triangle' }],
-        [{ duration: 0.018, volume: 0.045, filter: 'bandpass', frequency: 1300, q: 0.8 }],
-      );
+      playSample('uiToggle', { gain: 0.34, rateMin: 0.98, rateMax: 1.02 });
+    },
+    setMusicPhase(next) {
+      if (musicPhase === next) {
+        return;
+      }
+      musicPhase = next;
+      syncMusic();
     },
     toggleMute() {
       muted = !muted;
@@ -442,14 +364,14 @@ export function createAudioManager(
       syncMusic();
     },
     setVolume(next) {
-      sfxVolume = Math.max(0, Math.min(1, next));
+      sfxVolume = clamp01(next);
     },
     setMusicEnabled(next) {
       musicEnabled = next;
       syncMusic();
     },
     setMusicVolume(next) {
-      musicVolume = Math.max(0, Math.min(1, next));
+      musicVolume = clamp01(next);
       syncMusic();
     },
     isMuted() {
@@ -458,8 +380,16 @@ export function createAudioManager(
   };
 }
 
-declare global {
-  interface Window {
-    webkitAudioContext?: typeof AudioContext;
+function randomBetween(min: number, max: number): number {
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min >= max) {
+    return Number.isFinite(min) ? min : 1;
   }
+  return min + Math.random() * (max - min);
+}
+
+function clamp01(value: number): number {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+  return Math.max(0, Math.min(1, value));
 }
